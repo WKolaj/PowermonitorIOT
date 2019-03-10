@@ -1,0 +1,26 @@
+{
+  "name": "powermonitoriot",
+  "version": "0.0.0",
+  "description": "Application for monitoring low voltage cabinetts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WKolaj/PowermonitorIOT.git"
+  },
+  "keywords": [
+    "Monitoring",
+    "power",
+    "energy",
+    "consumption",
+    "IOT"
+  ],
+  "author": "WKolaj",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/WKolaj/PowermonitorIOT/issues"
+  },
+  "homepage": "https://github.com/WKolaj/PowermonitorIOT#readme"
+}
