@@ -5,10 +5,15 @@ class MBDriver {
    * @description Modbus driver based on modbus-serial npm package
    * @param {string} ipAdress ipAdress
    * @param {string} portNumber port number
-   * @param {number} unitId port number
    * @param {number} timeout timeout in ms
    */
-  constructor(ipAdress, portNumber = 502, timeout = 2000) {
+  constructor(
+    mbDevice,
+    ipAdress,
+    portNumber = 502,
+    timeout = 2000,
+    unitId = 1
+  ) {
     //Binding methods to driver object
     this._getData = this._getData.bind(this);
     this._disconnectWithoutDeactive = this._disconnectWithoutDeactive.bind(
@@ -22,17 +27,18 @@ class MBDriver {
     this.invokeActions = this.invokeActions.bind(this);
 
     //Setting default values
+    this._mbDevice = mbDevice;
     this._ipAdress = ipAdress;
     this._portNumber = portNumber;
     this._timeout = timeout;
     this._client = new ModbusRTU();
     this._actions = {};
+    this._unitId = unitId;
 
-    //Determining if driver is busyaddGetDataAction
+    //Determining if driver is busy - while invoking action
     this._busy = false;
 
-    //Determining if driver is active
-
+    //Determining if driver is active - enabled to connect and exchange data
     this._active = false;
   }
 
@@ -52,15 +58,28 @@ class MBDriver {
 
   /**
    * @description Creating action for getting data from MB Device
-   * @param {string} id actionID
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
    * @param {number} timeout Data length
    */
-  createGetDataAction(fcCode, offset, length, unitId = 1) {
-    return () => this._getData(fcCode, offset, length, unitId);
+  createGetDataAction(fcCode, offset, length) {
+    return () => this._getData(fcCode, offset, length);
   }
 
+  /**
+   * @description Creating action for writing data from MB Device
+   * @param {number} fcCode Modbus function code
+   * @param {number} offset Data offset
+   * @param {number} value value to set
+   */
+  createSetDataAction(fcCode, offset, value) {
+    return () => this._setData(fcCode, offset, value);
+  }
+
+  /**
+   * @description Invoking exchange data actions
+   * @param {object} actions Actions to invoke
+   */
   invokeActions(actions) {
     return new Promise(async (resolve, reject) => {
       //Invoking actions only if active
@@ -100,9 +119,8 @@ class MBDriver {
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
    * @param {number} length Data length
-   * @param {number} unitId Unit id
    */
-  _getData(fcCode, offset, length, unitId = 1) {
+  _getData(fcCode, offset, length) {
     //Reading asynchronously - returing Promise
     return new Promise(async (resolve, reject) => {
       //Invoking actions only if active
@@ -135,7 +153,7 @@ class MBDriver {
 
       try {
         //Setting unitId
-        this._client.setID(unitId);
+        this._client.setID(this._unitId);
 
         //Reading data depending on MB function
         let data = null;
@@ -171,6 +189,90 @@ class MBDriver {
         //Clear timeout and resolve promise
         clearTimeout(handle);
         return resolve(data.data);
+      } catch (err) {
+        //An error occured durring reading
+        //Clear timeout and reject promise
+        clearTimeout(handle);
+        this._disconnectWithoutDeactive();
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Creating action for writing data from device
+   * @param {number} fcCode Modbus function code
+   * @param {number} offset Data offset
+   * @param {number} value New value
+   */
+  _setData(fcCode, offset, value) {
+    //Reading asynchronously - returing Promise
+    return new Promise(async (resolve, reject) => {
+      //Invoking actions only if active
+      if (!this._active) {
+        return reject(new Error("Device is not active"));
+      }
+
+      console.log("Attempting to write..");
+
+      //If device is disconnected - attempt to connect before reading
+      if (!this.Connected) {
+        console.log("Device is disconnected!");
+
+        try {
+          //Attempting to connect...
+          await this._connectWithoutActivating();
+        } catch (err) {
+          //Reject promise if connecting fails...
+          return reject(err);
+        }
+      }
+
+      //Setting timeout - disconnect device and reject promise if driver was unable to set data in time
+      let handle = setTimeout(() => {
+        console.log("Writing data timeout!");
+
+        this._disconnectWithoutDeactive();
+        return reject(new Error("Writing data timeout error..."));
+      }, this._timeout);
+
+      try {
+        //Setting unitId
+        this._client.setID(this._unitId);
+
+        //Writing data depending on MB function
+        switch (fcCode) {
+          case 5: {
+            await this._client.writeCoils(offset, value);
+            break;
+          }
+          case 15: {
+            await this._client.writeCoils(offset, value);
+            break;
+          }
+          case 16: {
+            await this._client.writeRegisters(offset, value);
+            break;
+          }
+          case 6: {
+            await this._client.writeRegister(offset, value);
+            break;
+          }
+          default: {
+            //If wrong function number was given
+            console.log(`Invalid function MB write function number: ${fcCode}`);
+            return reject(
+              new Error(`Invalid function MB write function number: ${fcCode}`)
+            );
+          }
+        }
+
+        //Data has been read successfuly - resolve promise
+        console.log("Data written successfully!");
+
+        //Clear timeout and resolve promise
+        clearTimeout(handle);
+        return resolve();
       } catch (err) {
         //An error occured durring reading
         //Clear timeout and reject promise

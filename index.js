@@ -1,9 +1,19 @@
 const MBDevice = require("./classes/device/Modbus/MBDevice");
+const MBRTUDevice = require("./classes/device/Modbus/MBRTUDevice");
+const MBGateway = require("./classes/driver/Modbus/MBGateway");
 
-let pac1 = new MBDevice("PAC1", "192.168.0.73");
+let pac1 = new MBDevice("PAC1");
 
-let pac1Voltage = pac1._driver.createGetDataAction(3, 1, 12, 2);
-let pac1Currents = pac1._driver.createGetDataAction(3, 13, 6, 2);
+pac1.setModbusDriver("192.168.0.73", 502, 2000, 2);
+
+// let pac1 = new MBDevice("PAC1", 2);
+
+// let gateway = new MBGateway("192.168.0.73");
+
+// pac1.setModbusGateway(gateway);
+
+let pac1Voltage = pac1._driver.createGetDataAction(3, 1, 3);
+let pac1Currents = pac1._driver.createSetDataAction(16, 4, [1, 2, 3]);
 
 let actionsPac1 = [];
 
