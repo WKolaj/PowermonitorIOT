@@ -8,7 +8,7 @@ class MBDriver {
    * @param {number} unitId port number
    * @param {number} timeout timeout in ms
    */
-  constructor(ipAdress, portNumber = 502, unitId = 1, timeout = 2000) {
+  constructor(ipAdress, portNumber = 502, timeout = 2000) {
     //Binding methods to driver object
     this._getData = this._getData.bind(this);
     this._disconnectWithoutDeactive = this._disconnectWithoutDeactive.bind(
@@ -24,7 +24,6 @@ class MBDriver {
     //Setting default values
     this._ipAdress = ipAdress;
     this._portNumber = portNumber;
-    this._unitId = unitId;
     this._timeout = timeout;
     this._client = new ModbusRTU();
     this._actions = {};
@@ -58,8 +57,8 @@ class MBDriver {
    * @param {number} offset Data offset
    * @param {number} timeout Data length
    */
-  createGetDataAction(fcCode, offset, length) {
-    return () => this._getData(fcCode, offset, length);
+  createGetDataAction(fcCode, offset, length, unitId = 1) {
+    return () => this._getData(fcCode, offset, length, unitId);
   }
 
   invokeActions(actions) {
@@ -101,8 +100,9 @@ class MBDriver {
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
    * @param {number} length Data length
+   * @param {number} unitId Unit id
    */
-  _getData(fcCode, offset, length) {
+  _getData(fcCode, offset, length, unitId = 1) {
     //Reading asynchronously - returing Promise
     return new Promise(async (resolve, reject) => {
       //Invoking actions only if active
@@ -134,6 +134,9 @@ class MBDriver {
       }, this._timeout);
 
       try {
+        //Setting unitId
+        this._client.setID(unitId);
+
         //Reading data depending on MB function
         let data = null;
         switch (fcCode) {
@@ -200,8 +203,6 @@ class MBDriver {
       }, this._timeout);
 
       try {
-        //Setting id to device
-        await this._client.setID(this._unitId);
         //Connecting to device
         await this._client.connectTCP(this._ipAdress, {
           port: this._portNumber

@@ -9,14 +9,14 @@ class MBDevice extends Device {
    * @param {string} portNumber port number
    * @param {number} unitId port number
    */
-  constructor(name, ipAdress, portNumber = 502, unitId = 1) {
+  constructor(name, ipAdress, portNumber = 502) {
     super(name);
 
     //Binding methods to device object
     this.disconnect = this.disconnect.bind(this);
     this.connect = this.connect.bind(this);
 
-    this._driver = new MBDriver(ipAdress, portNumber, unitId);
+    this._driver = new MBDriver(ipAdress, portNumber);
   }
 
   /**@description Connecting to modbus device */
