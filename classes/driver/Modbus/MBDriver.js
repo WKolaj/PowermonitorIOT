@@ -17,8 +17,8 @@ class MBDriver {
     this._connectWithoutActivating = this._connectWithoutActivating.bind(this);
     this.disconnect = this.disconnect.bind(this);
     this.connect = this.connect.bind(this);
-    this.addAction = this.addAction.bind(this);
-    this.addGetDataAction = this.addGetDataAction.bind(this);
+
+    this.createGetDataAction = this.createGetDataAction.bind(this);
     this.invokeActions = this.invokeActions.bind(this);
 
     //Setting default values
@@ -29,7 +29,7 @@ class MBDriver {
     this._client = new ModbusRTU();
     this._actions = {};
 
-    //Determining if driver is busy
+    //Determining if driver is busyaddGetDataAction
     this._busy = false;
 
     //Determining if driver is active
@@ -51,15 +51,18 @@ class MBDriver {
     return this._active;
   }
 
-  addAction(id, action) {
-    this._actions[id] = action;
+  /**
+   * @description Creating action for getting data from MB Device
+   * @param {string} id actionID
+   * @param {number} fcCode Modbus function code
+   * @param {number} offset Data offset
+   * @param {number} timeout Data length
+   */
+  createGetDataAction(fcCode, offset, length) {
+    return () => this._getData(fcCode, offset, length);
   }
 
-  addGetDataAction(id, fcCode, offset, length) {
-    this.addAction(id, () => this._getData(fcCode, offset, length));
-  }
-
-  invokeActions() {
+  invokeActions(actions) {
     return new Promise(async (resolve, reject) => {
       //Invoking actions only if active
       if (!this._active) {
@@ -72,12 +75,12 @@ class MBDriver {
 
         console.log("Invoking actions");
         let data = {};
-        let allIds = Object.keys(this._actions);
+        let allIds = Object.keys(actions);
 
         for (let id of allIds) {
           try {
             console.log(`Invoking ${id}`);
-            data[id] = await this._actions[id]();
+            data[id] = await actions[id]();
             console.log(`Invoke result: ${data[id]}`);
           } catch (err) {
             console.log(err.message);
