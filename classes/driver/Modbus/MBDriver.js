@@ -10,9 +10,12 @@ class MBDriver {
    */
   constructor(ipAdress, portNumber = 502, unitId = 1, timeout = 2000) {
     //Binding methods to driver object
-    this.getData = this.getData.bind(this);
+    this._getData = this._getData.bind(this);
     this.disconnect = this.disconnect.bind(this);
     this.connect = this.connect.bind(this);
+    this.addAction = this.addAction.bind(this);
+    this.addGetDataAction = this.addGetDataAction.bind(this);
+    this.invokeActions = this.invokeActions.bind(this);
 
     //Setting default values
     this._ipAdress = ipAdress;
@@ -20,6 +23,7 @@ class MBDriver {
     this._unitId = unitId;
     this._timeout = timeout;
     this._client = new ModbusRTU();
+    this._actions = {};
   }
 
   /**
@@ -29,13 +33,41 @@ class MBDriver {
     return this._client.isOpen;
   }
 
+  addAction(id, action) {
+    this._actions[id] = action;
+  }
+
+  addGetDataAction(id, fcCode, offset, length) {
+    this.addAction(id, () => this._getData(fcCode, offset, length));
+  }
+
+  invokeActions() {
+    return new Promise(async (resolve, reject) => {
+      console.log("Invoking actions");
+      let data = {};
+      let allIds = Object.keys(this._actions);
+
+      for (let id of allIds) {
+        try {
+          console.log(`Invoking ${id}`);
+          data[id] = await this._actions[id]();
+          console.log(`Invoke result: ${data[id]}`);
+        } catch (err) {
+          reject(err);
+        }
+      }
+
+      resolve(data);
+    });
+  }
+
   /**
-   * @description Getting data from device
+   * @description Creating action for reading data from device
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
-   * @param {number} offset Data length
+   * @param {number} length Data length
    */
-  getData(fcCode, offset, length) {
+  _getData(fcCode, offset, length) {
     //Reading asynchronously - returing Promise
     return new Promise(async (resolve, reject) => {
       console.log("Attempting to read..");

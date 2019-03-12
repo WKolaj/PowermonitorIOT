@@ -1,9 +1,13 @@
 const MBDevice = require("./classes/device/Modbus/MBDevice");
 
-let mbDevice = new MBDevice("PAC", "192.168.0.211");
+let mbDevice = new MBDevice("PAC", "192.168.0.20");
+
+mbDevice._driver.addGetDataAction("Napiecia", 3, 0, 3);
+mbDevice._driver.addGetDataAction("Prady", 3, 14, 3);
+//mbDevice._driver.addGetDataAction(3, 3, 2, 1);
 
 let doRead = async device => {
-  return Promise.all([device._driver.getData(4, 1, 2)]);
+  return mbDevice._driver.invokeActions();
 };
 
 let exec = async () => {
