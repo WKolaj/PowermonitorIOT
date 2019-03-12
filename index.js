@@ -27,14 +27,18 @@ let exec = async () => {
       try {
         let data = await doRead1(pac1);
         console.log(data);
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     }, 1000);
 
     setInterval(async () => {
       try {
         let data = await doRead2(pac2);
         console.log(data);
-      } catch (err) {}
+      } catch (err) {
+        console.log(err);
+      }
     }, 1000);
   } catch (err) {}
 };
