@@ -24,6 +24,7 @@ class MBDriver {
     this._timeout = timeout;
     this._client = new ModbusRTU();
     this._actions = {};
+    this._busy = false;
   }
 
   /**
@@ -43,21 +44,30 @@ class MBDriver {
 
   invokeActions() {
     return new Promise(async (resolve, reject) => {
-      console.log("Invoking actions");
-      let data = {};
-      let allIds = Object.keys(this._actions);
+      console.log(`busy: ${this._busy}`);
+      if (!this._busy) {
+        this._busy = true;
 
-      for (let id of allIds) {
-        try {
-          console.log(`Invoking ${id}`);
-          data[id] = await this._actions[id]();
-          console.log(`Invoke result: ${data[id]}`);
-        } catch (err) {
-          reject(err);
+        console.log("Invoking actions");
+        let data = {};
+        let allIds = Object.keys(this._actions);
+
+        for (let id of allIds) {
+          try {
+            console.log(`Invoking ${id}`);
+            data[id] = await this._actions[id]();
+            console.log(`Invoke result: ${data[id]}`);
+          } catch (err) {
+            console.log(err.message);
+            this._busy = false;
+            console.log(`rejecting action...  ${id}`);
+            return reject(err);
+          }
         }
-      }
 
-      resolve(data);
+        this._busy = false;
+        return resolve(data);
+      }
     });
   }
 
@@ -81,7 +91,7 @@ class MBDriver {
           await this.connect();
         } catch (err) {
           //Reject promise if connecting fails...
-          reject(err);
+          return reject(err);
         }
       }
 
@@ -90,7 +100,7 @@ class MBDriver {
         console.log("Reading data timeout!");
 
         this.disconnect();
-        reject(new Error("Reading data timeout error..."));
+        return reject(new Error("Reading data timeout error..."));
       }, this._timeout);
 
       try {
@@ -116,7 +126,7 @@ class MBDriver {
           default: {
             //If wrong function number was given
             console.log(`Invalid function MB read function number: ${fcCode}`);
-            reject(
+            return reject(
               new Error(`Invalid function MB read function number: ${fcCode}`)
             );
           }
@@ -127,13 +137,13 @@ class MBDriver {
 
         //Clear timeout and resolve promise
         clearTimeout(handle);
-        resolve(data.data);
+        return resolve(data.data);
       } catch (err) {
         //An error occured durring reading
         //Clear timeout and reject promise
         clearTimeout(handle);
         this.disconnect();
-        reject(err);
+        return reject(err);
       }
     });
   }
@@ -151,7 +161,7 @@ class MBDriver {
 
         //If device is unable to connect in time - disconnect device an reject promise
         this.disconnect();
-        reject(new Error("Connection timeout error..."));
+        return reject(new Error("Connection timeout error..."));
       }, this._timeout);
 
       try {
@@ -165,12 +175,12 @@ class MBDriver {
         //Connected successfully - clear timeout and resolve the promise
         console.log("Connected successfully!");
         clearTimeout(handle);
-        resolve(true);
+        return resolve(true);
       } catch (err) {
         //Error while connecting
         console.log(`Error while connecting:${err.message}`);
         clearTimeout(handle);
-        reject(err);
+        return reject(err);
       }
     });
   }

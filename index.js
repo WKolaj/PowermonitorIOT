@@ -1,22 +1,38 @@
 const MBDevice = require("./classes/device/Modbus/MBDevice");
 
-let mbDevice = new MBDevice("PAC", "192.168.0.20");
+let pac1 = new MBDevice("PAC1", "192.168.8.111");
 
-mbDevice._driver.addGetDataAction("Napiecia", 3, 0, 3);
-mbDevice._driver.addGetDataAction("Prady", 3, 14, 3);
-//mbDevice._driver.addGetDataAction(3, 3, 2, 1);
+pac1._driver.addGetDataAction("PAC1 Napiecia", 3, 1, 12);
+pac1._driver.addGetDataAction("PAC1 Prady", 3, 13, 6);
 
-let doRead = async device => {
-  return mbDevice._driver.invokeActions();
+let pac2 = new MBDevice("PAC2", "192.168.8.112");
+
+pac2._driver.addGetDataAction("PAC2 Napiecia", 3, 1, 12);
+pac2._driver.addGetDataAction("PAC2 Prady", 3, 13, 6);
+
+let doRead1 = async device => {
+  return pac1._driver.invokeActions();
+};
+
+let doRead2 = async device => {
+  return pac2._driver.invokeActions();
 };
 
 let exec = async () => {
   try {
-    await mbDevice.connect();
+    await pac1.connect();
+    await pac2.connect();
 
     setInterval(async () => {
       try {
-        let data = await doRead(mbDevice);
+        let data = await doRead1(pac1);
+        console.log(data);
+      } catch (err) {}
+    }, 1000);
+
+    setInterval(async () => {
+      try {
+        let data = await doRead2(pac2);
         console.log(data);
       } catch (err) {}
     }, 1000);
