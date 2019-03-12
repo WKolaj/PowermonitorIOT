@@ -62,8 +62,9 @@ class MBDriver {
    * @param {number} offset Data offset
    * @param {number} timeout Data length
    */
-  createGetDataAction(fcCode, offset, length) {
-    return () => this._getData(fcCode, offset, length);
+  createGetDataAction(fcCode, offset, length, unitId) {
+    unitId = unitId || this._unitId;
+    return () => this._getData(fcCode, offset, length, unitId);
   }
 
   /**
@@ -72,8 +73,9 @@ class MBDriver {
    * @param {number} offset Data offset
    * @param {number} value value to set
    */
-  createSetDataAction(fcCode, offset, value) {
-    return () => this._setData(fcCode, offset, value);
+  createSetDataAction(fcCode, offset, value, unitId) {
+    unitId = unitId || this._unitId;
+    return () => this._setData(fcCode, offset, value, unitId);
   }
 
   /**
@@ -119,8 +121,9 @@ class MBDriver {
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
    * @param {number} length Data length
+   * @param {number} unitId Unit ID
    */
-  _getData(fcCode, offset, length) {
+  _getData(fcCode, offset, length, unitId) {
     //Reading asynchronously - returing Promise
     return new Promise(async (resolve, reject) => {
       //Invoking actions only if active
@@ -153,7 +156,7 @@ class MBDriver {
 
       try {
         //Setting unitId
-        this._client.setID(this._unitId);
+        this._client.setID(unitId);
 
         //Reading data depending on MB function
         let data = null;
@@ -204,8 +207,9 @@ class MBDriver {
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
    * @param {number} value New value
+   * @param {number} unitId Unit ID
    */
-  _setData(fcCode, offset, value) {
+  _setData(fcCode, offset, value, unitId) {
     //Reading asynchronously - returing Promise
     return new Promise(async (resolve, reject) => {
       //Invoking actions only if active
@@ -238,7 +242,7 @@ class MBDriver {
 
       try {
         //Setting unitId
-        this._client.setID(this._unitId);
+        this._client.setID(unitId);
 
         //Writing data depending on MB function
         switch (fcCode) {
