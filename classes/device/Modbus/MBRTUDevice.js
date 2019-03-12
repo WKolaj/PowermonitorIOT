@@ -44,6 +44,41 @@ class MBRTUDevice extends Device {
   disconnect() {
     return this._driver.disconnect();
   }
+
+  /**
+   * @description MBDevices associated with gateway
+   */
+  get MBDevices() {
+    return this._driver.MBDevices;
+  }
+
+  /**
+   * @description IPAdress used by gateway
+   */
+  get IPAdress() {
+    return this._driver.IPAdress;
+  }
+
+  /**
+   * @description PortNumber used by gateway
+   */
+  get PortNumber() {
+    return this._driver.PortNumber;
+  }
+
+  /**
+   * @description Timeout of driver
+   */
+  get Timeout() {
+    return this._driver.Timeout;
+  }
+
+  /**
+   * @description Default unit ID used by driver
+   */
+  get UnitID() {
+    return this._unitId;
+  }
 }
 
 module.exports = MBRTUDevice;

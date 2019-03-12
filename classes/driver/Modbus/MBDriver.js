@@ -32,7 +32,6 @@ class MBDriver {
     this._portNumber = portNumber;
     this._timeout = timeout;
     this._client = new ModbusRTU();
-    this._actions = {};
     this._unitId = unitId;
 
     //Determining if driver is busy - while invoking action
@@ -40,6 +39,41 @@ class MBDriver {
 
     //Determining if driver is active - enabled to connect and exchange data
     this._active = false;
+  }
+
+  /**
+   * @description MBDevice associated with driver
+   */
+  get MBDevice() {
+    return this._mbDevice;
+  }
+
+  /**
+   * @description IPAdress used by driver
+   */
+  get IPAdress() {
+    return this._ipAdress;
+  }
+
+  /**
+   * @description PortNumber used by driver
+   */
+  get PortNumber() {
+    return this._portNumber;
+  }
+
+  /**
+   * @description Timeout of driver
+   */
+  get Timeout() {
+    return this._timeout;
+  }
+
+  /**
+   * @description Default unit ID used by driver
+   */
+  get UnitID() {
+    return this._unitId;
   }
 
   /**

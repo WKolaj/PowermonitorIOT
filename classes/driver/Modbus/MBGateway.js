@@ -16,14 +16,29 @@ class MBGateway extends MBDriver {
     this._mbRTUDevices = [];
   }
 
+  /**
+   * @description Adding Modbus device to gateway
+   * @param {object} device Modbus device to add
+   */
   addModbusDevice(device) {
     this._mbRTUDevices.push(device);
   }
 
+  /**
+   * @description Adding Modbus device to gateway
+   * @param {object} device Modbus device to remove
+   */
   removeModbusDevice(device) {
     if (!device) return;
     let index = this._mbDevice.indexOf(device);
     this._mbRTUDevices.slice(index, 1);
+  }
+
+  /**
+   * @description MBDevices associated with gateway
+   */
+  get MBDevices() {
+    return this._mbRTUDevices;
   }
 }
 

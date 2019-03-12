@@ -26,6 +26,41 @@ class MBDevice extends Device {
     this._driver = new MBDriver(this, ipAdress, portNumber, timeout, unitId);
   }
 
+  /**
+   * @description MBDevice associated with driver
+   */
+  get MBDevice() {
+    return this._driver.MBDevice;
+  }
+
+  /**
+   * @description IPAdress used by driver
+   */
+  get IPAdress() {
+    return this._driver.IPAdress;
+  }
+
+  /**
+   * @description PortNumber used by driver
+   */
+  get PortNumber() {
+    return this._driver.PortNumber;
+  }
+
+  /**
+   * @description Timeout of driver
+   */
+  get Timeout() {
+    return this._driver.Timeout;
+  }
+
+  /**
+   * @description Default unit ID used by driver
+   */
+  get UnitID() {
+    return this._driver.UnitID;
+  }
+
   /**@description Connecting to modbus device */
   connect() {
     return this._driver.connect();
