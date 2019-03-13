@@ -30,8 +30,7 @@ class MBGateway extends MBDriver {
    */
   removeModbusDevice(device) {
     if (!device) return;
-    let index = this._mbDevice.indexOf(device);
-    this._mbRTUDevices.slice(index, 1);
+    this._mbRTUDevices = this._mbRTUDevices.filter(dev => dev !== device);
   }
 
   /**
