@@ -9,7 +9,7 @@ class MBDriver {
    */
   constructor(
     mbDevice,
-    ipAdress,
+    ipAdress = "192.168.0.100",
     portNumber = 502,
     timeout = 2000,
     unitId = 1
@@ -22,7 +22,6 @@ class MBDriver {
     this._connectWithoutActivating = this._connectWithoutActivating.bind(this);
     this.disconnect = this.disconnect.bind(this);
     this.connect = this.connect.bind(this);
-
     this.createGetDataAction = this.createGetDataAction.bind(this);
     this.invokeActions = this.invokeActions.bind(this);
 
@@ -91,6 +90,13 @@ class MBDriver {
   }
 
   /**
+   * @description Is device busy? this means, if driver is while invoking actions
+   */
+  get IsBusy() {
+    return this._busy;
+  }
+
+  /**
    * @description Creating action for getting data from MB Device
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
@@ -123,29 +129,26 @@ class MBDriver {
         return reject(new Error("Device is not active"));
       }
 
-      console.log(`busy: ${this._busy}`);
       if (!this._busy) {
         this._busy = true;
 
-        console.log("Invoking actions");
         let data = {};
         let allIds = Object.keys(actions);
 
         for (let id of allIds) {
           try {
-            console.log(`Invoking ${id}`);
             data[id] = await actions[id]();
-            console.log(`Invoke result: ${data[id]}`);
           } catch (err) {
-            console.log(err.message);
             this._busy = false;
-            console.log(`rejecting action...  ${id}`);
             return reject(err);
           }
         }
 
         this._busy = false;
         return resolve(data);
+      } else {
+        //If device is busy - resolve with
+        return reject(new Error("Device is busy..."));
       }
     });
   }
@@ -165,12 +168,8 @@ class MBDriver {
         return reject(new Error("Device is not active"));
       }
 
-      console.log("Attempting to read..");
-
       //If device is disconnected - attempt to connect before reading
       if (!this.Connected) {
-        console.log("Device is disconnected!");
-
         try {
           //Attempting to connect...
           await this._connectWithoutActivating();
@@ -182,8 +181,6 @@ class MBDriver {
 
       //Setting timeout - disconnect device and reject promise if driver was unable to get data in time
       let handle = setTimeout(() => {
-        console.log("Reading data timeout!");
-
         this._disconnectWithoutDeactive();
         return reject(new Error("Reading data timeout error..."));
       }, this._timeout);
@@ -213,7 +210,6 @@ class MBDriver {
           }
           default: {
             //If wrong function number was given
-            console.log(`Invalid function MB read function number: ${fcCode}`);
             return reject(
               new Error(`Invalid function MB read function number: ${fcCode}`)
             );
@@ -221,7 +217,6 @@ class MBDriver {
         }
 
         //Data has been read successfuly - resolve promise
-        console.log("Data read successfully!");
 
         //Clear timeout and resolve promise
         clearTimeout(handle);
@@ -251,12 +246,8 @@ class MBDriver {
         return reject(new Error("Device is not active"));
       }
 
-      console.log("Attempting to write..");
-
       //If device is disconnected - attempt to connect before reading
       if (!this.Connected) {
-        console.log("Device is disconnected!");
-
         try {
           //Attempting to connect...
           await this._connectWithoutActivating();
@@ -268,8 +259,6 @@ class MBDriver {
 
       //Setting timeout - disconnect device and reject promise if driver was unable to set data in time
       let handle = setTimeout(() => {
-        console.log("Writing data timeout!");
-
         this._disconnectWithoutDeactive();
         return reject(new Error("Writing data timeout error..."));
       }, this._timeout);
@@ -281,7 +270,7 @@ class MBDriver {
         //Writing data depending on MB function
         switch (fcCode) {
           case 5: {
-            await this._client.writeCoils(offset, value);
+            await this._client.writeCoil(offset, value);
             break;
           }
           case 15: {
@@ -298,7 +287,6 @@ class MBDriver {
           }
           default: {
             //If wrong function number was given
-            console.log(`Invalid function MB write function number: ${fcCode}`);
             return reject(
               new Error(`Invalid function MB write function number: ${fcCode}`)
             );
@@ -306,11 +294,10 @@ class MBDriver {
         }
 
         //Data has been read successfuly - resolve promise
-        console.log("Data written successfully!");
 
         //Clear timeout and resolve promise
         clearTimeout(handle);
-        return resolve();
+        return resolve(value);
       } catch (err) {
         //An error occured durring reading
         //Clear timeout and reject promise
@@ -331,12 +318,8 @@ class MBDriver {
       }
 
       //Attempting to connect
-      console.log("attempting to connect....");
-
       //Setting timeout - if device is unable to connect in time
       let handle = setTimeout(() => {
-        console.log("connecting timeout!");
-
         //If device is unable to connect in time - disconnect device an reject promise
         this._disconnectWithoutDeactive();
         return reject(new Error("Connection timeout error..."));
@@ -349,12 +332,10 @@ class MBDriver {
         });
 
         //Connected successfully - clear timeout and resolve the promise
-        console.log("Connected successfully!");
         clearTimeout(handle);
         return resolve(true);
       } catch (err) {
         //Error while connecting
-        console.log(`Error while connecting:${err.message}`);
         clearTimeout(handle);
         return reject(err);
       }
@@ -370,16 +351,12 @@ class MBDriver {
     this._busy = false;
 
     //Connecting to device
-    this._connectWithoutActivating();
+    return this._connectWithoutActivating();
   }
 
   /**@description Disconnecting from modbus device without deactivating driver */
   _disconnectWithoutDeactive() {
-    //Disconnect only i_disconnectWithoutResetingBusyStatef connected
-    if (this.Connected) {
-      console.log("Disconnecting device");
-      return this._client.close();
-    }
+    return this._client.close();
   }
 
   /**@description Disconnecting from modbus device */
@@ -391,7 +368,7 @@ class MBDriver {
     this._busy = false;
 
     //Disconnecting from device
-    this._disconnectWithoutDeactive();
+    return this._disconnectWithoutDeactive();
   }
 }
 

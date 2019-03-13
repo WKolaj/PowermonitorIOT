@@ -61,6 +61,20 @@ class MBDevice extends Device {
     return this._driver.UnitID;
   }
 
+  /**
+   * @description Is device connected?
+   */
+  get Connected() {
+    return this._driver.Connected;
+  }
+
+  /**
+   * @description Is device active? this means, if driver is enabled to exchange data
+   */
+  get IsActive() {
+    return this._driver.IsActive;
+  }
+
   /**@description Connecting to modbus device */
   connect() {
     return this._driver.connect();

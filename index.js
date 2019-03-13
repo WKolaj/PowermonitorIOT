@@ -6,8 +6,8 @@ let pac1 = new MBDevice("PAC1");
 
 pac1.setModbusDriver("192.168.0.73", 502, 2000, 2);
 
-let pac1Voltage = pac1._driver.createSetDataAction(6, 1, 2);
-let pac1Currents = pac1._driver.createSetDataAction(6, 4, 3);
+let pac1Voltage = pac1._driver.createGetDataAction(3, 1, 2);
+let pac1Currents = pac1._driver.createGetDataAction(3, 4, 3);
 
 // let pac1 = new MBRTUDevice("PAC1", 2);
 
@@ -54,6 +54,7 @@ let exec = async () => {
     setInterval(async () => {
       try {
         let data = await doRead1(pac1);
+        console.log(`${new Date(Date.now()).getMilliseconds()}:`);
         console.log(data);
       } catch (err) {
         console.log(err);
@@ -63,12 +64,15 @@ let exec = async () => {
     // setInterval(async () => {
     //   try {
     //     let data = await doRead2(pac2);
-    //     console.log(data);
+    // console.log(`${Date.now()}:`);
+    // console.log(data);
     //   } catch (err) {
     //     console.log(err);
     //   }
     // }, 1000);
-  } catch (err) {}
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 exec();
@@ -79,29 +83,29 @@ process.stdin.setRawMode(true);
 process.stdin.resume();
 
 // on any data into stdin
-process.stdin.on("data", function(key) {
+process.stdin.on("data", async function(key) {
   if (key.indexOf("q") == 0) {
-    process.exit();
+    await process.exit();
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("1") == 0) {
     console.log("disconnecting pac1...");
-    pac1.disconnect();
+    await pac1.disconnect();
     console.log("pac1 disconnected");
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("2") == 0) {
     console.log("disconnecting pac2...");
-    pac2.disconnect();
+    await pac2.disconnect();
     console.log("pac2 disconnected");
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("3") == 0) {
     console.log("connecting pac1...");
-    pac1.connect();
+    await pac1.connect();
     console.log("pac1 connected");
   }
 
