@@ -1,5 +1,6 @@
 const Device = require("../Device");
 const MBDriver = require("../../driver/Modbus/MBDriver");
+const MBRequestGrouper = require("../../driver/Modbus/MBRequestGrouper");
 
 class MBDevice extends Device {
   /**
@@ -24,13 +25,21 @@ class MBDevice extends Device {
    */
   setModbusDriver(ipAdress, portNumber = 502, timeout = 2000, unitId = 1) {
     this._driver = new MBDriver(this, ipAdress, portNumber, timeout, unitId);
+    this._mbRequestGrouper = new MBRequestGrouper(this);
+  }
+
+  /**
+   * @description MBRequestGrouper associated with driver
+   */
+  get RequestGrouper() {
+    return this._mbRequestGrouper;
   }
 
   /**
    * @description MBDevice associated with driver
    */
-  get MBDevice() {
-    return this._driver.MBDevice;
+  get MBDriver() {
+    return this._driver;
   }
 
   /**

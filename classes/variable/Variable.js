@@ -1,6 +1,18 @@
+const EventEmitter = require("events");
+
 class Variable {
-  constructor(name) {
+  constructor(device, name) {
+    this._device = device;
     this._name = name;
+    this._events = new EventEmitter();
+  }
+
+  get Events() {
+    return this._events;
+  }
+
+  get Device() {
+    return this._device;
   }
 
   get Name() {
@@ -8,8 +20,14 @@ class Variable {
   }
 
   get Value() {
-    //this._value - should be override in child classes
-    return this._value;
+    //_getValue - should be override in child classes
+    return _getValue();
+  }
+
+  set Value(newValue) {
+    //_setValue - should be override in child classes
+    this._setValue(newValue);
+    this.Events.emit("ValueChanged", [this, newValue]);
   }
 }
 

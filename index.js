@@ -4,33 +4,38 @@ const MBGateway = require("./classes/driver/Modbus/MBGateway");
 const MBRequestGrouper = require("./classes/driver/Modbus/MBRequestGrouper");
 const MBRequest = require("./classes/driver/Modbus/MBRequest");
 const MBVariable = require("./classes/variable/Modbus/MBVariable");
+const MBFloatVariable = require("./classes/variable/Modbus/MBFloatVariable");
+const MBInt16Variable = require("./classes/variable/Modbus/MBInt16Variable");
 
 let pac1 = new MBDevice("PAC1");
 
-pac1.setModbusDriver("192.168.0.17", 602, 2000, 2);
+pac1.setModbusDriver("192.168.0.17", 502, 2000, 1);
 
-const mbRequest1 = new MBRequest(pac1._driver, 16, 1);
+let napiecieL1 = new MBInt16Variable(pac1, "Napiecie L1", 16, 1);
+let napiecieL2 = new MBFloatVariable(pac1, "Napiecie L2", 3, 3);
+let napiecieL3 = new MBFloatVariable(pac1, "Napiecie L3", 3, 5);
 
-const napiecieL1 = new MBVariable("Napiecie L1", 0, 2);
-const napiecieL2 = new MBVariable("Napiecie L2", 2, 1);
-const napiecieL3 = new MBVariable("Napiecie L3", 3, 2);
+let pradL1 = new MBFloatVariable(pac1, "Prad L1", 3, 13);
+let pradL2 = new MBFloatVariable(pac1, "Prad L2", 3, 15);
+let pradL3 = new MBFloatVariable(pac1, "Prad L3", 3, 17);
 
-mbRequest1.addVariable(napiecieL1);
-mbRequest1.addVariable(napiecieL2);
-mbRequest1.addVariable(napiecieL3);
+napiecieL1.Events.on("ValueChanged", args => {
+  console.log(args[1]);
+});
 
-const mbRequest2 = new MBRequest(pac1._driver, 16, 1);
+let variables = [];
 
-const pradL1 = new MBVariable("Prad L1", 6, 2);
-const pradL2 = new MBVariable("Prad L2", 8, 1);
-const pradL3 = new MBVariable("Prad L3", 9, 2);
+variables.push(napiecieL1);
+variables.push(napiecieL2);
+variables.push(napiecieL3);
+variables.push(pradL1);
+variables.push(pradL2);
+variables.push(pradL3);
 
-mbRequest2.addVariable(pradL1);
-mbRequest2.addVariable(pradL2);
-mbRequest2.addVariable(pradL3);
+let requests = pac1.RequestGrouper.ConvertVariablesToRequests(variables);
 
 let doRead1 = async device => {
-  return pac1._driver.invokeRequests([mbRequest1, mbRequest2]);
+  return pac1._driver.invokeRequests(requests);
 };
 
 // let doRead2 = async device => {
@@ -44,20 +49,13 @@ let exec = async () => {
 
     setInterval(async () => {
       try {
-        let now = Math.round((Date.now() - 1552569213655) / 1000);
-        napiecieL1.Data = [now + 10, now + 9];
-        napiecieL2.Data = now + 8;
-        napiecieL3.Data = [now + 7, now + 6];
-        mbRequest1.updateAction();
-        pradL1.Data = [now + 5, now + 4];
-        pradL2.Data = now + 3;
-        pradL3.Data = [now + 2, now + 1];
-        mbRequest2.updateAction();
-
+        napiecieL1.Value = 65000;
+        for (let req of requests) {
+          req.updateAction();
+        }
         let result = await doRead1(pac1);
-        console.log(mbRequest1.VariableConnections);
-        console.log(mbRequest2.VariableConnections);
-        console.log(result);
+
+        //console.log(result);
       } catch (err) {
         console.log(err);
       }
@@ -73,7 +71,7 @@ let exec = async () => {
     //   }
     // }, 1000);
   } catch (err) {
-    console.log(err);
+    console.log(err.message);
   }
 };
 

@@ -13,7 +13,7 @@ function generateRandId() {
  * @param {number} maxRequestLength maximum length of Modbus RTU request
  */
 class MBRequest {
-  constructor(mbDriver, fcode, unitId, maxRequestLength = 200) {
+  constructor(mbDriver, fcode, unitId, maxRequestLength = 100) {
     //Generating random id
     this._id = generateRandId();
 
@@ -82,7 +82,23 @@ class MBRequest {
       let startIndex = variableObject.requestOffset;
       let stopIndex = variableObject.requestOffset + variableObject.length;
       variableObject.responseData = responseData.slice(startIndex, stopIndex);
+      variableObject.variable.Data = variableObject.responseData;
     }
+  }
+
+  canVariableBeAddedToRequest(mbVariable) {
+    if (this.Offset === undefined) return true;
+
+    //Throw an error in case length exceeds max modbus length
+    if (mbVariable.Length + this.Length > this._maxRequestLength) {
+      return false;
+    }
+    //Throw an error in case variable doest not correspond to actual request offset
+    if (this.Offset + this.Length != mbVariable.Offset) {
+      return false;
+    }
+
+    return true;
   }
 
   /**
@@ -93,9 +109,10 @@ class MBRequest {
     if (this.Offset === undefined) this._offset = mbVariable.Offset;
 
     //Throw an error in case length exceeds max modbus length
-    if (this.Offset + this.Length > this._maxRequestLength) {
+    if (mbVariable.Length + this.Length > this._maxRequestLength) {
       throw new Error(
-        "Request length + variable length exceeds maximum MB request length"
+        `Request length + variable length: ${mbVariable.Length +
+          this.Length} exceeds maximum MB request length`
       );
     }
     //Throw an error in case variable doest not correspond to actual request offset

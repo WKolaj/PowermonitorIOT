@@ -67,7 +67,7 @@ class MBRTUDevice extends Device {
   }
 
   /**
-   * @description Timeout of driver
+   * @description Timeout of driver_device
    */
   get Timeout() {
     return this._driver.Timeout;
