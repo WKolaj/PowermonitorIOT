@@ -1,4 +1,5 @@
 const ModbusRTU = require("modbus-serial");
+const MBDriverAction = require("./MBDriverAction");
 
 class MBDriver {
   /**
@@ -98,24 +99,32 @@ class MBDriver {
 
   /**
    * @description Creating action for getting data from MB Device
+   * @param {string} name Name of action
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
-   * @param {number} timeout Data length
+   * @param {number} length Data length
+   * @param {number} unitId unit ID
    */
-  createGetDataAction(fcCode, offset, length, unitId) {
+  createGetDataAction(name, fcCode, offset, length, unitId) {
     unitId = unitId || this._unitId;
-    return () => this._getData(fcCode, offset, length, unitId);
+    return new MBDriverAction(name, () =>
+      this._getData(fcCode, offset, length, unitId)
+    );
   }
 
   /**
    * @description Creating action for writing data from MB Device
+   * @param {string} name Name of action
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
    * @param {number} value value to set
+   * @param {number} unitId unit ID
    */
-  createSetDataAction(fcCode, offset, value, unitId) {
+  createSetDataAction(name, fcCode, offset, value, unitId) {
     unitId = unitId || this._unitId;
-    return () => this._setData(fcCode, offset, value, unitId);
+    return new MBDriverAction(name, () =>
+      this._setData(fcCode, offset, value, unitId)
+    );
   }
 
   /**
@@ -133,11 +142,11 @@ class MBDriver {
         this._busy = true;
 
         let data = {};
-        let allIds = Object.keys(actions);
+        let allActionNames = actions.getAllActionNames();
 
-        for (let id of allIds) {
+        for (let actionName of allActionNames) {
           try {
-            data[id] = await actions[id]();
+            data[actionName] = await actions.getAction(actionName).Function();
           } catch (err) {
             this._busy = false;
             return reject(err);
@@ -269,20 +278,12 @@ class MBDriver {
 
         //Writing data depending on MB function
         switch (fcCode) {
-          case 5: {
-            await this._client.writeCoil(offset, value);
-            break;
-          }
           case 15: {
             await this._client.writeCoils(offset, value);
             break;
           }
           case 16: {
             await this._client.writeRegisters(offset, value);
-            break;
-          }
-          case 6: {
-            await this._client.writeRegister(offset, value);
             break;
           }
           default: {

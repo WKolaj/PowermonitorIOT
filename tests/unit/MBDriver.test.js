@@ -1,4 +1,6 @@
 let MBDriver = require("../../classes/driver/Modbus/MBDriver");
+let ModbusDriverActions = require("../../classes/driver/Modbus/MBDriverActions");
+let ModbusDriverAction = require("../../classes/driver/Modbus/MBDriverAction");
 
 //Function for hanging thread
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -577,6 +579,7 @@ describe("MBDriver", () => {
 
   describe("createGetDataAction", () => {
     let mbDevice;
+    let actionName;
     let ipAdress;
     let portNumber;
     let timeout;
@@ -588,6 +591,7 @@ describe("MBDriver", () => {
 
     beforeEach(() => {
       mbDevice = "mockMBDevice";
+      actionName = "TestAction";
       ipAdress = "192.168.0.1";
       portNumber = 602;
       timeout = 1000;
@@ -605,19 +609,25 @@ describe("MBDriver", () => {
       mbDriver = new MBDriver(mbDevice, ipAdress, portNumber, timeout, unitId);
       mbDriver._client = mockModbus;
       mbDriver._getData = mockGetData;
-      return mbDriver.createGetDataAction(fcCode, offset, length, passedUnitId);
+      return mbDriver.createGetDataAction(
+        actionName,
+        fcCode,
+        offset,
+        length,
+        passedUnitId
+      );
     };
 
     it("should return action as a promise that invokes _getData", async () => {
       let action = await exec();
-      await action();
+      await action.Function();
 
       expect(mockGetData).toHaveBeenCalledTimes(1);
     });
 
     it("should return action as a promise that invokes _getData with arguments pass as an argument", async () => {
       let action = await exec();
-      await action();
+      await action.Function();
 
       expect(mockGetData.mock.calls[0][0]).toEqual(fcCode);
       expect(mockGetData.mock.calls[0][1]).toEqual(offset);
@@ -628,12 +638,18 @@ describe("MBDriver", () => {
     it("should return action as a promise that invokes _getData with arguments pass as an argument and unitId from driver if unitId is not provided", async () => {
       passedUnitId = undefined;
       let action = await exec();
-      await action();
+      await action.Function();
 
       expect(mockGetData.mock.calls[0][0]).toEqual(fcCode);
       expect(mockGetData.mock.calls[0][1]).toEqual(offset);
       expect(mockGetData.mock.calls[0][2]).toEqual(length);
       expect(mockGetData.mock.calls[0][3]).toEqual(unitId);
+    });
+
+    it("should set action name", async () => {
+      let action = await exec();
+
+      expect(action.Name).toEqual(actionName);
     });
   });
 
@@ -646,10 +662,12 @@ describe("MBDriver", () => {
     let mbDriver;
     let mockModbus;
     let mockSetData;
+    let actionName;
     let fcCode, offset, value, passedUnitId;
 
     beforeEach(() => {
       mbDevice = "mockMBDevice";
+      actionName = "ActionTest";
       ipAdress = "192.168.0.1";
       portNumber = 602;
       timeout = 1000;
@@ -667,19 +685,25 @@ describe("MBDriver", () => {
       mbDriver = new MBDriver(mbDevice, ipAdress, portNumber, timeout, unitId);
       mbDriver._client = mockModbus;
       mbDriver._setData = mockSetData;
-      return mbDriver.createSetDataAction(fcCode, offset, value, passedUnitId);
+      return mbDriver.createSetDataAction(
+        actionName,
+        fcCode,
+        offset,
+        value,
+        passedUnitId
+      );
     };
 
     it("should return action as a promise that invokes _setData", async () => {
       let action = await exec();
-      await action();
+      await action.Function();
 
       expect(mockSetData).toHaveBeenCalledTimes(1);
     });
 
     it("should return action as a promise that invokes _setData with arguments pass as an argument", async () => {
       let action = await exec();
-      await action();
+      await action.Function();
 
       expect(mockSetData.mock.calls[0][0]).toEqual(fcCode);
       expect(mockSetData.mock.calls[0][1]).toEqual(offset);
@@ -690,12 +714,18 @@ describe("MBDriver", () => {
     it("should return action as a promise that invokes _setData with arguments pass as an argument and unitId from driver if unitId is not provided", async () => {
       passedUnitId = undefined;
       let action = await exec();
-      await action();
+      await action.Function();
 
       expect(mockSetData.mock.calls[0][0]).toEqual(fcCode);
       expect(mockSetData.mock.calls[0][1]).toEqual(offset);
       expect(mockSetData.mock.calls[0][2]).toEqual(value);
       expect(mockSetData.mock.calls[0][3]).toEqual(unitId);
+    });
+
+    it("should set action name", async () => {
+      let action = await exec();
+
+      expect(action.Name).toEqual(actionName);
     });
   });
 
@@ -1049,6 +1079,9 @@ describe("MBDriver", () => {
     let mockModbus;
     let busy;
     let actions;
+    let action1;
+    let action2;
+    let action3;
     let action1Mock;
     let action2Mock;
     let action3Mock;
@@ -1071,7 +1104,13 @@ describe("MBDriver", () => {
       action3Mock = jest
         .fn()
         .mockImplementation(() => new Promise(resolve => resolve(3)));
-      actions = { act1: action1Mock, act2: action2Mock, act3: action3Mock };
+      action1 = new ModbusDriverAction("act1", action1Mock);
+      action2 = new ModbusDriverAction("act2", action2Mock);
+      action3 = new ModbusDriverAction("act3", action3Mock);
+      actions = new ModbusDriverActions();
+      actions.addAction(action1);
+      actions.addAction(action2);
+      actions.addAction(action3);
     });
 
     let exec = () => {
@@ -1117,7 +1156,13 @@ describe("MBDriver", () => {
         .fn()
         .mockImplementation(() => new Promise(resolve, reject => reject(2)));
 
-      actions = { act1: action1Mock, act2: action2Mock, act3: action3Mock };
+      action1 = new ModbusDriverAction("act1", action1Mock);
+      action2 = new ModbusDriverAction("act2", action2Mock);
+      action3 = new ModbusDriverAction("act3", action3Mock);
+      actions = new ModbusDriverActions();
+      actions.addAction(action1);
+      actions.addAction(action2);
+      actions.addAction(action3);
 
       await expect(exec()).rejects.toBeDefined();
 
@@ -1148,7 +1193,13 @@ describe("MBDriver", () => {
         .fn()
         .mockImplementation(() => new Promise(resolve, reject => reject(2)));
 
-      actions = { act1: action1Mock, act2: action2Mock, act3: action3Mock };
+      action1 = new ModbusDriverAction("act1", action1Mock);
+      action2 = new ModbusDriverAction("act2", action2Mock);
+      action3 = new ModbusDriverAction("act3", action3Mock);
+      actions = new ModbusDriverActions();
+      actions.addAction(action1);
+      actions.addAction(action2);
+      actions.addAction(action3);
 
       for (let i = 1; i <= 3; i++) {
         await expect(exec()).rejects.toBeDefined();

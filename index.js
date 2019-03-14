@@ -1,13 +1,28 @@
 const MBDevice = require("./classes/device/Modbus/MBDevice");
 const MBRTUDevice = require("./classes/device/Modbus/MBRTUDevice");
 const MBGateway = require("./classes/driver/Modbus/MBGateway");
+const MBDriverActions = require("./classes/driver/Modbus/MBDriverActions");
+const MBDriverAction = require("./classes/driver/Modbus/MBDriverAction");
+const MBRequestGrouper = require("./classes/driver/Modbus/MBRequestGrouper");
+const MBRequest = require("./classes/driver/Modbus/MBRequest");
+const MBVariable = require("./classes/variable/Modbus/MBVariable");
 
 let pac1 = new MBDevice("PAC1");
 
-pac1.setModbusDriver("192.168.0.73", 502, 2000, 2);
+pac1.setModbusDriver("192.168.0.20", 602, 2000, 2);
 
-let pac1Voltage = pac1._driver.createGetDataAction(3, 1, 2);
-let pac1Currents = pac1._driver.createGetDataAction(3, 4, 3);
+let actionsPAC1 = new MBDriverActions();
+
+const mbRequest1 = new MBRequest(pac1._driver, 15, 0, 2);
+
+const napiecieL1 = new MBVariable("Napiecie L1", 0, 2);
+const napiecieL2 = new MBVariable("Napiecie L2", 2, 1);
+const napiecieL3 = new MBVariable("Napiecie L3", 3, 2);
+mbRequest1.addVariable(napiecieL1);
+mbRequest1.addVariable(napiecieL2);
+mbRequest1.addVariable(napiecieL3);
+
+actionsPAC1.addAction(mbRequest1.Action);
 
 // let pac1 = new MBRTUDevice("PAC1", 2);
 
@@ -23,11 +38,6 @@ let pac1Currents = pac1._driver.createGetDataAction(3, 4, 3);
 //   pac1._unitId
 // );
 
-let actionsPac1 = [];
-
-actionsPac1["PAC1 Napiecia"] = pac1Voltage;
-actionsPac1["PAC1 Prady"] = pac1Currents;
-
 // let pac2 = new MBDevice("PAC2", "192.168.8.112");
 
 // let pac2Voltage = pac2._driver.createGetDataAction(3, 1, 12);
@@ -39,7 +49,9 @@ actionsPac1["PAC1 Prady"] = pac1Currents;
 // actionsPac2["PAC2 Prady"] = pac2Currents;
 
 let doRead1 = async device => {
-  return pac1._driver.invokeActions(actionsPac1);
+  actionsPAC1 = new MBDriverActions();
+  actionsPAC1.addAction(mbRequest1.Action);
+  return pac1._driver.invokeActions(actionsPAC1);
 };
 
 // let doRead2 = async device => {
@@ -53,9 +65,15 @@ let exec = async () => {
 
     setInterval(async () => {
       try {
-        let data = await doRead1(pac1);
-        console.log(`${new Date(Date.now()).getMilliseconds()}:`);
-        console.log(data);
+        let now = Math.round((Date.now() - 1552569213655) / 1000) % 2 == 0;
+        napiecieL1.Data = [now, !now];
+        napiecieL2.Data = now;
+        napiecieL3.Data = [!now, now];
+        console.log(mbRequest1.DataToSend);
+        mbRequest1.updateAction();
+
+        await doRead1(pac1);
+        console.log("value written..");
       } catch (err) {
         console.log(err);
       }
