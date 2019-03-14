@@ -1,5 +1,4 @@
 const ModbusRTU = require("modbus-serial");
-const MBDriverAction = require("./MBDriverAction");
 
 class MBDriver {
   /**
@@ -24,7 +23,7 @@ class MBDriver {
     this.disconnect = this.disconnect.bind(this);
     this.connect = this.connect.bind(this);
     this.createGetDataAction = this.createGetDataAction.bind(this);
-    this.invokeActions = this.invokeActions.bind(this);
+    this.invokeRequests = this.invokeRequests.bind(this);
 
     //Setting default values
     this._mbDevice = mbDevice;
@@ -99,17 +98,14 @@ class MBDriver {
 
   /**
    * @description Creating action for getting data from MB Device
-   * @param {string} name Name of action
    * @param {number} fcCode Modbus function code
    * @param {number} offset Data offset
    * @param {number} length Data length
    * @param {number} unitId unit ID
    */
-  createGetDataAction(name, fcCode, offset, length, unitId) {
+  createGetDataAction(fcCode, offset, length, unitId) {
     unitId = unitId || this._unitId;
-    return new MBDriverAction(name, () =>
-      this._getData(fcCode, offset, length, unitId)
-    );
+    return () => this._getData(fcCode, offset, length, unitId);
   }
 
   /**
@@ -120,18 +116,16 @@ class MBDriver {
    * @param {number} value value to set
    * @param {number} unitId unit ID
    */
-  createSetDataAction(name, fcCode, offset, value, unitId) {
+  createSetDataAction(fcCode, offset, value, unitId) {
     unitId = unitId || this._unitId;
-    return new MBDriverAction(name, () =>
-      this._setData(fcCode, offset, value, unitId)
-    );
+    return () => this._setData(fcCode, offset, value, unitId);
   }
 
   /**
-   * @description Invoking exchange data actions
-   * @param {object} actions Actions to invoke
+   * @description Invoking modbus requests
+   * @param {object} requests Requests to invoke
    */
-  invokeActions(actions) {
+  invokeRequests(requests) {
     return new Promise(async (resolve, reject) => {
       //Invoking actions only if active
       if (!this._active) {
@@ -142,11 +136,14 @@ class MBDriver {
         this._busy = true;
 
         let data = {};
-        let allActionNames = actions.getAllActionNames();
 
-        for (let actionName of allActionNames) {
+        for (let request of requests) {
           try {
-            data[actionName] = await actions.getAction(actionName).Function();
+            //Automatically fetching request data
+            let responseData = await request.Action();
+            request.setResponseData(responseData);
+
+            data[request.RequestId] = responseData;
           } catch (err) {
             this._busy = false;
             return reject(err);

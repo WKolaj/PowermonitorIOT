@@ -9,12 +9,11 @@ function generateRandId() {
  * @description Generating random id number
  * @param {object} mbDriver Modbus driver associated with request
  * @param {number} fcode Modbus function code
- * @param {number} startOffset request start object
  * @param {number} unitId unit id of request
  * @param {number} maxRequestLength maximum length of Modbus RTU request
  */
 class MBRequest {
-  constructor(mbDriver, fcode, startOffset, unitId, maxRequestLength = 200) {
+  constructor(mbDriver, fcode, unitId, maxRequestLength = 200) {
     //Generating random id
     this._id = generateRandId();
 
@@ -23,7 +22,6 @@ class MBRequest {
     this._unitId = unitId;
     this._fcode = fcode;
     this._write = fcode >= 1 && fcode <= 4 ? false : true;
-    this._offset = startOffset;
     this._length = 0;
     this._dataToSend = [];
     this._variableConnections = {};
@@ -48,7 +46,6 @@ class MBRequest {
 
       //Creating setDataAction
       return this.MBDriver.createSetDataAction(
-        this.RequestId,
         this.FCCode,
         this.Offset,
         this.DataToSend,
@@ -57,7 +54,6 @@ class MBRequest {
     } else {
       //Creating getDataAction
       return this.MBDriver.createGetDataAction(
-        this.RequestId,
         this.FCCode,
         this.Offset,
         this.Length,
@@ -70,10 +66,7 @@ class MBRequest {
    * @description Setting responsedata in variableCollection, on the basis of Modbus response
    * @param {object} response Response from Modbus function
    */
-  setResponseData(response) {
-    //Getting response associated with current request
-    let responseData = response[this.RequestId];
-
+  setResponseData(responseData) {
     if (responseData === undefined)
       throw new Error(`Response for request ${this.RequestId} not found`);
 
@@ -97,6 +90,8 @@ class MBRequest {
    * @param {object} mbVariable modbus Variable
    */
   addVariable(mbVariable) {
+    if (this.Offset === undefined) this._offset = mbVariable.Offset;
+
     //Throw an error in case length exceeds max modbus length
     if (this.Offset + this.Length > this._maxRequestLength) {
       throw new Error(

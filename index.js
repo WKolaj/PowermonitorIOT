@@ -1,57 +1,36 @@
 const MBDevice = require("./classes/device/Modbus/MBDevice");
 const MBRTUDevice = require("./classes/device/Modbus/MBRTUDevice");
 const MBGateway = require("./classes/driver/Modbus/MBGateway");
-const MBDriverActions = require("./classes/driver/Modbus/MBDriverActions");
-const MBDriverAction = require("./classes/driver/Modbus/MBDriverAction");
 const MBRequestGrouper = require("./classes/driver/Modbus/MBRequestGrouper");
 const MBRequest = require("./classes/driver/Modbus/MBRequest");
 const MBVariable = require("./classes/variable/Modbus/MBVariable");
 
 let pac1 = new MBDevice("PAC1");
 
-pac1.setModbusDriver("192.168.0.20", 602, 2000, 2);
+pac1.setModbusDriver("192.168.0.17", 602, 2000, 2);
 
-let actionsPAC1 = new MBDriverActions();
-
-const mbRequest1 = new MBRequest(pac1._driver, 15, 0, 2);
+const mbRequest1 = new MBRequest(pac1._driver, 16, 1);
 
 const napiecieL1 = new MBVariable("Napiecie L1", 0, 2);
 const napiecieL2 = new MBVariable("Napiecie L2", 2, 1);
 const napiecieL3 = new MBVariable("Napiecie L3", 3, 2);
+
 mbRequest1.addVariable(napiecieL1);
 mbRequest1.addVariable(napiecieL2);
 mbRequest1.addVariable(napiecieL3);
 
-actionsPAC1.addAction(mbRequest1.Action);
+const mbRequest2 = new MBRequest(pac1._driver, 16, 1);
 
-// let pac1 = new MBRTUDevice("PAC1", 2);
+const pradL1 = new MBVariable("Prad L1", 6, 2);
+const pradL2 = new MBVariable("Prad L2", 8, 1);
+const pradL3 = new MBVariable("Prad L3", 9, 2);
 
-// let gateway = new MBGateway("192.168.0.73");
-
-// pac1.setModbusGateway(gateway);
-
-// let pac1Voltage = pac1._driver.createGetDataAction(3, 1, 3, pac1._unitId);
-// let pac1Currents = pac1._driver.createSetDataAction(
-//   16,
-//   4,
-//   [1, 2, 3],
-//   pac1._unitId
-// );
-
-// let pac2 = new MBDevice("PAC2", "192.168.8.112");
-
-// let pac2Voltage = pac2._driver.createGetDataAction(3, 1, 12);
-// let pac2Currents = pac2._driver.createGetDataAction(3, 13, 6);
-
-// let actionsPac2 = [];
-
-// actionsPac2["PAC2 Napiecia"] = pac2Voltage;
-// actionsPac2["PAC2 Prady"] = pac2Currents;
+mbRequest2.addVariable(pradL1);
+mbRequest2.addVariable(pradL2);
+mbRequest2.addVariable(pradL3);
 
 let doRead1 = async device => {
-  actionsPAC1 = new MBDriverActions();
-  actionsPAC1.addAction(mbRequest1.Action);
-  return pac1._driver.invokeActions(actionsPAC1);
+  return pac1._driver.invokeRequests([mbRequest1, mbRequest2]);
 };
 
 // let doRead2 = async device => {
@@ -65,21 +44,26 @@ let exec = async () => {
 
     setInterval(async () => {
       try {
-        let now = Math.round((Date.now() - 1552569213655) / 1000) % 2 == 0;
-        napiecieL1.Data = [now, !now];
-        napiecieL2.Data = now;
-        napiecieL3.Data = [!now, now];
-        console.log(mbRequest1.DataToSend);
+        let now = Math.round((Date.now() - 1552569213655) / 1000);
+        napiecieL1.Data = [now + 10, now + 9];
+        napiecieL2.Data = now + 8;
+        napiecieL3.Data = [now + 7, now + 6];
         mbRequest1.updateAction();
+        pradL1.Data = [now + 5, now + 4];
+        pradL2.Data = now + 3;
+        pradL3.Data = [now + 2, now + 1];
+        mbRequest2.updateAction();
 
-        await doRead1(pac1);
-        console.log("value written..");
+        let result = await doRead1(pac1);
+        console.log(mbRequest1.VariableConnections);
+        console.log(mbRequest2.VariableConnections);
+        console.log(result);
       } catch (err) {
         console.log(err);
       }
     }, 1000);
 
-    // setInterval(async () => {
+    // setIntlet actionsPAC1 = new MBDriverActions();
     //   try {
     //     let data = await doRead2(pac2);
     // console.log(`${Date.now()}:`);
