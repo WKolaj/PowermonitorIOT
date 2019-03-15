@@ -27,6 +27,10 @@ class Variable {
   set Value(newValue) {
     //_setValue - should be override in child classes
     this._setValue(newValue);
+    this._emitValueChange(newValue);
+  }
+
+  _emitValueChange(newValue) {
     this.Events.emit("ValueChanged", [this, newValue]);
   }
 }

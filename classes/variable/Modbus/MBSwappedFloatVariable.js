@@ -1,11 +1,11 @@
 const MBVariable = require("./MBVariable");
 
 //Converting register array to float
-const mbDataToFloat = function(mbData) {
+const mbDataToSwappedFloat = function(mbData) {
   //Split 2 x 16 bit to bytes
   let int16Array = new Uint16Array(2);
-  int16Array[0] = mbData[1];
-  int16Array[1] = mbData[0];
+  int16Array[0] = mbData[0];
+  int16Array[1] = mbData[1];
   let bytes = new Int8Array(int16Array.buffer);
 
   //Bytes swap
@@ -29,7 +29,7 @@ const mbDataToFloat = function(mbData) {
 };
 
 //Converting float to register array
-const floatToMBData = function(floatValue) {
+const swappedFloatToMBData = function(floatValue) {
   //Split float into bytes
   let floatArray = new Float32Array(1);
   floatArray[0] = floatValue;
@@ -65,21 +65,21 @@ const floatToMBData = function(floatValue) {
 
   let int2 = view2.getUint16(0);
 
-  return [int2, int1];
+  return [int1, int2];
 };
 
-class MBFloatVariable extends MBVariable {
+class MBSwappedFloatVariable extends MBVariable {
   constructor(device, name, fcode, offset) {
     super(device, name, fcode, offset, 2);
   }
 
   _convertDataToValue(data) {
-    return mbDataToFloat(data);
+    return mbDataToSwappedFloat(data);
   }
 
   _convertValueToData(value) {
-    return floatToMBData(value);
+    return swappedFloatToMBData(value);
   }
 }
 
-module.exports = MBFloatVariable;
+module.exports = MBSwappedFloatVariable;

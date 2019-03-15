@@ -1,7 +1,7 @@
 const MBVariable = require("./MBVariable");
 
 //Converting register array to Int16
-const mbDataToInt16 = function(mbData) {
+const mbDataToUInt16 = function(mbData) {
   let int16Array = new Uint16Array(1);
   int16Array[0] = mbData[0];
   let bytes = new Int8Array(int16Array.buffer);
@@ -21,15 +21,15 @@ const mbDataToInt16 = function(mbData) {
 
   // Read the bits as a float; note that by doing this, we're implicitly
   // converting it from a 32-bit int into JavaScript's native 64-bit double
-  var num = view.getInt16(0);
+  var num = view.getUint16(0);
 
   return num;
 };
 
 //Converting Int16 to register array
-const int16ToMBData = function(intValue) {
+const uint16ToMBData = function(intValue) {
   //Split float into bytes
-  let int16Array = new Int16Array(1);
+  let int16Array = new Uint16Array(1);
   int16Array[0] = intValue;
   let bytes = new Int8Array(int16Array.buffer);
 
@@ -52,18 +52,18 @@ const int16ToMBData = function(intValue) {
   return [int2];
 };
 
-class MBInt16Variable extends MBVariable {
+class MBUInt16Variable extends MBVariable {
   constructor(device, name, fcode, offset) {
     super(device, name, fcode, offset, 1);
   }
 
   _convertDataToValue(data) {
-    return mbDataToInt16(data);
+    return mbDataToUInt16(data);
   }
 
   _convertValueToData(value) {
-    return int16ToMBData(value);
+    return uint16ToMBData(value);
   }
 }
 
-module.exports = MBInt16Variable;
+module.exports = MBUInt16Variable;

@@ -1,16 +1,7 @@
-module.exports.int16ToByteArray = function(int16) {
-  var byteArray = [0, 0];
+const MBVariable = require("./MBVariable");
 
-  for (var index = 0; index < byteArray.length; index++) {
-    var byte = int16 & 0xff;
-    byteArray[index] = byte;
-    int16 = (int16 - byte) / 256;
-  }
-
-  return byteArray;
-};
-
-module.exports.MBDataToFloat = function(mbData) {
+//Converting register array to float
+const mbDataToSwappedInt32 = function(mbData) {
   //Split 2 x 16 bit to bytes
   let int16Array = new Uint16Array(2);
   int16Array[0] = mbData[0];
@@ -31,17 +22,18 @@ module.exports.MBDataToFloat = function(mbData) {
   });
 
   // Read the bits as a float; note that by doing this, we're implicitly
-  // converting it from a 32-bit float into JavaScript's native 64-bit double
-  var num = view.getFloat32(0);
+  // converting it from a 32-bit int into JavaScript's native 64-bit double
+  var num = view.getInt32(0);
 
   return num;
 };
 
-module.exports.FloatToMBData = function(floatValue) {
+//Converting Int32 to register array
+const swappedInt32ToMBData = function(floatValue) {
   //Split float into bytes
-  let floatArray = new Float32Array(1);
-  floatArray[0] = floatValue;
-  let bytes = new Int8Array(floatArray.buffer);
+  let int32Array = new Int32Array(1);
+  int32Array[0] = floatValue;
+  let bytes = new Int8Array(int32Array.buffer);
 
   //swap bytes
   let int1Buf = [bytes[3], bytes[2]];
@@ -75,3 +67,19 @@ module.exports.FloatToMBData = function(floatValue) {
 
   return [int1, int2];
 };
+
+class MBSwappedInt32Variable extends MBVariable {
+  constructor(device, name, fcode, offset) {
+    super(device, name, fcode, offset, 2);
+  }
+
+  _convertDataToValue(data) {
+    return mbDataToSwappedInt32(data);
+  }
+
+  _convertValueToData(value) {
+    return swappedInt32ToMBData(value);
+  }
+}
+
+module.exports = MBSwappedInt32Variable;

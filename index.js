@@ -4,20 +4,20 @@ const MBGateway = require("./classes/driver/Modbus/MBGateway");
 const MBRequestGrouper = require("./classes/driver/Modbus/MBRequestGrouper");
 const MBRequest = require("./classes/driver/Modbus/MBRequest");
 const MBVariable = require("./classes/variable/Modbus/MBVariable");
-const MBFloatVariable = require("./classes/variable/Modbus/MBFloatVariable");
+const MBFloatVariable = require("./classes/variable/Modbus/MBBooleanVariable");
 const MBInt16Variable = require("./classes/variable/Modbus/MBInt16Variable");
 
 let pac1 = new MBDevice("PAC1");
 
 pac1.setModbusDriver("192.168.0.17", 502, 2000, 1);
 
-let napiecieL1 = new MBInt16Variable(pac1, "Napiecie L1", 16, 1);
-let napiecieL2 = new MBFloatVariable(pac1, "Napiecie L2", 3, 3);
-let napiecieL3 = new MBFloatVariable(pac1, "Napiecie L3", 3, 5);
+let napiecieL1 = new MBFloatVariable(pac1, "Napiecie L1", 1, 1);
+let napiecieL2 = new MBFloatVariable(pac1, "Napiecie L2", 1, 2);
+let napiecieL3 = new MBFloatVariable(pac1, "Napiecie L3", 1, 3);
 
-let pradL1 = new MBFloatVariable(pac1, "Prad L1", 3, 13);
-let pradL2 = new MBFloatVariable(pac1, "Prad L2", 3, 15);
-let pradL3 = new MBFloatVariable(pac1, "Prad L3", 3, 17);
+let pradL1 = new MBFloatVariable(pac1, "Prad L1", 1, 13);
+let pradL2 = new MBFloatVariable(pac1, "Prad L2", 1, 15);
+let pradL3 = new MBFloatVariable(pac1, "Prad L3", 1, 17);
 
 napiecieL1.Events.on("ValueChanged", args => {
   console.log(args[1]);
@@ -49,7 +49,7 @@ let exec = async () => {
 
     setInterval(async () => {
       try {
-        napiecieL1.Value = 65000;
+        napiecieL1.Value = true;
         for (let req of requests) {
           req.updateAction();
         }

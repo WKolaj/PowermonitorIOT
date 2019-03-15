@@ -1,7 +1,7 @@
 const MBVariable = require("./MBVariable");
 
-//Converting register array to float
-const mbDataToFloat = function(mbData) {
+//Converting register array to Int32
+const mbDataToUInt32 = function(mbData) {
   //Split 2 x 16 bit to bytes
   let int16Array = new Uint16Array(2);
   int16Array[0] = mbData[1];
@@ -22,18 +22,18 @@ const mbDataToFloat = function(mbData) {
   });
 
   // Read the bits as a float; note that by doing this, we're implicitly
-  // converting it from a 32-bit float into JavaScript's native 64-bit double
-  var num = view.getFloat32(0);
+  // converting it from a 32-bit int into JavaScript's native 64-bit double
+  var num = view.getUint32(0);
 
   return num;
 };
 
-//Converting float to register array
-const floatToMBData = function(floatValue) {
+//Converting Int32 to register array
+const uint32ToMBData = function(floatValue) {
   //Split float into bytes
-  let floatArray = new Float32Array(1);
-  floatArray[0] = floatValue;
-  let bytes = new Int8Array(floatArray.buffer);
+  let int32Array = new Uint32Array(1);
+  int32Array[0] = floatValue;
+  let bytes = new Int8Array(int32Array.buffer);
 
   //swap bytes
   let int1Buf = [bytes[3], bytes[2]];
@@ -68,18 +68,18 @@ const floatToMBData = function(floatValue) {
   return [int2, int1];
 };
 
-class MBFloatVariable extends MBVariable {
+class MBInt32Variable extends MBVariable {
   constructor(device, name, fcode, offset) {
     super(device, name, fcode, offset, 2);
   }
 
   _convertDataToValue(data) {
-    return mbDataToFloat(data);
+    return mbDataToUInt32(data);
   }
 
   _convertValueToData(value) {
-    return floatToMBData(value);
+    return uint32ToMBData(value);
   }
 }
 
-module.exports = MBFloatVariable;
+module.exports = MBInt32Variable;

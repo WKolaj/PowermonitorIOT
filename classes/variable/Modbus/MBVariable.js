@@ -27,17 +27,19 @@ class MBVariable extends Variable {
     return this._data;
   }
 
-  set Data(value) {
-    this._data = value;
-    //_convertDataToVariable should be override in children class
-    this.Value = this._convertDataToValue(value);
+  set Data(data) {
+    this._data = data;
+    this._value = this._convertDataToValue(data);
+    //Emitting singal of value change
+    this._emitValueChange(this._value);
   }
 
   _getValue() {
-    return this._convertDataToValue(this._data);
+    return this._value;
   }
 
   _setValue(value) {
+    this._value = value;
     this._data = this._convertValueToData(value);
   }
 }
