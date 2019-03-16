@@ -4,23 +4,23 @@ const MBGateway = require("./classes/driver/Modbus/MBGateway");
 const MBRequestGrouper = require("./classes/driver/Modbus/MBRequestGrouper");
 const MBRequest = require("./classes/driver/Modbus/MBRequest");
 const MBVariable = require("./classes/variable/Modbus/MBVariable");
-const MBFloatVariable = require("./classes/variable/Modbus/MBFloatVariable");
+const MBFloatVariable = require("./classes/variable/Modbus/MBByteArrayVariable");
 const MBInt16Variable = require("./classes/variable/Modbus/MBInt16Variable");
 
 let pac1 = new MBDevice("PAC1");
 
 pac1.setModbusDriver("192.168.0.17", 502, 2000, 1);
 
-let napiecieL1 = new MBFloatVariable(pac1, "Napiecie L1", 3, 1);
-let napiecieL2 = new MBFloatVariable(pac1, "Napiecie L2", 3, 2);
-let napiecieL3 = new MBFloatVariable(pac1, "Napiecie L3", 3, 3);
+let napiecieL1 = new MBFloatVariable(pac1, "Napiecie L1", 16, 1, 2);
+let napiecieL2 = new MBFloatVariable(pac1, "Napiecie L2", 3, 2, 2);
+let napiecieL3 = new MBFloatVariable(pac1, "Napiecie L3", 3, 3, 2);
 
-let pradL1 = new MBFloatVariable(pac1, "Prad L1", 3, 13);
-let pradL2 = new MBFloatVariable(pac1, "Prad L2", 3, 15);
-let pradL3 = new MBFloatVariable(pac1, "Prad L3", 3, 17);
+let pradL1 = new MBFloatVariable(pac1, "Prad L1", 3, 13, 2);
+let pradL2 = new MBFloatVariable(pac1, "Prad L2", 3, 15, 2);
+let pradL3 = new MBFloatVariable(pac1, "Prad L3", 3, 17, 2);
 
 napiecieL1.Events.on("ValueChanged", args => {
-  console.log(args[1]);
+  //console.log(args[0].convertToBits());
 });
 
 let variables = [];
@@ -42,19 +42,38 @@ let doRead1 = async device => {
 //   return pac2._driver.invokeActions(actionsPac2);
 // };
 
+let lastBitSet = 0;
+
+let switchBits = function(byteArray) {
+  let bitIndex = 0;
+
+  for (let i = 0; i < byteArray.Value.length; i++) {
+    for (let j = 0; j < 8; j++) {
+      bitIndex === lastBitSet
+        ? byteArray.setBit(i, j)
+        : byteArray.clearBit(i, j);
+      bitIndex++;
+    }
+  }
+  lastBitSet === 31 ? (lastBitSet = 0) : lastBitSet++;
+};
+
 let exec = async () => {
   try {
+    napiecieL1.Value = [0, 0, 0, 0];
     await pac1.connect();
     //await pac2.connect();
 
     setInterval(async () => {
       try {
-        //napiecieL1.Value = true;
+        //napiecieL1.Value = [3, 4, 5, 6];
+        switchBits(napiecieL1);
         for (let req of requests) {
           req.updateAction();
         }
         let result = await doRead1(pac1);
 
+        console.log(napiecieL1.Value);
         //console.log(result);
       } catch (err) {
         console.log(err);

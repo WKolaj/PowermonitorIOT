@@ -21,7 +21,7 @@ class Variable {
 
   get Value() {
     //_getValue - should be override in child classes
-    return _getValue();
+    return this._getValue();
   }
 
   set Value(newValue) {
