@@ -68,6 +68,7 @@ let exec = async () => {
       try {
         //napiecieL1.Value = [3, 4, 5, 6];
         switchBits(napiecieL1);
+        console.log(napiecieL1.Value);
         for (let req of requests) {
           req.updateAction();
         }

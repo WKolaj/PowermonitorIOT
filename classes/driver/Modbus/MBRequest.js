@@ -14,6 +14,28 @@ function generateRandId() {
  */
 class MBRequest {
   constructor(mbDriver, fcode, unitId, maxRequestLength = 100) {
+    //Throwing if fcode is invalid
+    if (!((fcode >= 1 && fcode <= 4) || fcode === 15 || fcode === 16))
+      throw new Error(`Unknown MBFunction codeL ${fcode}`);
+
+    //Throwing if driver is empty
+    if (!mbDriver) throw new Error("MBDriver cannot be empty");
+
+    //UnitID cannot be empty
+    if (unitId === undefined || unitId === null)
+      throw new Error("UnitID cannot be empty");
+
+    //Binind methods:
+    this.updateAction = this.updateAction.bind(this);
+    this._createAction = this._createAction.bind(this);
+    this.setResponseData = this.setResponseData.bind(this);
+    this.canVariableBeAddedToRequest = this.canVariableBeAddedToRequest.bind(
+      this
+    );
+    this.addVariable = this.addVariable.bind(this);
+    this._formatDataToSend = this._formatDataToSend.bind(this);
+    this._createVariableObject = this._createVariableObject.bind(this);
+
     //Generating random id
     this._id = generateRandId();
 
@@ -41,12 +63,11 @@ class MBRequest {
   _createAction() {
     if (this.Write) {
       //Write request - Data to send cannot be undefined
-      if (this.DataToSend === undefined)
+      if (this.DataToSend === undefined || this.DataToSend === null)
         throw new Error("Value cannot be empty");
-
       //Creating setDataAction
       return this.MBDriver.createSetDataAction(
-        this.FCCode,
+        this.FCode,
         this.Offset,
         this.DataToSend,
         this.UnitId
@@ -54,7 +75,7 @@ class MBRequest {
     } else {
       //Creating getDataAction
       return this.MBDriver.createGetDataAction(
-        this.FCCode,
+        this.FCode,
         this.Offset,
         this.Length,
         this.UnitId
@@ -69,6 +90,13 @@ class MBRequest {
   setResponseData(responseData) {
     if (responseData === undefined)
       throw new Error(`Response for request ${this.RequestId} not found`);
+
+    if (responseData.length !== this.Length)
+      throw new Error(
+        `Invalid length of response: ${responseData.length}, request Length:${
+          this.Length
+        }`
+      );
 
     //Setting response data
     this._responseData = responseData;
@@ -86,13 +114,29 @@ class MBRequest {
     }
   }
 
+  /**
+   * @description Determaining if variable can be added to this request
+   * depening on its offset, length and actual length of MBRequest
+   * @param {object} mbVariable Variable to be checked
+   */
   canVariableBeAddedToRequest(mbVariable) {
+    //Cannot add variable if FCode of variable is different
+    if (mbVariable.FCode !== this.FCode) return false;
+
+    //Cannot add variable if unitId of variable is different
+    if (mbVariable.UnitId !== this.UnitId) return false;
+
+    //Cannot add a variable that already exists in request
+    if (mbVariable.Name in this.VariableConnections) return false;
+
+    //Variable can be added despite its offset - undefined offset means that it is first variable of request - request's offset should be set according to there variable offset
     if (this.Offset === undefined) return true;
 
     //Throw an error in case length exceeds max modbus length
     if (mbVariable.Length + this.Length > this._maxRequestLength) {
       return false;
     }
+
     //Throw an error in case variable doest not correspond to actual request offset
     if (this.Offset + this.Length != mbVariable.Offset) {
       return false;
@@ -106,38 +150,25 @@ class MBRequest {
    * @param {object} mbVariable modbus Variable
    */
   addVariable(mbVariable) {
-    if (this.Offset === undefined) this._offset = mbVariable.Offset;
+    if (!this.canVariableBeAddedToRequest(mbVariable))
+      throw new Error(`Variable doesn't fit given variable`);
 
-    //Throw an error in case length exceeds max modbus length
-    if (mbVariable.Length + this.Length > this._maxRequestLength) {
-      throw new Error(
-        `Request length + variable length: ${mbVariable.Length +
-          this.Length} exceeds maximum MB request length`
-      );
-    }
-    //Throw an error in case variable doest not correspond to actual request offset
-    if (this.Offset + this.Length != mbVariable.Offset) {
-      throw new Error(
-        `Given variable has invalid offset: ${
-          mbVariable.Offset
-        }, current request offset: ${this.Offset + this.Length}`
-      );
-    }
+    if (this.Offset === undefined) this._offset = mbVariable.Offset;
 
     //Creating variable object and assigining it to VariableCollection
     this.VariableConnections[mbVariable.Name] = this._createVariableObject(
       mbVariable
     );
 
-    //Increasing length od request
+    //Increasing length od requestaddVariable
     this._length += mbVariable.Length;
 
     //Updating action
     this.updateAction();
   }
 
-  /**
-   * @description Private method for formating values, written to Modbus Devoce
+  /**variableObject
+   * @description Private method for formating values, which are to be written to Modbus Device
    */
   _formatDataToSend() {
     //Only valid for writing data
@@ -147,7 +178,6 @@ class MBRequest {
     this._dataToSend = [];
 
     let allVariableNames = Object.keys(this.VariableConnections);
-
     //Appending data from every variable to array of values which are ment to be written to Modbus driver
     for (let variableName of allVariableNames) {
       let variableObject = this.VariableConnections[variableName];
@@ -212,7 +242,7 @@ class MBRequest {
   /**
    * @description Modbus function code
    */
-  get FCCode() {
+  get FCode() {
     return this._fcode;
   }
 
