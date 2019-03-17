@@ -20,7 +20,6 @@ class MBVariable extends Variable {
   }
 
   get UnitId() {
-    console.log(this.Device);
     return this.Device.UnitId;
   }
 

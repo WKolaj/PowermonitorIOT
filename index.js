@@ -11,7 +11,7 @@ let pac1 = new MBDevice("PAC1");
 
 pac1.setModbusDriver("192.168.0.17", 502, 2000, 1);
 
-let napiecieL1 = new MBFloatVariable(pac1, "Napiecie L1", 16, 1, 2);
+let napiecieL1 = new MBFloatVariable(pac1, "Napiecie L1", 3, 1, 2);
 let napiecieL2 = new MBFloatVariable(pac1, "Napiecie L2", 3, 2, 2);
 let napiecieL3 = new MBFloatVariable(pac1, "Napiecie L3", 3, 3, 2);
 
@@ -73,7 +73,7 @@ let exec = async () => {
         }
         let result = await doRead1(pac1);
 
-        console.log(napiecieL1.Value);
+        //console.log(napiecieL1.Value);16
         //console.log(result);
       } catch (err) {
         console.log(err);
