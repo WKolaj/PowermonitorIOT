@@ -183,7 +183,7 @@ describe("MBRequest", () => {
     };
 
     it("should create call createGetDataAction of driver based of current offset and data length if fCode is read and should be called every added variable", () => {
-      fcode = 1;
+      fcode = 3;
       let action = exec();
 
       //Calls three time - every added varaible + calling createAction
@@ -824,7 +824,7 @@ describe("MBRequest", () => {
         initialOffset
       );
 
-      intVariable1.Data = 1;
+      intVariable1.Data = [1];
 
       mbRequest.addVariable(intVariable1);
 
@@ -843,7 +843,7 @@ describe("MBRequest", () => {
         initialOffset
       );
 
-      intVariable1.Data = 0;
+      intVariable1.Data = [0];
 
       mbRequest.addVariable(intVariable1);
 

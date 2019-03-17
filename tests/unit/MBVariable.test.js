@@ -184,7 +184,7 @@ describe("MBVariable", () => {
         UnitId: unitId
       };
       offset = 2;
-      length = 3;
+      length = 4;
       fcode = 4;
     });
 
@@ -218,7 +218,7 @@ describe("MBVariable", () => {
       };
       data = [1, 2, 3, 4];
       offset = 2;
-      length = 3;
+      length = 4;
       fcode = 4;
     });
 
@@ -256,7 +256,7 @@ describe("MBVariable", () => {
       };
       dataToSet = [1, 2, 3, 4];
       offset = 2;
-      length = 3;
+      length = 4;
       fcode = 4;
       dataCovertedToValue = 1234;
       _convertDataToValueMock = jest.fn().mockReturnValue(dataCovertedToValue);
@@ -290,6 +290,11 @@ describe("MBVariable", () => {
         dataCovertedToValue
       );
     });
+
+    it("should throw if data length is invalid", () => {
+      dataToSet = [1, 2, 3];
+      expect(() => exec()).toThrow();
+    });
   });
 
   describe("_getValue", () => {
@@ -310,7 +315,7 @@ describe("MBVariable", () => {
       };
       value = 1234;
       offset = 2;
-      length = 3;
+      length = 4;
       fcode = 4;
     });
 
@@ -348,7 +353,7 @@ describe("MBVariable", () => {
       };
       valueToSet = 1234;
       offset = 2;
-      length = 3;
+      length = 4;
       fcode = 4;
       valueConvertedToData = [1, 2, 3, 4];
       _convertValueToDataMock = jest.fn().mockReturnValue(valueConvertedToData);
@@ -399,7 +404,7 @@ describe("MBVariable", () => {
       };
       value = 1234;
       offset = 2;
-      length = 3;
+      length = 4;
       fcode = 4;
     });
 
@@ -437,7 +442,7 @@ describe("MBVariable", () => {
       };
       valueToSet = 1234;
       offset = 2;
-      length = 3;
+      length = 4;
       fcode = 4;
       valueConvertedToData = [1, 2, 3, 4];
       _convertValueToDataMock = jest.fn().mockReturnValue(valueConvertedToData);

@@ -26,7 +26,7 @@ class MBBooleanVariable extends MBVariable {
   /**
    * @description Private method called for getting all possible FCodes - implemented in child
    */
-  _getPossibeFCodes() {
+  _getPossibleFCodes() {
     return [1, 2, 15];
   }
 }

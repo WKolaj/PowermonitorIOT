@@ -68,7 +68,7 @@ class MBInt16Variable extends MBVariable {
   /**
    * @description Private method called for getting all possible FCodes - implemented in child
    */
-  _getPossibeFCodes() {
+  _getPossibleFCodes() {
     return [3, 4, 16];
   }
 }

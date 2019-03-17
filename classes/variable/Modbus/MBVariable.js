@@ -63,6 +63,11 @@ class MBVariable extends Variable {
    * @description Variable Data
    */
   set Data(data) {
+    if (data.length != this.Length)
+      throw new Error(
+        `Invalid data length: variable: ${this.Length}, data: ${data.length}`
+      );
+
     this._data = data;
     this._value = this._convertDataToValue(data);
     //Emitting singal of value change
@@ -80,8 +85,16 @@ class MBVariable extends Variable {
    * @description Private method called to set value on the basis of new value
    */
   _setValue(value) {
+    let convertedData = this._convertValueToData(value);
+    if (convertedData.length != this.Length)
+      throw new Error(
+        `Invalid data length: variable: ${this.Length}, data: ${
+          convertedData.length
+        }`
+      );
+
     this._value = value;
-    this._data = this._convertValueToData(value);
+    this._data = convertedData;
   }
 
   /**
