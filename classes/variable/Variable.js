@@ -2,6 +2,9 @@ const EventEmitter = require("events");
 
 class Variable {
   constructor(device, name) {
+    if (!device) throw new Error("Variable device cannot be empty");
+    if (!name) throw new Error("Variable name cannot be empty");
+
     this._device = device;
     this._name = name;
     this._events = new EventEmitter();
