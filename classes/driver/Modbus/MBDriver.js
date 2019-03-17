@@ -71,7 +71,7 @@ class MBDriver {
   /**
    * @description Default unit ID used by driver
    */
-  get UnitID() {
+  get UnitId() {
     return this._unitId;
   }
 

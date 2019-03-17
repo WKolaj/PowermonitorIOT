@@ -5,14 +5,14 @@ function generateRandId() {
   return Math.random().toString(36);
 }
 
-/**
- * @description Generating random id number
- * @param {object} mbDriver Modbus driver associated with request
- * @param {number} fcode Modbus function code
- * @param {number} unitId unit id of request
- * @param {number} maxRequestLength maximum length of Modbus RTU request
- */
 class MBRequest {
+  /**
+   * @description Modbus request class
+   * @param {object} mbDriver Modbus driver associated with request
+   * @param {number} fcode Modbus function code
+   * @param {number} unitId unit id of request
+   * @param {number} maxRequestLength maximum length of Modbus RTU request
+   */
   constructor(mbDriver, fcode, unitId, maxRequestLength = 100) {
     //Throwing if fcode is invalid
     if (!((fcode >= 1 && fcode <= 4) || fcode === 15 || fcode === 16))
@@ -151,7 +151,9 @@ class MBRequest {
    */
   addVariable(mbVariable) {
     if (!this.canVariableBeAddedToRequest(mbVariable))
-      throw new Error(`Variable doesn't fit given variable`);
+      throw new Error(
+        `Variable doesn't fit given variable: ${mbVariable.Name}`
+      );
 
     if (this.Offset === undefined) this._offset = mbVariable.Offset;
 

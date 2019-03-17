@@ -20,7 +20,7 @@ let pradL2 = new MBFloatVariable(pac1, "Prad L2", 3, 15, 2);
 let pradL3 = new MBFloatVariable(pac1, "Prad L3", 3, 17, 2);
 
 napiecieL1.Events.on("ValueChanged", args => {
-  //console.log(args[0].convertToBits());
+  console.log(args[0].convertToBits());
 });
 
 let variables = [];
@@ -68,7 +68,6 @@ let exec = async () => {
       try {
         //napiecieL1.Value = [3, 4, 5, 6];
         switchBits(napiecieL1);
-        console.log(napiecieL1.Value);
         for (let req of requests) {
           req.updateAction();
         }

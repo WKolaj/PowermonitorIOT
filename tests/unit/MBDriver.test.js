@@ -252,7 +252,7 @@ describe("MBDriver", () => {
     });
   });
 
-  describe("UnitID", () => {
+  describe("UnitId", () => {
     let mbDevice;
     let ipAdress;
     let portNumber;
@@ -270,7 +270,7 @@ describe("MBDriver", () => {
 
     let exec = () => {
       mbDriver = new MBDriver(mbDevice, ipAdress, portNumber, timeout, unitId);
-      return mbDriver.UnitID;
+      return mbDriver.UnitId;
     };
 
     it("should return unitId", () => {

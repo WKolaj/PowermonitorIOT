@@ -66,8 +66,8 @@ class MBDevice extends Device {
   /**
    * @description Default unit ID used by driver
    */
-  get UnitID() {
-    return this._driver.UnitID;
+  get UnitId() {
+    return this._driver.UnitId;
   }
 
   /**
