@@ -64,6 +64,12 @@ describe("MBVariable", () => {
 
       expect(() => exec()).toThrow();
     });
+
+    it("should if fCode is not containted in possible functions", () => {
+      fcode = 10;
+
+      expect(() => exec()).toThrow();
+    });
   });
 
   describe("FCode", () => {

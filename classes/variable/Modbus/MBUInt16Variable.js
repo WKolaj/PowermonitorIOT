@@ -64,6 +64,13 @@ class MBUInt16Variable extends MBVariable {
   _convertValueToData(value) {
     return uint16ToMBData(value);
   }
+
+  /**
+   * @description Private method called for getting all possible FCodes - implemented in child
+   */
+  _getPossibeFCodes() {
+    return [3, 4, 16];
+  }
 }
 
 module.exports = MBUInt16Variable;

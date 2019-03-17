@@ -91,6 +91,13 @@ class MBByteArrayVariable extends MBVariable {
     const mask = ~(1 << bitPosition);
     return number & mask;
   }
+
+  /**
+   * @description Private method called for getting all possible FCodes - implemented in child
+   */
+  _getPossibeFCodes() {
+    return [3, 4, 16];
+  }
 }
 
 module.exports = MBByteArrayVariable;

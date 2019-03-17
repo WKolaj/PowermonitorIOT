@@ -13,6 +13,12 @@ class MBVariable extends Variable {
     if (!fcode) throw new Error("FCode cannot be empty");
     if (!offset) throw new Error("Offset cannot be empty");
     if (!length) throw new Error("Length cannot be empty");
+    //Controlling if functions are possible
+    let allPossibleFCodes = this._getPossibleFCodes();
+
+    if (!allPossibleFCodes.includes(fcode))
+      throw new Error(`Fcode ${fcode} cannot be applied to given variable`);
+
     this._offset = offset;
     this._length = length;
     this._fcode = fcode;
@@ -76,6 +82,13 @@ class MBVariable extends Variable {
   _setValue(value) {
     this._value = value;
     this._data = this._convertValueToData(value);
+  }
+
+  /**
+   * @description Private method called for getting all possible FCodes - implemented in child
+   */
+  _getPossibleFCodes() {
+    return [1, 2, 3, 4, 15, 16];
   }
 }
 

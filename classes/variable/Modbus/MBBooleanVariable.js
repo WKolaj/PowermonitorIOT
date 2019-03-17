@@ -22,6 +22,13 @@ class MBBooleanVariable extends MBVariable {
   _convertValueToData(value) {
     return booleanToMBData(value);
   }
+
+  /**
+   * @description Private method called for getting all possible FCodes - implemented in child
+   */
+  _getPossibeFCodes() {
+    return [1, 2, 15];
+  }
 }
 
 module.exports = MBBooleanVariable;
