@@ -68,4 +68,74 @@ describe("MBBooleanVariable", () => {
       expect(result).toContain(15);
     });
   });
+
+  describe("_convertDataToValue", () => {
+    let device;
+    let name;
+    let fcode;
+    let offset;
+    let mbVariable;
+    let dataToConvert;
+
+    beforeEach(() => {
+      device = {};
+      name = "Test var name";
+      fcode = 1;
+      offset = 1;
+      dataToConvert = [true];
+    });
+
+    let exec = () => {
+      mbVariable = new MBBooleanVariable(device, name, fcode, offset);
+      return mbVariable._convertDataToValue(dataToConvert);
+    };
+
+    it("should convert data to value and return it if data is [true]", () => {
+      let result = exec();
+
+      expect(result).toEqual(true);
+    });
+
+    it("should convert data to value and return it if data is [false]", () => {
+      dataToConvert = [false];
+      let result = exec();
+
+      expect(result).toEqual(false);
+    });
+  });
+
+  describe("_convertValueToData", () => {
+    let device;
+    let name;
+    let fcode;
+    let offset;
+    let mbVariable;
+    let valueToConvert;
+
+    beforeEach(() => {
+      device = {};
+      name = "Test var name";
+      fcode = 1;
+      offset = 1;
+      valueToConvert = true;
+    });
+
+    let exec = () => {
+      mbVariable = new MBBooleanVariable(device, name, fcode, offset);
+      return mbVariable._convertValueToData(valueToConvert);
+    };
+
+    it("should convert value to data and return it if value is true", () => {
+      let result = exec();
+
+      expect(result).toEqual([true]);
+    });
+
+    it("should convert value to data and return it if value is false", () => {
+      valueToConvert = false;
+      let result = exec();
+
+      expect(result).toEqual([false]);
+    });
+  });
 });
