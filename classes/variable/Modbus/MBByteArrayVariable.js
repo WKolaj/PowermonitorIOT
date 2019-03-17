@@ -80,7 +80,7 @@ class MBByteArrayVariable extends MBVariable {
   }
 
   _getBit(number, bitPosition) {
-    return (number & (1 << bitPosition)) === 0 ? 0 : 1;
+    return (number & (1 << bitPosition)) === 0 ? false : true;
   }
 
   _setBit(number, bitPosition) {
