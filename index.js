@@ -72,7 +72,7 @@ let exec = async () => {
         //   req.updateAction();
         // }
         //await napiecieL1.SetSingle(435.23);
-        await napiecieL1.GetSingle(435.23);
+        await napiecieL1.getSingle();
         //console.log(await napiecieL1.GetSingle(435.23));
         //let result = await doRead1(pac1);
         //console.log(napiecieL1.Value);16
