@@ -8,7 +8,13 @@ describe("MBInt32Variable", () => {
     let offset;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;
@@ -48,7 +54,13 @@ describe("MBInt32Variable", () => {
     let mbVariable;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;
@@ -78,7 +90,13 @@ describe("MBInt32Variable", () => {
     let dataToConvert;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;
@@ -120,7 +138,13 @@ describe("MBInt32Variable", () => {
     let valueToConvert;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;

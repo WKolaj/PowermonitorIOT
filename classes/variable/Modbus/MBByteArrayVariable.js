@@ -40,7 +40,7 @@ const byteArrayToMBData = function(byteArray) {
 
 class MBByteArrayVariable extends MBVariable {
   constructor(device, name, fcode, offset, length) {
-    super(device, name, fcode, offset, length);
+    super(device, name, fcode, offset, length, 16, fcode);
   }
 
   getBit(byteNumber, bitNumber) {

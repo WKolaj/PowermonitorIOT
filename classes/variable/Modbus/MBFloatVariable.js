@@ -70,7 +70,7 @@ const floatToMBData = function(floatValue) {
 
 class MBFloatVariable extends MBVariable {
   constructor(device, name, fcode, offset) {
-    super(device, name, fcode, offset, 2);
+    super(device, name, fcode, offset, 2, 16, fcode);
   }
 
   _convertDataToValue(data) {

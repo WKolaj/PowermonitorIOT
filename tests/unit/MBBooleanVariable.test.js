@@ -8,7 +8,13 @@ describe("MBBooleanVariable", () => {
     let offset;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 1;
       offset = 1;
@@ -38,6 +44,18 @@ describe("MBBooleanVariable", () => {
       fcode = 3;
       expect(() => exec()).toThrow();
     });
+
+    it("should set GetSingleFCode = 1", () => {
+      let result = exec();
+
+      expect(result.GetSingleFCode).toEqual(1);
+    });
+
+    it("should set SetSingleFCode = 15", () => {
+      let result = exec();
+
+      expect(result.SetSingleFCode).toEqual(15);
+    });
   });
 
   describe("_getPossibeFCodes", () => {
@@ -48,7 +66,13 @@ describe("MBBooleanVariable", () => {
     let mbVariable;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 1;
       offset = 1;
@@ -78,7 +102,13 @@ describe("MBBooleanVariable", () => {
     let dataToConvert;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 1;
       offset = 1;
@@ -113,7 +143,13 @@ describe("MBBooleanVariable", () => {
     let valueToConvert;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 1;
       offset = 1;

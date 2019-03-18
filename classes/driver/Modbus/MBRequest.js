@@ -121,7 +121,7 @@ class MBRequest {
    */
   canVariableBeAddedToRequest(mbVariable) {
     //Cannot add variable if FCode of variable is different
-    if (mbVariable.FCode !== this.FCode) return false;
+    //if (mbVariable.FCode !== this.FCode) return false; - Added possinility to add variables with different FCode - eg. setting variable
 
     //Cannot add variable if unitId of variable is different
     if (mbVariable.UnitId !== this.UnitId) return false;

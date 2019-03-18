@@ -12,7 +12,7 @@ const booleanToMBData = function(booleanValue) {
 
 class MBBooleanVariable extends MBVariable {
   constructor(device, name, fcode, offset) {
-    super(device, name, fcode, offset, 1);
+    super(device, name, fcode, offset, 1, 15, 1);
   }
 
   _convertDataToValue(data) {

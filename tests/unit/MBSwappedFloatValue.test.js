@@ -8,7 +8,13 @@ describe("MBSwappedFloatVariable", () => {
     let offset;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;
@@ -38,6 +44,18 @@ describe("MBSwappedFloatVariable", () => {
       fcode = 1;
       expect(() => exec()).toThrow();
     });
+
+    it("should set GetSingleFCode = 3", () => {
+      let result = exec();
+
+      expect(result.GetSingleFCode).toEqual(3);
+    });
+
+    it("should set SetSingleFCode = 16", () => {
+      let result = exec();
+
+      expect(result.SetSingleFCode).toEqual(16);
+    });
   });
 
   describe("_getPossibeFCodes", () => {
@@ -48,7 +66,13 @@ describe("MBSwappedFloatVariable", () => {
     let mbVariable;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;
@@ -78,7 +102,13 @@ describe("MBSwappedFloatVariable", () => {
     let dataToConvert;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;
@@ -106,7 +136,13 @@ describe("MBSwappedFloatVariable", () => {
     let valueToConvert;
 
     beforeEach(() => {
-      device = {};
+      device = {
+        UnitId: 2,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
       name = "Test var name";
       fcode = 3;
       offset = 1;

@@ -54,7 +54,7 @@ const uint16ToMBData = function(intValue) {
 
 class MBUInt16Variable extends MBVariable {
   constructor(device, name, fcode, offset) {
-    super(device, name, fcode, offset, 1);
+    super(device, name, fcode, offset, 1, 16, fcode);
   }
 
   _convertDataToValue(data) {

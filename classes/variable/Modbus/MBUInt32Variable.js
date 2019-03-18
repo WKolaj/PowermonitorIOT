@@ -70,7 +70,7 @@ const uint32ToMBData = function(floatValue) {
 
 class MBInt32Variable extends MBVariable {
   constructor(device, name, fcode, offset) {
-    super(device, name, fcode, offset, 2);
+    super(device, name, fcode, offset, 2, 16, fcode);
   }
 
   _convertDataToValue(data) {
