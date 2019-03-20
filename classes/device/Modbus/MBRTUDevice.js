@@ -1,7 +1,7 @@
-const Device = require("../Device");
+const MBDevice = require("./MBDevice");
 const MBGateway = require("../../driver/Modbus/MBGateway");
 
-class MBRTUDevice extends Device {
+class MBRTUDevice extends MBDevice {
   /**
    * @description Modbus device
    * @param {string} name device name
@@ -35,42 +35,11 @@ class MBRTUDevice extends Device {
     this._driver = undefined;
   }
 
-  /**@description Connecting to modbus device */
-  connect() {
-    return this._driver.connect();
-  }
-
-  /**@description Connecting to modbus device */
-  disconnect() {
-    return this._driver.disconnect();
-  }
-
   /**
-   * @description MBDevices associated with gateway
+   * @description Default unit ID used by driver
    */
-  get MBDevices() {
-    return this._driver.MBDevices;
-  }
-
-  /**
-   * @description IPAdress used by gateway
-   */
-  get IPAdress() {
-    return this._driver.IPAdress;
-  }
-
-  /**
-   * @description PortNumber used by gateway
-   */
-  get PortNumber() {
-    return this._driver.PortNumber;
-  }
-
-  /**
-   * @description Timeout of driver_device
-   */
-  get Timeout() {
-    return this._driver.Timeout;
+  get Gateway() {
+    return this._driver;
   }
 
   /**

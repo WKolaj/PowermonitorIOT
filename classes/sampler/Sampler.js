@@ -1,0 +1,160 @@
+const EventEmitter = require("events");
+
+class Sampler {
+  /**
+   * @description Class representing whole app time sampler
+   */
+  constructor() {
+    this._tickHandler = null;
+    this._devices = {};
+    this._lastTickTimeNumber = 0;
+    this._events = new EventEmitter();
+    this._active = false;
+    this._tickInterval = 100;
+  }
+
+  /**
+   * @description Is sampler active
+   */
+  get Active() {
+    return this._active;
+  }
+
+  /**
+   * @description Last operation TickNumber
+   */
+  get LastTickTimeNumber() {
+    return this._lastTickTimeNumber;
+  }
+
+  /**
+   * @description Events associated with sampler
+   */
+  get Events() {
+    return this._events;
+  }
+
+  /**
+   * @description All devices connected to sampler
+   */
+  get AllDevices() {
+    return this._devices;
+  }
+
+  /**
+   * @description Method called every tick of Interval handler
+   */
+  _tick() {
+    //Invoking only if sampler is active
+    if (this.Active) {
+      let tickNumber = Sampler.convertDateToTickNumber(Date.now());
+      if (this._shouldEmitTick(tickNumber)) this._emitTick(tickNumber);
+    }
+  }
+
+  /**
+   * @description Method for starting sampling of sampler
+   */
+  start() {
+    if (!this.Active) {
+      this._tickHandler = setInterval(() => this._tick(), this._tickInterval);
+      this._active = true;
+    }
+  }
+
+  /**
+   * @description Method for stopping
+   */
+  stop() {
+    clearInterval(this._tickHandler);
+    this._tickHandler = null;
+    this._active = false;
+  }
+
+  /**
+   * @description Solving emiting tick
+   * @param {number} tickNumber Actual tick number
+   */
+  _emitTick(tickNumber) {
+    try {
+      //Refreshing all devices
+      this._refreshAllDevices(tickNumber);
+
+      //emiting tick event
+      this.Events.emit("OnTick", [tickNumber]);
+
+      //setting last tick number to actual
+      this._lastTickTimeNumber = tickNumber;
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  /**
+   * @description Refreshing all devices
+   * @param {number} tickNumber Actual tick number
+   */
+  _refreshAllDevices(tickNumber) {
+    let allDeviceNames = Object.keys(this.AllDevices);
+    for (let deviceName of allDeviceNames) {
+      try {
+        this.AllDevices[deviceName].refresh(tickNumber);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }
+
+  /**
+   * @description Adding new device to the sampler
+   * @param {object} device Device to be added
+   */
+  addDevice(device) {
+    this.AllDevices[device.Name] = device;
+  }
+
+  /**
+   * @description Removing new device to the sampler
+   * @param {object} device Device to be removed
+   */
+  removeDevice(device) {
+    if (!this.AllDevices[device.Name])
+      throw new Error(`There is no such device as ${device.Name}`);
+    delete this.AllDevices[device.Name];
+  }
+
+  /**
+   * @description Should tick be emitted based on last tick time?
+   * @param {number} tickNumber Actual tick time
+   */
+  _shouldEmitTick(tickNumber) {
+    return tickNumber !== this._lastTickTimeNumber;
+  }
+
+  /**
+   * @description Doest TickId matches actual tick?
+   * @param {number} tickNumber Actual tick
+   * @param {number} tickId TickId to be checked
+   */
+  static doesTickIdMatchesTick(tickNumber, tickId) {
+    return tickNumber % tickId === 0;
+  }
+
+  /**
+   * @description Converting date to tick number
+   * @param {number} date Date to be converted
+   */
+  static convertDateToTickNumber(date) {
+    return Math.round(date / 1000);
+  }
+
+  /**
+   * @description Converting sample time to tick id
+   * @param {number} timeSample Sample time
+   */
+  static convertTimeSampleToTickId(timeSample) {
+    return timeSample;
+  }
+}
+
+module.exports = Sampler;

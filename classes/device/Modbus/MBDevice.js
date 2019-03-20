@@ -6,7 +6,6 @@ class MBDevice extends Device {
   /**
    * @description Modbus device
    * @param {string} name device name
-   * @param {number} unitId Modbus RTU address
    */
   constructor(name) {
     super(name);
