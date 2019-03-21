@@ -119,6 +119,24 @@ describe("Sampler", () => {
     });
   });
 
+  describe("convertTickIdToTimeSample", () => {
+    let tickId;
+
+    beforeEach(() => {
+      tickId = 15;
+    });
+
+    let exec = () => {
+      return Sampler.convertTickIdToTimeSample(tickId);
+    };
+
+    it("should convert tickId to timeSample - return timeSample in seconds", () => {
+      let result = exec();
+
+      expect(result).toEqual(15);
+    });
+  });
+
   describe("_shouldEmitTick", () => {
     let sampler;
     let lastTickTimeNumber;

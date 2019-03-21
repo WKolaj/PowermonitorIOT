@@ -9,10 +9,56 @@ const MBInt16Variable = require("./classes/variable/Modbus/MBInt16Variable");
 const Sampler = require("./classes/sampler/Sampler");
 
 let sampler = new Sampler();
-sampler.Events.on("OnTick", args => {
-  console.log(args[0]);
-});
 
+let device = new MBDevice("PAC");
+device.setModbusDriver("192.168.0.20");
+device.connect();
+
+let var1 = new MBInt16Variable(device, "var1", 3, 1);
+let var2 = new MBInt16Variable(device, "var2", 3, 2);
+let var3 = new MBInt16Variable(device, "var3", 3, 3);
+let var4 = new MBInt16Variable(device, "var4", 3, 4);
+let var5 = new MBInt16Variable(device, "var5", 3, 5);
+let var6 = new MBInt16Variable(device, "var6", 3, 6);
+let var7 = new MBInt16Variable(device, "var7", 3, 7);
+let var8 = new MBInt16Variable(device, "var8", 3, 8);
+let var9 = new MBInt16Variable(device, "var9", 3, 9);
+
+var1.TimeSample = 1;
+var2.TimeSample = 1;
+var3.TimeSample = 5;
+var4.TimeSample = 1;
+var5.TimeSample = 1;
+var6.TimeSample = 5;
+var7.TimeSample = 1;
+var8.TimeSample = 1;
+var9.TimeSample = 5;
+
+let logVar = args => {
+  console.log(`${Date.now()}: ${args[0].Name}, ${args[1]}`);
+};
+
+var1.Events.on("ValueChanged", logVar);
+var2.Events.on("ValueChanged", logVar);
+var3.Events.on("ValueChanged", logVar);
+var4.Events.on("ValueChanged", logVar);
+var5.Events.on("ValueChanged", logVar);
+var6.Events.on("ValueChanged", logVar);
+var7.Events.on("ValueChanged", logVar);
+var8.Events.on("ValueChanged", logVar);
+var9.Events.on("ValueChanged", logVar);
+
+device.addVariable(var1);
+device.addVariable(var2);
+device.addVariable(var3);
+device.addVariable(var4);
+device.addVariable(var5);
+device.addVariable(var6);
+device.addVariable(var7);
+device.addVariable(var8);
+device.addVariable(var9);
+
+sampler.addDevice(device);
 sampler.start();
 
 // let pac1 = new MBDevice("PAC1");

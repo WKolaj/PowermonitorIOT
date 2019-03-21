@@ -20,6 +20,7 @@ describe("Variable", () => {
       expect(result).toBeDefined();
       expect(result.Device).toEqual(device);
       expect(result.Name).toEqual(name);
+      expect(result.TimeSample).toEqual(1);
     });
 
     it("should set event emitter", () => {

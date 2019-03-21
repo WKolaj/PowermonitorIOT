@@ -63,7 +63,7 @@ class Sampler {
   }
 
   /**
-   * @description Method for stopping
+   * @description Method for stopaping
    */
   stop() {
     clearInterval(this._tickHandler);
@@ -149,11 +149,19 @@ class Sampler {
   }
 
   /**
-   * @description Converting sample time to tick id
+   * @description Converting time sample to TickId
    * @param {number} timeSample Sample time
    */
   static convertTimeSampleToTickId(timeSample) {
     return timeSample;
+  }
+
+  /**
+   * @description Converting tick id to time sample
+   * @param {number} tickId Tick id
+   */
+  static convertTickIdToTimeSample(tickId) {
+    return tickId;
   }
 }
 

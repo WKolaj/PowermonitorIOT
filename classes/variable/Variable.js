@@ -1,4 +1,5 @@
 const EventEmitter = require("events");
+const Sampler = require("../sampler/Sampler");
 
 class Variable {
   /**
@@ -13,6 +14,19 @@ class Variable {
     this._device = device;
     this._name = name;
     this._events = new EventEmitter();
+    this._tickId = Sampler.convertTimeSampleToTickId(1);
+  }
+
+  get TickId() {
+    return this._tickId;
+  }
+
+  set TimeSample(value) {
+    this._tickId = Sampler.convertTimeSampleToTickId(value);
+  }
+
+  get TimeSample() {
+    return Sampler.convertTickIdToTimeSample(this._tickId);
   }
 
   /**
