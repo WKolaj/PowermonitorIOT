@@ -1,4 +1,5 @@
 const Variable = require("../../classes/variable/Variable");
+const Sampler = require("../../classes/sampler/Sampler");
 
 describe("Variable", () => {
   describe("constructor", () => {
@@ -20,6 +21,11 @@ describe("Variable", () => {
       expect(result).toBeDefined();
       expect(result.Device).toEqual(device);
       expect(result.Name).toEqual(name);
+    });
+
+    it("should set default time sample to 1s", () => {
+      let result = exec();
+
       expect(result.TimeSample).toEqual(1);
     });
 
@@ -62,6 +68,81 @@ describe("Variable", () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(variable._events);
+    });
+  });
+
+  describe("TickId", () => {
+    let device;
+    let name;
+    let variable;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+    });
+
+    let exec = () => {
+      variable = new Variable(device, name);
+      return variable.TickId;
+    };
+
+    it("should return tickId", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(variable._tickId);
+    });
+  });
+
+  describe("get TimeSample", () => {
+    let device;
+    let name;
+    let variable;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+    });
+
+    let exec = () => {
+      variable = new Variable(device, name);
+      return variable.TimeSample;
+    };
+
+    it("should return tickId converted to SampleTime", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(
+        Sampler.convertTickIdToTimeSample(variable._tickId)
+      );
+    });
+  });
+
+  describe("set TimeSample", () => {
+    let device;
+    let name;
+    let variable;
+    let timeSample;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+      timeSample = 15;
+    });
+
+    let exec = () => {
+      variable = new Variable(device, name);
+      variable.TimeSample = timeSample;
+    };
+
+    it("should set tickId converted from SampleTime", () => {
+      exec();
+
+      expect(variable._tickId).toBeDefined();
+      expect(variable._tickId).toEqual(
+        Sampler.convertTimeSampleToTickId(timeSample)
+      );
     });
   });
 

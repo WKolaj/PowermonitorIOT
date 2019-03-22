@@ -4,8 +4,15 @@ class Device {
    * @param {string} name device name
    */
   constructor(name) {
-    this.name = name;
+    this._name = name;
     this._variables = {};
+  }
+
+  /**
+   * @description Name describing device
+   */
+  get Name() {
+    return this._name;
   }
 
   /**
@@ -31,7 +38,7 @@ class Device {
         `There is no such variable in device - variable name:${variable.Name}`
       );
 
-    this.Variables[variable.Name] = variable;
+    delete this.Variables[variable.Name];
   }
 
   static divideVariablesByTickId(variables) {
