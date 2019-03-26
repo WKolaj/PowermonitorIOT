@@ -6,6 +6,7 @@ describe("MBUInt16Variable", () => {
     let name;
     let fcode;
     let offset;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -21,7 +22,12 @@ describe("MBUInt16Variable", () => {
     });
 
     let exec = () => {
-      return new MBUInt16Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      return new MBUInt16Variable(device, payload);
     };
 
     it("should create new MBUInt16Variable based on given arguments", () => {
@@ -64,6 +70,7 @@ describe("MBUInt16Variable", () => {
     let fcode;
     let offset;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -79,7 +86,12 @@ describe("MBUInt16Variable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBUInt16Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBUInt16Variable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -100,6 +112,7 @@ describe("MBUInt16Variable", () => {
     let offset;
     let mbVariable;
     let dataToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -116,7 +129,12 @@ describe("MBUInt16Variable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBUInt16Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBUInt16Variable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -142,6 +160,7 @@ describe("MBUInt16Variable", () => {
     let offset;
     let mbVariable;
     let valueToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -158,7 +177,12 @@ describe("MBUInt16Variable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBUInt16Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBUInt16Variable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 

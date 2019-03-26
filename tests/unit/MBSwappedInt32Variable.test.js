@@ -6,6 +6,7 @@ describe("MBSwappedInt32Variable", () => {
     let name;
     let fcode;
     let offset;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -21,7 +22,12 @@ describe("MBSwappedInt32Variable", () => {
     });
 
     let exec = () => {
-      return new MBSwappedInt32Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      return new MBSwappedInt32Variable(device, payload);
     };
 
     it("should create new MBSwappedInt32Variable based on given arguments", () => {
@@ -64,6 +70,7 @@ describe("MBSwappedInt32Variable", () => {
     let fcode;
     let offset;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -79,7 +86,12 @@ describe("MBSwappedInt32Variable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBSwappedInt32Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBSwappedInt32Variable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -100,6 +112,7 @@ describe("MBSwappedInt32Variable", () => {
     let offset;
     let mbVariable;
     let dataToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -119,7 +132,12 @@ describe("MBSwappedInt32Variable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBSwappedInt32Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBSwappedInt32Variable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -148,6 +166,7 @@ describe("MBSwappedInt32Variable", () => {
     let offset;
     let mbVariable;
     let valueToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -164,7 +183,12 @@ describe("MBSwappedInt32Variable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBSwappedInt32Variable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBSwappedInt32Variable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 

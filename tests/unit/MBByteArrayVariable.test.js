@@ -7,6 +7,7 @@ describe("MBByteArrayVariable", () => {
     let fcode;
     let offset;
     let length;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -23,7 +24,13 @@ describe("MBByteArrayVariable", () => {
     });
 
     let exec = () => {
-      return new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      return new MBByteArrayVariable(device, payload);
     };
 
     it("should create new MBBoleanVariable based on given arguments", () => {
@@ -62,6 +69,7 @@ describe("MBByteArrayVariable", () => {
     let offset;
     let mbVariable;
     let length;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -78,7 +86,13 @@ describe("MBByteArrayVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -100,6 +114,7 @@ describe("MBByteArrayVariable", () => {
     let mbVariable;
     let dataToConvert;
     let length;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -117,7 +132,13 @@ describe("MBByteArrayVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -136,6 +157,7 @@ describe("MBByteArrayVariable", () => {
     let mbVariable;
     let valueToConvert;
     let length;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -153,7 +175,13 @@ describe("MBByteArrayVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
@@ -172,6 +200,7 @@ describe("MBByteArrayVariable", () => {
     let mbVariable;
     let length;
     let byteToCheck;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -187,7 +216,13 @@ describe("MBByteArrayVariable", () => {
       length = 4;
       //0 1 0 1 0 1 0 1
       byteToCheck = 85;
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
     });
 
     it("should get bit value of variable based on bit number", () => {
@@ -209,6 +244,7 @@ describe("MBByteArrayVariable", () => {
     let offset;
     let length;
     let byteToSet;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -223,7 +259,13 @@ describe("MBByteArrayVariable", () => {
       offset = 1;
       length = 4;
       byteToSet = 0;
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
     });
 
     it("should return value with given bit set", () => {
@@ -245,6 +287,7 @@ describe("MBByteArrayVariable", () => {
     let offset;
     let length;
     let byteToClear;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -259,7 +302,13 @@ describe("MBByteArrayVariable", () => {
       offset = 1;
       length = 4;
       byteToClear = 255;
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
     });
 
     it("should return value with given bit cleared", () => {
@@ -282,6 +331,7 @@ describe("MBByteArrayVariable", () => {
     let mbVariable;
     let length;
     let valueToSet;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -300,7 +350,13 @@ describe("MBByteArrayVariable", () => {
       // 15 - 0 0 0 0 1 1 1 1
       //240 - 1 1 1 1 0 0 0 0
       valueToSet = [85, 170, 15, 240];
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -351,6 +407,7 @@ describe("MBByteArrayVariable", () => {
     let mbVariable;
     let length;
     let valueToSet;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -365,7 +422,13 @@ describe("MBByteArrayVariable", () => {
       offset = 1;
       length = 2;
       valueToSet = [0, 0, 0, 0];
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -448,6 +511,7 @@ describe("MBByteArrayVariable", () => {
     let mbVariable;
     let length;
     let valueToSet;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -462,7 +526,13 @@ describe("MBByteArrayVariable", () => {
       offset = 1;
       length = 2;
       valueToSet = [255, 255, 255, 255];
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -545,6 +615,7 @@ describe("MBByteArrayVariable", () => {
     let mbVariable;
     let length;
     let valueToSet;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -563,7 +634,13 @@ describe("MBByteArrayVariable", () => {
       // 15 - 0 0 0 0 1 1 1 1
       //240 - 1 1 1 1 0 0 0 0
       valueToSet = [85, 170, 15, 240];
-      mbVariable = new MBByteArrayVariable(device, name, fcode, offset, length);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length
+      };
+      mbVariable = new MBByteArrayVariable(device, payload);
       mbVariable.Value = valueToSet;
     });
 

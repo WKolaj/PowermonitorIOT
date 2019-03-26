@@ -1,10 +1,12 @@
 const Variable = require("../../classes/variable/Variable");
 const Sampler = require("../../classes/sampler/Sampler");
+const _ = require("lodash");
 
 describe("Variable", () => {
   describe("constructor", () => {
     let device;
     let name;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -12,7 +14,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      return new Variable(device, name);
+      payload = { name: name };
+      return new Variable(device, payload);
     };
 
     it("should create new variable with given arguments", () => {
@@ -48,10 +51,35 @@ describe("Variable", () => {
     });
   });
 
+  describe("generateRandId", () => {
+    let randIds;
+    let arrayLength;
+
+    beforeEach(() => {
+      arrayLength = 1000000;
+      randIds = [];
+    });
+
+    let exec = () => {
+      for (let i = 0; i < arrayLength; i++) {
+        randIds.push(Variable.generateRandId());
+      }
+    };
+
+    it("should generate and return uniq id", () => {
+      exec();
+
+      expect(randIds).toBeDefined();
+      expect(randIds.length).toEqual(arrayLength);
+      expect(_.uniq(randIds).length).toEqual(arrayLength);
+    });
+  });
+
   describe("Events", () => {
     let device;
     let name;
     let variable;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -59,7 +87,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       return variable.Events;
     };
 
@@ -75,6 +104,7 @@ describe("Variable", () => {
     let device;
     let name;
     let variable;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -82,7 +112,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       return variable.TickId;
     };
 
@@ -94,10 +125,11 @@ describe("Variable", () => {
     });
   });
 
-  describe("get TimeSample", () => {
+  describe("Id", () => {
     let device;
     let name;
     let variable;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -105,7 +137,33 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
+      return variable.Id;
+    };
+
+    it("should return Id", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(variable._id);
+    });
+  });
+
+  describe("get TimeSample", () => {
+    let device;
+    let name;
+    let variable;
+    let payload;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+    });
+
+    let exec = () => {
+      payload = { name: name };
+      variable = new Variable(device, payload);
       return variable.TimeSample;
     };
 
@@ -124,6 +182,7 @@ describe("Variable", () => {
     let name;
     let variable;
     let timeSample;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -132,7 +191,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       variable.TimeSample = timeSample;
     };
 
@@ -150,6 +210,7 @@ describe("Variable", () => {
     let device;
     let name;
     let variable;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -157,7 +218,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       return variable.Device;
     };
 
@@ -173,6 +235,7 @@ describe("Variable", () => {
     let device;
     let name;
     let variable;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -180,7 +243,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       return variable.Name;
     };
 
@@ -198,6 +262,7 @@ describe("Variable", () => {
     let variable;
     let _getValueMock;
     let _getValueMockReturn;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -207,7 +272,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       variable._getValue = _getValueMock;
 
       return variable.Value;
@@ -228,6 +294,7 @@ describe("Variable", () => {
     let value;
     let _setValueMock;
     let _emitValueChangeMock;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -238,7 +305,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       variable._setValue = _setValueMock;
       variable._emitValueChange = _emitValueChangeMock;
 
@@ -267,6 +335,7 @@ describe("Variable", () => {
     let value;
     let eventMock;
     let emitMock;
+    let payload;
 
     beforeEach(() => {
       device = "My test device";
@@ -279,7 +348,8 @@ describe("Variable", () => {
     });
 
     let exec = () => {
-      variable = new Variable(device, name);
+      payload = { name: name };
+      variable = new Variable(device, payload);
       variable._events = eventMock;
       variable._emitValueChange(value);
     };

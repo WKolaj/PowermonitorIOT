@@ -431,44 +431,44 @@ describe("MBDevice", () => {
     let name;
     let device;
     let variable;
-    let variableName;
+    let variableId;
     let refreshGroupMock;
 
     beforeEach(() => {
       name = "test name";
-      variableName = "test variable";
-      variable = { Name: variableName };
+      variableId = "test variable";
+      variable = { Id: variableId };
       refreshGroupMock = jest.fn();
     });
 
     let exec = () => {
       device = new MBDevice(name);
-      device.refreshRequestGroups = refreshGroupMock;
+      device._refreshRequestGroups = refreshGroupMock;
       device.addVariable(variable);
     };
 
     it("should add variable to variables", () => {
       exec();
 
-      expect(device.Variables[variableName]).toBeDefined();
-      expect(device.Variables[variableName]).toEqual(variable);
+      expect(device.Variables[variableId]).toBeDefined();
+      expect(device.Variables[variableId]).toEqual(variable);
     });
 
     it("should add variable again after it was deleted", () => {
       exec();
-      device.removeVariable(variable);
+      device.removeVariable(variableId);
       device.addVariable(variable);
-      expect(device.Variables[variableName]).toBeDefined();
-      expect(device.Variables[variableName]).toEqual(variable);
+      expect(device.Variables[variableId]).toBeDefined();
+      expect(device.Variables[variableId]).toEqual(variable);
     });
 
     it("should replace given variable if name already existis", () => {
       exec();
-      let newVariable = { id: "new", Name: variableName };
+      let newVariable = { Id: variableId, Name: "new" };
 
       device.addVariable(newVariable);
-      expect(device.Variables[variableName]).not.toEqual(variable);
-      expect(device.Variables[variableName]).toEqual(newVariable);
+      expect(device.Variables[variableId]).not.toEqual(variable);
+      expect(device.Variables[variableId]).toEqual(newVariable);
     });
 
     it("should call refreshRequestGroups", () => {
@@ -484,19 +484,21 @@ describe("MBDevice", () => {
     let variable;
     let variableName;
     let refreshGroupMock;
+    let variableId;
 
     beforeEach(() => {
+      variableId = 1234;
       name = "test name";
       variableName = "test variable";
-      variable = { Name: variableName };
+      variable = { Id: variableId, Name: variableName };
       refreshGroupMock = jest.fn();
     });
 
     let exec = () => {
       device = new MBDevice(name);
-      device.refreshRequestGroups = refreshGroupMock;
+      device._refreshRequestGroups = refreshGroupMock;
       device.addVariable(variable);
-      device.removeVariable(variable);
+      device.removeVariable(variableId);
     };
 
     it("should remove variable from variables", () => {
@@ -505,14 +507,14 @@ describe("MBDevice", () => {
       expect(device.Variables[variableName]).not.toBeDefined();
     });
 
-    it("should throw if there is no variable of such name", () => {
+    it("should throw if there is no variable of such id", () => {
       device = new MBDevice(name);
-      device.refreshRequestGroups = refreshGroupMock;
+      device._refreshRequestGroups = refreshGroupMock;
       device.addVariable(variable);
 
-      let newVariable = { Name: "new test name" };
+      let newVariable = { Id: "new test name" };
 
-      expect(() => device.removeVariable(newVariable)).toThrow();
+      expect(() => device.removeVariable(newVariable.Id)).toThrow();
     });
 
     it("should call refreshRequestGroups", () => {
@@ -522,7 +524,7 @@ describe("MBDevice", () => {
     });
   });
 
-  describe("refreshRequestGroups", () => {
+  describe("_refreshRequestGroups", () => {
     let variable1;
     let variable2;
     let variable3;
@@ -579,7 +581,7 @@ describe("MBDevice", () => {
     });
 
     let exec = () => {
-      device.refreshRequestGroups();
+      device._refreshRequestGroups();
     };
 
     it("should create requests on the basis of variables and their tickIds", () => {

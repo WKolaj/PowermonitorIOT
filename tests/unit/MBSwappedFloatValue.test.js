@@ -6,6 +6,7 @@ describe("MBSwappedFloatVariable", () => {
     let name;
     let fcode;
     let offset;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -21,7 +22,12 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     let exec = () => {
-      return new MBSwappedFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      return new MBSwappedFloatVariable(device, payload);
     };
 
     it("should create new MBSwappedFloatVariable based on given arguments", () => {
@@ -64,6 +70,7 @@ describe("MBSwappedFloatVariable", () => {
     let fcode;
     let offset;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -79,7 +86,12 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBSwappedFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBSwappedFloatVariable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -100,6 +112,7 @@ describe("MBSwappedFloatVariable", () => {
     let offset;
     let mbVariable;
     let dataToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -116,7 +129,12 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBSwappedFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBSwappedFloatVariable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -134,6 +152,7 @@ describe("MBSwappedFloatVariable", () => {
     let offset;
     let mbVariable;
     let valueToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -150,7 +169,12 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBSwappedFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBSwappedFloatVariable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 

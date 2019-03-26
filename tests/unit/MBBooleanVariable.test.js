@@ -6,6 +6,7 @@ describe("MBBooleanVariable", () => {
     let name;
     let fcode;
     let offset;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -21,7 +22,12 @@ describe("MBBooleanVariable", () => {
     });
 
     let exec = () => {
-      return new MBBooleanVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      return new MBBooleanVariable(device, payload);
     };
 
     it("should create new MBBoleanVariable based on given arguments", () => {
@@ -64,6 +70,7 @@ describe("MBBooleanVariable", () => {
     let fcode;
     let offset;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -79,7 +86,12 @@ describe("MBBooleanVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBBooleanVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBBooleanVariable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -100,6 +112,7 @@ describe("MBBooleanVariable", () => {
     let offset;
     let mbVariable;
     let dataToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -116,7 +129,12 @@ describe("MBBooleanVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBBooleanVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBBooleanVariable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -141,6 +159,7 @@ describe("MBBooleanVariable", () => {
     let offset;
     let mbVariable;
     let valueToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -157,7 +176,12 @@ describe("MBBooleanVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBBooleanVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBBooleanVariable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 

@@ -11,8 +11,13 @@ const booleanToMBData = function(booleanValue) {
 };
 
 class MBBooleanVariable extends MBVariable {
-  constructor(device, name, fcode, offset) {
-    super(device, name, fcode, offset, 1, 15, 1);
+  constructor(device, payload) {
+    if (!payload) throw new Error("Payload cannot be empty");
+    payload.length = 1;
+    payload.getSingleFCode = 1;
+    payload.setSingleFCode = 15;
+
+    super(device, payload);
   }
 
   _convertDataToValue(data) {
@@ -28,6 +33,22 @@ class MBBooleanVariable extends MBVariable {
    */
   _getPossibleFCodes() {
     return [1, 2, 15];
+  }
+
+  /**
+   * @description Method for generating new variable based on given payload
+   */
+  editWithPayload(payload) {
+    //Creating new value from payload
+    let editedVariable = new MBBooleanVariable(
+      this.Device,
+      this._generatePayloadToEdit(payload)
+    );
+
+    //Reassigining events;
+    editedVariable._events = this.Events;
+
+    return editedVariable;
   }
 }
 

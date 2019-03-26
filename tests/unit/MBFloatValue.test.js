@@ -6,6 +6,7 @@ describe("MBFloatVariable", () => {
     let name;
     let fcode;
     let offset;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -21,7 +22,12 @@ describe("MBFloatVariable", () => {
     });
 
     let exec = () => {
-      return new MBFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      return new MBFloatVariable(device, payload);
     };
 
     it("should create new MBFloatVariable based on given arguments", () => {
@@ -64,6 +70,7 @@ describe("MBFloatVariable", () => {
     let fcode;
     let offset;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -79,7 +86,12 @@ describe("MBFloatVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBFloatVariable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -116,7 +128,12 @@ describe("MBFloatVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBFloatVariable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -134,6 +151,7 @@ describe("MBFloatVariable", () => {
     let offset;
     let mbVariable;
     let valueToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -150,7 +168,12 @@ describe("MBFloatVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBFloatVariable(device, name, fcode, offset);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset
+      };
+      mbVariable = new MBFloatVariable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 

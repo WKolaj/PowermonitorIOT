@@ -10,6 +10,7 @@ describe("MBVariable", () => {
     let unitId;
     let getSingleFCode;
     let setSingleFCode;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -29,15 +30,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      return new MBVariable(
-        device,
-        name,
-        fcode,
-        offset,
-        length,
-        setSingleFCode,
-        getSingleFCode
-      );
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode
+      };
+      return new MBVariable(device, payload);
     };
 
     it("should create new MBVariable based on given parameters", () => {
@@ -160,6 +161,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -177,7 +179,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.FCode;
     };
 
@@ -196,6 +206,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -213,7 +224,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 3);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.Offset;
     };
 
@@ -232,6 +251,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -249,7 +269,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 3);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.Length;
     };
 
@@ -268,6 +296,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -285,7 +314,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 3);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.UnitId;
     };
 
@@ -304,6 +341,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -321,7 +359,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.SetSingleFCode;
     };
 
@@ -340,6 +386,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -357,7 +404,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.GetSingleFCode;
     };
 
@@ -376,6 +431,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -393,7 +449,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.SetSingleRequest;
     };
 
@@ -413,6 +477,7 @@ describe("MBVariable", () => {
     let length;
     let unitId;
     let mbVariable;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -430,7 +495,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       return mbVariable.GetSingleRequest;
     };
 
@@ -451,6 +524,7 @@ describe("MBVariable", () => {
     let unitId;
     let mbVariable;
     let data;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -469,7 +543,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 3);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       mbVariable._data = data;
       return mbVariable.Data;
     };
@@ -493,6 +575,7 @@ describe("MBVariable", () => {
     let _convertDataToValueMock;
     let _emitValueChangeMock;
     let dataCovertedToValue;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -516,7 +599,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       mbVariable._emitValueChange = _emitValueChangeMock;
       mbVariable._convertDataToValue = _convertDataToValueMock;
       mbVariable.Data = dataToSet;
@@ -576,7 +667,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 3);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       mbVariable._value = value;
       return mbVariable._getValue();
     };
@@ -600,6 +699,7 @@ describe("MBVariable", () => {
     let _convertValueToDataMock;
     let _emitValueChangeMock;
     let valueConvertedToData;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -621,7 +721,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       mbVariable._emitValueChange = _emitValueChangeMock;
       mbVariable._convertValueToData = _convertValueToDataMock;
       mbVariable._setValue(valueToSet);
@@ -655,6 +763,7 @@ describe("MBVariable", () => {
     let unitId;
     let mbVariable;
     let value;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -673,7 +782,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 3);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       mbVariable._value = value;
       return mbVariable.Value;
     };
@@ -697,6 +814,7 @@ describe("MBVariable", () => {
     let _convertValueToDataMock;
     let _emitValueChangeMock;
     let valueConvertedToData;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -718,7 +836,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 3);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       mbVariable._emitValueChange = _emitValueChangeMock;
       mbVariable._convertValueToData = _convertValueToDataMock;
       mbVariable.Value = valueToSet;
@@ -755,6 +881,7 @@ describe("MBVariable", () => {
     let mockInvokeRequest;
     let mockGetValue;
     let mockGetAction;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -776,7 +903,15 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+      mbVariable = new MBVariable(device, payload);
       //Setting in order to check Value by GetSingle
       mbVariable._value = 1234;
       return mbVariable.getSingle();
@@ -810,6 +945,7 @@ describe("MBVariable", () => {
     let mockSetValue;
     let mockSetUpdateAction;
     let mockSetValueFunc;
+    let payload;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -833,7 +969,16 @@ describe("MBVariable", () => {
     });
 
     let exec = () => {
-      mbVariable = new MBVariable(device, name, fcode, offset, length, 16, 4);
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+
+      mbVariable = new MBVariable(device, payload);
       //Setting in order to check Value by GetSingle
       mbVariable._value = 1234;
       mbVariable._setValue = mockSetValueFunc;

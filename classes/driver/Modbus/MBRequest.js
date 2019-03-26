@@ -1,12 +1,5 @@
 const mongoose = require("mongoose");
 
-/**
- * @description Generating random id number
- */
-function generateRandId() {
-  return mongoose.Types.ObjectId();
-}
-
 class MBRequest {
   /**
    * @description Modbus request class
@@ -39,7 +32,7 @@ class MBRequest {
     this._createVariableObject = this._createVariableObject.bind(this);
 
     //Generating random id
-    this._id = generateRandId();
+    this._id = MBRequest.generateRandId();
 
     //Setting appropriate variables
     this._mbDriver = mbDriver;
@@ -51,6 +44,14 @@ class MBRequest {
     this._variableConnections = {};
     this._maxRequestLength = maxRequestLength;
   }
+
+  /**
+   * @description Generating random id
+   */
+  static generateRandId() {
+    return mongoose.Types.ObjectId();
+  }
+
   /**
    * @description Updating Action property
    */

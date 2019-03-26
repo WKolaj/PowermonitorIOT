@@ -69,8 +69,13 @@ const int32ToMBData = function(floatValue) {
 };
 
 class MBInt32Variable extends MBVariable {
-  constructor(device, name, fcode, offset) {
-    super(device, name, fcode, offset, 2, 16, fcode);
+  constructor(device, payload) {
+    if (!payload) throw new Error("Payload cannot be empty");
+    payload.length = 2;
+    payload.setSingleFCode = 16;
+    payload.getSingleFCode = payload.fCode;
+
+    super(device, payload);
   }
 
   _convertDataToValue(data) {
@@ -86,6 +91,21 @@ class MBInt32Variable extends MBVariable {
    */
   _getPossibleFCodes() {
     return [3, 4, 16];
+  }
+
+  /**
+   * @description Method for generating new variable based on given payload
+   */
+  editWithPayload(payload) {
+    //Creating new value from payload
+    let editedVariable = new MBInt32Variable(
+      this.Device,
+      this._generatePayloadToEdit(payload)
+    );
+    //Reassigining events;
+    editedVariable._events = this.Events;
+
+    return editedVariable;
   }
 }
 

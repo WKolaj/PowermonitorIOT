@@ -26,19 +26,18 @@ class Device {
    * @description Adding variable to device
    */
   addVariable(variable) {
-    this.Variables[variable.Name] = variable;
+    this.Variables[variable.Id] = variable;
   }
 
   /**
    * @description Removing variable from device
+   * @param {string} id device id
    */
-  removeVariable(variable) {
-    if (!(variable.Name in this.Variables))
-      throw Error(
-        `There is no such variable in device - variable name:${variable.Name}`
-      );
+  removeVariable(id) {
+    if (!(id in this.Variables))
+      throw Error(`There is no such variable in device - variable id:${id}`);
 
-    delete this.Variables[variable.Name];
+    delete this.Variables[id];
   }
 
   static divideVariablesByTickId(variables) {
@@ -52,6 +51,14 @@ class Device {
     }
 
     return variablesToReturn;
+  }
+
+  /**
+   * @description Getting variable by device id
+   * @param {string} id device id
+   */
+  getVariable(id) {
+    return this.Variables[id];
   }
 
   /**

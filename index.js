@@ -7,60 +7,100 @@ const MBVariable = require("./classes/variable/Modbus/MBVariable");
 const MBFloatVariable = require("./classes/variable/Modbus/MBFloatVariable");
 const MBInt16Variable = require("./classes/variable/Modbus/MBInt16Variable");
 const Sampler = require("./classes/sampler/Sampler");
+const MBSwappedFloatVariable = require("./classes/variable/Modbus/MBSwappedFloatVariable");
 
 let sampler = new Sampler();
 
 let device = new MBDevice("PAC");
-device.setModbusDriver("192.168.0.20");
-device.connect();
+device.setModbusDriver("192.168.0.211");
 
-let var1 = new MBInt16Variable(device, "var1", 3, 1);
-let var2 = new MBInt16Variable(device, "var2", 3, 2);
-let var3 = new MBInt16Variable(device, "var3", 3, 3);
-let var4 = new MBInt16Variable(device, "var4", 3, 4);
-let var5 = new MBInt16Variable(device, "var5", 3, 5);
-let var6 = new MBInt16Variable(device, "var6", 3, 6);
-let var7 = new MBInt16Variable(device, "var7", 3, 7);
-let var8 = new MBInt16Variable(device, "var8", 3, 8);
-let var9 = new MBInt16Variable(device, "var9", 3, 9);
+let var1Payload = {
+  timeSample: 1,
+  type: "swappedFloat",
+  name: "Napiecie L1-N",
+  fCode: 3,
+  offset: 1
+};
+let var2Payload = {
+  timeSample: 1,
+  type: "swappedFloat",
+  name: "Napiecie L2-N",
+  fCode: 3,
+  offset: 3
+};
+let var3Payload = {
+  timeSample: 1,
+  type: "swappedFloat",
+  name: "Napiecie L3-N",
+  fCode: 3,
+  offset: 5
+};
+// let var4Payload = {
+//   timeSample: 2,
+//   type: "swappedFloat",
+//   name: "Napiecie L1-L2",
+//   fCode: 3,
+//   offset: 7
+// };
+// let var5Payload = {
+//   timeSample: 2,
+//   type: "swappedFloat",
+//   name: "Napiecie L2-L3",
+//   fCode: 3,
+//   offset: 9
+// };
+// let var6Payload = {
+//   timeSample: 2,
+//   type: "swappedFloat",
+//   name: "Napiecie L3-L1",
+//   fCode: 3,
+//   offset: 11
+// };
+// let var7Payload = {
+//   timeSample: 3,
+//   type: "swappedFloat",
+//   name: "Prąd L1",
+//   fCode: 3,
+//   offset: 13
+// };
+// let var8Payload = {
+//   timeSample: 3,
+//   type: "swappedFloat",
+//   name: "Prąd L2",
+//   fCode: 3,
+//   offset: 15
+// };
+// let var9Payload = {
+//   timeSample: 3,
+//   type: "swappedFloat",
+//   name: "Prąd L3",
+//   fCode: 3,
+//   offset: 17
+// };
 
-var1.TimeSample = 1;
-var2.TimeSample = 1;
-var3.TimeSample = 5;
-var4.TimeSample = 1;
-var5.TimeSample = 1;
-var6.TimeSample = 5;
-var7.TimeSample = 1;
-var8.TimeSample = 1;
-var9.TimeSample = 5;
+let var1 = device.createVariable(var1Payload);
+let var2 = device.createVariable(var2Payload);
+let var3 = device.createVariable(var3Payload);
+
+// device.createVariable(var4Payload);
+// device.createVariable(var5Payload);
+// device.createVariable(var6Payload);
+// device.createVariable(var7Payload);
+// device.createVariable(var8Payload);
+// device.createVariable(var9Payload);
 
 let logVar = args => {
   console.log(`${Date.now()}: ${args[0].Name}, ${args[1]}`);
 };
 
-var1.Events.on("ValueChanged", logVar);
-var2.Events.on("ValueChanged", logVar);
-var3.Events.on("ValueChanged", logVar);
-var4.Events.on("ValueChanged", logVar);
-var5.Events.on("ValueChanged", logVar);
-var6.Events.on("ValueChanged", logVar);
-var7.Events.on("ValueChanged", logVar);
-var8.Events.on("ValueChanged", logVar);
-var9.Events.on("ValueChanged", logVar);
-
-device.addVariable(var1);
-device.addVariable(var2);
-device.addVariable(var3);
-device.addVariable(var4);
-device.addVariable(var5);
-device.addVariable(var6);
-device.addVariable(var7);
-device.addVariable(var8);
-device.addVariable(var9);
+for (let variable of Object.values(device.Variables)) {
+  variable.Events.on("ValueChanged", logVar);
+}
 
 sampler.addDevice(device);
 sampler.start();
 
+device.connect();
 // let pac1 = new MBDevice("PAC1");
 
 // pac1.setModbusDriver("192.168.0.20", 502, 2000, 1);
@@ -152,42 +192,41 @@ sampler.start();
 
 // exec();
 
-// console.log("Press any key to exit");
+console.log("Press any key to exit");
 
-// process.stdin.setRawMode(true);
-// process.stdin.resume();
+process.stdin.setRawMode(true);
+process.stdin.resume();
 
-// // on any data into stdin
-// process.stdin.on("data", async function(key) {
-//   if (key.indexOf("q") == 0) {
-//     await process.exit();
-//   }
+// on any data into stdin
+process.stdin.on("data", async function(key) {
+  if (key.indexOf("q") == 0) {
+    await process.exit();
+  }
 
-//   // without rawmode, it returns EOL with the string
-//   if (key.indexOf("1") == 0) {
-//     console.log("disconnecting pac1...");
-//     await pac1.disconnect();
-//     console.log("pac1 disconnected");
-//   }
+  // without rawmode, it returns EOL with the string
+  if (key.indexOf("1") == 0) {
+    let payload =
+      var1.Name == "Napiecie L1-N"
+        ? { name: "Napiecie L1-L2", offset: 7 }
+        : { name: "Napiecie L1-N", offset: 1 };
+    var1 = device.editVariable(var1.Id, payload);
+  }
 
-//   // without rawmode, it returns EOL with the string
-//   if (key.indexOf("2") == 0) {
-//     console.log("disconnecting pac2...");
-//     await pac2.disconnect();
-//     console.log("pac2 disconnected");
-//   }
+  // without rawmode, it returns EOL with the string
+  if (key.indexOf("2") == 0) {
+    let payload =
+      var2.Name == "Napiecie L2-N"
+        ? { name: "Napiecie L2-L3", offset: 9 }
+        : { name: "Napiecie L2-N", offset: 3 };
+    var2 = device.editVariable(var2.Id, payload);
+  }
 
-//   // without rawmode, it returns EOL with the string
-//   if (key.indexOf("3") == 0) {
-//     console.log("connecting pac1...");
-//     await pac1.connect();
-//     console.log("pac1 connected");
-//   }
-
-//   // without rawmode, it returns EOL with the string
-//   if (key.indexOf("4") == 0) {
-//     console.log("connecting pac2...");
-//     pac2.connect();
-//     console.log("pac2 connected");
-//   }
-// });
+  // without rawmode, it returns EOL with the string
+  if (key.indexOf("3") == 0) {
+    let payload =
+      var3.Name == "Napiecie L3-N"
+        ? { name: "Napiecie L3-L1", offset: 11 }
+        : { name: "Napiecie L3-N", offset: 5 };
+    var3 = device.editVariable(var3.Id, payload);
+  }
+});

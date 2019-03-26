@@ -39,8 +39,12 @@ const byteArrayToMBData = function(byteArray) {
 };
 
 class MBByteArrayVariable extends MBVariable {
-  constructor(device, name, fcode, offset, length) {
-    super(device, name, fcode, offset, length, 16, fcode);
+  constructor(device, payload) {
+    if (!payload) throw new Error("Payload cannot be empty");
+    payload.getSingleFCode = payload.fCode;
+    payload.setSingleFCode = 16;
+
+    super(device, payload);
   }
 
   getBit(byteNumber, bitNumber) {
@@ -97,6 +101,22 @@ class MBByteArrayVariable extends MBVariable {
    */
   _getPossibleFCodes() {
     return [3, 4, 16];
+  }
+
+  /**
+   * @description Method for generating new variable based on given payload
+   */
+  editWithPayload(payload) {
+    //Creating new value from payload
+    let editedVariable = new MBByteArrayVariable(
+      this.Device,
+      this._generatePayloadToEdit(payload)
+    );
+
+    //Reassigining events;
+    editedVariable._events = this.Events;
+
+    return editedVariable;
   }
 }
 

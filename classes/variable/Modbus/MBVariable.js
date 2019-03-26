@@ -5,63 +5,58 @@ class MBVariable extends Variable {
   /**
    * @description Base class representing Modbus variable
    * @param {object} device device associated with variable
-   * @param {string} name variable name
-   * @param {number} fcode Modbus function code
-   * @param {number} offset variable offset
-   * @param {number} length variable length
-   * @param {number} setSingleFCode fCode for setting single variable
-   * @param {number} getSingleFCode fCode for getting single variable
+   * @param {object} payload varaible payload
    */
-  constructor(
-    device,
-    name,
-    fcode,
-    offset,
-    length,
-    setSingleFCode,
-    getSingleFCode
-  ) {
-    super(device, name);
-    if (!fcode) throw new Error("FCode cannot be empty");
-    if (!offset) throw new Error("Offset cannot be empty");
-    if (!length) throw new Error("Length cannot be empty");
-    if (!setSingleFCode) throw new Error("SetSingleFCode cannot be empty");
-    if (!getSingleFCode) throw new Error("getSingleFCode cannot be empty");
+  constructor(device, payload) {
+    super(device, payload);
+
+    if (!payload.fCode) throw new Error("FCode cannot be empty");
+    if (!payload.offset) throw new Error("Offset cannot be empty");
+    if (!payload.length) throw new Error("Length cannot be empty");
+    if (!payload.setSingleFCode)
+      throw new Error("SetSingleFCode cannot be empty");
+    if (!payload.getSingleFCode)
+      throw new Error("GetSingleFCode cannot be empty");
 
     //Controlling if functions are possible
     let allPossibleFCodes = this._getPossibleFCodes();
 
-    if (!allPossibleFCodes.includes(fcode))
-      throw new Error(`Fcode ${fcode} cannot be applied to given variable`);
-
-    if (!allPossibleFCodes.includes(setSingleFCode))
+    if (!allPossibleFCodes.includes(payload.fCode))
       throw new Error(
-        `Fcode ${setSingleFCode} cannot be applied to given variable`
+        `Fcode ${payload.fCode} cannot be applied to given variable`
       );
 
-    if (!allPossibleFCodes.includes(getSingleFCode))
+    if (!allPossibleFCodes.includes(payload.setSingleFCode))
       throw new Error(
-        `Fcode ${getSingleFCode} cannot be applied to given variable`
+        `Fcode ${payload.setSingleFCode} cannot be applied to given variable`
       );
 
-    this._offset = offset;
-    this._length = length;
-    this._fcode = fcode;
-    this._setSingleFCode = setSingleFCode;
-    this._getSingleFCode = getSingleFCode;
+    if (!allPossibleFCodes.includes(payload.getSingleFCode))
+      throw new Error(
+        `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
+      );
+
+    this._offset = payload.offset;
+    this._length = payload.length;
+    this._fcode = payload.fCode;
+    this._setSingleFCode = payload.setSingleFCode;
+    this._getSingleFCode = payload.getSingleFCode;
 
     this._getSingleRequest = new MBRequest(
       device.MBDriver,
-      getSingleFCode,
+      payload.getSingleFCode,
       device.UnitId
     );
     this._getSingleRequest.addVariable(this);
     this._setSingleRequest = new MBRequest(
       device.MBDriver,
-      setSingleFCode,
+      payload.setSingleFCode,
       device.UnitId
     );
     this._setSingleRequest.addVariable(this);
+
+    //Setting value if defined
+    if (payload.value) this.Value = payload.value;
   }
 
   /**
@@ -197,6 +192,49 @@ class MBVariable extends Variable {
    */
   _getPossibleFCodes() {
     return [1, 2, 3, 4, 15, 16];
+  }
+
+  /**
+   * @description Method for generating payload - overriding in child classes
+   */
+  _generatePayload() {
+    let payload = super._generatePayload();
+
+    payload.offset = this.Offset;
+    payload.length = this.Length;
+    payload.fCode = this.FCode;
+    payload.value = this.Value;
+
+    return payload;
+  }
+
+  _generatePayloadToEdit(payload) {
+    //Coping all neccessary data to payload
+    payload.id = this.Id;
+
+    //If payload has no varaibles define - define it on the basis of current values;
+    if (!payload.timeSample) payload.timeSample = this.TimeSample;
+    if (!payload.name) payload.name = this.Name;
+
+    if (!payload.offset) payload.offset = this.Offset;
+    if (!payload.length) payload.length = this.Length;
+    if (!payload.fCode) payload.fCode = this.FCode;
+    if (!payload.value) payload.value = this.Value;
+
+    return payload;
+  }
+
+  /**
+   * @description Method for generating new variable based on given payload
+   */
+  editWithPayload(payload) {
+    //Creating new value from payload
+    let editedVariable = new MBVariable(this._generatePayloadToEdit(payload));
+
+    //Reassigining events;
+    editedVariable._events = this.Events;
+
+    return editedVariable;
   }
 }
 
