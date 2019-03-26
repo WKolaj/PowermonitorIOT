@@ -1,8 +1,10 @@
+const mongoose = require("mongoose");
+
 /**
  * @description Generating random id number
  */
 function generateRandId() {
-  return Math.random().toString(36);
+  return mongoose.Types.ObjectId();
 }
 
 class MBRequest {
