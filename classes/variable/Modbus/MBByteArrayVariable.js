@@ -39,6 +39,11 @@ const byteArrayToMBData = function(byteArray) {
 };
 
 class MBByteArrayVariable extends MBVariable {
+  /**
+   * @description Modbus Byte Array variable
+   * @param {Object} device Device associated with variable
+   * @param {Object} payload Variable payload
+   */
   constructor(device, payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.getSingleFCode = payload.fCode;
@@ -47,22 +52,40 @@ class MBByteArrayVariable extends MBVariable {
     super(device, payload);
   }
 
+  /**
+   * @description Getting bit from byte
+   * @param {number} byteNumber Byte number
+   * @param {number} bitNumber Bit number
+   */
   getBit(byteNumber, bitNumber) {
     return this._getBit(this._value[byteNumber], bitNumber);
   }
 
+  /**
+   * @description Setting bit in byte
+   * @param {number} byteNumber byte number
+   * @param {number} bitNumber bit number
+   */
   setBit(byteNumber, bitNumber) {
     this.Value[byteNumber] = this._setBit(this.Value[byteNumber], bitNumber);
     //Simply for invoking valueChangeEvent and recreate modbus data
     this.Value = this.Value;
   }
 
+  /**
+   * @description Clearing bit in byte
+   * @param {number} byteNumber byte number
+   * @param {number} bitNumber bit number
+   */
   clearBit(byteNumber, bitNumber) {
     this.Value[byteNumber] = this._clearBit(this.Value[byteNumber], bitNumber);
     //Simply for invoking valueChangeEvent and recreate modbus data
     this.Value = this.Value;
   }
 
+  /**
+   * @description converting variable to bit array
+   */
   convertToBits() {
     let bits = [];
 
@@ -75,22 +98,45 @@ class MBByteArrayVariable extends MBVariable {
     return bits;
   }
 
+  /**
+   * @description method for converting data to value
+   * @param {Array} data array of UInt16 representing data
+   */
   _convertDataToValue(data) {
     return mbDataToByteArray(data);
   }
 
+  /**
+   * @description method for converting value to data
+   * @param {number} value value  to be converted
+   */
   _convertValueToData(value) {
     return byteArrayToMBData(value);
   }
 
+  /**
+   * @description method for getting bit in given variable
+   * @param {number} number variable
+   * @param {number} bitPosition bit position
+   */
   _getBit(number, bitPosition) {
     return (number & (1 << bitPosition)) === 0 ? false : true;
   }
 
+  /**
+   * @description method for setting bit in given variable
+   * @param {number} number variable
+   * @param {number} bitPosition bit position
+   */
   _setBit(number, bitPosition) {
     return number | (1 << bitPosition);
   }
 
+  /**
+   * @description method for clearing bit in given variable
+   * @param {number} number variable
+   * @param {number} bitPosition bit position
+   */
   _clearBit(number, bitPosition) {
     const mask = ~(1 << bitPosition);
     return number & mask;
@@ -103,6 +149,10 @@ class MBByteArrayVariable extends MBVariable {
     return [3, 4, 16];
   }
 
+  /**
+   * Generating payload to edit variable
+   * @param {Object} payload
+   */
   _generatePayloadToEdit(payload) {
     //Resetting value if length changes without value
     let resetValue = false;

@@ -68,7 +68,12 @@ const swappedUint32ToMBData = function(floatValue) {
   return [int1, int2];
 };
 
-class MBInt32Variable extends MBVariable {
+class MBSwappedUInt32Variable extends MBVariable {
+  /**
+   * @description Modbus Swapped UInt32 variable
+   * @param {Object} device Device associated with variable
+   * @param {Object} payload Variable payload
+   */
   constructor(device, payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 2;
@@ -80,10 +85,18 @@ class MBInt32Variable extends MBVariable {
     super(device, payload);
   }
 
+  /**
+   * @description method for converting data to value
+   * @param {Array} data array of UInt16 representing data
+   */
   _convertDataToValue(data) {
     return mbDataToSwappedUInt32(data);
   }
 
+  /**
+   * @description method for converting value to data
+   * @param {number} value value  to be converted
+   */
   _convertValueToData(value) {
     return swappedUint32ToMBData(value);
   }
@@ -100,7 +113,7 @@ class MBInt32Variable extends MBVariable {
    */
   editWithPayload(payload) {
     //Creating new value from payload
-    let editedVariable = new MBInt32Variable(
+    let editedVariable = new MBSwappedUInt32Variable(
       this.Device,
       this._generatePayloadToEdit(payload)
     );
@@ -112,4 +125,4 @@ class MBInt32Variable extends MBVariable {
   }
 }
 
-module.exports = MBInt32Variable;
+module.exports = MBSwappedUInt32Variable;

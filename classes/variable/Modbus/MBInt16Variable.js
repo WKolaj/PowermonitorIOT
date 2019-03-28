@@ -53,6 +53,11 @@ const int16ToMBData = function(intValue) {
 };
 
 class MBInt16Variable extends MBVariable {
+  /**
+   * @description Modbus Int16 variable
+   * @param {Object} device Device associated with variable
+   * @param {Object} payload Variable payload
+   */
   constructor(device, payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 1;
@@ -64,10 +69,18 @@ class MBInt16Variable extends MBVariable {
     super(device, payload);
   }
 
+  /**
+   * @description method for converting data to value
+   * @param {Array} data array of UInt16 representing data
+   */
   _convertDataToValue(data) {
     return mbDataToInt16(data);
   }
 
+  /**
+   * @description method for converting value to data
+   * @param {number} value value  to be converted
+   */
   _convertValueToData(value) {
     return int16ToMBData(value);
   }

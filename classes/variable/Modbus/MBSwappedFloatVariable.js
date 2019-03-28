@@ -69,6 +69,11 @@ const swappedFloatToMBData = function(floatValue) {
 };
 
 class MBSwappedFloatVariable extends MBVariable {
+  /**
+   * @description Modbus Swapped Float variable
+   * @param {Object} device Device associated with variable
+   * @param {Object} payload Variable payload
+   */
   constructor(device, payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 2;
@@ -80,10 +85,18 @@ class MBSwappedFloatVariable extends MBVariable {
     super(device, payload);
   }
 
+  /**
+   * @description method for converting data to value
+   * @param {Array} data array of UInt16 representing data
+   */
   _convertDataToValue(data) {
     return mbDataToSwappedFloat(data);
   }
 
+  /**
+   * @description method for converting value to data
+   * @param {number} value value  to be converted
+   */
   _convertValueToData(value) {
     return swappedFloatToMBData(value);
   }
