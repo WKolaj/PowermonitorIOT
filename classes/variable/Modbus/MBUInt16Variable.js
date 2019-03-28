@@ -57,7 +57,9 @@ class MBUInt16Variable extends MBVariable {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 1;
     payload.setSingleFCode = 16;
-    payload.getSingleFCode = payload.fCode;
+    //Setting alwyas function 3 in case given fcode is write option - fcode 16
+    payload.getSingleFCode =
+      payload.fCode === 3 || payload.fCode == 4 ? payload.fCode : 3;
 
     super(device, payload);
   }

@@ -10,7 +10,10 @@ describe("MBVariable", () => {
     let unitId;
     let getSingleFCode;
     let setSingleFCode;
+    let setValueMockFunction;
+    let value;
     let payload;
+    let realSetValueMockFunction;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -27,6 +30,14 @@ describe("MBVariable", () => {
       fcode = 4;
       getSingleFCode = 3;
       setSingleFCode = 16;
+      value = 1234;
+      setValueMockFunction = jest.fn();
+      realSetValueMockFunction = MBVariable.prototype._setValue;
+    });
+
+    //Should set again real _setValue function
+    afterEach(() => {
+      MBVariable.prototype._setValue = realSetValueMockFunction;
     });
 
     let exec = () => {
@@ -36,8 +47,11 @@ describe("MBVariable", () => {
         offset: offset,
         length: length,
         getSingleFCode: getSingleFCode,
-        setSingleFCode: setSingleFCode
+        setSingleFCode: setSingleFCode,
+        value: value
       };
+      MBVariable.prototype._setValue = setValueMockFunction;
+
       return new MBVariable(device, payload);
     };
 
@@ -52,6 +66,8 @@ describe("MBVariable", () => {
       expect(result.Length).toEqual(length);
       expect(result.GetSingleFCode).toEqual(getSingleFCode);
       expect(result.SetSingleFCode).toEqual(setSingleFCode);
+      expect(setValueMockFunction).toHaveBeenCalledTimes(1);
+      expect(setValueMockFunction.mock.calls[0][0]).toEqual(value);
     });
 
     it("should throw if device is empty", () => {
@@ -150,6 +166,13 @@ describe("MBVariable", () => {
 
       expect(result);
       expect(result._setSingleRequest).toBeDefined();
+    });
+
+    it("should not set value if value in payload is not defined", () => {
+      value = undefined;
+      let result = exec();
+
+      expect(setValueMockFunction).not.toHaveBeenCalled();
     });
   });
 
@@ -1007,6 +1030,890 @@ describe("MBVariable", () => {
       let result = await exec();
 
       expect(result).toEqual(mockSetValue);
+    });
+  });
+
+  describe("get Payload", () => {
+    let device;
+    let name;
+    let fcode;
+    let offset;
+    let length;
+    let unitId;
+    let getSingleFCode;
+    let setSingleFCode;
+    let setValueMockFunction;
+    let getValueMockFunction;
+    let value;
+    let payload;
+    let realSetValueMockFunction;
+    let realGetValueMockFunction;
+    let variable;
+
+    beforeEach(() => {
+      name = "Test variable name";
+      unitId = 1;
+      device = {
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
+      offset = 2;
+      length = 3;
+      fcode = 4;
+      getSingleFCode = 3;
+      setSingleFCode = 16;
+      value = 1234;
+      realSetValueMockFunction = MBVariable.prototype._setValue;
+      realGetValueMockFunction = MBVariable.prototype._getValue;
+    });
+
+    //Should set again real _setValue function
+    afterEach(() => {
+      MBVariable.prototype._setValue = realSetValueMockFunction;
+      MBVariable.prototype._getValue = realGetValueMockFunction;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      setValueMockFunction = jest.fn();
+      getValueMockFunction = jest.fn().mockReturnValue(value);
+
+      MBVariable.prototype._setValue = setValueMockFunction;
+      MBVariable.prototype._getValue = getValueMockFunction;
+      variable = new MBVariable(device, payload);
+      return variable.Payload;
+    };
+
+    it("should generate payload with appropriate parameters", () => {
+      let result = exec();
+
+      let validPayload = {
+        name: variable.Name,
+        id: variable.Id,
+        timeSample: variable.TimeSample,
+        offset: offset,
+        length: length,
+        fCode: fcode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if value is undefined", () => {
+      value = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        name: variable.Name,
+        id: variable.Id,
+        timeSample: variable.TimeSample,
+        offset: offset,
+        length: length,
+        fCode: fcode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+  });
+
+  describe("_generatePayload", () => {
+    let device;
+    let name;
+    let fcode;
+    let offset;
+    let length;
+    let unitId;
+    let getSingleFCode;
+    let setSingleFCode;
+    let setValueMockFunction;
+    let getValueMockFunction;
+    let value;
+    let payload;
+    let realSetValueMockFunction;
+    let realGetValueMockFunction;
+    let variable;
+
+    beforeEach(() => {
+      name = "Test variable name";
+      unitId = 1;
+      device = {
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
+      offset = 2;
+      length = 3;
+      fcode = 4;
+      getSingleFCode = 3;
+      setSingleFCode = 16;
+      value = 1234;
+      realSetValueMockFunction = MBVariable.prototype._setValue;
+      realGetValueMockFunction = MBVariable.prototype._getValue;
+    });
+
+    //Should set again real _setValue function
+    afterEach(() => {
+      MBVariable.prototype._setValue = realSetValueMockFunction;
+      MBVariable.prototype._getValue = realGetValueMockFunction;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      setValueMockFunction = jest.fn();
+      getValueMockFunction = jest.fn().mockReturnValue(value);
+
+      MBVariable.prototype._setValue = setValueMockFunction;
+      MBVariable.prototype._getValue = getValueMockFunction;
+      variable = new MBVariable(device, payload);
+      return variable._generatePayload();
+    };
+
+    it("should generate payload with appropriate parameters", () => {
+      let result = exec();
+
+      let validPayload = {
+        name: variable.Name,
+        id: variable.Id,
+        timeSample: variable.TimeSample,
+        offset: offset,
+        length: length,
+        fCode: fcode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if value is undefined", () => {
+      value = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        name: variable.Name,
+        id: variable.Id,
+        timeSample: variable.TimeSample,
+        offset: offset,
+        length: length,
+        fCode: fcode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+  });
+
+  describe("_generatePayloadToEdit", () => {
+    let device;
+    let name;
+    let fcode;
+    let offset;
+    let length;
+    let unitId;
+    let timeSample;
+    let getSingleFCode;
+    let setSingleFCode;
+    let setValueMockFunction;
+    let getValueMockFunction;
+    let value;
+    let payload;
+    let realSetValueMockFunction;
+    let realGetValueMockFunction;
+    let variable;
+    let editPayload;
+    let editTimeSample;
+    let editName;
+    let editOffset;
+    let editLength;
+    let editFCode;
+    let editValue;
+    let editGetSingleFCode;
+    let editSetSingleFCode;
+
+    beforeEach(() => {
+      name = "Test variable name";
+      unitId = 1;
+      device = {
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
+      offset = 2;
+      length = 3;
+      fcode = 4;
+      getSingleFCode = 3;
+      setSingleFCode = 16;
+      value = 1234;
+      timeSample = 3;
+      realSetValueMockFunction = MBVariable.prototype._setValue;
+      realGetValueMockFunction = MBVariable.prototype._getValue;
+
+      editTimeSample = 5;
+      editName = "Edited name";
+      editOffset = 6;
+      editLength = 7;
+      editFCode = 3;
+      editValue = 4321;
+      editGetSingleFCode = 4;
+      editSetSingleFCode = 16;
+    });
+
+    //Should set again real _setValue function
+    afterEach(() => {
+      MBVariable.prototype._setValue = realSetValueMockFunction;
+      MBVariable.prototype._getValue = realGetValueMockFunction;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        timeSample: timeSample,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      setValueMockFunction = jest.fn();
+      getValueMockFunction = jest.fn().mockReturnValue(value);
+
+      MBVariable.prototype._setValue = setValueMockFunction;
+      MBVariable.prototype._getValue = getValueMockFunction;
+      variable = new MBVariable(device, payload);
+
+      editPayload = {
+        timeSample: editTimeSample,
+        name: editName,
+        fCode: editFCode,
+        offset: editOffset,
+        length: editLength,
+        getSingleFCode: editGetSingleFCode,
+        setSingleFCode: editSetSingleFCode,
+        value: editValue
+      };
+
+      return variable._generatePayloadToEdit(editPayload);
+    };
+
+    it("should generate payload with appropriate parameters if all parameters are passed", () => {
+      let result = exec();
+
+      let validPayload = {
+        timeSample: editTimeSample,
+        name: editName,
+        fCode: editFCode,
+        offset: editOffset,
+        length: editLength,
+        getSingleFCode: editGetSingleFCode,
+        setSingleFCode: editSetSingleFCode,
+        value: editValue
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only timeSample is passed", () => {
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: editTimeSample,
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only name is passed", () => {
+      editTimeSample = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: editName,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only name is offset", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: name,
+        fCode: fcode,
+        offset: editOffset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only name is length", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: editLength,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only name is fcode", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: name,
+        fCode: editFCode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only name is value", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: editValue
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only name is getSingleFCode", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: editGetSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only name is setSingleFCode", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: editSetSingleFCode,
+        value: value
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+  });
+
+  describe("editWithPayload", () => {
+    let device;
+    let name;
+    let fcode;
+    let offset;
+    let length;
+    let unitId;
+    let timeSample;
+    let getSingleFCode;
+    let setSingleFCode;
+    let setValueMockFunction;
+    let getValueMockFunction;
+    let value;
+    let payload;
+    let realSetValueMockFunction;
+    let realGetValueMockFunction;
+    let variable;
+    let editPayload;
+    let editTimeSample;
+    let editName;
+    let editOffset;
+    let editLength;
+    let editFCode;
+    let editValue;
+    let editGetSingleFCode;
+    let editSetSingleFCode;
+
+    beforeEach(() => {
+      name = "Test variable name";
+      unitId = 1;
+      device = {
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      };
+      offset = 2;
+      length = 3;
+      fcode = 4;
+      getSingleFCode = 3;
+      setSingleFCode = 16;
+      value = 1234;
+      timeSample = 3;
+      realSetValueMockFunction = MBVariable.prototype._setValue;
+      realGetValueMockFunction = MBVariable.prototype._getValue;
+
+      editTimeSample = 5;
+      editName = "Edited name";
+      editOffset = 6;
+      editLength = 7;
+      editFCode = 3;
+      editValue = 4321;
+      editGetSingleFCode = 4;
+      editSetSingleFCode = 16;
+    });
+
+    //Should set again real _setValue function
+    afterEach(() => {
+      MBVariable.prototype._setValue = realSetValueMockFunction;
+      MBVariable.prototype._getValue = realGetValueMockFunction;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        timeSample: timeSample,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value
+      };
+
+      setValueMockFunction = jest.fn();
+      getValueMockFunction = jest.fn().mockReturnValue(value);
+
+      MBVariable.prototype._setValue = setValueMockFunction;
+      MBVariable.prototype._getValue = getValueMockFunction;
+      variable = new MBVariable(device, payload);
+
+      editPayload = {
+        timeSample: editTimeSample,
+        name: editName,
+        fCode: editFCode,
+        offset: editOffset,
+        length: editLength,
+        getSingleFCode: editGetSingleFCode,
+        setSingleFCode: editSetSingleFCode,
+        value: editValue
+      };
+
+      return variable.editWithPayload(editPayload);
+    };
+
+    it("should generate variable with payload with appropriate parameters if all parameters are passed", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(editTimeSample);
+      expect(result.Name).toEqual(editName);
+      expect(result.FCode).toEqual(editFCode);
+      expect(result.Offset).toEqual(editOffset);
+      expect(result.Length).toEqual(editLength);
+      expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
+    });
+
+    it("should generate identical variable with payload with appropriate parameters if only timeSample", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(value);
+    });
+
+    it("should generate variable with timeSample equal to timeSample given in payload", () => {
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(editTimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(value);
+    });
+
+    it("should generate variable with Name equal to Name given in payload", () => {
+      editTimeSample = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(editName);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(value);
+    });
+
+    it("should generate variable with Offset equal to Offset given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(editOffset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(value);
+    });
+
+    it("should generate variable with Length equal to Length given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(editLength);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(value);
+    });
+
+    it("should generate variable with FCode equal to FCode given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(editFCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(value);
+    });
+
+    it("should generate variable with Value equal to Value given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editFCode = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
+    });
+
+    it("should generate variable with GetSingleFCode equal to GetSingleFCode given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editFCode = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editSetSingleFCode = undefined;
+      editValue = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(variable.Value);
+    });
+
+    it("should generate variable with SetSingleFCode equal to SetSingleFCode given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editFCode = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editGetSingleFCode = undefined;
+      editValue = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
+
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(variable.Value);
     });
   });
 });

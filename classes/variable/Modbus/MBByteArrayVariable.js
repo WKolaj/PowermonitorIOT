@@ -103,6 +103,31 @@ class MBByteArrayVariable extends MBVariable {
     return [3, 4, 16];
   }
 
+  _generatePayloadToEdit(payload) {
+    //Resetting value if length changes without value
+    let resetValue = false;
+    if (
+      payload.value === undefined &&
+      payload.length !== undefined &&
+      payload.length !== this.Length
+    ) {
+      console.log(
+        `value:${payload.value} length:${payload.length} this.length:${
+          this.Length
+        }`
+      );
+      resetValue = true;
+    }
+
+    let result = super._generatePayloadToEdit(payload);
+
+    if (resetValue) {
+      result.value = undefined;
+    }
+
+    return result;
+  }
+
   /**
    * @description Method for generating new variable based on given payload
    */

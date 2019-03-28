@@ -49,6 +49,10 @@ describe("Variable", () => {
 
       expect(() => exec()).toThrow();
     });
+
+    it("should throw if payload is empty", () => {
+      expect(() => new Variable(device)).toThrow();
+    });
   });
 
   describe("generateRandId", () => {
@@ -369,6 +373,128 @@ describe("Variable", () => {
       expect(emitMock.mock.calls[0][1].length).toEqual(2);
       expect(emitMock.mock.calls[0][1][0]).toEqual(variable);
       expect(emitMock.mock.calls[0][1][1]).toEqual(value);
+    });
+  });
+
+  describe("get Payload", () => {
+    let device;
+    let name;
+    let variable;
+    let payload;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+    });
+
+    let exec = () => {
+      payload = { name: name };
+      variable = new Variable(device, payload);
+      return variable.Payload;
+    };
+
+    it("should return valid payload", () => {
+      let result = exec();
+      let validPayload = {
+        name: variable.Name,
+        id: variable.Id,
+        timeSample: variable.TimeSample
+      };
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+  });
+
+  describe("_generatePayload", () => {
+    let device;
+    let name;
+    let variable;
+    let payload;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+    });
+
+    let exec = () => {
+      payload = { name: name };
+      variable = new Variable(device, payload);
+      return variable._generatePayload();
+    };
+
+    it("should return valid payload", () => {
+      let result = exec();
+      let validPayload = {
+        name: variable.Name,
+        id: variable.Id,
+        timeSample: variable.TimeSample
+      };
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+  });
+
+  describe("_editWithPayload", () => {
+    let device;
+    let name;
+    let variable;
+    let payload;
+    let payloadToEdit;
+    let timeSampleToEdit;
+    let nameToEdit;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+      nameToEdit = "Edited name of variable";
+      timeSampleToEdit = 5;
+    });
+
+    let exec = () => {
+      payload = { name: name };
+      variable = new Variable(device, payload);
+
+      payloadToEdit = { name: nameToEdit, timeSample: timeSampleToEdit };
+      return variable.editWithPayload(payloadToEdit);
+    };
+
+    it("should return new value with edited values based on payload", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.TimeSample).toEqual(timeSampleToEdit);
+      expect(result.Name).toEqual(nameToEdit);
+    });
+
+    it("should return new value with event emitter being the same object as in original ", () => {
+      let result = exec();
+
+      expect(result.Events).toBeDefined();
+      expect(result.Events).toEqual(variable.Events);
+      expect(result.Name).toEqual(nameToEdit);
+    });
+
+    it("should set id of payload based on variable id", () => {
+      let result = exec();
+
+      expect(result.Id).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+    });
+
+    it("should set timeSample from based variable if timeSample is not given in edit payload", () => {
+      timeSampleToEdit = undefined;
+      let result = exec();
+
+      expect(result.TimeSample).toBeDefined();
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+    });
+
+    it("should set name from based variable if name is not given in edit payload", () => {
+      nameToEdit = undefined;
+      let result = exec();
+
+      expect(result.Name).toBeDefined();
+      expect(result.Name).toEqual(variable.Name);
     });
   });
 });

@@ -56,7 +56,7 @@ class MBVariable extends Variable {
     this._setSingleRequest.addVariable(this);
 
     //Setting value if defined
-    if (payload.value) this.Value = payload.value;
+    if (payload.value !== undefined) this.Value = payload.value;
   }
 
   /**
@@ -219,7 +219,9 @@ class MBVariable extends Variable {
     if (!payload.offset) payload.offset = this.Offset;
     if (!payload.length) payload.length = this.Length;
     if (!payload.fCode) payload.fCode = this.FCode;
-    if (!payload.value) payload.value = this.Value;
+    if (payload.value === undefined) payload.value = this.Value;
+    if (!payload.getSingleFCode) payload.getSingleFCode = this.GetSingleFCode;
+    if (!payload.setSingleFCode) payload.setSingleFCode = this.SetSingleFCode;
 
     return payload;
   }
@@ -229,7 +231,10 @@ class MBVariable extends Variable {
    */
   editWithPayload(payload) {
     //Creating new value from payload
-    let editedVariable = new MBVariable(this._generatePayloadToEdit(payload));
+    let editedVariable = new MBVariable(
+      this.Device,
+      this._generatePayloadToEdit(payload)
+    );
 
     //Reassigining events;
     editedVariable._events = this.Events;
