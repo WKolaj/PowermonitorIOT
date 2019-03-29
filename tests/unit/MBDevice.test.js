@@ -1,58 +1,84 @@
 const MBDevice = require("../../classes/device/Modbus/MBDevice");
+const MBBooleanVariable = require("../../classes/variable/Modbus/MBBooleanVariable");
+const MBByteArrayVariable = require("../../classes/variable/Modbus/MBByteArrayVariable");
+const MBFloatVariable = require("../../classes/variable/Modbus/MBFloatVariable");
+const MBInt16Variable = require("../../classes/variable/Modbus/MBInt16Variable");
+const MBInt32Variable = require("../../classes/variable/Modbus/MBInt32Variable");
+const MBSwappedFloatVariable = require("../../classes/variable/Modbus/MBSwappedFloatVariable");
+const MBSwappedInt32Variable = require("../../classes/variable/Modbus/MBSwappedInt32Variable");
+const MBSwappedUInt32Variable = require("../../classes/variable/Modbus/MBSwappedUInt32Variable");
+const MBUInt16Variable = require("../../classes/variable/Modbus/MBUInt16Variable");
+const MBUInt32Variable = require("../../classes/variable/Modbus/MBUInt32Variable");
 
 describe("MBDevice", () => {
   describe("constructor", () => {
     let name;
-    let payload;
-
-    beforeEach(() => {
-      name = "test name";
-    });
-
-    let exec = () => {
-      payload = { name: name };
-      return new MBDevice(payload);
-    };
-
-    it("should create new Device and set its name", () => {
-      let result = exec();
-
-      expect(result).toBeDefined();
-      expect(result.Name).toEqual(name);
-    });
-
-    it("should initiazle variables to empty object", () => {
-      let result = exec();
-
-      expect(result.Variables).toEqual({});
-    });
-  });
-
-  describe("setModbusDriver", () => {
-    let name;
-    let device;
     let ipAdress;
     let portNumber;
     let timeout;
     let unitId;
     let payload;
+    let variables;
+    let realInitVariableFunc;
+    let initVariablesMockFunc;
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
-      portNumber = 1234;
-      timeout = 4321;
-      unitId = 123;
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      variables = { var1: "var1", var2: "var2", var3: "var3" };
+      realInitVariableFunc = MBDevice.prototype._initVariables;
+      initVariablesMockFunc = jest.fn();
+      MBDevice.prototype._initVariables = initVariablesMockFunc;
+    });
+
+    afterEach(() => {
+      MBDevice.prototype._initVariables = realInitVariableFunc;
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId,
+        variables: variables
+      };
+
+      return new MBDevice(payload);
     };
 
-    it("should set MBDriver based on given arguments", () => {
+    it("should create new Device and set its name, ipAdress, portNumber, timeout and unitId", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Name).toEqual(name);
+      expect(result.IPAdress).toEqual(ipAdress);
+      expect(result.PortNumber).toEqual(portNumber);
+      expect(result.Timeout).toEqual(timeout);
+      expect(result.UnitId).toEqual(unitId);
+    });
+
+    it("should initiazle variables to empty object if no variables are given", () => {
+      variables = undefined;
+      let result = exec();
+
+      expect(initVariablesMockFunc).not.toHaveBeenCalled();
+      expect(result.Variables).toEqual({});
+    });
+
+    it("should initialize variables by calling initVariables if variables in payload are passed", () => {
       exec();
+
+      expect(initVariablesMockFunc).toHaveBeenCalledTimes(1);
+      expect(initVariablesMockFunc.mock.calls[0][0]).toEqual(variables);
+    });
+
+    it("should set MBDriver based on given arguments", () => {
+      let device = exec();
 
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver.IPAdress).toEqual(ipAdress);
@@ -62,38 +88,42 @@ describe("MBDevice", () => {
     });
 
     it("should set mbRequestGrouper", () => {
-      exec();
+      let device = exec();
 
       expect(device.RequestGrouper).toBeDefined();
       expect(device.RequestGrouper.MBDevice).toEqual(device);
     });
 
     it("should set requests to empty object", () => {
-      exec();
+      let device = exec();
 
       expect(device.Requests).toBeDefined();
       expect(device.Requests).toEqual({});
     });
 
-    it("should set portNumber to 502 if port was not given", () => {
-      portNumber = undefined;
-      exec();
-
-      expect(device.MBDriver.PortNumber).toEqual(502);
+    it("should throw if name is empty", () => {
+      name = undefined;
+      expect(() => exec()).toThrow();
     });
 
-    it("should set timeout to 2000 if timeout was not given", () => {
-      timeout = undefined;
-      exec();
-
-      expect(device.MBDriver.Timeout).toEqual(2000);
+    it("should throw if ipAdress is empty", () => {
+      ipAdress = undefined;
+      expect(() => exec()).toThrow();
     });
 
-    it("should set unitId to 1 if unitId was not given", () => {
+    it("should throw if unitId is empty", () => {
       unitId = undefined;
-      exec();
+      expect(() => exec()).toThrow();
+    });
 
-      expect(device.MBDriver.UnitId).toEqual(1);
+    it("should throw if timeout is empty", () => {
+      timeout = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if portNumber is empty", () => {
+      portNumber = undefined;
+      expect(() => exec()).toThrow();
     });
   });
 
@@ -108,16 +138,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.Requests;
     };
 
@@ -140,16 +175,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.RequestGrouper;
     };
 
@@ -172,16 +212,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.MBDriver;
     };
 
@@ -204,16 +249,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.IPAdress;
     };
 
@@ -236,16 +286,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.PortNumber;
     };
 
@@ -268,16 +323,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.Timeout;
     };
 
@@ -300,16 +360,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.UnitId;
     };
 
@@ -332,16 +397,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.Connected;
     };
 
@@ -364,16 +434,21 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
     });
 
     let exec = () => {
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       return device.IsActive;
     };
 
@@ -397,14 +472,19 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
       driverConnectMock = jest.fn();
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       device._driver.connect = driverConnectMock;
     });
 
@@ -431,14 +511,19 @@ describe("MBDevice", () => {
 
     beforeEach(() => {
       name = "test name";
-      payload = { name: name };
-      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
       unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
       driverDisconnectMock = jest.fn();
-      device.setModbusDriver(ipAdress, portNumber, timeout, unitId);
       device._driver.disconnect = driverDisconnectMock;
     });
 
@@ -453,110 +538,12 @@ describe("MBDevice", () => {
     });
   });
 
-  describe("addVariable", () => {
-    let name;
-    let device;
-    let variable;
-    let variableId;
-    let refreshGroupMock;
-    let payload;
-
-    beforeEach(() => {
-      name = "test name";
-      variableId = "test variable";
-      variable = { Id: variableId };
-      refreshGroupMock = jest.fn();
-    });
-
-    let exec = () => {
-      payload = { name: name };
-      device = new MBDevice(payload);
-      device._refreshRequestGroups = refreshGroupMock;
-      device.addVariable(variable);
-    };
-
-    it("should add variable to variables", () => {
-      exec();
-
-      expect(device.Variables[variableId]).toBeDefined();
-      expect(device.Variables[variableId]).toEqual(variable);
-    });
-
-    it("should add variable again after it was deleted", () => {
-      exec();
-      device.removeVariable(variableId);
-      device.addVariable(variable);
-      expect(device.Variables[variableId]).toBeDefined();
-      expect(device.Variables[variableId]).toEqual(variable);
-    });
-
-    it("should replace given variable if name already existis", () => {
-      exec();
-      let newVariable = { Id: variableId, Name: "new" };
-
-      device.addVariable(newVariable);
-      expect(device.Variables[variableId]).not.toEqual(variable);
-      expect(device.Variables[variableId]).toEqual(newVariable);
-    });
-
-    it("should call refreshRequestGroups", () => {
-      exec();
-
-      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe("removeVariable", () => {
-    let name;
-    let device;
-    let variable;
-    let variableName;
-    let refreshGroupMock;
-    let variableId;
-    let payload;
-
-    beforeEach(() => {
-      variableId = 1234;
-      name = "test name";
-      payload = { name: name };
-      variableName = "test variable";
-      variable = { Id: variableId, Name: variableName };
-      refreshGroupMock = jest.fn();
-    });
-
-    let exec = () => {
-      payload = { name: name };
-      device = new MBDevice(payload);
-      device._refreshRequestGroups = refreshGroupMock;
-      device.addVariable(variable);
-      device.removeVariable(variableId);
-    };
-
-    it("should remove variable from variables", () => {
-      exec();
-
-      expect(device.Variables[variableName]).not.toBeDefined();
-    });
-
-    it("should throw if there is no variable of such id", () => {
-      payload = { name: name };
-      device = new MBDevice(payload);
-      device._refreshRequestGroups = refreshGroupMock;
-      device.addVariable(variable);
-
-      let newVariable = { Id: "new test name" };
-
-      expect(() => device.removeVariable(newVariable.Id)).toThrow();
-    });
-
-    it("should call refreshRequestGroups", () => {
-      exec();
-      //First time while adding second while removing
-      expect(refreshGroupMock).toHaveBeenCalledTimes(2);
-    });
-  });
-
   describe("_refreshRequestGroups", () => {
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+
     let variable1;
     let variable2;
     let variable3;
@@ -575,6 +562,12 @@ describe("MBDevice", () => {
     let device;
 
     beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+
       variable1 = { Name: "var1", TickId: 1 };
       variable2 = { Name: "var2", TickId: 1 };
       variable3 = { Name: "var3", TickId: 2 };
@@ -596,9 +589,14 @@ describe("MBDevice", () => {
       };
 
       name = "test name";
-      payload = { name: name };
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
       device = new MBDevice(payload);
-      device.setModbusDriver("192.168.0.10");
       device._mbRequestGrouper = mockRequestGroupper;
 
       //Adding directly to collection - in order not to call refreshRequestGroup while adding
@@ -760,7 +758,18 @@ describe("MBDevice", () => {
     let tickNumber;
     let payload;
 
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+
     beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+
       variable1 = {
         Id: "1001",
         Value: "1234"
@@ -881,14 +890,18 @@ describe("MBDevice", () => {
         "5": [request9, request10]
       };
 
-      name = "Device1";
       mockOnRefreshEvent = jest.fn();
-      payload = { name: name };
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
       device = new MBDevice(payload);
       device.Events.on("Refreshed", args => {
         mockOnRefreshEvent(args);
       });
-      device.setModbusDriver("192.168.0.10");
       device._requests = requests;
 
       mockInvokeRequestsFn = jest.fn();
@@ -1037,6 +1050,1882 @@ describe("MBDevice", () => {
         .mockRejectedValueOnce(new Error("Test error"));
 
       expect(() => exec()).not.toThrow();
+    });
+  });
+
+  describe("_createBooleanVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBBooleanVariable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "bool";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 1;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createBooleanVariable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(1);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = true;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createByteArrayVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varLength;
+    let varId;
+    let varValue;
+    let varClass = MBByteArrayVariable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "byteArray";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varLength = 4;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        length: varLength,
+        value: varValue
+      };
+
+      return device._createByteArrayVariable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(varLength);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = [1, 2, 3, 4, 5, 6, 7, 8];
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Length in payload is empty", () => {
+      varLength = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createFloatVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBFloatVariable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "float";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createFloatVariable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(2);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234.4321;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createSwappedFloatVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBSwappedFloatVariable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "swappedFloat";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createSwappedFloatVariable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(2);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234.4321;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createInt32Variable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBInt32Variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "int32";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createInt32Variable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(2);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createSwappedInt32Variable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBSwappedInt32Variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "swappedInt32";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createSwappedInt32Variable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(2);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createUInt32Variable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBUInt32Variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "int32";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createUInt32Variable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(2);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createSwappedUInt32Variable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBSwappedUInt32Variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "swappedUInt32";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createSwappedUInt32Variable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(2);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createInt16Variable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBInt16Variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "int16";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createInt16Variable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(1);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("_createUInt16Variable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let varClass = MBUInt16Variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = undefined;
+      varType = "int16";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = undefined;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      return device._createUInt16Variable(variablePayload);
+    };
+
+    it("should create, add to variables and return new variable ", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(device.Variables[result.Id]).toBeDefined();
+      expect(device.Variables[result.Id]).toEqual(result);
+    });
+
+    it("variable should be created based on given payload ", () => {
+      let result = exec();
+
+      expect(result instanceof varClass).toBeTruthy();
+      expect(result.Id).toBeDefined();
+      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.Name).toEqual(varName);
+      expect(result.Offset).toEqual(varOffset);
+      expect(result.Length).toEqual(1);
+      expect(result.FCode).toEqual(varFcode);
+    });
+
+    it("variable set id of variable if it is given in payload", () => {
+      varId = 1234;
+      let result = exec();
+
+      expect(result.Id).toEqual(varId);
+    });
+
+    it("variable set value of variable if it is given in payload", () => {
+      varValue = 1234;
+      let result = exec();
+
+      expect(result.Value).toEqual(varValue);
+    });
+
+    it("should throw if TimeSample in payload is empty", () => {
+      varTimeSample = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Name in payload is empty", () => {
+      varName = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if Offset in payload is empty", () => {
+      varOffset = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if FCode in payload is empty", () => {
+      varFcode = undefined;
+      expect(() => exec()).toThrow();
+    });
+
+    it("should refresh requests group", () => {
+      exec();
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("createVariable", () => {
+    let name;
+    let device;
+    let payload;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varLength;
+    let varFcode;
+    let varType;
+    let _createBooleanVariableMockFunc;
+    let _createByteArrayVariableMockFunc;
+    let _createFloatVariableMockFunc;
+    let _createSwappedFloatVariableMockFunc;
+    let _createInt16VariableMockFunc;
+    let _createUInt16VariableMockFunc;
+    let _createInt32VariableMockFunc;
+    let _createUInt32VariableMockFunc;
+    let _createSwappedInt32VariableMockFunc;
+    let _createSwappedUInt32VariableMockFunc;
+
+    let _createBooleanVariableMockFuncResult;
+    let _createByteArrayVariableMockFuncResult;
+    let _createFloatVariableMockFuncResult;
+    let _createSwappedFloatVariableMockFuncResult;
+    let _createInt16VariableMockFuncResult;
+    let _createUInt16VariableMockFuncResult;
+    let _createInt32VariableMockFuncResult;
+    let _createUInt32VariableMockFuncResult;
+    let _createSwappedInt32VariableMockFuncResult;
+    let _createSwappedUInt32VariableMockFuncResult;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+      varTimeSample = 2;
+      varName = "test variable";
+      varOffset = 5;
+      varLength = 123;
+      varFcode = 3;
+      varType = "boolean";
+      _createBooleanVariableMockFuncResult = "some value boolean";
+      _createByteArrayVariableMockFuncResult = "some value byte array";
+      _createFloatVariableMockFuncResult = "some value float";
+      _createSwappedFloatVariableMockFuncResult = "some value swapped float";
+      _createInt16VariableMockFuncResult = "some value int16";
+      _createUInt16VariableMockFuncResult = "some value uin16";
+      _createInt32VariableMockFuncResult = "some value int32";
+      _createUInt32VariableMockFuncResult = "some value uin32";
+      _createSwappedInt32VariableMockFuncResult = "some value swapped int32";
+      _createSwappedUInt32VariableMockFuncResult = "some value swapped uin32";
+
+      _createBooleanVariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createBooleanVariableMockFuncResult);
+      _createByteArrayVariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createByteArrayVariableMockFuncResult);
+      _createFloatVariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createFloatVariableMockFuncResult);
+      _createSwappedFloatVariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createSwappedFloatVariableMockFuncResult);
+      _createInt16VariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createInt16VariableMockFuncResult);
+      _createUInt16VariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createUInt16VariableMockFuncResult);
+      _createInt32VariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createInt32VariableMockFuncResult);
+      _createUInt32VariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createUInt32VariableMockFuncResult);
+      _createSwappedInt32VariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createSwappedInt32VariableMockFuncResult);
+      _createSwappedUInt32VariableMockFunc = jest
+        .fn()
+        .mockReturnValue(_createSwappedUInt32VariableMockFuncResult);
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
+
+      variablePayload = {
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        length: varLength
+      };
+
+      device._createBooleanVariable = _createBooleanVariableMockFunc;
+      device._createByteArrayVariable = _createByteArrayVariableMockFunc;
+      device._createFloatVariable = _createFloatVariableMockFunc;
+      device._createSwappedFloatVariable = _createSwappedFloatVariableMockFunc;
+      device._createInt16Variable = _createInt16VariableMockFunc;
+      device._createUInt16Variable = _createUInt16VariableMockFunc;
+      device._createInt32Variable = _createInt32VariableMockFunc;
+      device._createUInt32Variable = _createUInt32VariableMockFunc;
+      device._createSwappedInt32Variable = _createSwappedInt32VariableMockFunc;
+      device._createSwappedUInt32Variable = _createSwappedUInt32VariableMockFunc;
+
+      return device.createVariable(variablePayload);
+    };
+
+    it("should create and return boolean variable if payload type is boolean", () => {
+      varType = "boolean";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createBooleanVariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+
+      expect(result).toEqual(_createBooleanVariableMockFuncResult);
+    });
+
+    it("should create and return byteArray variable if payload type is boolean", () => {
+      varType = "byteArray";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createByteArrayVariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createByteArrayVariableMockFuncResult);
+    });
+
+    it("should create and return float variable if payload type is boolean", () => {
+      varType = "float";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createFloatVariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createFloatVariableMockFuncResult);
+    });
+
+    it("should create and return int16 variable if payload type is boolean", () => {
+      varType = "int16";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createInt16VariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createInt16VariableMockFuncResult);
+    });
+
+    it("should create and return int32 variable if payload type is boolean", () => {
+      varType = "int32";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createInt32VariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createInt32VariableMockFuncResult);
+    });
+
+    it("should create and return swapped float variable if payload type is boolean", () => {
+      varType = "swappedFloat";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createSwappedFloatVariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createSwappedFloatVariableMockFuncResult);
+    });
+
+    it("should create and return swapped int32 variable if payload type is boolean", () => {
+      varType = "swappedInt32";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createSwappedInt32VariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createSwappedInt32VariableMockFuncResult);
+    });
+
+    it("should create and return swapped uint32 variable if payload type is boolean", () => {
+      varType = "swappedUInt32";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).toHaveBeenCalledTimes(1);
+
+      expect(_createSwappedUInt32VariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createSwappedUInt32VariableMockFuncResult);
+    });
+
+    it("should create and return uint16 variable if payload type is boolean", () => {
+      varType = "uInt16";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createUInt16VariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createUInt16VariableMockFuncResult);
+    });
+
+    it("should create and return uint32 variable if payload type is boolean", () => {
+      varType = "uInt32";
+      let result = exec();
+
+      expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedFloatVariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt16VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createUInt32VariableMockFunc).toHaveBeenCalledTimes(1);
+      expect(_createSwappedInt32VariableMockFunc).not.toHaveBeenCalled();
+      expect(_createSwappedUInt32VariableMockFunc).not.toHaveBeenCalled();
+
+      expect(_createUInt32VariableMockFunc.mock.calls[0][0]).toEqual(
+        variablePayload
+      );
+      expect(result).toEqual(_createUInt32VariableMockFuncResult);
+    });
+
+    it("should throw if payload.type is not recognized", () => {
+      varType = "unrecognizedType";
+
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if payload is empty", () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
+
+      expect(() => device.createVariable()).toThrow();
+    });
+
+    it("should throw if payload.type is empty", () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
+
+      expect(() => device.createVariable({})).toThrow();
+    });
+  });
+
+  describe("addVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variableId;
+    let variableName;
+    let variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+      variableId = 1234;
+      variableName = "test variable";
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variable = {
+        Id: variableId,
+        Name: variableName
+      };
+
+      return device.addVariable(variable);
+    };
+
+    it("should add variable to variables", () => {
+      exec();
+
+      expect(device.Variables[variableId]).toBeDefined();
+      expect(device.Variables[variableId]).toEqual(variable);
+    });
+
+    it("should add variable again after it was deleted", () => {
+      exec();
+      device.removeVariable(variable.Id);
+      device.addVariable(variable);
+      expect(device.Variables[variableId]).toBeDefined();
+      expect(device.Variables[variableId]).toEqual(variable);
+    });
+
+    it("should replace given variable if name already existis", () => {
+      exec();
+      let newVariable = { Id: variableId, Name: "new" };
+
+      device.addVariable(newVariable);
+      expect(device.Variables[variableId]).not.toEqual(variable);
+      expect(device.Variables[variableId]).toEqual(newVariable);
+    });
+
+    it("should call refresh groups after adding variable", () => {
+      exec();
+
+      expect(refreshGroupMock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("removeVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variableId;
+    let variableName;
+    let variable;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+      variableId = 1234;
+      variableName = "test variable";
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variable = {
+        Id: variableId,
+        Name: variableName
+      };
+
+      device.addVariable(variable);
+
+      return device.removeVariable(variableId);
+    };
+
+    it("should remove variable from variables", () => {
+      exec();
+
+      expect(device.Variables[variableId]).not.toBeDefined();
+    });
+
+    it("should return removed variable", () => {
+      let result = exec();
+
+      expect(result).toEqual(variable);
+    });
+
+    it("should throw if there is no variable of such id", () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variable = {
+        Id: variableId,
+        Name: variableName
+      };
+
+      device.addVariable(variable);
+
+      let newVariable = { Id: "new test name" };
+
+      expect(() => device.removeVariable(newVariable)).toThrow();
+    });
+
+    it("should call refresh groups after adding variable", () => {
+      exec();
+
+      //First time while adding second while removing
+      expect(refreshGroupMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe("editVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+
+    let variablePayload;
+    let varTimeSample;
+    let varName;
+    let varOffset;
+    let varFcode;
+    let varType;
+    let varId;
+    let varValue;
+    let variable;
+
+    let editVariablePayload;
+    let editVarTimeSample;
+    let editVarName;
+    let editVarOffset;
+    let editVarFcode;
+    let editVarId;
+    let editVarValue;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      varId = 1234;
+      varType = "int16";
+      varTimeSample = 1;
+      varName = "test variable";
+      varOffset = 2;
+      varFcode = 3;
+      varValue = 123;
+
+      editVarId = undefined;
+      editVarTimeSample = 2;
+      editVarName = "test variable2";
+      editVarOffset = 3;
+      editVarFcode = 4;
+      editVarValue = 321;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variablePayload = {
+        id: varId,
+        type: varType,
+        timeSample: varTimeSample,
+        name: varName,
+        offset: varOffset,
+        fCode: varFcode,
+        value: varValue
+      };
+
+      variable = device.createVariable(variablePayload);
+
+      editVariablePayload = {
+        id: editVarId,
+        timeSample: editVarTimeSample,
+        name: editVarName,
+        offset: editVarOffset,
+        fCode: editVarFcode,
+        value: editVarValue
+      };
+
+      return device.editVariable(varId, editVariablePayload);
+    };
+
+    it("should create and return new variable based on payload and assing it in device - instead of previous one ", () => {
+      let result = exec();
+
+      let editedVariable = device.Variables[varId];
+      expect(editedVariable).toBeDefined();
+      expect(editedVariable).not.toEqual(variable);
+
+      expect(editedVariable.TimeSample).toEqual(editVarTimeSample);
+      expect(editedVariable.Name).toEqual(editVarName);
+      expect(editedVariable.Offset).toEqual(editVarOffset);
+      expect(editedVariable.FCode).toEqual(editVarFcode);
+      expect(editedVariable.Value).toEqual(editVarValue);
+
+      expect(editedVariable.Events).toEqual(variable.Events);
+
+      expect(editedVariable instanceof MBInt16Variable).toBeTruthy();
+
+      expect(result).toEqual(editedVariable);
+    });
+
+    it("should throw if there is no variable of given id", () => {
+      exec();
+      expect(() => device.editVariable(8765, editVariablePayload)).toThrow();
+    });
+
+    it("should not set id to new if it exists in payload", () => {
+      editVarId = 8765;
+
+      let editedVariable = device.Variables[varId];
+      expect(editedVariable).toBeDefined();
+      expect(editedVariable).not.toEqual(variable);
+      expect(editedVariable.Id).toEqual(varId);
     });
   });
 });

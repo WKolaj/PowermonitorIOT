@@ -57,7 +57,10 @@ class Device {
     if (!(id in this.Variables))
       throw Error(`There is no such variable in device - variable id:${id}`);
 
+    let variableToDelete = this.Variables[id];
     delete this.Variables[id];
+
+    return variableToDelete;
   }
 
   static divideVariablesByTickId(variables) {

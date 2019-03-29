@@ -11,8 +11,16 @@ const MBSwappedFloatVariable = require("./classes/variable/Modbus/MBSwappedFloat
 
 let sampler = new Sampler();
 
-let device = new MBDevice({ name: "PAC" });
-device.setModbusDriver("192.168.1.8");
+let devicePayload = {
+  name: "PAC",
+  ipAdress: "192.168.1.8",
+  timeout: 2000,
+  unitId: 1,
+  portNumber: 502
+};
+
+let device = new MBDevice(devicePayload);
+
 device.Events.on("Refreshed", args => {
   console.log(args[2]);
   console.log(args[1]);

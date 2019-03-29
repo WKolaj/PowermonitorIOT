@@ -32,6 +32,14 @@ describe("Device", () => {
 
       expect(result.Events).toBeDefined();
     });
+
+    it("should throw if payload is empty", () => {
+      expect(() => new Device()).toThrow();
+    });
+
+    it("should throw if payload has no name", () => {
+      expect(() => new Device({})).toThrow();
+    });
   });
 
   describe("get Events", () => {
@@ -100,6 +108,47 @@ describe("Device", () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(device._variables);
+    });
+  });
+
+  describe("get Variable", () => {
+    let name;
+    let device;
+    let payload;
+    let var1;
+    let var2;
+    let var3;
+    let getId;
+
+    beforeEach(() => {
+      name = "test name";
+      var1 = { Id: 101 };
+      var2 = { Id: 102 };
+      var3 = { Id: 103 };
+      getId = 102;
+    });
+
+    let exec = () => {
+      payload = { name: name };
+      device = new Device(payload);
+      device.addVariable(var1);
+      device.addVariable(var2);
+      device.addVariable(var3);
+      return device.getVariable(getId);
+    };
+
+    it("should return variable of given id", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(var2);
+    });
+
+    it("should return undefined if there is no variable of given id", () => {
+      getId = 1234;
+      let result = exec();
+
+      expect(result).not.toBeDefined();
     });
   });
 
@@ -173,12 +222,12 @@ describe("Device", () => {
       expect(device.Variables[variableId]).not.toBeDefined();
     });
 
-    it("should throw if there is no variable of such name", () => {
+    it("should throw if there is no variable of such id", () => {
       payload = { name: name };
       device = new Device(payload);
       device.addVariable(variable);
 
-      let newVariable = { Name: "new test name" };
+      let newVariable = { Id: "new test Id" };
 
       expect(() => device.removeVariable(newVariable)).toThrow();
     });

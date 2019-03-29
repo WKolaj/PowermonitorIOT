@@ -21,23 +21,34 @@ class MBDevice extends Device {
   constructor(payload) {
     super(payload);
 
+    if (!payload.ipAdress) throw new Error("ipAdress cannot be empty");
+    if (!payload.portNumber) throw new Error("port number cannot be empty");
+    if (!payload.timeout) throw new Error("timeout cannot be empty");
+    if (!payload.unitId) throw new Error("unitId cannot be empty");
+
     //Binding methods to device object
     this.disconnect = this.disconnect.bind(this);
     this.connect = this.connect.bind(this);
+
+    //Setting modbus driver
+    this._driver = new MBDriver(
+      this,
+      payload.ipAdress,
+      payload.portNumber,
+      payload.timeout,
+      payload.unitId
+    );
+    this._mbRequestGrouper = new MBRequestGrouper(this);
+    this._requests = {};
+
+    //Initializing variables if they are given in payload
+    if (payload.variables) this._initVariables(payload.variables);
   }
 
   /**
-   * @description Assigning Modbus Driver to Modbus Device
-   * @param {string} ipAdress ipAdress
-   * @param {number} portNumber port number
-   * @param {number} timeout timeout
-   * @param {number} unitId Modbus RTU Id
+   * @description Method for initializing variables
    */
-  setModbusDriver(ipAdress, portNumber = 502, timeout = 2000, unitId = 1) {
-    this._driver = new MBDriver(this, ipAdress, portNumber, timeout, unitId);
-    this._mbRequestGrouper = new MBRequestGrouper(this);
-    this._requests = {};
-  }
+  _initVariables(variables) {}
 
   /**
    * @description All requests divided by tickId
@@ -128,6 +139,10 @@ class MBDevice extends Device {
     }
   }
 
+  /**
+   * @description creating variable and adding it to the Device
+   * @param {object} payload Payload of variable to be created
+   */
   createVariable(payload) {
     if (!payload) throw new Error("Given payload cannot be empty");
     if (!payload.type)
@@ -138,7 +153,7 @@ class MBDevice extends Device {
         return this._createBooleanVariable(payload);
       }
       case "byteArray": {
-        return this._createBooleanVariable(payload);
+        return this._createByteArrayVariable(payload);
       }
       case "float": {
         return this._createFloatVariable(payload);
@@ -170,16 +185,6 @@ class MBDevice extends Device {
         );
       }
     }
-  }
-
-  removeVariable(id, payload) {
-    if (!this.Variables[id])
-      throw new Error(`Variable of given id: ${id} does not exist in device`);
-
-    let variableToDelete = this.Variables[id];
-
-    this.removeVariable();
-    return variableToAdd;
   }
 
   editVariable(id, payload) {
@@ -362,8 +367,10 @@ class MBDevice extends Device {
    * @param {string} id device id
    */
   removeVariable(id) {
-    super.removeVariable(id);
+    let deletedVariable = super.removeVariable(id);
     this._refreshRequestGroups();
+
+    return deletedVariable;
   }
 
   /**
