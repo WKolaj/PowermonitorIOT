@@ -911,6 +911,7 @@ describe("MBRequestGrouper", () => {
       mbDevice = { MBDriver: mbDriver };
       maxReqLength = 50;
       variable1Payload = {
+        Id: "0001",
         Name: "Var1",
         UnitId: 100,
         FCode: 1,
@@ -918,6 +919,7 @@ describe("MBRequestGrouper", () => {
         Length: 1
       };
       variable2Payload = {
+        Id: "0002",
         Name: "Var2",
         UnitId: 100,
         FCode: 1,
@@ -925,6 +927,7 @@ describe("MBRequestGrouper", () => {
         Length: 1
       };
       variable3Payload = {
+        Id: "0003",
         Name: "Var3",
         UnitId: 100,
         FCode: 3,
@@ -932,6 +935,7 @@ describe("MBRequestGrouper", () => {
         Length: 1
       };
       variable4Payload = {
+        Id: "0004",
         Name: "Var4",
         UnitId: 100,
         FCode: 3,
@@ -939,6 +943,7 @@ describe("MBRequestGrouper", () => {
         Length: 1
       };
       variable5Payload = {
+        Id: "0005",
         Name: "Var5",
         UnitId: 100,
         FCode: 4,
@@ -946,6 +951,7 @@ describe("MBRequestGrouper", () => {
         Length: 1
       };
       variable6Payload = {
+        Id: "0006",
         Name: "Var6",
         UnitId: 200,
         FCode: 4,
@@ -953,6 +959,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable7Payload = {
+        Id: "0007",
         Name: "Var7",
         UnitId: 200,
         FCode: 15,
@@ -960,6 +967,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable8Payload = {
+        Id: "0008",
         Name: "Var8",
         UnitId: 200,
         FCode: 15,
@@ -967,6 +975,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable9Payload = {
+        Id: "0009",
         Name: "Var9",
         UnitId: 200,
         FCode: 16,
@@ -974,6 +983,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable10Payload = {
+        Id: "0010",
         Name: "Var10",
         UnitId: 200,
         FCode: 16,
@@ -981,6 +991,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable11Payload = {
+        Id: "0011",
         Name: "Var11",
         UnitId: 300,
         FCode: 3,
@@ -988,6 +999,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable12Payload = {
+        Id: "0012",
         Name: "Var12",
         UnitId: 300,
         FCode: 3,
@@ -995,6 +1007,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable13Payload = {
+        Id: "0013",
         Name: "Var13",
         UnitId: 300,
         FCode: 3,
@@ -1002,6 +1015,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable14Payload = {
+        Id: "0014",
         Name: "Var14",
         UnitId: 300,
         FCode: 3,
@@ -1009,6 +1023,7 @@ describe("MBRequestGrouper", () => {
         Length: 2
       };
       variable15Payload = {
+        Id: "0015",
         Name: "Var15",
         UnitId: 300,
         FCode: 3,

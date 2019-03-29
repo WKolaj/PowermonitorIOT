@@ -35,6 +35,27 @@ class MBRequestGrouper {
   }
 
   /**
+   * @description Method for converting requests to VariableId : newValue Pair
+   * @param {Array} requests Requests to be converted to VariableId : newValue Pair
+   */
+  ConvertRequestsToIDValuePair(requests) {
+    let valuesToReturn = {};
+
+    for (let request of requests) {
+      let variableConnectionsOfRequest = Object.values(
+        request.VariableConnections
+      );
+
+      for (let variableConnection of variableConnectionsOfRequest) {
+        valuesToReturn[variableConnection.variable.Id] =
+          variableConnection.variable.Value;
+      }
+    }
+
+    return valuesToReturn;
+  }
+
+  /**
    * @description Method for generating requests based on variable collection
    * @param {object} mbDevice Variables collection
    */

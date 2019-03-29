@@ -3,13 +3,15 @@ const Device = require("../../classes/device/Device");
 describe("Device", () => {
   describe("constructor", () => {
     let name;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
     });
 
     let exec = () => {
-      return new Device(name);
+      payload = { name: name };
+      return new Device(payload);
     };
 
     it("should create new Device and set its name", () => {
@@ -24,18 +26,49 @@ describe("Device", () => {
 
       expect(result.Variables).toEqual({});
     });
+
+    it("should initiazle event object", () => {
+      let result = exec();
+
+      expect(result.Events).toBeDefined();
+    });
   });
 
-  describe("get Name", () => {
+  describe("get Events", () => {
     let name;
     let device;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
     });
 
     let exec = () => {
-      device = new Device(name);
+      payload = { name: name };
+      device = new Device(payload);
+      return device.Events;
+    };
+
+    it("should return EventEmitter of device", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(device._events);
+    });
+  });
+
+  describe("get Name", () => {
+    let name;
+    let device;
+    let payload;
+
+    beforeEach(() => {
+      name = "test name";
+    });
+
+    let exec = () => {
+      payload = { name: name };
+      device = new Device(payload);
       return device.Name;
     };
 
@@ -50,13 +83,15 @@ describe("Device", () => {
   describe("get Variables", () => {
     let name;
     let device;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
     });
 
     let exec = () => {
-      device = new Device(name);
+      payload = { name: name };
+      device = new Device(payload);
       return device.Variables;
     };
 
@@ -73,6 +108,7 @@ describe("Device", () => {
     let device;
     let variable;
     let variableId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
@@ -81,7 +117,8 @@ describe("Device", () => {
     });
 
     let exec = () => {
-      device = new Device(name);
+      payload = { name: name };
+      device = new Device(payload);
       device.addVariable(variable);
     };
 
@@ -115,6 +152,7 @@ describe("Device", () => {
     let device;
     let variable;
     let variableId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
@@ -123,7 +161,8 @@ describe("Device", () => {
     });
 
     let exec = () => {
-      device = new Device(name);
+      payload = { name: name };
+      device = new Device(payload);
       device.addVariable(variable);
       device.removeVariable(variableId);
     };
@@ -135,7 +174,8 @@ describe("Device", () => {
     });
 
     it("should throw if there is no variable of such name", () => {
-      device = new Device(name);
+      payload = { name: name };
+      device = new Device(payload);
       device.addVariable(variable);
 
       let newVariable = { Name: "new test name" };
@@ -248,6 +288,64 @@ describe("Device", () => {
           variable10
         ]
       });
+    });
+  });
+
+  describe("constructor", () => {
+    let name;
+    let payload;
+    let device;
+    let tickNumber;
+    let _refreshMock;
+    let _refreshMockResolvedValue;
+    let eventEmitterMock;
+    let eventEmitterMockEmitMethod;
+
+    beforeEach(() => {
+      name = "test name";
+      tickNumber = 15;
+      _refreshMockResolvedValue = 1234;
+      eventEmitterMockEmitMethod = jest.fn();
+      eventEmitterMock = { emit: eventEmitterMockEmitMethod };
+    });
+
+    let exec = () => {
+      payload = { name: name };
+      _refreshMock = jest.fn().mockResolvedValue(_refreshMockResolvedValue);
+      device = new Device(payload);
+      device._refresh = _refreshMock;
+      device._events = eventEmitterMock;
+
+      return device.refresh(tickNumber);
+    };
+
+    it("should call _refresh method with tick arguments", async () => {
+      let result = await exec();
+
+      expect(_refreshMock).toHaveBeenCalledTimes(1);
+      expect(_refreshMock.mock.calls[0][0]).toEqual(tickNumber);
+    });
+
+    it("should invoke Refreshed Event with _refresh result if refresh result is not empty", async () => {
+      let result = await exec();
+
+      expect(eventEmitterMockEmitMethod).toHaveBeenCalledTimes(1);
+      expect(eventEmitterMockEmitMethod.mock.calls[0][0]).toEqual("Refreshed");
+      expect(eventEmitterMockEmitMethod.mock.calls[0][1][0]).toEqual(device);
+      expect(eventEmitterMockEmitMethod.mock.calls[0][1][1]).toEqual(
+        _refreshMockResolvedValue
+      );
+      expect(eventEmitterMockEmitMethod.mock.calls[0][1][2]).toEqual(
+        tickNumber
+      );
+    });
+
+    it("should not invoke Refreshed Event if refresh result is empty", async () => {
+      _refreshMockResolvedValue = null;
+
+      let result = await exec();
+
+      expect(eventEmitterMockEmitMethod).not.toHaveBeenCalled();
     });
   });
 });

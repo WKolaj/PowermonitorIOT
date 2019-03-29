@@ -11,26 +11,30 @@ const MBSwappedFloatVariable = require("./classes/variable/Modbus/MBSwappedFloat
 
 let sampler = new Sampler();
 
-let device = new MBDevice("PAC");
-device.setModbusDriver("192.168.0.211");
+let device = new MBDevice({ name: "PAC" });
+device.setModbusDriver("192.168.1.8");
+device.Events.on("Refreshed", args => {
+  console.log(args[2]);
+  console.log(args[1]);
+});
 
 let var1Payload = {
   timeSample: 1,
-  type: "swappedFloat",
+  type: "float",
   name: "Napiecie L1-N",
   fCode: 3,
   offset: 1
 };
 let var2Payload = {
   timeSample: 1,
-  type: "swappedFloat",
+  type: "float",
   name: "Napiecie L2-N",
   fCode: 3,
   offset: 3
 };
 let var3Payload = {
-  timeSample: 1,
-  type: "swappedFloat",
+  timeSample: 2,
+  type: "float",
   name: "Napiecie L3-N",
   fCode: 3,
   offset: 5
@@ -93,14 +97,15 @@ let logVar = args => {
   console.log(`${Date.now()}: ${args[0].Name}, ${args[1]}`);
 };
 
-for (let variable of Object.values(device.Variables)) {
-  variable.Events.on("ValueChanged", logVar);
-}
+// for (let variable of Object.values(device.Variables)) {
+//   variable.Events.on("ValueChanged", logVar);
+// }
 
 sampler.addDevice(device);
 sampler.start();
 
 device.connect();
+
 // let pac1 = new MBDevice("PAC1");
 
 // pac1.setModbusDriver("192.168.0.20", 502, 2000, 1);

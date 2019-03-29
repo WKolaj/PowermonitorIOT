@@ -3,13 +3,15 @@ const MBDevice = require("../../classes/device/Modbus/MBDevice");
 describe("MBDevice", () => {
   describe("constructor", () => {
     let name;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
     });
 
     let exec = () => {
-      return new MBDevice(name);
+      payload = { name: name };
+      return new MBDevice(payload);
     };
 
     it("should create new Device and set its name", () => {
@@ -33,10 +35,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -100,10 +104,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -130,10 +136,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -160,10 +168,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -190,10 +200,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -220,10 +232,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -250,10 +264,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -280,10 +296,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -310,10 +328,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -340,10 +360,12 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -371,10 +393,12 @@ describe("MBDevice", () => {
     let timeout;
     let unitId;
     let driverConnectMock;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -403,10 +427,12 @@ describe("MBDevice", () => {
     let timeout;
     let unitId;
     let driverDisconnectMock;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       ipAdress = "192.168.0.10";
       portNumber = 1234;
       timeout = 4321;
@@ -433,6 +459,7 @@ describe("MBDevice", () => {
     let variable;
     let variableId;
     let refreshGroupMock;
+    let payload;
 
     beforeEach(() => {
       name = "test name";
@@ -442,7 +469,8 @@ describe("MBDevice", () => {
     });
 
     let exec = () => {
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       device._refreshRequestGroups = refreshGroupMock;
       device.addVariable(variable);
     };
@@ -485,17 +513,20 @@ describe("MBDevice", () => {
     let variableName;
     let refreshGroupMock;
     let variableId;
+    let payload;
 
     beforeEach(() => {
       variableId = 1234;
       name = "test name";
+      payload = { name: name };
       variableName = "test variable";
       variable = { Id: variableId, Name: variableName };
       refreshGroupMock = jest.fn();
     });
 
     let exec = () => {
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       device._refreshRequestGroups = refreshGroupMock;
       device.addVariable(variable);
       device.removeVariable(variableId);
@@ -508,7 +539,8 @@ describe("MBDevice", () => {
     });
 
     it("should throw if there is no variable of such id", () => {
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       device._refreshRequestGroups = refreshGroupMock;
       device.addVariable(variable);
 
@@ -537,6 +569,7 @@ describe("MBDevice", () => {
     let variable10;
     let mockRequestGroupper;
     let mockConvertVariablesToRequests;
+    let payload;
 
     let name;
     let device;
@@ -563,7 +596,8 @@ describe("MBDevice", () => {
       };
 
       name = "test name";
-      device = new MBDevice(name);
+      payload = { name: name };
+      device = new MBDevice(payload);
       device.setModbusDriver("192.168.0.10");
       device._mbRequestGrouper = mockRequestGroupper;
 
@@ -705,23 +739,139 @@ describe("MBDevice", () => {
     let request9;
     let request10;
     let mockInvokeRequestsFn;
+    let mockEventEmitter;
+    let mockEventEmitterEmitMethod;
+    let variable1;
+    let variable2;
+    let variable3;
+    let variable4;
+    let variable5;
+    let variable6;
+    let variable7;
+    let variable8;
+    let variable9;
+    let variable10;
+    let variable11;
+    let variable12;
 
     let name;
     let device;
     let isDeviceActive;
     let tickNumber;
+    let payload;
 
     beforeEach(() => {
-      request1 = "request 1";
-      request2 = "request 2";
-      request3 = "request 3";
-      request4 = "request 4";
-      request5 = "request 5";
-      request6 = "request 6";
-      request7 = "request 7";
-      request8 = "request 8";
-      request9 = "request 9";
-      request10 = "request 10";
+      variable1 = {
+        Id: "1001",
+        Value: "1234"
+      };
+      variable2 = {
+        Id: "1002",
+        Value: "1235"
+      };
+      variable3 = {
+        Id: "1003",
+        Value: "1236"
+      };
+      variable4 = {
+        Id: "1004",
+        Value: "1237"
+      };
+      variable5 = {
+        Id: "1005",
+        Value: "1238"
+      };
+      variable6 = {
+        Id: "1006",
+        Value: "1239"
+      };
+      variable7 = {
+        Id: "1007",
+        Value: "1240"
+      };
+      variable8 = {
+        Id: "1008",
+        Value: "1241"
+      };
+      variable9 = {
+        Id: "1009",
+        Value: "1242"
+      };
+      variable10 = {
+        Id: "1010",
+        Value: "1243"
+      };
+      variable11 = {
+        Id: "1011",
+        Value: "1244"
+      };
+      variable12 = {
+        Id: "1012",
+        Value: "1245"
+      };
+
+      request1 = {
+        Id: "0001",
+        VariableConnections: {
+          [variable1.Id]: { variable: variable1 }
+        }
+      };
+      request2 = {
+        Id: "0002",
+        VariableConnections: {
+          [variable2.Id]: { variable: variable2 },
+          [variable3.Id]: { variable: variable3 }
+        }
+      };
+      request3 = {
+        Id: "0003",
+        VariableConnections: {
+          [variable4.Id]: { variable: variable4 },
+          [variable5.Id]: { variable: variable5 }
+        }
+      };
+      request4 = {
+        Id: "0004",
+        VariableConnections: {
+          [variable6.Id]: { variable: variable6 }
+        }
+      };
+      request5 = {
+        Id: "0005",
+        VariableConnections: {
+          [variable7.Id]: { variable: variable7 }
+        }
+      };
+      request6 = {
+        Id: "0006",
+        VariableConnections: {
+          [variable8.Id]: { variable: variable8 }
+        }
+      };
+      request7 = {
+        Id: "0007",
+        VariableConnections: {
+          [variable9.Id]: { variable: variable9 }
+        }
+      };
+      request8 = {
+        Id: "0008",
+        VariableConnections: {
+          [variable10.Id]: { variable: variable10 }
+        }
+      };
+      request9 = {
+        Id: "0009",
+        VariableConnections: {
+          [variable11.Id]: { variable: variable11 }
+        }
+      };
+      request10 = {
+        Id: "0010",
+        VariableConnections: {
+          [variable12.Id]: { variable: variable12 }
+        }
+      };
 
       let requests = {
         "1": [request1, request2],
@@ -732,30 +882,42 @@ describe("MBDevice", () => {
       };
 
       name = "Device1";
-      device = new MBDevice(name);
+      mockOnRefreshEvent = jest.fn();
+      payload = { name: name };
+      device = new MBDevice(payload);
+      device.Events.on("Refreshed", args => {
+        mockOnRefreshEvent(args);
+      });
       device.setModbusDriver("192.168.0.10");
       device._requests = requests;
+
       mockInvokeRequestsFn = jest.fn();
       tickNumber = 10;
 
       isDeviceActive = true;
+
+      mockEventEmitterEmitMethod = jest.fn();
+      mockEventEmitter = {
+        emit: mockEventEmitterEmitMethod
+      };
+      device._events = mockEventEmitter;
     });
 
     let exec = () => {
       device.MBDriver._active = isDeviceActive;
       device.MBDriver.invokeRequests = mockInvokeRequestsFn;
-      device.refresh(tickNumber);
+      return device.refresh(tickNumber);
     };
 
-    it("should not invoke any request if device is not active", () => {
+    it("should not invoke any request if device is not active", async () => {
       isDeviceActive = false;
-      exec();
+      await exec();
 
       expect(mockInvokeRequestsFn).not.toHaveBeenCalled();
     });
 
-    it("should invoke all requests that matches tickNumber", () => {
-      exec();
+    it("should invoke all requests that matches tickNumber", async () => {
+      await exec();
 
       expect(mockInvokeRequestsFn).toHaveBeenCalledTimes(1);
       expect(mockInvokeRequestsFn.mock.calls[0][0].length).toEqual(6);
@@ -767,13 +929,101 @@ describe("MBDevice", () => {
       expect(mockInvokeRequestsFn.mock.calls[0][0][5]).toEqual(request10);
     });
 
-    it("should not throw if requests are empty", () => {
+    it("should invoke Refreshed event with all changed variables if there was no error", async () => {
+      await exec();
+
+      expect(mockEventEmitterEmitMethod).toHaveBeenCalledTimes(1);
+      expect(mockEventEmitterEmitMethod.mock.calls[0][0]).toEqual("Refreshed");
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][0]).toEqual(device);
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][2]).toEqual(
+        tickNumber
+      );
+      expect(
+        Object.keys(mockEventEmitterEmitMethod.mock.calls[0][1][1]).length
+      ).toEqual(8);
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1001"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1001"]).toEqual(
+        "1234"
+      );
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1002"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1002"]).toEqual(
+        "1235"
+      );
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1003"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1003"]).toEqual(
+        "1236"
+      );
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1004"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1004"]).toEqual(
+        "1237"
+      );
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1005"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1005"]).toEqual(
+        "1238"
+      );
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1006"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1006"]).toEqual(
+        "1239"
+      );
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1011"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1011"]).toEqual(
+        "1244"
+      );
+
+      expect(
+        mockEventEmitterEmitMethod.mock.calls[0][1][1]["1012"]
+      ).toBeDefined();
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1012"]).toEqual(
+        "1245"
+      );
+    });
+
+    it("should not invoke Refreshed event with all changed variables if there was an error", async () => {
+      mockInvokeRequestsFn = jest.fn().mockImplementation(() => {
+        throw new Error("Test error");
+      });
+
+      await exec();
+
+      expect(mockEventEmitterEmitMethod).not.toHaveBeenCalled();
+    });
+
+    it("should not invoke Refreshed event with all changed variables if device is not active", async () => {
+      isDeviceActive = false;
+
+      await exec();
+
+      expect(mockEventEmitterEmitMethod).not.toHaveBeenCalled();
+    });
+
+    it("should not throw if requests are empty", async () => {
       device._requests = {};
 
       expect(() => exec()).not.toThrow();
     });
 
-    it("should not throw if invokeRequest throws", () => {
+    it("should not throw if invokeRequest throws", async () => {
       mockInvokeRequestsFn = jest.fn().mockImplementation(() => {
         throw new Error("Test error");
       });
@@ -781,7 +1031,7 @@ describe("MBDevice", () => {
       expect(() => exec()).not.toThrow();
     });
 
-    it("should not throw if invokeRequest rejects", () => {
+    it("should not throw if invokeRequest rejects", async () => {
       mockInvokeRequestsFn = jest
         .fn()
         .mockRejectedValueOnce(new Error("Test error"));

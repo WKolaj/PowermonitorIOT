@@ -16,10 +16,10 @@ const MBUInt32Variable = require("../../variable/Modbus/MBUInt32Variable");
 class MBDevice extends Device {
   /**
    * @description Modbus device
-   * @param {string} name device name
+   * @param {object} payload device payload
    */
-  constructor(name) {
-    super(name);
+  constructor(payload) {
+    super(payload);
 
     //Binding methods to device object
     this.disconnect = this.disconnect.bind(this);
@@ -369,8 +369,8 @@ class MBDevice extends Device {
   /**
    * @description Refreshing variables based on tickNumber
    */
-  refresh(tickNumber) {
-    if (!this.IsActive) return;
+  async _refresh(tickNumber) {
+    if (!this.IsActive) return null;
 
     let allTickIds = Object.keys(this.Requests);
 
@@ -383,9 +383,12 @@ class MBDevice extends Device {
     }
 
     try {
-      this.MBDriver.invokeRequests(requestsToInvoke);
+      await this.MBDriver.invokeRequests(requestsToInvoke);
+      //Returing all refreshed variable Ids and values;
+      return this.RequestGrouper.ConvertRequestsToIDValuePair(requestsToInvoke);
     } catch (err) {
       console.log(err);
+      return null;
     }
   }
 }

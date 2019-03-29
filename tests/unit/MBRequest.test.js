@@ -425,16 +425,16 @@ describe("MBRequest", () => {
       exec();
 
       expect(
-        mbRequest.VariableConnections[intVariable1.Name].responseData
+        mbRequest.VariableConnections[intVariable1.Id].responseData
       ).toEqual([intVariable1ResponseData]);
       expect(
-        mbRequest.VariableConnections[intVariable2.Name].responseData
+        mbRequest.VariableConnections[intVariable2.Id].responseData
       ).toEqual([intVariable2ResponseData]);
       expect(
-        mbRequest.VariableConnections[intVariable3.Name].responseData
+        mbRequest.VariableConnections[intVariable3.Id].responseData
       ).toEqual(intVariable3ResponseData);
       expect(
-        mbRequest.VariableConnections[intVariable4.Name].responseData
+        mbRequest.VariableConnections[intVariable4.Id].responseData
       ).toEqual([intVariable4ResponseData]);
     });
 
@@ -604,10 +604,75 @@ describe("MBRequest", () => {
       expect(result).toBeFalsy();
     });
 
-    it("should return false if variable with such name is was already added to request", () => {
+    it("should return true if variable with such name is was already added to request", () => {
       variableToAddName = "Var1";
 
       let result = exec();
+
+      expect(result).toBeTruthy();
+    });
+
+    it("should return false if variable with such id is already added to request", () => {
+      mbDriver = {
+        createSetDataAction: mbDriverCreateSetActionMock,
+        createGetDataAction: mbDriverCreateGetActionMock
+      };
+
+      mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
+
+      //Creating variables to Add
+      intVariable1 = new MBInt16Variable(
+        {
+          UnitId: unitId,
+          MBDriver: {
+            createGetDataAction: jest.fn().mockReturnValue(1),
+            createSetDataAction: jest.fn().mockReturnValue(2)
+          }
+        },
+        {
+          name: "Var1",
+          fCode: fcode,
+          offset: initialOffset
+        }
+      );
+      intVariable2 = new MBInt16Variable(
+        {
+          UnitId: unitId,
+          MBDriver: {
+            createGetDataAction: jest.fn().mockReturnValue(1),
+            createSetDataAction: jest.fn().mockReturnValue(2)
+          }
+        },
+        {
+          name: "Var2",
+          fCode: fcode,
+          offset: initialOffset + 1
+        }
+      );
+
+      //Adding varaibles in order to get offset and length
+      mbRequest.addVariable(intVariable1);
+      mbRequest.addVariable(intVariable2);
+
+      let variableToAdd = new MBInt16Variable(
+        {
+          UnitId: variableUnitId,
+          MBDriver: {
+            createGetDataAction: jest.fn().mockReturnValue(1),
+            createSetDataAction: jest.fn().mockReturnValue(2)
+          }
+        },
+        {
+          name: variableToAddName,
+          fCode: variableToAddFcode,
+          offset: variableToAddInitialOffset
+        }
+      );
+
+      //Setting id as id of variable that already exists in request
+      variableToAdd._id = intVariable2.Id;
+
+      let result = mbRequest.canVariableBeAddedToRequest(variableToAdd);
 
       expect(result).toBeFalsy();
     });
@@ -738,12 +803,78 @@ describe("MBRequest", () => {
       }).toThrow();
     });
 
-    it("should throw if variable with such name is was already added to request", () => {
+    it("should throw if variable with such Id was already added to request", () => {
+      mbDriver = {
+        createSetDataAction: mbDriverCreateSetActionMock,
+        createGetDataAction: mbDriverCreateGetActionMock
+      };
+
+      mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
+
+      //Creating variables to Add
+      intVariable1 = new MBInt16Variable(
+        {
+          UnitId: unitId,
+          MBDriver: {
+            createGetDataAction: jest.fn().mockReturnValue(1),
+            createSetDataAction: jest.fn().mockReturnValue(2)
+          }
+        },
+        {
+          name: "Var1",
+          fCode: fcode,
+          offset: initialOffset
+        }
+      );
+      intVariable2 = new MBInt16Variable(
+        {
+          UnitId: unitId,
+          MBDriver: {
+            createGetDataAction: jest.fn().mockReturnValue(1),
+            createSetDataAction: jest.fn().mockReturnValue(2)
+          }
+        },
+        {
+          name: "Var2",
+          fCode: fcode,
+          offset: initialOffset + 1
+        }
+      );
+
+      //Adding varaibles in order to get offset and length
+      mbRequest.addVariable(intVariable1);
+      mbRequest.addVariable(intVariable2);
+      mbRequest.updateAction = mbRequestUpdateActionMock;
+
+      variableToAdd = new MBInt32Variable(
+        {
+          UnitId: variableUnitId,
+          MBDriver: {
+            createGetDataAction: jest.fn().mockReturnValue(1),
+            createSetDataAction: jest.fn().mockReturnValue(2)
+          }
+        },
+        {
+          name: variableToAddName,
+          fCode: variableToAddFcode,
+          offset: variableToAddInitialOffset
+        }
+      );
+
+      //Setting the same Id to variable to Add
+      variableToAdd.Id = intVariable2.Id;
+
+      expect(() => {
+        mbRequest.addVariable(variableToAdd);
+      }).not.toThrow();
+    });
+
+    it("should not throw if variable with such name is was already added to request", () => {
       variableToAddName = "Var1";
 
       expect(() => {
         exec();
-      }).toThrow();
+      }).not.toThrow();
     });
 
     it("should throw if variable unitId is different than request unitId", () => {
@@ -779,13 +910,13 @@ describe("MBRequest", () => {
         responseData: undefined
       };
 
-      expect(mbRequest.VariableConnections[variableToAdd.Name]).toBeDefined();
-      expect(mbRequest.VariableConnections[variableToAdd.Name]).toMatchObject(
+      expect(mbRequest.VariableConnections[variableToAdd.Id]).toBeDefined();
+      expect(mbRequest.VariableConnections[variableToAdd.Id]).toMatchObject(
         variableObject
       );
-      expect(
-        mbRequest.VariableConnections[variableToAdd.Name].variable
-      ).toEqual(variableToAdd);
+      expect(mbRequest.VariableConnections[variableToAdd.Id].variable).toEqual(
+        variableToAdd
+      );
     });
 
     it("should increment length of request", () => {

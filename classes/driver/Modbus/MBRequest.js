@@ -105,10 +105,10 @@ class MBRequest {
     this._responseData = responseData;
 
     //Setting asociated responseData to variables
-    let allVariableNames = Object.keys(this.VariableConnections);
+    let allVariableIds = Object.keys(this.VariableConnections);
 
-    for (let variableName of allVariableNames) {
-      let variableObject = this.VariableConnections[variableName];
+    for (let variableId of allVariableIds) {
+      let variableObject = this.VariableConnections[variableId];
 
       let startIndex = variableObject.requestOffset;
       let stopIndex = variableObject.requestOffset + variableObject.length;
@@ -130,7 +130,7 @@ class MBRequest {
     if (mbVariable.UnitId !== this.UnitId) return false;
 
     //Cannot add a variable that already exists in request
-    if (mbVariable.Name in this.VariableConnections) return false;
+    if (mbVariable.Id in this.VariableConnections) return false;
 
     //Variable can be added despite its offset - undefined offset means that it is first variable of request - request's offset should be set according to there variable offset
     if (this.Offset === undefined) return true;
@@ -161,7 +161,7 @@ class MBRequest {
     if (this.Offset === undefined) this._offset = mbVariable.Offset;
 
     //Creating variable object and assigining it to VariableCollection
-    this.VariableConnections[mbVariable.Name] = this._createVariableObject(
+    this.VariableConnections[mbVariable.Id] = this._createVariableObject(
       mbVariable
     );
 
@@ -182,10 +182,10 @@ class MBRequest {
     //Asigning data to send in the same order as variables are defined
     this._dataToSend = [];
 
-    let allVariableNames = Object.keys(this.VariableConnections);
+    let allVariableIds = Object.keys(this.VariableConnections);
     //Appending data from every variable to array of values which are ment to be written to Modbus driver
-    for (let variableName of allVariableNames) {
-      let variableObject = this.VariableConnections[variableName];
+    for (let variableId of allVariableIds) {
+      let variableObject = this.VariableConnections[variableId];
       let variable = variableObject.variable;
 
       if (Array.isArray(variable.Data)) {

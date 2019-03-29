@@ -1,11 +1,31 @@
+const EventEmitter = require("events");
+const mongoose = require("mongoose");
+
 class Device {
   /**
    * @description Base class representing Device
-   * @param {string} name device name
+   * @param {object} payload Device payload
    */
-  constructor(name) {
-    this._name = name;
+  constructor(payload) {
+    if (!payload) throw new Error("Payload cannot be empty");
+    if (!payload.name) throw new Error("Payload Name cannot be empty");
+
+    this._name = payload.name;
     this._variables = {};
+
+    //Events of device
+    this._events = new EventEmitter();
+
+    //Generating random id in case it was not provided
+    if (!payload.id) payload.id = Device.generateRandId();
+    this._id = payload.id;
+  }
+
+  /**
+   * @description Event emitter
+   */
+  get Events() {
+    return this._events;
   }
 
   /**
@@ -62,9 +82,28 @@ class Device {
   }
 
   /**
+   * @description Refreshing variables based on tickNumber
+   */
+  async refresh(tickNumber) {
+    let result = await this._refresh(tickNumber);
+    if (result) {
+      this.Events.emit("Refreshed", [this, result, tickNumber]);
+    }
+  }
+
+  /**
    * @description Refreshing variables based on tickNumber - should be override in child classes
    */
-  refresh(tickNumber) {}
+  _refresh(tickNumber) {
+    return {};
+  }
+
+  /**
+   * @description Generating random id
+   */
+  static generateRandId() {
+    return mongoose.Types.ObjectId();
+  }
 }
 
 module.exports = Device;
