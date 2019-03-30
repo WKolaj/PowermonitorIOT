@@ -107,25 +107,25 @@ let logVar = args => {
 
 console.log(device.Payload);
 
-let device2 = new MBDevice(device.Payload);
+// let device2 = new MBDevice(device.Payload);
 
-device2.Events.on("Refreshed", args => {
-  console.log(args[2]);
-  console.log(args[1]);
-});
+// device2.Events.on("Refreshed", args => {
+//   console.log(args[2]);
+//   console.log(args[1]);
+// });
 
 // for (let variable of Object.values(device.Variables)) {
 //   variable.Events.on("ValueChanged", qlogVar);
 // }
 
-// sampler.addDevice(device);
+sampler.addDevice(device);
 
 sampler.start();
 
-// device.connect();
+device.connect();
 
-sampler.addDevice(device2);
-device2.connect();
+// sampler.addDevice(device2);
+// device2.connect();
 
 // let pac1 = new MBDevice("PAC1");
 
@@ -232,27 +232,29 @@ process.stdin.on("data", async function(key) {
   // without rawmode, it returns EOL with the string
   if (key.indexOf("1") == 0) {
     let payload =
-      var1.Name == "Napiecie L1-N"
-        ? { name: "Napiecie L1-L2", offset: 7 }
-        : { name: "Napiecie L1-N", offset: 1 };
-    var1 = device.editVariable(var1.Id, payload);
+      device.PortNumber == 502 ? { portNumber: 503 } : { portNumber: 502 };
+    device.editWithPayload(payload);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("2") == 0) {
     let payload =
-      var2.Name == "Napiecie L2-N"
-        ? { name: "Napiecie L2-L3", offset: 9 }
-        : { name: "Napiecie L2-N", offset: 3 };
-    var2 = device.editVariable(var2.Id, payload);
+      device.Timeout == 2000 ? { timeout: 1000 } : { timeout: 2000 };
+    device.editWithPayload(payload);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("3") == 0) {
     let payload =
-      var3.Name == "Napiecie L3-N"
-        ? { name: "Napiecie L3-L1", offset: 11 }
-        : { name: "Napiecie L3-N", offset: 5 };
-    var3 = device.editVariable(var3.Id, payload);
+      device.IPAdress == "192.168.1.8"
+        ? { ipAdress: "192.168.1.9" }
+        : { ipAdress: "192.168.1.8" };
+    device.editWithPayload(payload);
+  }
+
+  // without rawmode, it returns EOL with the string
+  if (key.indexOf("4") == 0) {
+    let payload = device.UnitId == 1 ? { unitId: 2 } : { unitId: 1 };
+    device.editWithPayload(payload);
   }
 });

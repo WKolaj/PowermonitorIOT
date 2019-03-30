@@ -17,6 +17,7 @@ describe("MBDevice", () => {
     let portNumber;
     let timeout;
     let unitId;
+    let type;
     let payload;
     let variables;
     let realInitVariableFunc;
@@ -28,7 +29,12 @@ describe("MBDevice", () => {
       portNumber = 502;
       timeout = 2000;
       unitId = 1;
-      variables = { var1: "var1", var2: "var2", var3: "var3" };
+      variables = [
+        { Id: "var1", Name: "name1" },
+        { Id: "var2", Name: "name2" },
+        { Id: "var3", Name: "name3" }
+      ];
+      type = undefined;
       realInitVariableFunc = MBDevice.prototype._initVariables;
       initVariablesMockFunc = jest.fn();
       MBDevice.prototype._initVariables = initVariablesMockFunc;
@@ -45,7 +51,8 @@ describe("MBDevice", () => {
         portNumber: portNumber,
         timeout: timeout,
         unitId: unitId,
-        variables: variables
+        variables: variables,
+        type: type
       };
 
       return new MBDevice(payload);
@@ -124,6 +131,21 @@ describe("MBDevice", () => {
     it("should throw if portNumber is empty", () => {
       portNumber = undefined;
       expect(() => exec()).toThrow();
+    });
+
+    it("should set type to mbDevice if no type is provided in payload", () => {
+      let result = exec();
+
+      expect(result.Type).toBeDefined();
+      expect(result.Type).toEqual("mbDevice");
+    });
+
+    it("should set type to type given in payload if it exists", () => {
+      type = "test type";
+      let result = exec();
+
+      expect(result.Type).toBeDefined();
+      expect(result.Type).toEqual(type);
     });
   });
 
@@ -235,6 +257,43 @@ describe("MBDevice", () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(device._driver);
+    });
+  });
+
+  describe("Type", () => {
+    let name;
+    let device;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 1234;
+      timeout = 4321;
+      unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice(payload);
+    });
+
+    let exec = () => {
+      return device.Type;
+    };
+
+    it("should return type of device", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual("mbDevice");
     });
   });
 
@@ -457,6 +516,104 @@ describe("MBDevice", () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(device.MBDriver.IsActive);
+    });
+  });
+
+  describe("get Payload", () => {
+    let device;
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let type;
+    let payload;
+    let variables;
+    let initVariablesMockFunc;
+    let realInitVariableFunc;
+    let isActive;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      isActive = false;
+      variables = [
+        { Id: "var1", Name: "name1", Payload: "variable1" },
+        { Id: "var2", Name: "name2", Payload: "variable2" },
+        { Id: "var3", Name: "name3", Payload: "variable3" }
+      ];
+      type = "test type";
+
+      initVariablesMockFunc = function(variablesToAdd) {
+        this.Variables = [];
+
+        for (let variable of variablesToAdd) {
+          this.Variables[variable.Id] = variable;
+        }
+      };
+
+      realInitVariableFunc = MBDevice.prototype._initVariables;
+      MBDevice.prototype._initVariables = initVariablesMockFunc;
+    });
+
+    afterEach(() => {
+      MBDevice.prototype._initVariables = realInitVariableFunc;
+    });
+
+    let exec = () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId,
+        variables: variables,
+        type: type
+      };
+
+      device = new MBDevice(payload);
+      device._driver._active = isActive;
+
+      return device.Payload;
+    };
+
+    it("should return payload based on device parameters", async () => {
+      let result = await exec();
+
+      let expectedPayload = {
+        id: device.Id,
+        name: device.Name,
+        timeout: device.Timeout,
+        unitId: device.UnitId,
+        ipAdress: device.IPAdress,
+        portNumber: device.PortNumber,
+        type: device.Type,
+        variables: ["variable1", "variable2", "variable3"]
+      };
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(expectedPayload);
+    });
+
+    it("should return payload based on device parameters when device has no variables", async () => {
+      variables = [];
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: device.Id,
+        name: device.Name,
+        timeout: device.Timeout,
+        unitId: device.UnitId,
+        ipAdress: device.IPAdress,
+        portNumber: device.PortNumber,
+        type: device.Type,
+        variables: []
+      };
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(expectedPayload);
     });
   });
 
@@ -2933,6 +3090,379 @@ describe("MBDevice", () => {
 
       //Three times - first time addding variable second removing while editing, thrid - adding new generated variable
       expect(refreshGroupMock).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe("editWithPayload", () => {
+    let device;
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let type;
+    let payload;
+    let variables;
+    let initVariablesMockFunc;
+    let realInitVariableFunc;
+    let isActive;
+
+    let connectMockFunc;
+    let disconnectMockFunc;
+    let refreshGroupMockFunc;
+
+    let editedName;
+    let editedIpAdress;
+    let editedPortNumber;
+    let editedTimeout;
+    let editedUnitId;
+    let editedType;
+    let editedVariables;
+    let editedPayload;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      isActive = false;
+      variables = [
+        { Id: "var1", Name: "name1" },
+        { Id: "var2", Name: "name2" },
+        { Id: "var3", Name: "name3" }
+      ];
+      type = "test type";
+
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId,
+        variables: variables,
+        type: type
+      };
+
+      refreshGroupMockFunc = jest.fn();
+      connectMockFunc = jest.fn();
+      disconnectMockFunc = jest.fn();
+
+      initVariablesMockFunc = function(variablesToAdd) {
+        this.Variables = [];
+
+        for (let variable of variablesToAdd) {
+          this.Variables[variable.Id] = variable;
+        }
+      };
+
+      realInitVariableFunc = MBDevice.prototype._initVariables;
+      MBDevice.prototype._initVariables = initVariablesMockFunc;
+
+      device = new MBDevice(payload);
+      device._refreshRequestGroups = refreshGroupMockFunc;
+      device.connect = connectMockFunc;
+      device.disconnect = disconnectMockFunc;
+
+      editedName = "test name";
+      editedIpAdress = "192.168.1.10";
+      editedPortNumber = 503;
+      editedTimeout = 3000;
+      editedUnitId = 4;
+      editedVariables = undefined;
+      editedType = undefined;
+    });
+
+    afterEach(() => {
+      MBDevice.prototype._initVariables = realInitVariableFunc;
+    });
+
+    let exec = () => {
+      device._driver._active = isActive;
+
+      editedPayload = {
+        name: editedName,
+        ipAdress: editedIpAdress,
+        portNumber: editedPortNumber,
+        timeout: editedTimeout,
+        unitId: editedUnitId,
+        variables: editedVariables,
+        type: editedType
+      };
+      return device.editWithPayload(editedPayload);
+    };
+
+    it("should edit device based on given payload", async () => {
+      await exec();
+      expect(device.IPAdress).toEqual(editedIpAdress);
+      expect(device.Name).toEqual(editedName);
+      expect(device.PortNumber).toEqual(editedPortNumber);
+      expect(device.Timeout).toEqual(editedTimeout);
+      expect(device.UnitId).toEqual(editedUnitId);
+    });
+
+    it("should not edit variables if variables in payload are undefined", async () => {
+      await exec();
+      expect(device.Variables).toBeDefined();
+      expect(Object.keys(device.Variables).length).toEqual(3);
+      expect(device.Variables["var1"]).toMatchObject({
+        Id: "var1",
+        Name: "name1"
+      });
+      expect(device.Variables["var2"]).toMatchObject({
+        Id: "var2",
+        Name: "name2"
+      });
+      expect(device.Variables["var3"]).toMatchObject({
+        Id: "var3",
+        Name: "name3"
+      });
+    });
+
+    it("should not edit variables if variables in payload are defined", async () => {
+      editedVariables = [
+        { Id: "var4", Name: "name4" },
+        { Id: "var5", Name: "name5" },
+        { Id: "var6", Name: "name6" }
+      ];
+
+      await exec();
+      expect(device.Variables).toBeDefined();
+      expect(Object.keys(device.Variables).length).toEqual(3);
+      expect(device.Variables["var1"]).toMatchObject({
+        Id: "var1",
+        Name: "name1"
+      });
+      expect(device.Variables["var2"]).toMatchObject({
+        Id: "var2",
+        Name: "name2"
+      });
+      expect(device.Variables["var3"]).toMatchObject({
+        Id: "var3",
+        Name: "name3"
+      });
+    });
+
+    it("should not edit type if type in payload is undefined", async () => {
+      editedType = undefined;
+      await exec();
+      expect(device.Type).toBeDefined();
+      expect(device.Type).toEqual(type);
+    });
+
+    it("should not edit type if type in payload is defined", async () => {
+      editedType = "new test type";
+      await exec();
+      expect(device.Type).toBeDefined();
+      expect(device.Type).toEqual(type);
+    });
+
+    it("should not disconnect if device is not active", async () => {
+      isActive = false;
+      await exec();
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should call disconnect if device is active", async () => {
+      isActive = true;
+      await exec();
+      expect(disconnectMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not connect if device is not active", async () => {
+      isActive = false;
+      await exec();
+      expect(connectMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should call connect if device is active", async () => {
+      isActive = true;
+      await exec();
+      expect(connectMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call disconnect before connect if device is active", async () => {
+      isActive = true;
+      await exec();
+      expect(disconnectMockFunc).toHaveBeenCalledBefore(connectMockFunc);
+
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should not call connect or disconnect if device is active and ipAdress, portNumber, unitId and timeout are undefined - but change other attributes", async () => {
+      isActive = true;
+      editedIpAdress = undefined;
+      editedPortNumber = undefined;
+      editedTimeout = undefined;
+      editedUnitId = undefined;
+
+      await exec();
+      expect(connectMockFunc).not.toHaveBeenCalled();
+      expect(disconnectMockFunc).not.toHaveBeenCalled();
+      expect(device.Name).toEqual(editedName);
+
+      expect(refreshGroupMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should call connect and disconnect and refreshGroups and create new MBDriver if device is active and at least ipAdress is defined - and change other attributes", async () => {
+      let prevMBDriver = device.MBDriver;
+      isActive = true;
+      editedIpAdress = "192.168.1.1";
+      editedPortNumber = undefined;
+      editedTimeout = undefined;
+      editedUnitId = undefined;
+
+      await exec();
+      expect(connectMockFunc).toHaveBeenCalledTimes(1);
+      expect(disconnectMockFunc).toHaveBeenCalledTimes(1);
+      expect(device.Name).toEqual(editedName);
+
+      expect(prevMBDriver).toBeDefined();
+      expect(device.MBDriver).toBeDefined();
+      expect(device.MBDriver).not.toEqual(prevMBDriver);
+
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least ipAdress is defined - and change other attributes", async () => {
+      let prevMBDriver = device.MBDriver;
+      isActive = true;
+      editedIpAdress = "192.168.1.1";
+      editedPortNumber = undefined;
+      editedTimeout = undefined;
+      editedUnitId = undefined;
+
+      await exec();
+      expect(connectMockFunc).toHaveBeenCalledTimes(1);
+      expect(disconnectMockFunc).toHaveBeenCalledTimes(1);
+      expect(device.Name).toEqual(editedName);
+
+      expect(prevMBDriver).toBeDefined();
+      expect(device.MBDriver).toBeDefined();
+      expect(device.MBDriver).not.toEqual(prevMBDriver);
+
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least PortNumber is defined - and change other attributes", async () => {
+      let prevMBDriver = device.MBDriver;
+      isActive = true;
+      editedIpAdress = undefined;
+      editedPortNumber = 1234;
+      editedTimeout = undefined;
+      editedUnitId = undefined;
+
+      await exec();
+      expect(connectMockFunc).toHaveBeenCalledTimes(1);
+      expect(disconnectMockFunc).toHaveBeenCalledTimes(1);
+      expect(device.Name).toEqual(editedName);
+
+      expect(prevMBDriver).toBeDefined();
+      expect(device.MBDriver).toBeDefined();
+      expect(device.MBDriver).not.toEqual(prevMBDriver);
+
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least Timeout is defined - and change other attributes", async () => {
+      let prevMBDriver = device.MBDriver;
+      isActive = true;
+      editedIpAdress = undefined;
+      editedPortNumber = undefined;
+      editedTimeout = 5000;
+      editedUnitId = undefined;
+
+      await exec();
+      expect(connectMockFunc).toHaveBeenCalledTimes(1);
+      expect(disconnectMockFunc).toHaveBeenCalledTimes(1);
+      expect(device.Name).toEqual(editedName);
+
+      expect(prevMBDriver).toBeDefined();
+      expect(device.MBDriver).toBeDefined();
+      expect(device.MBDriver).not.toEqual(prevMBDriver);
+
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least unitId is defined - and change other attributes", async () => {
+      let prevMBDriver = device.MBDriver;
+      isActive = true;
+      editedIpAdress = undefined;
+      editedPortNumber = undefined;
+      editedTimeout = undefined;
+      editedUnitId = 12;
+
+      await exec();
+      expect(connectMockFunc).toHaveBeenCalledTimes(1);
+      expect(disconnectMockFunc).toHaveBeenCalledTimes(1);
+      expect(device.Name).toEqual(editedName);
+
+      expect(prevMBDriver).toBeDefined();
+      expect(device.MBDriver).toBeDefined();
+      expect(device.MBDriver).not.toEqual(prevMBDriver);
+
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should return device after edditing", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(device);
+    });
+  });
+
+  describe("Connected", () => {
+    let name;
+    let device;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let createVariableMockFn;
+    let variable1;
+    let variable2;
+    let variable3;
+    let variables;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 1234;
+      timeout = 4321;
+      unitId = 123;
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      createVariableMockFn = jest.fn();
+      device = new MBDevice(payload);
+      device.createVariable = createVariableMockFn;
+      variable1 = { Id: "var1", name: "variable1" };
+      variable2 = { Id: "var2", name: "variable2" };
+      variable3 = { Id: "var3", name: "variable3" };
+      variables = [variable1, variable2, variable3];
+    });
+
+    let exec = () => {
+      device._initVariables(variables);
+    };
+
+    it("should call create variable for each variable in given collection", () => {
+      exec();
+
+      expect(createVariableMockFn).toHaveBeenCalledTimes(variables.length);
+      expect(createVariableMockFn.mock.calls[0][0]).toEqual(variable1);
+      expect(createVariableMockFn.mock.calls[1][0]).toEqual(variable2);
+      expect(createVariableMockFn.mock.calls[2][0]).toEqual(variable3);
+    });
+
+    it("should not throw if variables are empty", () => {
+      variables = [];
+      expect(() => exec()).not.toThrow();
     });
   });
 });

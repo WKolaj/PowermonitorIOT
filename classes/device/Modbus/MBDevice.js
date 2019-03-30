@@ -43,6 +43,9 @@ class MBDevice extends Device {
 
     //Initializing variables if they are given in payload
     if (payload.variables) this._initVariables(payload.variables);
+
+    //If type is given in payload - set it according to payload - otherwise set default mbDevice type
+    this._type = payload.type ? payload.type : "mbDevice";
   }
 
   /**
@@ -191,6 +194,11 @@ class MBDevice extends Device {
     }
   }
 
+  /**
+   * @description Method for editting variable
+   * @param {string} id Id of variable to be edited
+   * @param {*} payload Payload of eddition
+   */
   editVariable(id, payload) {
     if (!this.Variables[id])
       throw new Error(`Variable of given id: ${id} does not exist in device`);
@@ -206,6 +214,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating boolean variable
+   * @param {*} payload Payload of edition
+   */
   _createBooleanVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -221,6 +233,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating byteArray variable
+   * @param {*} payload Payload of edition
+   */
   _createByteArrayVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -238,6 +254,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating float variable
+   * @param {*} payload Payload of edition
+   */
   _createFloatVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -253,6 +273,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating swapped float variable
+   * @param {*} payload Payload of edition
+   */
   _createSwappedFloatVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -268,6 +292,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating int16 variable
+   * @param {*} payload Payload of edition
+   */
   _createInt16Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -283,6 +311,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating int32 variable
+   * @param {*} payload Payload of edition
+   */
   _createInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -298,6 +330,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating swapped int32 variable
+   * @param {*} payload Payload of edition
+   */
   _createSwappedInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -313,6 +349,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating uint16 variable
+   * @param {*} payload Payload of edition
+   */
   _createUInt16Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -328,6 +368,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating uint32 variable
+   * @param {*} payload Payload of edition
+   */
   _createUInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -343,6 +387,10 @@ class MBDevice extends Device {
     return variableToAdd;
   }
 
+  /**
+   * @description Method for creating swapped uint32 variable
+   * @param {*} payload Payload of edition
+   */
   _createSwappedUInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
@@ -419,9 +467,14 @@ class MBDevice extends Device {
 
     parentPayload.variables = this._generateVariablesPayload();
 
+    parentPayload.type = this.Type;
+
     return parentPayload;
   }
 
+  /**
+   * @description Method for generating payload associated with added variables
+   */
   _generateVariablesPayload() {
     let varaiblesPayload = [];
     let allVariables = Object.values(this.Variables);
@@ -431,6 +484,48 @@ class MBDevice extends Device {
     }
 
     return varaiblesPayload;
+  }
+
+  /**
+   * @description Method for editing Device
+   */
+  async editWithPayload(payload) {
+    await super.editWithPayload(payload);
+
+    let changeAssociatedWithMBDriver =
+      payload.ipAdress ||
+      payload.timeout ||
+      payload.portNumber ||
+      payload.unitId;
+
+    let shouldBeReconnected = this.IsActive && changeAssociatedWithMBDriver;
+    //Reconnecting only if device is Active and change is associated with modbus driver
+    if (shouldBeReconnected) {
+      await this.disconnect();
+    }
+
+    //Setting driver parameters if they are empty
+    if (!payload.ipAdress) payload.ipAdress = this.IPAdress;
+    if (!payload.timeout) payload.timeout = this.Timeout;
+    if (!payload.portNumber) payload.portNumber = this.PortNumber;
+    if (!payload.unitId) payload.unitId = this.UnitId;
+
+    if (changeAssociatedWithMBDriver) {
+      this._driver = new MBDriver(
+        this,
+        payload.ipAdress,
+        payload.portNumber,
+        payload.timeout,
+        payload.unitId
+      );
+      this._refreshRequestGroups();
+    }
+
+    if (shouldBeReconnected) {
+      await this.connect();
+    }
+
+    return this;
   }
 }
 

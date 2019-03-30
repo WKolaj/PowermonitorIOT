@@ -216,6 +216,10 @@ class MBVariable extends Variable {
     return payload;
   }
 
+  /**
+   * Generating payload for creating new variable based on this variable
+   * @param {object} payload Payload
+   */
   _generatePayloadToEdit(payload) {
     //Coping all neccessary data to payload
     payload.id = this.Id;

@@ -19,6 +19,15 @@ class Device {
     //Generating random id in case it was not provided
     if (!payload.id) payload.id = Device.generateRandId();
     this._id = payload.id;
+
+    this._type = undefined;
+  }
+
+  /**
+   * @description Type of device
+   */
+  get Type() {
+    return this._type;
   }
 
   /**
@@ -130,6 +139,14 @@ class Device {
       id: this.Id,
       name: this.Name
     };
+  }
+
+  /**
+   * @description Method for editing Device
+   */
+  async editWithPayload(payload) {
+    //Setting new values if they are given in payload
+    if (payload.name) this._name = payload.name;
   }
 }
 
