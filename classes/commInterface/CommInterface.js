@@ -59,20 +59,34 @@ class CommInterface {
     return this._generatePayload();
   }
 
+  /**
+   * @description Starting commmunication of device
+   * @param {string} deviceId Device Id
+   */
   async startCommunication(deviceId) {
     return this.getDevice(deviceId).connect();
   }
 
+  /**
+   * @description Stopping commmunication of device
+   * @param {string} deviceId Device Id
+   */
   async stopCommunication(deviceId) {
     return this.getDevice(deviceId).disconnect();
   }
 
+  /**
+   * @description Starting with all devices
+   */
   async startCommunicationWithAllDevices() {
     for (let deviceId of Object.keys(this.Devices)) {
       this.startCommunication(deviceId);
     }
   }
 
+  /**
+   * @description Stopping with all devices
+   */
   async stopCommunicationWithAllDevices() {
     for (let deviceId of Object.keys(this.Devices)) {
       this.stopCommunication(deviceId);
@@ -215,6 +229,25 @@ class CommInterface {
   removeVariable(deviceId, variableId) {
     let device = this.getDevice(deviceId);
     return device.removeVariable(variableId);
+  }
+
+  /**
+   * @description Getting value strightly from device
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   */
+  async getVariableFromDevice(deviceId, variableId) {
+    return this.getVariable(deviceId, variableId).getSingle();
+  }
+
+  /**
+   * @description Setting value strightly in device
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   * @param {object} value value to be set
+   */
+  async setVariableInDevice(deviceId, variableId, value) {
+    return this.getVariable(deviceId, variableId).setSingle(value);
   }
 
   _generatePayload() {

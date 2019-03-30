@@ -419,16 +419,21 @@ process.stdin.on("data", async function(key) {
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("1") == 0) {
-    let payload =
-      device.PortNumber == 502 ? { portNumber: 503 } : { portNumber: 502 };
-    device.editWithPayload(payload);
+    commInterface.setVariableInDevice(
+      "5c9f8a7fd04bb119b3ad229f",
+      "5c9f8a7fd04bb119b3ad22a0",
+      Math.random() * 100
+    );
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("2") == 0) {
-    let payload =
-      device.Timeout == 2000 ? { timeout: 1000 } : { timeout: 2000 };
-    device.editWithPayload(payload);
+    console.log(
+      await commInterface.getVariableFromDevice(
+        "5c9f8a7fd04bb119b3ad229f",
+        "5c9f8a7fd04bb119b3ad22a0"
+      )
+    );
   }
 
   // without rawmode, it returns EOL with the string

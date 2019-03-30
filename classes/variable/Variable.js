@@ -100,6 +100,21 @@ class Variable {
   }
 
   /**
+   * @description Setting value in variable and in device - should be override in child classes
+   * @param {object} newValue value to set
+   */
+  setSingle(newValue) {
+    throw new Error("Not implemented");
+  }
+
+  /**
+   * @description Getting value from device - should be override in child classes
+   */
+  getSingle() {
+    throw new Error("Not implemented");
+  }
+
+  /**
    * @description Private method to emit ValueChange event
    * @param {object} newValue new value
    */
