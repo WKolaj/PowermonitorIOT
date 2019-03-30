@@ -4,7 +4,7 @@
   "description": "Application for monitoring low voltage cabinetts",
   "main": "index.js",
   "scripts": {
-    "test": "jest  --watchAll --runInBand --detectOpenHandles --forceExit --coverage --verbose "
+    "test": "jest  --watchAll --runInBand --detectOpenHandles --forceExit --coverage  "
   },
   "repository": {
     "type": "git",

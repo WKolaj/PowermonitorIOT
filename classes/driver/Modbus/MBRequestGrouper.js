@@ -35,8 +35,8 @@ class MBRequestGrouper {
   }
 
   /**
-   * @description Method for converting requests to VariableId : newValue Pair
-   * @param {Array} requests Requests to be converted to VariableId : newValue Pair
+   * @description Method for converting requests to VariableId : variable with new value Pair
+   * @param {Array} requests Requests to be converted to VariableId : variable with new value Pair
    */
   ConvertRequestsToIDValuePair(requests) {
     let valuesToReturn = {};
@@ -48,7 +48,7 @@ class MBRequestGrouper {
 
       for (let variableConnection of variableConnectionsOfRequest) {
         valuesToReturn[variableConnection.variable.Id] =
-          variableConnection.variable.Value;
+          variableConnection.variable;
       }
     }
 

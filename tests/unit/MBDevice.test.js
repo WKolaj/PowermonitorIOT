@@ -1116,56 +1116,56 @@ describe("MBDevice", () => {
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1001"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1001"]).toEqual(
-        "1234"
+        variable1
       );
 
       expect(
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1002"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1002"]).toEqual(
-        "1235"
+        variable2
       );
 
       expect(
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1003"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1003"]).toEqual(
-        "1236"
+        variable3
       );
 
       expect(
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1004"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1004"]).toEqual(
-        "1237"
+        variable4
       );
 
       expect(
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1005"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1005"]).toEqual(
-        "1238"
+        variable5
       );
 
       expect(
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1006"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1006"]).toEqual(
-        "1239"
+        variable6
       );
 
       expect(
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1011"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1011"]).toEqual(
-        "1244"
+        variable11
       );
 
       expect(
         mockEventEmitterEmitMethod.mock.calls[0][1][1]["1012"]
       ).toBeDefined();
       expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]["1012"]).toEqual(
-        "1245"
+        variable12
       );
     });
 
