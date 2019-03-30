@@ -23,6 +23,8 @@ class MBBooleanVariable extends MBVariable {
     payload.setSingleFCode = 15;
 
     super(device, payload);
+
+    this._type = "boolean";
   }
 
   /**

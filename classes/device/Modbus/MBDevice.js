@@ -48,7 +48,11 @@ class MBDevice extends Device {
   /**
    * @description Method for initializing variables
    */
-  _initVariables(variables) {}
+  _initVariables(variables) {
+    for (let variable of variables) {
+      this.createVariable(variable);
+    }
+  }
 
   /**
    * @description All requests divided by tickId
@@ -397,6 +401,36 @@ class MBDevice extends Device {
       console.log(err);
       return null;
     }
+  }
+
+  /**
+   * @description Method for generating payload
+   */
+  _generatePayload() {
+    let parentPayload = super._generatePayload();
+
+    parentPayload.isActive = this.IsActive;
+
+    parentPayload.timeout = this.Timeout;
+    parentPayload.ipAdress = this.IPAdress;
+    parentPayload.timeout = this.Timeout;
+    parentPayload.unitId = this.UnitId;
+    parentPayload.portNumber = this.PortNumber;
+
+    parentPayload.variables = this._generateVariablesPayload();
+
+    return parentPayload;
+  }
+
+  _generateVariablesPayload() {
+    let varaiblesPayload = [];
+    let allVariables = Object.values(this.Variables);
+
+    for (let variable of allVariables) {
+      varaiblesPayload.push(variable.Payload);
+    }
+
+    return varaiblesPayload;
   }
 }
 

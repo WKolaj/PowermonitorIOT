@@ -105,14 +105,27 @@ let logVar = args => {
   console.log(`${Date.now()}: ${args[0].Name}, ${args[1]}`);
 };
 
+console.log(device.Payload);
+
+let device2 = new MBDevice(device.Payload);
+
+device2.Events.on("Refreshed", args => {
+  console.log(args[2]);
+  console.log(args[1]);
+});
+
 // for (let variable of Object.values(device.Variables)) {
-//   variable.Events.on("ValueChanged", logVar);
+//   variable.Events.on("ValueChanged", qlogVar);
 // }
 
-sampler.addDevice(device);
+// sampler.addDevice(device);
+
 sampler.start();
 
-device.connect();
+// device.connect();
+
+sampler.addDevice(device2);
+device2.connect();
 
 // let pac1 = new MBDevice("PAC1");
 

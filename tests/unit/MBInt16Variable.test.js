@@ -62,6 +62,12 @@ describe("MBInt16Variable", () => {
 
       expect(result.SetSingleFCode).toEqual(16);
     });
+
+    it("should set Type to corresponding type", () => {
+      let result = exec();
+
+      expect(result.Type).toEqual("int16");
+    });
   });
 
   describe("_getPossibeFCodes", () => {

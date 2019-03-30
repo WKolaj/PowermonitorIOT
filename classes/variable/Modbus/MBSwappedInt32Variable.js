@@ -83,6 +83,8 @@ class MBSwappedInt32Variable extends MBVariable {
       payload.fCode === 3 || payload.fCode == 4 ? payload.fCode : 3;
 
     super(device, payload);
+
+    this._type = "swappedInt32";
   }
 
   /**

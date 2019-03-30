@@ -66,6 +66,12 @@ describe("MBFloatVariable", () => {
     it("should throw if payload is empty", () => {
       expect(() => new MBFloatVariable(device)).toThrow();
     });
+
+    it("should set Type to corresponding type", () => {
+      let result = exec();
+
+      expect(result.Type).toEqual("float");
+    });
   });
 
   describe("_getPossibeFCodes", () => {

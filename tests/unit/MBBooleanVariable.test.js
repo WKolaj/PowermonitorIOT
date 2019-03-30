@@ -66,6 +66,12 @@ describe("MBBooleanVariable", () => {
 
       expect(result.SetSingleFCode).toEqual(15);
     });
+
+    it("should set Type to corresponding type", () => {
+      let result = exec();
+
+      expect(result.Type).toEqual("boolean");
+    });
   });
 
   describe("_getPossibeFCodes", () => {

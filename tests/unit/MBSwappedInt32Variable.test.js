@@ -66,6 +66,12 @@ describe("MBSwappedInt32Variable", () => {
 
       expect(result.SetSingleFCode).toEqual(16);
     });
+
+    it("should set Type to corresponding type", () => {
+      let result = exec();
+
+      expect(result.Type).toEqual("swappedInt32");
+    });
   });
 
   describe("_getPossibeFCodes", () => {

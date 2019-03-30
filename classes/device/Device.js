@@ -22,6 +22,20 @@ class Device {
   }
 
   /**
+   * @description Device payload
+   */
+  get Payload() {
+    return this._generatePayload();
+  }
+
+  /**
+   * @description uniq id of device
+   */
+  get Id() {
+    return this._id;
+  }
+
+  /**
    * @description Event emitter
    */
   get Events() {
@@ -106,6 +120,16 @@ class Device {
    */
   static generateRandId() {
     return mongoose.Types.ObjectId();
+  }
+
+  /**
+   * @description Method for generating payload - overriding in child classes
+   */
+  _generatePayload() {
+    return {
+      id: this.Id,
+      name: this.Name
+    };
   }
 }
 

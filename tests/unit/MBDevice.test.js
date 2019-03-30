@@ -2927,5 +2927,12 @@ describe("MBDevice", () => {
       expect(editedVariable).not.toEqual(variable);
       expect(editedVariable.Id).toEqual(varId);
     });
+
+    it("should call refresh groups", () => {
+      exec();
+
+      //Three times - first time addding variable second removing while editing, thrid - adding new generated variable
+      expect(refreshGroupMock).toHaveBeenCalledTimes(3);
+    });
   });
 });

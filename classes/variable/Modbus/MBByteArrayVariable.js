@@ -50,6 +50,7 @@ class MBByteArrayVariable extends MBVariable {
     payload.setSingleFCode = 16;
 
     super(device, payload);
+    this._type = "byteArray";
   }
 
   /**
