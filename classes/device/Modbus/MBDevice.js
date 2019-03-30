@@ -46,6 +46,9 @@ class MBDevice extends Device {
 
     //If type is given in payload - set it according to payload - otherwise set default mbDevice type
     this._type = payload.type ? payload.type : "mbDevice";
+
+    //Connecting if device should be active according to payload
+    if (payload.isActive) this.connect();
   }
 
   /**

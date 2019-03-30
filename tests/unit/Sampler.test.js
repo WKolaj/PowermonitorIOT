@@ -171,11 +171,13 @@ describe("Sampler", () => {
     let sampler;
     let mockDevice;
     let deviceName;
+    let deviceId;
 
     beforeEach(() => {
       deviceName = "Test device";
+      deviceId = 1234;
       sampler = new Sampler();
-      mockDevice = { Name: deviceName };
+      mockDevice = { Name: deviceName, Id: deviceId };
     });
 
     let exec = () => {
@@ -184,7 +186,7 @@ describe("Sampler", () => {
 
     it("should add new device to sampler", () => {
       exec();
-      expect(sampler.AllDevices[deviceName]).toEqual(mockDevice);
+      expect(sampler.AllDevices[deviceId]).toEqual(mockDevice);
     });
   });
 
@@ -224,12 +226,15 @@ describe("Sampler", () => {
   describe("_refreshAllDevices", () => {
     let sampler;
     let device1Mock;
+    let device1Id;
     let device1Name;
     let device1RefreshMock;
     let device2Mock;
+    let device2Id;
     let device2Name;
     let device2RefreshMock;
     let device3Mock;
+    let device3Id;
     let device3Name;
     let device3RefreshMock;
     let tickNumber;
@@ -238,16 +243,31 @@ describe("Sampler", () => {
       tickNumber = 123;
 
       device1Name = "Dev1";
+      device1Id = "0001";
       device1RefreshMock = jest.fn();
-      device1Mock = { Name: device1Name, refresh: device1RefreshMock };
+      device1Mock = {
+        Name: device1Name,
+        refresh: device1RefreshMock,
+        Id: device1Id
+      };
 
       device2Name = "Dev2";
+      device2Id = "0002";
       device2RefreshMock = jest.fn();
-      device2Mock = { Name: device2Name, refresh: device2RefreshMock };
+      device2Mock = {
+        Name: device2Name,
+        refresh: device2RefreshMock,
+        Id: device2Id
+      };
 
       device3Name = "Dev3";
+      device3Id = "0003";
       device3RefreshMock = jest.fn();
-      device3Mock = { Name: device3Name, refresh: device3RefreshMock };
+      device3Mock = {
+        Name: device3Name,
+        refresh: device3RefreshMock,
+        Id: device3Id
+      };
 
       sampler = new Sampler();
       sampler.addDevice(device1Mock);
@@ -284,29 +304,47 @@ describe("Sampler", () => {
     let device1Mock;
     let device1Name;
     let device1RefreshMock;
+    let device1Id;
     let device2Mock;
     let device2Name;
     let device2RefreshMock;
+    let device2Id;
     let device3Mock;
     let device3Name;
     let device3RefreshMock;
     let tickNumber;
     let tickEventHandler;
+    let device3Id;
 
     beforeEach(() => {
       tickNumber = 123;
 
       device1Name = "Dev1";
+      device1Id = "0001";
       device1RefreshMock = jest.fn();
-      device1Mock = { Name: device1Name, refresh: device1RefreshMock };
+      device1Mock = {
+        Name: device1Name,
+        refresh: device1RefreshMock,
+        Id: device1Id
+      };
 
       device2Name = "Dev2";
+      device2Id = "0002";
       device2RefreshMock = jest.fn();
-      device2Mock = { Name: device2Name, refresh: device2RefreshMock };
+      device2Mock = {
+        Name: device2Name,
+        refresh: device2RefreshMock,
+        Id: device2Id
+      };
 
       device3Name = "Dev3";
+      device3Id = "0003";
       device3RefreshMock = jest.fn();
-      device3Mock = { Name: device3Name, refresh: device3RefreshMock };
+      device3Mock = {
+        Name: device3Name,
+        refresh: device3RefreshMock,
+        Id: device3Id
+      };
 
       sampler = new Sampler();
       sampler.addDevice(device1Mock);

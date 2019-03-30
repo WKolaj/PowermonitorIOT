@@ -22,6 +22,9 @@ describe("MBDevice", () => {
     let variables;
     let realInitVariableFunc;
     let initVariablesMockFunc;
+    let isActive;
+    let mockConnectFunc;
+    let realConnectFunc;
 
     beforeEach(() => {
       name = "test name";
@@ -35,13 +38,18 @@ describe("MBDevice", () => {
         { Id: "var3", Name: "name3" }
       ];
       type = undefined;
+      isActive = false;
       realInitVariableFunc = MBDevice.prototype._initVariables;
+      realConnectFunc = MBDevice.prototype.connect;
       initVariablesMockFunc = jest.fn();
+      mockConnectFunc = jest.fn();
       MBDevice.prototype._initVariables = initVariablesMockFunc;
+      MBDevice.prototype.connect = mockConnectFunc;
     });
 
     afterEach(() => {
       MBDevice.prototype._initVariables = realInitVariableFunc;
+      MBDevice.prototype.connect = realConnectFunc;
     });
 
     let exec = () => {
@@ -52,7 +60,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId,
         variables: variables,
-        type: type
+        type: type,
+        isActive: isActive
       };
 
       return new MBDevice(payload);
@@ -67,6 +76,8 @@ describe("MBDevice", () => {
       expect(result.PortNumber).toEqual(portNumber);
       expect(result.Timeout).toEqual(timeout);
       expect(result.UnitId).toEqual(unitId);
+
+      expect(mockConnectFunc).not.toHaveBeenCalled();
     });
 
     it("should initiazle variables to empty object if no variables are given", () => {
@@ -146,6 +157,13 @@ describe("MBDevice", () => {
 
       expect(result.Type).toBeDefined();
       expect(result.Type).toEqual(type);
+    });
+
+    it("should call connect if device is active according to payload", () => {
+      isActive = true;
+      exec();
+
+      expect(mockConnectFunc).toHaveBeenCalledTimes(1);
     });
   });
 

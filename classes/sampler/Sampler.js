@@ -110,7 +110,7 @@ class Sampler {
    * @param {object} device Device to be added
    */
   addDevice(device) {
-    this.AllDevices[device.Name] = device;
+    this.AllDevices[device.Id] = device;
   }
 
   /**
@@ -118,9 +118,9 @@ class Sampler {
    * @param {object} device Device to be removed
    */
   removeDevice(device) {
-    if (!this.AllDevices[device.Name])
-      throw new Error(`There is no such device as ${device.Name}`);
-    delete this.AllDevices[device.Name];
+    if (!this.AllDevices[device.Id])
+      throw new Error(`There is no such device as ${device.Id}`);
+    delete this.AllDevices[device.Id];
   }
 
   /**

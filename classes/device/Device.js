@@ -86,6 +86,23 @@ class Device {
     return variableToDelete;
   }
 
+  /**
+   * @description creating variable and adding it to the Device - should be override in child classes
+   * @param {object} payload Payload of variable to be created
+   */
+  createVariable(payload) {
+    throw new Error("Not implemented");
+  }
+
+  /**
+   * @description Method for editting variable - should be override in child classes
+   * @param {string} id Id of variable to be edited
+   * @param {object} payload Payload of eddition
+   */
+  editVariable(id, payload) {
+    throw new Error("Not implemented");
+  }
+
   static divideVariablesByTickId(variables) {
     let variablesToReturn = {};
 
@@ -121,7 +138,7 @@ class Device {
    * @description Refreshing variables based on tickNumber - should be override in child classes
    */
   _refresh(tickNumber) {
-    return {};
+    throw new Error("Not implemented");
   }
 
   /**

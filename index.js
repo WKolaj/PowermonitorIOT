@@ -1,52 +1,248 @@
-const MBDevice = require("./classes/device/Modbus/MBDevice");
-const MBRTUDevice = require("./classes/device/Modbus/MBRTUDevice");
-const MBGateway = require("./classes/driver/Modbus/MBGateway");
-const MBRequestGrouper = require("./classes/driver/Modbus/MBRequestGrouper");
-const MBRequest = require("./classes/driver/Modbus/MBRequest");
-const MBVariable = require("./classes/variable/Modbus/MBVariable");
-const MBFloatVariable = require("./classes/variable/Modbus/MBFloatVariable");
-const MBInt16Variable = require("./classes/variable/Modbus/MBInt16Variable");
-const Sampler = require("./classes/sampler/Sampler");
-const MBSwappedFloatVariable = require("./classes/variable/Modbus/MBSwappedFloatVariable");
+const commInterface = require("./classes/commInterface/CommInterface");
 
-let sampler = new Sampler();
-
-let devicePayload = {
-  name: "PAC",
-  ipAdress: "192.168.1.8",
-  timeout: 2000,
-  unitId: 1,
-  portNumber: 502
+let json = {
+  "5c9f8a7fd04bb119b3ad229f": {
+    id: "5c9f8a7fd04bb119b3ad229f",
+    name: "PAC",
+    isActive: false,
+    timeout: 2000,
+    ipAdress: "192.168.1.8",
+    unitId: 1,
+    portNumber: 502,
+    variables: [
+      {
+        id: "5c9f8a7fd04bb119b3ad22a0",
+        timeSample: 1,
+        name: "Napiecie L1-N",
+        offset: 1,
+        length: 2,
+        fCode: 3,
+        value: 1,
+        type: "float"
+      },
+      {
+        id: "5c9f8a7fd04bb119b3ad22a4",
+        timeSample: 1,
+        name: "Napiecie L2-N",
+        offset: 3,
+        length: 2,
+        fCode: 3,
+        value: 2,
+        type: "float"
+      },
+      {
+        id: "5c9f8a7fd04bb119b3ad22a8",
+        timeSample: 1,
+        name: "Napiecie L3-N",
+        offset: 5,
+        length: 2,
+        fCode: 3,
+        value: 3,
+        type: "float"
+      }
+    ],
+    type: "mbDevice"
+  },
+  "5c9f8a7fd04bb119b3ad22ac": {
+    id: "5c9f8a7fd04bb119b3ad22ac",
+    name: "PAC",
+    isActive: false,
+    timeout: 2000,
+    ipAdress: "192.168.1.8",
+    unitId: 1,
+    portNumber: 503,
+    variables: [
+      {
+        id: "5c9f8a7fd04bb119b3ad22ad",
+        timeSample: 1,
+        name: "Napiecie L1-N",
+        offset: 1,
+        length: 2,
+        fCode: 3,
+        value: 4,
+        type: "float"
+      },
+      {
+        id: "5c9f8a7fd04bb119b3ad22b1",
+        timeSample: 1,
+        name: "Napiecie L2-N",
+        offset: 3,
+        length: 2,
+        fCode: 3,
+        value: 5,
+        type: "float"
+      },
+      {
+        id: "5c9f8a7fd04bb119b3ad22b5",
+        timeSample: 1,
+        name: "Napiecie L3-N",
+        offset: 5,
+        length: 2,
+        fCode: 3,
+        value: 6,
+        type: "float"
+      }
+    ],
+    type: "mbDevice"
+  },
+  "5c9f8a7fd04bb119b3ad22b9": {
+    id: "5c9f8a7fd04bb119b3ad22b9",
+    name: "PAC",
+    isActive: false,
+    timeout: 2000,
+    ipAdress: "192.168.1.8",
+    unitId: 1,
+    portNumber: 504,
+    variables: [
+      {
+        id: "5c9f8a7fd04bb119b3ad22ba",
+        timeSample: 1,
+        name: "Napiecie L1-N",
+        offset: 1,
+        length: 2,
+        fCode: 3,
+        value: 7,
+        type: "float"
+      },
+      {
+        id: "5c9f8a7fd04bb119b3ad22be",
+        timeSample: 1,
+        name: "Napiecie L2-N",
+        offset: 3,
+        length: 2,
+        fCode: 3,
+        value: 8,
+        type: "float"
+      },
+      {
+        id: "5c9f8a7fd04bb119b3ad22c2",
+        timeSample: 1,
+        name: "Napiecie L3-N",
+        offset: 5,
+        length: 2,
+        fCode: 3,
+        value: 9,
+        type: "float"
+      }
+    ],
+    type: "mbDevice"
+  }
 };
 
-let device = new MBDevice(devicePayload);
+commInterface.init(json);
 
-device.Events.on("Refreshed", args => {
-  console.log(args[2]);
-  console.log(args[1]);
-});
+commInterface.startCommunicationWithAllDevices();
 
-let var1Payload = {
-  timeSample: 1,
-  type: "float",
-  name: "Napiecie L1-N",
-  fCode: 3,
-  offset: 1
-};
-let var2Payload = {
-  timeSample: 1,
-  type: "float",
-  name: "Napiecie L2-N",
-  fCode: 3,
-  offset: 3
-};
-let var3Payload = {
-  timeSample: 2,
-  type: "float",
-  name: "Napiecie L3-N",
-  fCode: 3,
-  offset: 5
-};
+// let device1Payload = {
+//   type: "mbDevice",
+//   name: "PAC",
+//   ipAdress: "192.168.1.8",
+//   timeout: 2000,
+//   unitId: 1,
+//   portNumber: 502,
+//   variables: [
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L1-N",
+//       fCode: 3,
+//       offset: 1
+//     },
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L2-N",
+//       fCode: 3,
+//       offset: 3
+//     },
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L3-N",
+//       fCode: 3,
+//       offset: 5
+//     }
+//   ]
+// };
+
+// let device2Payload = {
+//   type: "mbDevice",
+//   name: "PAC",
+//   ipAdress: "192.168.1.8",
+//   timeout: 2000,
+//   unitId: 1,
+//   portNumber: 503,
+//   variables: [
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L1-N",
+//       fCode: 3,
+//       offset: 1
+//     },
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L2-N",
+//       fCode: 3,
+//       offset: 3
+//     },
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L3-N",
+//       fCode: 3,
+//       offset: 5
+//     }
+//   ]
+// };
+
+// let device3Payload = {
+//   type: "mbDevice",
+//   name: "PAC",
+//   ipAdress: "192.168.1.8",
+//   timeout: 2000,
+//   unitId: 1,
+//   portNumber: 504,
+//   variables: [
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L1-N",
+//       fCode: 3,
+//       offset: 1
+//     },
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L2-N",
+//       fCode: 3,
+//       offset: 3
+//     },
+//     {
+//       timeSample: 1,
+//       type: "float",
+//       name: "Napiecie L3-N",
+//       fCode: 3,
+//       offset: 5
+//     }
+//   ]
+// };
+
+// let device1 = commInterface.createNewDevice(device1Payload);
+// let device2 = commInterface.createNewDevice(device2Payload);
+// let device3 = commInterface.createNewDevice(device3Payload);
+
+for (let device of Object.values(commInterface.Devices)) {
+  device.Events.on("Refreshed", args => {
+    console.log(args[2]);
+    let allIds = Object.keys(args[1]);
+    for (let id of allIds) {
+      console.log(`${args[1][id].Name}: ${args[1][id].Value}`);
+    }
+  });
+}
+
 // let var4Payload = {
 //   timeSample: 2,
 //   type: "swappedFloat",
@@ -90,9 +286,9 @@ let var3Payload = {
 //   offset: 17
 // };
 
-let var1 = device.createVariable(var1Payload);
-let var2 = device.createVariable(var2Payload);
-let var3 = device.createVariable(var3Payload);
+// let var1 = device.createVariable(var1Payload);
+// let var2 = device.createVariable(var2Payload);
+// let var3 = device.createVariable(var3Payload);
 
 // device.createVariable(var4Payload);
 // device.createVariable(var5Payload);
@@ -101,11 +297,9 @@ let var3 = device.createVariable(var3Payload);
 // device.createVariable(var8Payload);
 // device.createVariable(var9Payload);
 
-let logVar = args => {
-  console.log(`${Date.now()}: ${args[0].Name}, ${args[1]}`);
-};
-
-console.log(device.Payload);
+// let logVar = args => {
+//   console.log(`${Date.now()}: ${args[0].Name}, ${args[1]}`);
+// };
 
 // let device2 = new MBDevice(device.Payload);
 
@@ -117,12 +311,6 @@ console.log(device.Payload);
 // for (let variable of Object.values(device.Variables)) {
 //   variable.Events.on("ValueChanged", qlogVar);
 // }
-
-sampler.addDevice(device);
-
-sampler.start();
-
-device.connect();
 
 // sampler.addDevice(device2);
 // device2.connect();
@@ -256,5 +444,20 @@ process.stdin.on("data", async function(key) {
   if (key.indexOf("4") == 0) {
     let payload = device.UnitId == 1 ? { unitId: 2 } : { unitId: 1 };
     device.editWithPayload(payload);
+  }
+
+  // without rawmode, it returns EOL with the string
+  if (key.indexOf("5") == 0) {
+    console.log(JSON.stringify(commInterface.Payload));
+  }
+
+  // without rawmode, it returns EOL with the string
+  if (key.indexOf("6") == 0) {
+    commInterface.startCommunicationWithAllDevices();
+  }
+
+  // without rawmode, it returns EOL with the string
+  if (key.indexOf("7") == 0) {
+    commInterface.stopCommunicationWithAllDevices();
   }
 });
