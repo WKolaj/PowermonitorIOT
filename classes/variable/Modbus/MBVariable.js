@@ -56,7 +56,18 @@ class MBVariable extends Variable {
     this._setSingleRequest.addVariable(this);
 
     //Setting value if defined
-    if (payload.value !== undefined) this.Value = payload.value;
+    if (payload.value !== undefined) {
+      this.Value = payload.value;
+    } else {
+      //Setting defualt value - data with all elements equal 0 if not defined in payload
+      let dataToSet = [];
+      for (let i = 0; i < this._length; i++) {
+        dataToSet.push(0);
+      }
+
+      //Setting data without invoking event
+      this.Data = dataToSet;
+    }
   }
 
   /**
@@ -170,6 +181,16 @@ class MBVariable extends Variable {
     //Emitting singal of value change
     this._emitValueChange(this._value);
   }
+
+  /**
+   * @description Private method for converting data to value - should be overwritten in child classes
+   */
+  _convertDataToValue() {}
+
+  /**
+   * @description Private method for converting value to data - should be overwritten in child classes
+   */
+  _convertValueToData() {}
 
   /**
    * @description Private method called in order to retrieve Value

@@ -40,6 +40,12 @@ describe("MBUInt32Variable", () => {
       expect(result.Offset).toEqual(offset);
     });
 
+    it("should set default value if value is not given in payload", () => {
+      let result = exec();
+
+      expect(result.Value).toEqual(0);
+    });
+
     it("should set length to 2", () => {
       let result = exec();
 

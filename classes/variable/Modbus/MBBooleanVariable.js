@@ -2,7 +2,7 @@ const MBVariable = require("./MBVariable");
 
 //Converting register array to Int16
 const mbDataToBoolean = function(mbData) {
-  return mbData[0];
+  return mbData[0] > 0;
 };
 
 //Converting Int16 to register array

@@ -46,6 +46,12 @@ describe("MBFloatVariable", () => {
       expect(result.Length).toEqual(2);
     });
 
+    it("should set default value if value is not given in payload", () => {
+      let result = exec();
+
+      expect(result.Value).toEqual(0);
+    });
+
     it("should throw if fcode is no associated with analog variable - fCode 1", () => {
       fcode = 1;
       expect(() => exec()).toThrow();

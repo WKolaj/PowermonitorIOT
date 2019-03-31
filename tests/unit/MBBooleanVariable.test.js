@@ -50,6 +50,12 @@ describe("MBBooleanVariable", () => {
       expect(result.Length).toEqual(1);
     });
 
+    it("should set default value if value is not given in payload", () => {
+      let result = exec();
+
+      expect(result.Value).toEqual(false);
+    });
+
     it("should throw if fcode is no associated with boolean variable - fCode 3", () => {
       fcode = 3;
       expect(() => exec()).toThrow();

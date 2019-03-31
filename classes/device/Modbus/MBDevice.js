@@ -158,6 +158,9 @@ class MBDevice extends Device {
     if (!payload.type)
       throw new Error("Given variable payload has no type defined");
 
+    if (payload.id && this.Variables[payload.id])
+      throw new Error(`Variable with id ${payload.id} already exists!`);
+
     switch (payload.type) {
       case "boolean": {
         return this._createBooleanVariable(payload);

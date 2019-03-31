@@ -48,6 +48,12 @@ describe("MBByteArrayVariable", () => {
       expect(() => new MBByteArrayVariable(device)).toThrow();
     });
 
+    it("should set default value if value is not given in payload", () => {
+      let result = exec();
+
+      expect(result.Value).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    });
+
     it("should throw if fcode is no associated with byte variable - fCode 1", () => {
       fcode = 1;
       expect(() => exec()).toThrow();
@@ -898,7 +904,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Length equal to Length given in payload - and reset value if it not corresponds to given length", () => {
+    it("should generate variable with Length equal to Length given in payload - and set value to [0,0...,0] if it doesn't correspond to given length", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -920,7 +926,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Length).toEqual(editLength);
       expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
       expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
-      expect(result.Value).not.toBeDefined();
+      expect(result.Value).toEqual([0, 0, 0, 0, 0, 0]);
     });
 
     it("should generate variable with Length equal to Length given in payload - and leave value if it corresponds to given length", () => {

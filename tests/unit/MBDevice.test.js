@@ -2814,6 +2814,12 @@ describe("MBDevice", () => {
 
       expect(() => device.createVariable({})).toThrow();
     });
+
+    it("should throw if varaible with given id already", () => {
+      payload.id = "1234";
+      device.Variables["1234"] = "already defined variable";
+      expect(() => device.createVariable(payload)).toThrow();
+    });
   });
 
   describe("addVariable", () => {

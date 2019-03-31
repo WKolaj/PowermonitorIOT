@@ -96,13 +96,40 @@ class CommInterface {
   /**
    * @description Method for getting all deviceIds, variableIds and variable values
    */
-  getAllIdsAndValues() {
+  getMainData() {
     let collectionToReturn = {};
-    for (let device of this.Devices) {
+    let allDevices = Object.values(this.Devices);
+
+    for (let device of allDevices) {
+      collectionToReturn[device.Id] = {
+        name: device.Name,
+        variables: {}
+      };
+
+      let allVariables = Object.values(device.Variables);
+      for (let variable of allVariables) {
+        collectionToReturn[device.Id]["variables"][variable.Id] = {
+          name: variable.Name,
+          value: variable.Value
+        };
+      }
+    }
+    return collectionToReturn;
+  }
+
+  /**
+   * @description Method for getting all values
+   */
+  getAllValues() {
+    let collectionToReturn = {};
+    let allDevices = Object.values(this.Devices);
+
+    for (let device of allDevices) {
       collectionToReturn[device.Id] = {};
 
-      for (let variable of this.Variables) {
-        collectionToReturn[deviceId][variable.Id] = variable.Value;
+      let allVariables = Object.values(device.Variables);
+      for (let variable of allVariables) {
+        collectionToReturn[device.Id][variable.Id] = variable.Value;
       }
     }
     return collectionToReturn;
@@ -114,7 +141,14 @@ class CommInterface {
    */
   getAllVariables(deviceId) {
     let device = this.getDevice(deviceId);
-    return device.Variables;
+    return Object.values(device.Variables);
+  }
+
+  /**
+   * @description Getting all devices
+   */
+  getAllDevices() {
+    return Object.values(this.Devices);
   }
 
   /**
@@ -125,6 +159,8 @@ class CommInterface {
     if (!payload) throw new Error("Given payload cannot be empty");
     if (!payload.type)
       throw new Error("Given device payload has no type defined");
+    if (payload.id && this.Devices[payload.id])
+      throw new Error(`Device with id ${payload.id} already exists!`);
 
     switch (payload.type) {
       //value mbDevice type should not be changed - sensitive in mbDevice constructor
@@ -250,6 +286,9 @@ class CommInterface {
     return this.getVariable(deviceId, variableId).setSingle(value);
   }
 
+  /**
+   * @description Method for generating payload for whole commInterface - all devices and its variables
+   */
   _generatePayload() {
     let payloadToReturn = {};
 
