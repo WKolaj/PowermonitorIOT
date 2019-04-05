@@ -254,7 +254,8 @@ describe("CommInterface", () => {
         type: "int16",
         offset: 2,
         fCode: 3,
-        value: 1234
+        value: 1234,
+        archived: true
       };
       let varaible2Payload = {
         id: "1235",
@@ -263,7 +264,8 @@ describe("CommInterface", () => {
         type: "boolean",
         offset: 1,
         fCode: 1,
-        value: true
+        value: true,
+        archived: false
       };
       let varaible3Payload = {
         id: "1236",
@@ -272,7 +274,8 @@ describe("CommInterface", () => {
         type: "int32",
         offset: 5,
         fCode: 4,
-        value: 4321
+        value: 4321,
+        archived: true
       };
 
       variables = [varaible1Payload, varaible2Payload, varaible3Payload];
@@ -314,21 +317,24 @@ describe("CommInterface", () => {
         name: "test variable 1",
         type: "int16",
         offset: 2,
-        fCode: 3
+        fCode: 3,
+        archived: true
       };
       let varaible2Payload = {
         timeSample: 3,
         name: "test variable 2",
         type: "boolean",
         offset: 1,
-        fCode: 1
+        fCode: 1,
+        archived: false
       };
       let varaible3Payload = {
         timeSample: 4,
         name: "test variable 3",
         type: "int32",
         offset: 5,
-        fCode: 4
+        fCode: 4,
+        archived: true
       };
 
       variables = [varaible1Payload, varaible2Payload, varaible3Payload];
@@ -367,21 +373,24 @@ describe("CommInterface", () => {
         name: "test variable 1",
         type: "int16",
         offset: 2,
-        fCode: 3
+        fCode: 3,
+        archived: true
       };
       let varaible2Payload = {
         timeSample: 3,
         name: "test variable 2",
         type: "boolean",
         offset: 1,
-        fCode: 1
+        fCode: 1,
+        archived: false
       };
       let varaible3Payload = {
         timeSample: 4,
         name: "test variable 3",
         type: "int32",
         offset: 5,
-        fCode: 4
+        fCode: 4,
+        archived: true
       };
 
       variables = [varaible1Payload, varaible2Payload, varaible3Payload];

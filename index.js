@@ -3,46 +3,139 @@ const commInterface = require("./classes/commInterface/CommInterface");
 let json = {
   "5c9f8a7fd04bb119b3ad229f": {
     id: "5c9f8a7fd04bb119b3ad229f",
-    name: "PAC",
+    name: "PAC4200",
     isActive: false,
     timeout: 2000,
-    ipAdress: "192.168.1.10",
+    ipAdress: "10.10.10.112",
     unitId: 1,
     portNumber: 502,
     variables: [
       {
-        id: "5c9f8a7fd04bb119b3ad22a0",
         timeSample: 1,
         name: "Napiecie L1-N",
         offset: 1,
         length: 2,
         fCode: 3,
         value: 1,
-        type: "float"
+        type: "swappedFloat"
       },
       {
-        id: "5c9f8a7fd04bb119b3ad22a4",
         timeSample: 1,
         name: "Napiecie L2-N",
         offset: 3,
         length: 2,
         fCode: 3,
         value: 2,
-        type: "float"
+        type: "swappedFloat"
       },
       {
-        id: "5c9f8a7fd04bb119b3ad22a8",
         timeSample: 1,
         name: "Napiecie L3-N",
         offset: 5,
         length: 2,
         fCode: 3,
         value: 3,
-        type: "float"
+        type: "swappedFloat"
+      },
+
+      {
+        timeSample: 1,
+        name: "Prąd L1",
+        offset: 13,
+        length: 2,
+        fCode: 3,
+        value: 1,
+        type: "swappedFloat"
+      },
+      {
+        timeSample: 1,
+        name: "Prąd L2",
+        offset: 15,
+        length: 2,
+        fCode: 3,
+        value: 2,
+        type: "swappedFloat"
+      },
+      {
+        timeSample: 1,
+        name: "Prąd L3",
+        offset: 17,
+        length: 2,
+        fCode: 3,
+        value: 3,
+        type: "swappedFloat"
       }
     ],
     type: "mbDevice"
   }
+
+  // "5c9f8a7fd04bb119b3ad229e": {
+  //   id: "5c9f8a7fd04bb119b3ad229e",
+  //   name: "PAC3200",
+  //   isActive: false,
+  //   timeout: 2000,
+  //   ipAdress: "10.10.10.111",
+  //   unitId: 1,
+  //   portNumber: 502,
+  //   variables: [
+  //     {
+  //       timeSample: 1,
+  //       name: "Napiecie L1-N",
+  //       offset: 1,
+  //       length: 2,
+  //       fCode: 3,
+  //       value: 1,
+  //       type: "swappedFloat"
+  //     },
+  //     {
+  //       timeSample: 1,
+  //       name: "Napiecie L2-N",
+  //       offset: 3,
+  //       length: 2,
+  //       fCode: 3,
+  //       value: 2,
+  //       type: "swappedFloat"
+  //     },
+  //     {
+  //       timeSample: 1,
+  //       name: "Napiecie L3-N",
+  //       offset: 5,
+  //       length: 2,
+  //       fCode: 3,
+  //       value: 3,
+  //       type: "swappedFloat"
+  //     },
+
+  //     {
+  //       timeSample: 1,
+  //       name: "Prąd L1",
+  //       offset: 13,
+  //       length: 2,
+  //       fCode: 3,
+  //       value: 1,
+  //       type: "swappedFloat"
+  //     },
+  //     {
+  //       timeSample: 1,
+  //       name: "Prąd L2",
+  //       offset: 15,
+  //       length: 2,
+  //       fCode: 3,
+  //       value: 2,
+  //       type: "swappedFloat"
+  //     },
+  //     {
+  //       timeSample: 1,
+  //       name: "Prąd L3",
+  //       offset: 17,
+  //       length: 2,
+  //       fCode: 3,
+  //       value: 3,
+  //       type: "swappedFloat"
+  //     }
+  //   ],
+  //   type: "mbDevice"
+  // }
 };
 
 commInterface.init(json);
@@ -56,7 +149,7 @@ for (let device of Object.values(commInterface.Devices)) {
     console.log(args[2]);
     let allIds = Object.keys(args[1]);
     for (let id of allIds) {
-      console.log(`${args[1][id].Name}: ${args[1][id].Value}`);
+      console.log(`${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`);
     }
   });
 }

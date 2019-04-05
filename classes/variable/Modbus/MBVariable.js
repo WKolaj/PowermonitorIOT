@@ -248,6 +248,7 @@ class MBVariable extends Variable {
     //If payload has no varaibles define - define it on the basis of current values;
     if (!payload.timeSample) payload.timeSample = this.TimeSample;
     if (!payload.name) payload.name = this.Name;
+    if (payload.archived === undefined) payload.archived = this.Archived;
 
     if (!payload.offset) payload.offset = this.Offset;
     if (!payload.length) payload.length = this.Length;

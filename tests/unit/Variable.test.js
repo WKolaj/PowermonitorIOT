@@ -6,15 +6,17 @@ describe("Variable", () => {
   describe("constructor", () => {
     let device;
     let name;
+    let archived;
     let payload;
 
     beforeEach(() => {
       device = "My test device";
       name = "Name of variable";
+      archived = true;
     });
 
     let exec = () => {
-      payload = { name: name };
+      payload = { name: name, archived: archived };
       return new Variable(device, payload);
     };
 
@@ -24,6 +26,23 @@ describe("Variable", () => {
       expect(result).toBeDefined();
       expect(result.Device).toEqual(device);
       expect(result.Name).toEqual(name);
+      expect(result.Archived).toEqual(archived);
+    });
+
+    it("should set Archived to false if it is not defined in payload", () => {
+      archived = undefined;
+
+      let result = exec();
+
+      expect(result.Archived).toEqual(false);
+    });
+
+    it("should set Archived to false if it is set to false in payload", () => {
+      archived = false;
+
+      let result = exec();
+
+      expect(result.Archived).toEqual(false);
     });
 
     it("should set default time sample to 1s", () => {
@@ -260,6 +279,33 @@ describe("Variable", () => {
     });
   });
 
+  describe("Archived", () => {
+    let device;
+    let name;
+    let archived;
+    let variable;
+    let payload;
+
+    beforeEach(() => {
+      device = "My test device";
+      name = "Name of variable";
+      archived = true;
+    });
+
+    let exec = () => {
+      payload = { name: name, archived: archived };
+      variable = new Variable(device, payload);
+      return variable.Archived;
+    };
+
+    it("should return if variable is archived", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(archived);
+    });
+  });
+
   describe("get Value", () => {
     let device;
     let name;
@@ -379,16 +425,18 @@ describe("Variable", () => {
   describe("get Payload", () => {
     let device;
     let name;
+    let archived;
     let variable;
     let payload;
 
     beforeEach(() => {
       device = "My test device";
       name = "Name of variable";
+      archived = true;
     });
 
     let exec = () => {
-      payload = { name: name };
+      payload = { name: name, archived: archived };
       variable = new Variable(device, payload);
       return variable.Payload;
     };
@@ -398,7 +446,8 @@ describe("Variable", () => {
       let validPayload = {
         name: variable.Name,
         id: variable.Id,
-        timeSample: variable.TimeSample
+        timeSample: variable.TimeSample,
+        archived: archived
       };
       expect(result).toBeDefined();
       expect(result).toMatchObject(validPayload);
@@ -408,16 +457,18 @@ describe("Variable", () => {
   describe("_generatePayload", () => {
     let device;
     let name;
+    let archived;
     let variable;
     let payload;
 
     beforeEach(() => {
       device = "My test device";
       name = "Name of variable";
+      archived = true;
     });
 
     let exec = () => {
-      payload = { name: name };
+      payload = { name: name, archived: archived };
       variable = new Variable(device, payload);
       return variable._generatePayload();
     };
@@ -427,7 +478,8 @@ describe("Variable", () => {
       let validPayload = {
         name: variable.Name,
         id: variable.Id,
-        timeSample: variable.TimeSample
+        timeSample: variable.TimeSample,
+        archived: variable.Archived
       };
       expect(result).toBeDefined();
       expect(result).toMatchObject(validPayload);
@@ -437,6 +489,7 @@ describe("Variable", () => {
   describe("_editWithPayload", () => {
     let device;
     let name;
+    let archived;
     let variable;
     let payload;
     let payloadToEdit;
@@ -447,14 +500,20 @@ describe("Variable", () => {
       device = "My test device";
       name = "Name of variable";
       nameToEdit = "Edited name of variable";
+      archived = false;
+      archivedToEdit = true;
       timeSampleToEdit = 5;
     });
 
     let exec = () => {
-      payload = { name: name };
+      payload = { name: name, archived: archived };
       variable = new Variable(device, payload);
 
-      payloadToEdit = { name: nameToEdit, timeSample: timeSampleToEdit };
+      payloadToEdit = {
+        name: nameToEdit,
+        timeSample: timeSampleToEdit,
+        archived: archivedToEdit
+      };
       return variable.editWithPayload(payloadToEdit);
     };
 
@@ -464,6 +523,7 @@ describe("Variable", () => {
       expect(result).toBeDefined();
       expect(result.TimeSample).toEqual(timeSampleToEdit);
       expect(result.Name).toEqual(nameToEdit);
+      expect(result.Archived).toEqual(archivedToEdit);
     });
 
     it("should return new value with event emitter being the same object as in original ", () => {
@@ -495,6 +555,14 @@ describe("Variable", () => {
 
       expect(result.Name).toBeDefined();
       expect(result.Name).toEqual(variable.Name);
+    });
+
+    it("should set archive from base variable if archive is true in original variable and archive is empty in payload", () => {
+      archivedToEdit = undefined;
+      let result = exec();
+
+      expect(result.Archived).toBeDefined();
+      expect(result.Archived).toEqual(variable.Archived);
     });
   });
 });

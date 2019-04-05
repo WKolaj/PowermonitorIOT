@@ -1036,6 +1036,7 @@ describe("MBVariable", () => {
   describe("get Payload", () => {
     let device;
     let name;
+    let archived;
     let fcode;
     let offset;
     let length;
@@ -1068,6 +1069,7 @@ describe("MBVariable", () => {
       value = 1234;
       realSetValueMockFunction = MBVariable.prototype._setValue;
       realGetValueMockFunction = MBVariable.prototype._getValue;
+      archived = true;
     });
 
     //Should set again real _setValue function
@@ -1084,7 +1086,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       setValueMockFunction = jest.fn();
@@ -1106,7 +1109,8 @@ describe("MBVariable", () => {
         offset: offset,
         length: length,
         fCode: fcode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1125,7 +1129,8 @@ describe("MBVariable", () => {
         offset: offset,
         length: length,
         fCode: fcode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1149,6 +1154,7 @@ describe("MBVariable", () => {
     let realSetValueMockFunction;
     let realGetValueMockFunction;
     let variable;
+    let archived;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -1168,6 +1174,7 @@ describe("MBVariable", () => {
       value = 1234;
       realSetValueMockFunction = MBVariable.prototype._setValue;
       realGetValueMockFunction = MBVariable.prototype._getValue;
+      archived = true;
     });
 
     //Should set again real _setValue function
@@ -1184,7 +1191,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       setValueMockFunction = jest.fn();
@@ -1206,7 +1214,8 @@ describe("MBVariable", () => {
         offset: offset,
         length: length,
         fCode: fcode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1225,7 +1234,8 @@ describe("MBVariable", () => {
         offset: offset,
         length: length,
         fCode: fcode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1236,6 +1246,7 @@ describe("MBVariable", () => {
   describe("_generatePayloadToEdit", () => {
     let device;
     let name;
+    let archived;
     let fcode;
     let offset;
     let length;
@@ -1259,6 +1270,7 @@ describe("MBVariable", () => {
     let editValue;
     let editGetSingleFCode;
     let editSetSingleFCode;
+    let editArchived;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -1279,6 +1291,7 @@ describe("MBVariable", () => {
       timeSample = 3;
       realSetValueMockFunction = MBVariable.prototype._setValue;
       realGetValueMockFunction = MBVariable.prototype._getValue;
+      archived = false;
 
       editTimeSample = 5;
       editName = "Edited name";
@@ -1288,6 +1301,7 @@ describe("MBVariable", () => {
       editValue = 4321;
       editGetSingleFCode = 4;
       editSetSingleFCode = 16;
+      editArchived = true;
     });
 
     //Should set again real _setValue function
@@ -1305,7 +1319,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       setValueMockFunction = jest.fn();
@@ -1323,7 +1338,8 @@ describe("MBVariable", () => {
         length: editLength,
         getSingleFCode: editGetSingleFCode,
         setSingleFCode: editSetSingleFCode,
-        value: editValue
+        value: editValue,
+        archived: editArchived
       };
 
       return variable._generatePayloadToEdit(editPayload);
@@ -1340,7 +1356,8 @@ describe("MBVariable", () => {
         length: editLength,
         getSingleFCode: editGetSingleFCode,
         setSingleFCode: editSetSingleFCode,
-        value: editValue
+        value: editValue,
+        archived: editArchived
       };
 
       expect(result).toBeDefined();
@@ -1355,6 +1372,7 @@ describe("MBVariable", () => {
       editValue = undefined;
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1366,7 +1384,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1381,6 +1400,7 @@ describe("MBVariable", () => {
       editValue = undefined;
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1392,7 +1412,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1407,6 +1428,7 @@ describe("MBVariable", () => {
       editValue = undefined;
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1418,7 +1440,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1433,6 +1456,7 @@ describe("MBVariable", () => {
       editValue = undefined;
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1444,7 +1468,8 @@ describe("MBVariable", () => {
         length: editLength,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1459,6 +1484,7 @@ describe("MBVariable", () => {
       editValue = undefined;
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1470,7 +1496,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1485,6 +1512,7 @@ describe("MBVariable", () => {
       editFCode = undefined;
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1496,7 +1524,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: editValue
+        value: editValue,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1511,6 +1540,7 @@ describe("MBVariable", () => {
       editFCode = undefined;
       editValue = undefined;
       editSetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1522,7 +1552,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: editGetSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        archived: archived
       };
 
       expect(result).toBeDefined();
@@ -1537,6 +1568,7 @@ describe("MBVariable", () => {
       editFCode = undefined;
       editValue = undefined;
       editGetSingleFCode = undefined;
+      editArchived = undefined;
 
       let result = exec();
 
@@ -1548,7 +1580,36 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: editSetSingleFCode,
-        value: value
+        value: value,
+        archived: archived
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload with appropriate parameters if only archived is defined", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editFCode = undefined;
+      editValue = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = exec();
+
+      let validPayload = {
+        timeSample: timeSample,
+        name: name,
+        fCode: fcode,
+        offset: offset,
+        length: length,
+        getSingleFCode: getSingleFCode,
+        setSingleFCode: setSingleFCode,
+        value: value,
+        archived: editArchived
       };
 
       expect(result).toBeDefined();
