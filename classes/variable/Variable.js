@@ -25,9 +25,16 @@ class Variable {
     if (!payload.id) payload.id = Variable.generateRandId();
     this._id = payload.id;
 
+    if (!payload.unit) payload.unit = "";
+    this._unit = payload.unit;
+
     //Setting archive settings according to value
     if (payload.archived) this._archived = true;
     else this._archived = false;
+  }
+
+  get Unit() {
+    return this._unit;
   }
 
   /**
@@ -148,7 +155,8 @@ class Variable {
       id: this.Id,
       timeSample: this.TimeSample,
       name: this.Name,
-      archived: this.Archived
+      archived: this.Archived,
+      unit: this.Unit
     };
   }
 
@@ -163,6 +171,7 @@ class Variable {
     if (!payload.timeSample) payload.timeSample = this.TimeSample;
     if (!payload.name) payload.name = this.Name;
     if (payload.archived === undefined) payload.archived = this.Archived;
+    if (!payload.unit) payload.unit = this.Unit;
 
     let editedVariable = new Variable(this.Device, payload);
 

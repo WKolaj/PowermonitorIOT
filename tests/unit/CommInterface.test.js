@@ -21,7 +21,8 @@ let testPayload = JSON.stringify({
         type: "int16",
         archived: true,
         getSingleFCode: 3,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit1"
       },
       {
         id: "0002",
@@ -34,7 +35,8 @@ let testPayload = JSON.stringify({
         type: "int32",
         archived: true,
         getSingleFCode: 4,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit2"
       },
       {
         id: "0003",
@@ -47,7 +49,8 @@ let testPayload = JSON.stringify({
         type: "float",
         archived: true,
         getSingleFCode: 3,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit3"
       }
     ],
     type: "mbDevice"
@@ -72,7 +75,8 @@ let testPayload = JSON.stringify({
         type: "boolean",
         archived: true,
         getSingleFCode: 1,
-        setSingleFCode: 15
+        setSingleFCode: 15,
+        unit: "unit4"
       },
       {
         id: "0005",
@@ -85,7 +89,8 @@ let testPayload = JSON.stringify({
         type: "swappedInt32",
         archived: true,
         getSingleFCode: 4,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit5"
       },
       {
         id: "0006",
@@ -98,7 +103,8 @@ let testPayload = JSON.stringify({
         type: "swappedFloat",
         archived: true,
         getSingleFCode: 3,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit6"
       }
     ],
     type: "mbDevice"
@@ -123,7 +129,8 @@ let testPayload = JSON.stringify({
         type: "uInt16",
         archived: true,
         getSingleFCode: 3,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit7"
       },
       {
         id: "0008",
@@ -136,7 +143,8 @@ let testPayload = JSON.stringify({
         type: "swappedUInt32",
         archived: true,
         getSingleFCode: 4,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit8"
       },
       {
         id: "0009",
@@ -149,7 +157,8 @@ let testPayload = JSON.stringify({
         type: "uInt32",
         archived: true,
         getSingleFCode: 3,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unit: "unit9"
       }
     ],
     type: "mbDevice"
@@ -2786,6 +2795,7 @@ describe("CommInterface", () => {
     let variableGetSingleFCode;
     let variableSetSingleFCode;
     let variableValue;
+    let variableUnit;
     let variablePayload;
 
     beforeEach(() => {
@@ -2801,6 +2811,7 @@ describe("CommInterface", () => {
       variableGetSingleFCode = 3;
       variableSetSingleFCode = 16;
       variableValue = 123.321;
+      variableUnit = "testUnit";
     });
 
     let exec = () => {
@@ -2814,7 +2825,8 @@ describe("CommInterface", () => {
         getSingleFCode: variableGetSingleFCode,
         setSingleFCode: variableSetSingleFCode,
         archived: variableArchived,
-        value: variableValue
+        value: variableValue,
+        unit: variableUnit
       };
 
       commInterface.init(initPayload);
@@ -2893,6 +2905,16 @@ describe("CommInterface", () => {
       expect(result).toBeDefined();
       expect(result.Value).toBeDefined();
       expect(result.Value).toEqual(0);
+    });
+
+    it("should automatically set unit to empty string if it is not provided in payload", () => {
+      variableUnit = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Unit).toBeDefined();
+      expect(result.Unit).toEqual("");
     });
 
     it("should throw and not add variable if name is not given in payload", () => {
@@ -3045,6 +3067,7 @@ describe("CommInterface", () => {
     let editVariableGetSingleFCode;
     let editVariableSetSingleFCode;
     let editVariableValue;
+    let editVariableUnit;
     let editVariablePayload;
 
     beforeEach(() => {
@@ -3062,6 +3085,7 @@ describe("CommInterface", () => {
       editVariableGetSingleFCode = 3;
       editVariableSetSingleFCode = 16;
       editVariableValue = 123.321;
+      editVariableUnit = "test unit";
     });
 
     let exec = () => {
@@ -3075,7 +3099,8 @@ describe("CommInterface", () => {
         setSingleFCode: editVariableSetSingleFCode,
         archived: editVariableArchived,
         value: editVariableValue,
-        type: editVariableType
+        type: editVariableType,
+        unit: editVariableUnit
       };
 
       commInterface.init(initPayload);
@@ -3190,6 +3215,7 @@ describe("CommInterface", () => {
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
@@ -3205,6 +3231,7 @@ describe("CommInterface", () => {
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
       expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(initVariablePayload.unit);
     });
 
     it("should edit only fcode if only fcode is defined in payload ", () => {
@@ -3215,6 +3242,7 @@ describe("CommInterface", () => {
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
@@ -3230,6 +3258,7 @@ describe("CommInterface", () => {
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
       expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(initVariablePayload.unit);
     });
 
     it("should edit only offset if only offset is defined in payload ", () => {
@@ -3240,6 +3269,7 @@ describe("CommInterface", () => {
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
@@ -3255,6 +3285,7 @@ describe("CommInterface", () => {
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
       expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(initVariablePayload.unit);
     });
 
     it("should edit only timeSample if only timeSample is defined in payload ", () => {
@@ -3265,6 +3296,7 @@ describe("CommInterface", () => {
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
@@ -3280,6 +3312,7 @@ describe("CommInterface", () => {
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
       expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(initVariablePayload.unit);
     });
 
     it("should edit only archived if only archived is defined in payload ", () => {
@@ -3290,6 +3323,7 @@ describe("CommInterface", () => {
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
@@ -3305,6 +3339,34 @@ describe("CommInterface", () => {
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
       expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(initVariablePayload.unit);
+    });
+
+    it("should edit only unit if only unit is defined in payload ", () => {
+      editVariableName = undefined;
+      editVariableFcode = undefined;
+      editVariableOffset = undefined;
+      editVariableTimeSample = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableSetSingleFCode = undefined;
+      editVariableValue = undefined;
+      editVariableArchived = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(initVariablePayload.name);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(editVariableUnit);
     });
 
     it("should edit only getSingleFCode if only getSingleFCode is defined in payload ", () => {
@@ -3314,6 +3376,7 @@ describe("CommInterface", () => {
       editVariableArchived = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
@@ -3330,6 +3393,7 @@ describe("CommInterface", () => {
       expect(result.GetSingleFCode).toEqual(editVariableGetSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
       expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(initVariablePayload.unit);
     });
 
     it("should edit only setSingleFCode if only setSingleFCode is defined in payload ", () => {
@@ -3340,6 +3404,7 @@ describe("CommInterface", () => {
       editVariableArchived = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableValue = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
@@ -3355,6 +3420,7 @@ describe("CommInterface", () => {
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(editVariableSetSingleFCode);
       expect(result.Value).toEqual(initVariablePayload.value);
+      expect(result.Unit).toEqual(initVariablePayload.unit);
     });
 
     it("should edit only value if only value is defined in payload ", () => {
@@ -3365,6 +3431,7 @@ describe("CommInterface", () => {
       editVariableArchived = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
+      editVariableUnit = undefined;
 
       let initVariablePayload = initPayload[deviceId].variables.filter(
         variable => variable.id === variableId
