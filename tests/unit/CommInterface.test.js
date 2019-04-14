@@ -18,7 +18,10 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 3,
         value: 1,
-        type: "int16"
+        type: "int16",
+        archived: true,
+        getSingleFCode: 3,
+        setSingleFCode: 16
       },
       {
         id: "0002",
@@ -28,7 +31,10 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 2,
-        type: "int32"
+        type: "int32",
+        archived: true,
+        getSingleFCode: 4,
+        setSingleFCode: 16
       },
       {
         id: "0003",
@@ -38,7 +44,10 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 3.3,
-        type: "float"
+        type: "float",
+        archived: true,
+        getSingleFCode: 3,
+        setSingleFCode: 16
       }
     ],
     type: "mbDevice"
@@ -60,7 +69,10 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 1,
         value: true,
-        type: "boolean"
+        type: "boolean",
+        archived: true,
+        getSingleFCode: 1,
+        setSingleFCode: 15
       },
       {
         id: "0005",
@@ -70,7 +82,10 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 5,
-        type: "swappedInt32"
+        type: "swappedInt32",
+        archived: true,
+        getSingleFCode: 4,
+        setSingleFCode: 16
       },
       {
         id: "0006",
@@ -80,7 +95,10 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 6.6,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true,
+        getSingleFCode: 3,
+        setSingleFCode: 16
       }
     ],
     type: "mbDevice"
@@ -98,21 +116,27 @@ let testPayload = JSON.stringify({
         id: "0007",
         timeSample: 2,
         name: "test variable 4",
-        offset: 5,
+        offset: 4,
         length: 1,
         fCode: 3,
         value: 7,
-        type: "uInt16"
+        type: "uInt16",
+        archived: true,
+        getSingleFCode: 3,
+        setSingleFCode: 16
       },
       {
         id: "0008",
         timeSample: 3,
         name: "test variable 5",
-        offset: 6,
+        offset: 5,
         length: 2,
         fCode: 4,
         value: 8,
-        type: "swappedUInt32"
+        type: "swappedUInt32",
+        archived: true,
+        getSingleFCode: 4,
+        setSingleFCode: 16
       },
       {
         id: "0009",
@@ -120,9 +144,12 @@ let testPayload = JSON.stringify({
         name: "test variable 6",
         offset: 7,
         length: 2,
-        fCode: 16,
+        fCode: 3,
         value: 9,
-        type: "uInt32"
+        type: "uInt32",
+        archived: true,
+        getSingleFCode: 3,
+        setSingleFCode: 16
       }
     ],
     type: "mbDevice"
@@ -138,12 +165,156 @@ describe("CommInterface", () => {
   });
 
   afterEach(async () => {
-    //ending communication with all devices if there are any
-    await commInterface.stopCommunicationWithAllDevices();
-    commInterface.Sampler.stop();
+    if (commInterface.Initialized) {
+      //ending communication with all devices if there are any
+      await commInterface.stopCommunicationWithAllDevices();
+      commInterface.Sampler.stop();
+    }
+
     jest.resetModules();
     //waiting for all sampling actions to end being invoke;
     await snooze(100);
+  });
+
+  describe("constructor", () => {
+    it("should set Initialized to false", () => {
+      expect(commInterface.Initialized).toBeFalsy();
+    });
+  });
+
+  describe("init", () => {
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+    });
+
+    let exec = () => {
+      return commInterface.init(initPayload);
+    };
+
+    it("should set Initialized to true", () => {
+      exec();
+      expect(commInterface.Initialized).toBeTruthy();
+    });
+
+    it("should create and start sampler", () => {
+      exec();
+      expect(commInterface.Sampler).toBeDefined();
+      expect(commInterface.Sampler.Active).toBeTruthy();
+    });
+
+    it("should create devices and variables based on given payload", () => {
+      exec();
+
+      expect(commInterface.Payload).toBeDefined();
+      expect(commInterface.Payload).toMatchObject(initPayload);
+    });
+
+    it("should create devices and variables based on given payload if there is only one device", () => {
+      let firstDevice = Object.values(initPayload)[0];
+
+      initPayload = {
+        [firstDevice.id]: firstDevice
+      };
+
+      exec();
+
+      expect(commInterface.Payload).toBeDefined();
+      expect(commInterface.Payload).toMatchObject(initPayload);
+    });
+
+    it("should create devices and variables based on given payload if there is empty variables field in devices", () => {
+      let allDevices = Object.values(initPayload);
+
+      for (let device of allDevices) {
+        initPayload[device.id].variables = [];
+      }
+
+      exec();
+
+      expect(commInterface.Payload).toBeDefined();
+      expect(commInterface.Payload).toMatchObject(initPayload);
+    });
+
+    it("should create empty devices object, create and initialize Sampler and set Initialized to true if payload is empty object ", () => {
+      initPayload = {};
+      exec();
+
+      expect(commInterface.Initialized).toBeTruthy();
+
+      expect(commInterface.Sampler).toBeDefined();
+      expect(commInterface.Sampler.Active).toBeTruthy();
+
+      expect(commInterface.Devices).toBeDefined();
+      expect(commInterface.Devices).toEqual({});
+    });
+
+    it("should create empty devices object, create and initialize Sampler and set Initialized to true if payload is undefined ", () => {
+      initPayload = undefined;
+      exec();
+
+      expect(commInterface.Initialized).toBeTruthy();
+
+      expect(commInterface.Sampler).toBeDefined();
+      expect(commInterface.Sampler.Active).toBeTruthy();
+
+      expect(commInterface.Devices).toBeDefined();
+      expect(commInterface.Devices).toEqual({});
+    });
+
+    it("should not invoke again after first invoke", () => {
+      exec();
+
+      let oldPayload = initPayload;
+
+      //Reinitializing using empty payload - checking whether it would change Devices
+      initPayload = {};
+
+      //Trying to initialize second time based on different payload
+      exec();
+
+      expect(commInterface.Payload).toMatchObject(oldPayload);
+    });
+
+    it("should start all active defices", async () => {
+      let allPayloadDevices = Object.values(initPayload);
+
+      for (let device of allPayloadDevices) {
+        initPayload[device.id].isActive = true;
+      }
+
+      exec();
+
+      await snooze(1000);
+
+      let allDevices = commInterface.getAllDevices();
+
+      //All devices should be active
+      for (let device of allDevices) {
+        expect(device.IsActive).toEqual(true);
+      }
+
+      //All devices should call connectTCP of their clients
+      for (let device of allDevices) {
+        //Can be called several times - if device is active and sampler invoke tick before connection was established
+        expect(device.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+        //Every call should have been done with propriate parameters
+        for (
+          let i = 0;
+          i < device.MBDriver._client.connectTCP.mock.calls.length;
+          i++
+        ) {
+          expect(device.MBDriver._client.connectTCP.mock.calls[i][0]).toEqual(
+            device.IPAdress
+          );
+          expect(
+            device.MBDriver._client.connectTCP.mock.calls[i][1]
+          ).toMatchObject({ port: device.PortNumber });
+        }
+      }
+    });
   });
 
   describe("createNewDevice", () => {
@@ -246,7 +417,7 @@ describe("CommInterface", () => {
       );
     });
 
-    it("should create a new device together with its variables if they are given", () => {
+    it("should create a new modbus device together with its variables if they are given", () => {
       let varaible1Payload = {
         id: "1234",
         timeSample: 2,
@@ -1308,6 +1479,161 @@ describe("CommInterface", () => {
     });
   });
 
+  describe("getAllVariables", () => {
+    let deviceId;
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1234";
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface.getAllVariables(deviceId);
+    };
+
+    it("should return all variables of device of given id", () => {
+      let result = exec();
+
+      let variable1 = commInterface.getVariable("1234", "0001");
+      let variable2 = commInterface.getVariable("1234", "0002");
+      let variable3 = commInterface.getVariable("1234", "0003");
+
+      expect(result.length).toEqual(3);
+      expect(result).toContain(variable1);
+      expect(result).toContain(variable2);
+      expect(result).toContain(variable3);
+    });
+
+    it("should throw if there is no device of given id", () => {
+      deviceId = "4321";
+
+      expect(() => {
+        exec();
+      }).toThrow();
+    });
+
+    it("should return empty array if device has no variables", () => {
+      initPayload[deviceId].variables = undefined;
+
+      let result = exec();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("getAllDevices", () => {
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface.getAllDevices();
+    };
+
+    it("should return all devices", () => {
+      let result = exec();
+
+      let device1 = commInterface.getDevice("1234");
+      let device2 = commInterface.getDevice("1235");
+      let device3 = commInterface.getDevice("1236");
+
+      expect(result.length).toEqual(3);
+      expect(result).toContain(device1);
+      expect(result).toContain(device2);
+      expect(result).toContain(device3);
+    });
+
+    it("should return empty array if there are no devices", () => {
+      initPayload = {};
+
+      let result = exec();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("getAllVariableIds", () => {
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface.getAllVariableIds();
+    };
+
+    it("should return all variables ids", () => {
+      let result = exec();
+
+      expect(result.length).toEqual(9);
+      expect(result).toContain("0001");
+      expect(result).toContain("0002");
+      expect(result).toContain("0003");
+      expect(result).toContain("0004");
+      expect(result).toContain("0005");
+      expect(result).toContain("0006");
+      expect(result).toContain("0007");
+      expect(result).toContain("0008");
+      expect(result).toContain("0009");
+    });
+
+    it("should return empty array if there is no variable", () => {
+      initPayload["1234"].variables = undefined;
+      initPayload["1235"].variables = undefined;
+      initPayload["1236"].variables = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("_doesVariableExistis", () => {
+    let initPayload;
+    let variableId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      variableId = "0005";
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface._doesVariableExistis(variableId);
+    };
+
+    it("should return true if variable already exists in commInterface", () => {
+      let result = exec();
+
+      expect(result).toBeTruthy();
+    });
+
+    it("should return false if variable does not exists in commInterface", () => {
+      variableId = "8765";
+      let result = exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if variable does not exists in commInterface end there are no variables added", () => {
+      initPayload["1234"].variables = undefined;
+      initPayload["1235"].variables = undefined;
+      initPayload["1236"].variables = undefined;
+
+      let result = exec();
+
+      expect(result).toBeFalsy();
+    });
+  });
+
   describe("startCommunication", () => {
     let initPayload;
     let deviceId;
@@ -1414,6 +1740,1815 @@ describe("CommInterface", () => {
     it("should throw if there is no device of given id", () => {
       deviceId = "4321";
 
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("startCommunicationWithAllDevices", () => {
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface.startCommunicationWithAllDevices();
+    };
+
+    it("should set every device to active", async () => {
+      await exec();
+
+      let allDevices = commInterface.getAllDevices();
+
+      for (let device of allDevices) {
+        expect(device.IsActive).toEqual(true);
+      }
+    });
+
+    it("should start communication with all devices", async () => {
+      await exec();
+
+      let allDevices = commInterface.getAllDevices();
+
+      for (let device of allDevices) {
+        //Can be called several times - if device is active and sampler invoke tick before connection was established
+        expect(device.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+        //Every call should have been done with propriate parameters
+        for (
+          let i = 0;
+          i < device.MBDriver._client.connectTCP.mock.calls.length;
+          i++
+        ) {
+          expect(device.MBDriver._client.connectTCP.mock.calls[i][0]).toEqual(
+            device.IPAdress
+          );
+          expect(
+            device.MBDriver._client.connectTCP.mock.calls[i][1]
+          ).toMatchObject({ port: device.PortNumber });
+        }
+      }
+    });
+
+    it("should not throw if there are no devices added", () => {
+      initPayload = {};
+
+      expect(() => exec()).not.toThrow();
+    });
+
+    it("should not throw if it is called more than once", async () => {
+      await exec();
+
+      expect(() => exec()).not.toThrow();
+    });
+  });
+
+  describe("stopCommunicationWithAllDevices", () => {
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+    });
+
+    let exec = async () => {
+      commInterface.init(initPayload);
+      await commInterface.startCommunicationWithAllDevices();
+
+      return commInterface.stopCommunicationWithAllDevices();
+    };
+
+    it("should set all devices to inactive", async () => {
+      await exec();
+
+      let allDevices = commInterface.getAllDevices();
+
+      for (let device of allDevices) {
+        expect(device.IsActive).toEqual(false);
+      }
+    });
+
+    it("should stop communication with all devices", async () => {
+      await exec();
+
+      let allDevices = commInterface.getAllDevices();
+
+      for (let device of allDevices) {
+        expect(device.MBDriver._client.close).toHaveBeenCalledTimes(1);
+      }
+    });
+
+    it("should not throw if there are no devices added", () => {
+      initPayload = {};
+
+      expect(() => exec()).not.toThrow();
+    });
+
+    it("should not throw if it is called more than once", async () => {
+      await exec();
+
+      expect(() => exec()).not.toThrow();
+    });
+  });
+
+  describe("getDevice", () => {
+    let initPayload;
+    let deviceId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface.getDevice(deviceId);
+    };
+
+    it("should return device of given id", () => {
+      let result = exec();
+
+      let device1 = commInterface.Devices[deviceId];
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(device1);
+    });
+
+    it("should throw if there is no device of given id", () => {
+      deviceId = "8765";
+
+      expect(() => exec()).toThrow();
+    });
+  });
+
+  describe("removeDevice", () => {
+    let initPayload;
+    let deviceId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface.removeDevice(deviceId);
+    };
+
+    it("should remove device from commInterface", async () => {
+      let result = await exec();
+
+      let allDeviceIds = Object.keys(commInterface.Devices);
+
+      expect(allDeviceIds.length).toEqual(Object.keys(initPayload).length - 1);
+      expect(allDeviceIds).not.toContain(deviceId);
+    });
+
+    it("should reject if there is no device of given id", async () => {
+      deviceId = "8765";
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should disconnect and remove device if it is active", async () => {
+      initPayload[deviceId].isActive = true;
+
+      await snooze(100);
+
+      let result = await exec();
+
+      let allDeviceIds = Object.keys(commInterface.Devices);
+
+      expect(allDeviceIds.length).toEqual(Object.keys(initPayload).length - 1);
+      expect(allDeviceIds).not.toContain(deviceId);
+
+      expect(result.MBDriver._client.close).toHaveBeenCalled();
+    });
+
+    it("should not call disconnect if removed device is not active", async () => {
+      initPayload[deviceId].isActive = false;
+
+      await snooze(100);
+
+      let result = await exec();
+
+      let allDeviceIds = Object.keys(commInterface.Devices);
+
+      expect(allDeviceIds.length).toEqual(Object.keys(initPayload).length - 1);
+      expect(allDeviceIds).not.toContain(deviceId);
+
+      expect(result.MBDriver._client.close).not.toHaveBeenCalled();
+    });
+
+    it("should not call disconnect if removed device is not active", async () => {
+      initPayload[deviceId].isActive = false;
+
+      await snooze(100);
+
+      let result = await exec();
+
+      let allDeviceIds = Object.keys(commInterface.Devices);
+
+      expect(allDeviceIds.length).toEqual(Object.keys(initPayload).length - 1);
+      expect(allDeviceIds).not.toContain(deviceId);
+
+      expect(result.MBDriver._client.close).not.toHaveBeenCalled();
+    });
+
+    it("should remove device from samplers collection", async () => {
+      let result = await exec();
+
+      expect(commInterface.Sampler.AllDevices[deviceId]).not.toBeDefined();
+    });
+  });
+
+  describe("editDevice", () => {
+    let initPayload;
+    let deviceId;
+    let editPayload;
+    let editId;
+    let editName;
+    let editIsActive;
+    let editTimeout;
+    let editIpAdress;
+    let editUnitId;
+    let editPortNumber;
+    let editVariables;
+    let initDriver;
+    let initVariables;
+
+    beforeEach(() => {
+      editId = undefined;
+      editName = "Modified device";
+      editIsActive = false;
+      editTimeout = 4000;
+      editIpAdress = "192.168.0.17";
+      editUnitId = 5;
+      editPortNumber = 602;
+      editVariables = undefined;
+
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+    });
+
+    let exec = async () => {
+      editPayload = {
+        id: editId,
+        name: editName,
+        isActive: editIsActive,
+        timeout: editTimeout,
+        ipAdress: editIpAdress,
+        unitId: editUnitId,
+        portNumber: editPortNumber,
+        variables: editVariables
+      };
+      commInterface.init(initPayload);
+      initDriver = commInterface.getDevice(deviceId).MBDriver;
+      initVariables = Object.values(
+        commInterface.getDevice(deviceId).Variables
+      );
+      return commInterface.editDevice(deviceId, editPayload);
+    };
+
+    it("should edit device of given id according to given payload", async () => {
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+    });
+
+    it("should return edited device", async () => {
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(result).toEqual(editedDevice);
+    });
+
+    it("should not edit variables even if they are given in payload", async () => {
+      editVariables = [
+        {
+          id: "0010",
+          timeSample: 2,
+          name: "test variable 10",
+          offset: 5,
+          length: 1,
+          fCode: 3,
+          value: 1,
+          type: "int32",
+          archived: true,
+          getSingleFCode: 3,
+          setSingleFCode: 16
+        },
+        {
+          id: "0011",
+          timeSample: 3,
+          name: "test variable 11",
+          offset: 7,
+          length: 2,
+          fCode: 4,
+          value: 2,
+          type: "float",
+          archived: true,
+          getSingleFCode: 4,
+          setSingleFCode: 16
+        }
+      ];
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+      expect(editedDevice.Payload.variables).toBeDefined();
+      expect(editedDevice.Payload.variables).toMatchObject(
+        initPayload[deviceId].variables
+      );
+    });
+
+    it("should not edit variables even if they are given in payload as empty array", async () => {
+      editVariables = [];
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+      expect(editedDevice.Payload.variables).toBeDefined();
+      expect(editedDevice.Payload.variables).toMatchObject(
+        initPayload[deviceId].variables
+      );
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - Timeout", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = 4000;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = undefined;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+      //Only timeout should be edited
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+
+      //Rest should stay the same
+      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
+      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
+      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - IPAdress", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = undefined;
+      editIpAdress = "192.168.0.1";
+      editUnitId = undefined;
+      editPortNumber = undefined;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+
+      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
+      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - UnitId", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = 123;
+      editPortNumber = undefined;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+
+      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
+      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - PortNumber", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = 123;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+
+      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
+      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
+      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+    });
+
+    it("should start communication when isActive is set to true and previosly was false and change was not associated with driver ", async () => {
+      editIsActive = true;
+
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = undefined;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Can be called several times - if device is active and sampler invoke tick before connection was established
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+      for (
+        let i = 0;
+        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
+        i++
+      ) {
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
+        ).toEqual(initPayload[deviceId].ipAdress);
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
+        ).toMatchObject({ port: initPayload[deviceId].portNumber });
+      }
+    });
+
+    it("should start communication when isActive is set to true and previosly was false and change was associated with driver ", async () => {
+      editIsActive = true;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Can be called several times - if device is active and sampler invoke tick before connection was established
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+      for (
+        let i = 0;
+        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
+        i++
+      ) {
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
+        ).toEqual(editIpAdress);
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
+        ).toMatchObject({ port: editPortNumber });
+      }
+    });
+
+    it("should not start communication when isActive is set to true and previosly was true and change was not associated with driver ", async () => {
+      initPayload[deviceId].isActive = true;
+      editIsActive = true;
+
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = undefined;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Shouldn't be called more than once
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalledTimes(1);
+    });
+
+    it("should restart communication when isActive is set to true and previosly was true but change was associated with driver ", async () => {
+      initPayload[deviceId].isActive = true;
+      editIsActive = true;
+
+      let result = await exec();
+
+      await snooze(100);
+
+      let editedDevice = commInterface.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Should call disconnect of old driver
+      expect(initDriver._client.close).toHaveBeenCalledTimes(1);
+
+      //Should call connect to new driver
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+      for (
+        let i = 0;
+        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
+        i++
+      ) {
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
+        ).toEqual(editIpAdress);
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
+        ).toMatchObject({ port: editPortNumber });
+      }
+
+      //Disconnect should be called before new connect
+      expect(initDriver._client.close).toHaveBeenCalledBefore(
+        editedDevice.MBDriver._client.connectTCP
+      );
+    });
+
+    it("should recreate all variables when recreating driver", async () => {
+      initPayload[deviceId].isActive = true;
+      editIsActive = true;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+      let newVariables = Object.values(editedDevice.Variables);
+
+      expect(newVariables).toBeDefined();
+      expect(newVariables.length).toBeDefined();
+      expect(newVariables.length).toEqual(initVariables.length);
+
+      for (let variable of newVariables) {
+        //GetSingleRequest and SetSingleRequest drivers must equal to new driver
+        expect(variable.GetSingleRequest.MBDriver).toEqual(
+          editedDevice.MBDriver
+        );
+        expect(variable.SetSingleRequest.MBDriver).toEqual(
+          editedDevice.MBDriver
+        );
+
+        expect(initVariables).not.toContain(variable);
+      }
+
+      //Variables payload should be equal
+
+      let oldVariablesPayload = initVariables.map(variable => variable.Payload);
+      let newVariablesPayload = newVariables.map(variable => variable.Payload);
+
+      expect(newVariablesPayload).toBeDefined();
+      expect(newVariablesPayload).toMatchObject(oldVariablesPayload);
+    });
+
+    it("should throw if there is no device of given id", () => {
+      deviceId = "8765";
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should not change id if id is different in payload and in argument", async () => {
+      editId = "8765";
+
+      let result = await exec();
+
+      expect(result.Id).toBeDefined();
+      expect(result.Id).toEqual(deviceId);
+    });
+  });
+
+  describe("createDevice", () => {
+    let initPayload;
+    let deviceId;
+    let createPayload;
+    let createId;
+    let createName;
+    let createIsActive;
+    let createTimeout;
+    let createIpAdress;
+    let createUnitId;
+    let createPortNumber;
+    let createVariables;
+
+    beforeEach(() => {
+      createId = undefined;
+      createName = "Created device";
+      createIsActive = false;
+      createTimeout = 4000;
+      createIpAdress = "192.168.0.17";
+      createUnitId = 5;
+      createPortNumber = 602;
+      createVariables = undefined;
+      createType = "mbDevice";
+
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+
+      createVariables = [
+        {
+          id: "1001",
+          timeSample: 2,
+          name: "test variable 11",
+          offset: 5,
+          length: 1,
+          fCode: 3,
+          value: 1,
+          type: "int16",
+          archived: true,
+          getSingleFCode: 3,
+          setSingleFCode: 16
+        },
+        {
+          id: "1002",
+          timeSample: 3,
+          name: "test variable 12",
+          offset: 6,
+          length: 2,
+          fCode: 4,
+          value: 2,
+          type: "int32",
+          archived: true,
+          getSingleFCode: 4,
+          setSingleFCode: 16
+        },
+        {
+          id: "1003",
+          timeSample: 4,
+          name: "test variable 13",
+          offset: 7,
+          length: 2,
+          fCode: 16,
+          value: 3.3,
+          type: "float",
+          archived: true,
+          getSingleFCode: 3,
+          setSingleFCode: 16
+        }
+      ];
+    });
+
+    let exec = async () => {
+      createPayload = {
+        id: createId,
+        name: createName,
+        isActive: createIsActive,
+        timeout: createTimeout,
+        ipAdress: createIpAdress,
+        unitId: createUnitId,
+        portNumber: createPortNumber,
+        variables: createVariables,
+        type: createType
+      };
+
+      commInterface.init(initPayload);
+
+      return commInterface.createNewDevice(createPayload);
+    };
+
+    it("should return created device", async () => {
+      let result = await exec();
+
+      let allDevices = commInterface.getAllDevices();
+
+      let createDevice = allDevices[allDevices.length - 1];
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(createDevice);
+    });
+
+    it("should create new device based on given payload", async () => {
+      let result = await exec();
+
+      expect(result.Name).toEqual(createName);
+      expect(result.IsActive).toEqual(createIsActive);
+      expect(result.Timeout).toEqual(createTimeout);
+      expect(result.IPAdress).toEqual(createIpAdress);
+      expect(result.UnitId).toEqual(createUnitId);
+      expect(result.PortNumber).toEqual(createPortNumber);
+      expect(result.Type).toEqual(createType);
+
+      let allVariables = Object.values(result.Variables);
+
+      expect(allVariables).toBeDefined();
+      expect(allVariables.length).toBeDefined();
+      expect(allVariables.length).toEqual(createVariables.length);
+
+      for (let i = 0; i < allVariables.length; i++) {
+        expect(allVariables[i].Payload).toMatchObject(createVariables[i]);
+      }
+
+      //Should create device with new id
+      expect(result.Id).toBeDefined();
+    });
+
+    it("should create new device based on given payload when variables are empty", async () => {
+      createVariables = undefined;
+
+      let result = await exec();
+
+      expect(result.Name).toEqual(createName);
+      expect(result.IsActive).toEqual(createIsActive);
+      expect(result.Timeout).toEqual(createTimeout);
+      expect(result.IPAdress).toEqual(createIpAdress);
+      expect(result.UnitId).toEqual(createUnitId);
+      expect(result.PortNumber).toEqual(createPortNumber);
+      expect(result.Type).toEqual(createType);
+
+      expect(result.Variables).toBeDefined();
+      expect(result.Variables).toEqual({});
+    });
+
+    it("should create device with given id if id is defined", async () => {
+      createId = "8765";
+
+      let result = await exec();
+
+      expect(result.Name).toEqual(createName);
+      expect(result.IsActive).toEqual(createIsActive);
+      expect(result.Timeout).toEqual(createTimeout);
+      expect(result.IPAdress).toEqual(createIpAdress);
+      expect(result.UnitId).toEqual(createUnitId);
+      expect(result.PortNumber).toEqual(createPortNumber);
+      expect(result.Type).toEqual(createType);
+
+      //Should create device with new id
+      expect(result.Id).toBeDefined();
+      expect(result.Id).toEqual(createId);
+    });
+
+    it("should throw and not add any device if device of given id already exists", async () => {
+      createId = "1234";
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if name in payload does not exists", async () => {
+      createName = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should not throw but add new device with isActive set to false if isActive in payload does not exists", async () => {
+      createIsActive = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.not.toBeDefined();
+
+      let allDevices = commInterface.getAllDevices();
+
+      expect(allDevices.length).toEqual(Object.keys(initPayload).length + 1);
+
+      let createdDevice = allDevices[allDevices.length - 1];
+
+      expect(createdDevice).toBeDefined();
+      expect(createdDevice.IsActive).toBeFalsy();
+    });
+
+    it("should throw and not add any device if timeout in payload does not exists", async () => {
+      createTimeout = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if IPAdress in payload does not exists", async () => {
+      createIpAdress = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if UnitId in payload does not exists", async () => {
+      createUnitId = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if PortNumber in payload does not exists", async () => {
+      createPortNumber = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if Type in payload does not exists", async () => {
+      createType = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if one of variable is invalid", async () => {
+      createVariables[1] = {
+        id: "1002",
+        timeSample: 3,
+        name: "test variable 12",
+        offset: 6,
+        length: 2,
+        fCode: 1234,
+        value: 2,
+        type: "int32",
+        archived: true,
+        getSingleFCode: 4,
+        setSingleFCode: 16
+      };
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if payload is undefined", async () => {
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await commInterface.init(initPayload);
+
+            await commInterface.createNewDevice();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should throw and not add any device if payload is empty", async () => {
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await commInterface.init(initPayload);
+
+            await commInterface.createNewDevice({});
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllDevices().length).toEqual(
+        Object.keys(initPayload).length
+      );
+    });
+
+    it("should connect device if isActive is true", async () => {
+      createIsActive = true;
+
+      let result = await exec();
+
+      expect(result.IsActive).toBeTruthy();
+      expect(result.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+      for (
+        let i = 0;
+        i < result.MBDriver._client.connectTCP.mock.calls.length;
+        i++
+      ) {
+        expect(result.MBDriver._client.connectTCP.mock.calls[i][0]).toEqual(
+          createIpAdress
+        );
+        expect(
+          result.MBDriver._client.connectTCP.mock.calls[i][1]
+        ).toMatchObject({ port: createPortNumber });
+      }
+    });
+  });
+
+  describe("createVariable", () => {
+    let initPayload;
+    let deviceId;
+    let variableId;
+    let variableName;
+    let variableFcode;
+    let variableOffset;
+    let variableType;
+    let variableTimeSample;
+    let variableArchived;
+    let variableGetSingleFCode;
+    let variableSetSingleFCode;
+    let variableValue;
+    let variablePayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+      variableId = "87654321";
+      variableName = "test variable";
+      variableFcode = 3;
+      variableOffset = 2;
+      variableType = "float";
+      variableTimeSample = 5;
+      variableArchived = true;
+      variableGetSingleFCode = 3;
+      variableSetSingleFCode = 16;
+      variableValue = 123.321;
+    });
+
+    let exec = () => {
+      variablePayload = {
+        id: variableId,
+        name: variableName,
+        fCode: variableFcode,
+        offset: variableOffset,
+        type: variableType,
+        timeSample: variableTimeSample,
+        getSingleFCode: variableGetSingleFCode,
+        setSingleFCode: variableSetSingleFCode,
+        archived: variableArchived,
+        value: variableValue
+      };
+
+      commInterface.init(initPayload);
+      return commInterface.createVariable(deviceId, variablePayload);
+    };
+
+    it("should create new variable based on given payload", () => {
+      let result = exec();
+
+      let createdVariable = commInterface.getVariable(deviceId, variableId);
+
+      expect(createdVariable).toBeDefined();
+      expect(createdVariable.Payload).toBeDefined();
+      expect(createdVariable.Payload).toMatchObject(variablePayload);
+    });
+
+    it("should return created variable", () => {
+      let result = exec();
+
+      let createdVariable = commInterface.getVariable(deviceId, variableId);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(createdVariable);
+    });
+
+    it("should set own variable id if id is not defined inside payload", () => {
+      variableId = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toBeDefined();
+
+      let createdVariable = commInterface.getVariable(deviceId, result.Id);
+
+      expect(result).toEqual(createdVariable);
+    });
+
+    it("should automatically set getSingleFCode if it is not provided in payload", () => {
+      variableGetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.GetSingleFCode).toBeDefined();
+      //Float has default value of 3
+      expect(result.GetSingleFCode).toEqual(3);
+    });
+
+    it("should automatically set setSingleFCode if it is not provided in payload", () => {
+      variableSetSingleFCode = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.SetSingleFCode).toBeDefined();
+      //Float has default value of 3
+      expect(result.SetSingleFCode).toEqual(16);
+    });
+
+    it("should automatically set archived to false if it is not provided in payload", () => {
+      variableArchived = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Archived).toBeDefined();
+      expect(result.Archived).toBeFalsy();
+    });
+
+    it("should automatically set value to default value eg. 0 if it is not provided in payload", () => {
+      variableValue = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Value).toBeDefined();
+      expect(result.Value).toEqual(0);
+    });
+
+    it("should throw and not add variable if name is not given in payload", () => {
+      variableName = undefined;
+
+      expect(() => exec()).toThrow();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).Variables).length
+      ).toEqual(3);
+    });
+
+    it("should throw and not add variable  if fCode is not given in payload", () => {
+      variableFcode = undefined;
+
+      expect(() => exec()).toThrow();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).Variables).length
+      ).toEqual(3);
+    });
+
+    it("should throw and not add variable  if offset is not given in payload", () => {
+      variableOffset = undefined;
+
+      expect(() => exec()).toThrow();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).Variables).length
+      ).toEqual(3);
+    });
+
+    it("should throw and not add variable  if time sample is not given in payload", () => {
+      variableTimeSample = undefined;
+
+      expect(() => exec()).toThrow();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).Variables).length
+      ).toEqual(3);
+    });
+
+    it("should throw and not add variable if variable of given id already exists", () => {
+      variableId = "0002";
+
+      expect(() => exec()).toThrow();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).Variables).length
+      ).toEqual(3);
+    });
+  });
+
+  describe("getVariable", () => {
+    let initPayload;
+    let deviceId;
+    let variableId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+      variableId = "0005";
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      return commInterface.getVariable(deviceId, variableId);
+    };
+
+    it("should return variable if it exists", () => {
+      let result = exec();
+
+      expect(result).toEqual(
+        commInterface.getDevice(deviceId).Variables[variableId]
+      );
+    });
+
+    it("should throw if device does not exists", () => {
+      deviceId = "8765";
+
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if variable does not exists", () => {
+      variableId = "8765";
+
+      expect(() => exec()).toThrow();
+    });
+  });
+
+  describe("removeVariable", () => {
+    let initPayload;
+    let deviceId;
+    let variableId;
+    let variableToRemove;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+      variableId = "0005";
+    });
+
+    let exec = () => {
+      commInterface.init(initPayload);
+      variableToRemove = commInterface.getVariable(deviceId, variableId);
+      return commInterface.removeVariable(deviceId, variableId);
+    };
+
+    it("should remove variable of given id", () => {
+      let result = exec();
+
+      let allVariableIds = commInterface.getAllVariableIds();
+
+      expect(allVariableIds).not.toContain(variableId);
+    });
+
+    it("should return removed variable", () => {
+      let result = exec();
+
+      expect(result).toEqual(variableToRemove);
+    });
+
+    it("should throw and no delete variable if it does not exist", () => {
+      deviceId = "8765";
+
+      expect(() => exec()).toThrow();
+      expect(commInterface.getAllVariableIds().length).toEqual(9);
+    });
+
+    it("should throw if variable does not exists", () => {
+      variableId = "8765";
+
+      expect(() => exec()).toThrow();
+      expect(commInterface.getAllVariableIds().length).toEqual(9);
+    });
+  });
+
+  describe("editVariable", () => {
+    let initPayload;
+    let deviceId;
+    let variableId;
+    let originalVariable;
+    let editVariableId;
+    let editVariableName;
+    let editVariableType;
+    let editVariableFcode;
+    let editVariableOffset;
+    let editVariableTimeSample;
+    let editVariableArchived;
+    let editVariableGetSingleFCode;
+    let editVariableSetSingleFCode;
+    let editVariableValue;
+    let editVariablePayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+      variableId = "0005";
+
+      editVariableId = undefined;
+      editVariableName = "test editVariable";
+      editVariableType = undefined;
+      editVariableFcode = 3;
+      editVariableOffset = 2;
+      editVariableTimeSample = 5;
+      editVariableArchived = true;
+      editVariableGetSingleFCode = 3;
+      editVariableSetSingleFCode = 16;
+      editVariableValue = 123.321;
+    });
+
+    let exec = () => {
+      editVariablePayload = {
+        id: editVariableId,
+        name: editVariableName,
+        fCode: editVariableFcode,
+        offset: editVariableOffset,
+        timeSample: editVariableTimeSample,
+        getSingleFCode: editVariableGetSingleFCode,
+        setSingleFCode: editVariableSetSingleFCode,
+        archived: editVariableArchived,
+        value: editVariableValue,
+        type: editVariableType
+      };
+
+      commInterface.init(initPayload);
+
+      originalVariable = commInterface.getVariable(deviceId, variableId);
+
+      return commInterface.editVariable(
+        deviceId,
+        variableId,
+        editVariablePayload
+      );
+    };
+
+    it("should edit variable based on given payload", () => {
+      let result = exec();
+
+      let editedVariable = commInterface.getVariable(deviceId, variableId);
+
+      expect(editedVariable.Id).toEqual(variableId);
+      expect(editedVariable.Name).toEqual(editVariableName);
+      expect(editedVariable.FCode).toEqual(editVariableFcode);
+      expect(editedVariable.Offset).toEqual(editVariableOffset);
+      expect(editedVariable.TimeSample).toEqual(editVariableTimeSample);
+      expect(editedVariable.Archived).toEqual(editVariableArchived);
+      expect(editedVariable.GetSingleFCode).toEqual(editVariableGetSingleFCode);
+      expect(editedVariable.SetSingleFCode).toEqual(editVariableSetSingleFCode);
+      expect(editedVariable.Value).toEqual(editVariableValue);
+    });
+
+    it("should return edited variable", () => {
+      let result = exec();
+
+      let editedVariable = commInterface.getVariable(deviceId, variableId);
+
+      expect(result).toEqual(editedVariable);
+    });
+
+    it("should not edit variable type if it is defined in payload", () => {
+      editVariableType = "float";
+
+      let result = exec();
+
+      let editedVariable = commInterface.getVariable(deviceId, variableId);
+
+      let orginalType = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0].type;
+
+      //Type should have not been edited
+      expect(editedVariable.Type).not.toEqual(editVariableType);
+      expect(editedVariable.Type).toEqual(orginalType);
+
+      //All other parameters should have been edited
+      expect(editedVariable.Id).toEqual(variableId);
+      expect(editedVariable.Name).toEqual(editVariableName);
+      expect(editedVariable.FCode).toEqual(editVariableFcode);
+      expect(editedVariable.Offset).toEqual(editVariableOffset);
+      expect(editedVariable.TimeSample).toEqual(editVariableTimeSample);
+      expect(editedVariable.Archived).toEqual(editVariableArchived);
+      expect(editedVariable.GetSingleFCode).toEqual(editVariableGetSingleFCode);
+      expect(editedVariable.SetSingleFCode).toEqual(editVariableSetSingleFCode);
+      expect(editedVariable.Value).toEqual(editVariableValue);
+    });
+
+    it("should not edit variable id if it is defined in payload", () => {
+      editVariableId = "87654321";
+
+      let result = exec();
+
+      let editedVariable = commInterface.getVariable(deviceId, variableId);
+
+      //Type should have not been edited
+      expect(editedVariable.Id).not.toEqual(editVariableId);
+      expect(editedVariable.Id).toEqual(variableId);
+
+      //All other parameters should have been edited
+      expect(editedVariable.Id).toEqual(variableId);
+      expect(editedVariable.Name).toEqual(editVariableName);
+      expect(editedVariable.FCode).toEqual(editVariableFcode);
+      expect(editedVariable.Offset).toEqual(editVariableOffset);
+      expect(editedVariable.TimeSample).toEqual(editVariableTimeSample);
+      expect(editedVariable.Archived).toEqual(editVariableArchived);
+      expect(editedVariable.GetSingleFCode).toEqual(editVariableGetSingleFCode);
+      expect(editedVariable.SetSingleFCode).toEqual(editVariableSetSingleFCode);
+      expect(editedVariable.Value).toEqual(editVariableValue);
+    });
+
+    it("should create completly new variable but with the same event object", () => {
+      let result = exec();
+
+      let editedVariable = commInterface.getVariable(deviceId, variableId);
+
+      expect(originalVariable).not.toEqual(editedVariable);
+
+      expect(originalVariable.Events).toBeDefined();
+      expect(originalVariable.Events).toEqual(editedVariable.Events);
+    });
+
+    it("should not add new variable but replace old one", () => {
+      let result = exec();
+
+      expect(
+        Object.keys(commInterface.getDevice(deviceId).Variables).length
+      ).toEqual(initPayload[deviceId].variables.length);
+    });
+
+    it("should edit only name if only name is defined in payload ", () => {
+      editVariableFcode = undefined;
+      editVariableOffset = undefined;
+      editVariableTimeSample = undefined;
+      editVariableArchived = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableSetSingleFCode = undefined;
+      editVariableValue = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(editVariableName);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+    });
+
+    it("should edit only fcode if only fcode is defined in payload ", () => {
+      editVariableFcode = undefined;
+      editVariableOffset = undefined;
+      editVariableTimeSample = undefined;
+      editVariableArchived = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableSetSingleFCode = undefined;
+      editVariableValue = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(editVariableName);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+    });
+
+    it("should edit only offset if only offset is defined in payload ", () => {
+      editVariableName = undefined;
+      editVariableFcode = undefined;
+      editVariableTimeSample = undefined;
+      editVariableArchived = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableSetSingleFCode = undefined;
+      editVariableValue = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(initVariablePayload.name);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(editVariableOffset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+    });
+
+    it("should edit only timeSample if only timeSample is defined in payload ", () => {
+      editVariableName = undefined;
+      editVariableFcode = undefined;
+      editVariableOffset = undefined;
+      editVariableArchived = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableSetSingleFCode = undefined;
+      editVariableValue = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(initVariablePayload.name);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(editVariableTimeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+    });
+
+    it("should edit only archived if only archived is defined in payload ", () => {
+      editVariableName = undefined;
+      editVariableFcode = undefined;
+      editVariableOffset = undefined;
+      editVariableTimeSample = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableSetSingleFCode = undefined;
+      editVariableValue = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(initVariablePayload.name);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(editVariableArchived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+    });
+
+    it("should edit only getSingleFCode if only getSingleFCode is defined in payload ", () => {
+      editVariableName = undefined;
+      editVariableOffset = undefined;
+      editVariableTimeSample = undefined;
+      editVariableArchived = undefined;
+      editVariableSetSingleFCode = undefined;
+      editVariableValue = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(initVariablePayload.name);
+      //We have to change also the fcode of whole variable if changing getSingleFCode
+      expect(result.FCode).toEqual(editVariableFcode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(editVariableGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+    });
+
+    it("should edit only setSingleFCode if only setSingleFCode is defined in payload ", () => {
+      editVariableName = undefined;
+      editVariableFcode = undefined;
+      editVariableOffset = undefined;
+      editVariableTimeSample = undefined;
+      editVariableArchived = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableValue = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(initVariablePayload.name);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editVariableSetSingleFCode);
+      expect(result.Value).toEqual(initVariablePayload.value);
+    });
+
+    it("should edit only value if only value is defined in payload ", () => {
+      editVariableName = undefined;
+      editVariableFcode = undefined;
+      editVariableOffset = undefined;
+      editVariableTimeSample = undefined;
+      editVariableArchived = undefined;
+      editVariableGetSingleFCode = undefined;
+      editVariableSetSingleFCode = undefined;
+
+      let initVariablePayload = initPayload[deviceId].variables.filter(
+        variable => variable.id === variableId
+      )[0];
+
+      let result = exec();
+
+      expect(result.Name).toEqual(initVariablePayload.name);
+      expect(result.FCode).toEqual(initVariablePayload.fCode);
+      expect(result.Offset).toEqual(initVariablePayload.offset);
+      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.Archived).toEqual(initVariablePayload.archived);
+      expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
+      expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
+      expect(result.Value).toEqual(editVariableValue);
+    });
+
+    it("should throw if there is no such variable", () => {
+      variableId = "8765";
+
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if there is no such device", () => {
+      deviceId = "8765";
+
+      expect(() => exec()).toThrow();
+    });
+  });
+
+  describe("getVariableFromDevice", () => {
+    let initPayload;
+    let deviceId;
+    let variableId;
+    let connectDevice;
+    let previousValue;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1236";
+      variableId = "0009";
+
+      connectDevice = true;
+    });
+
+    let exec = async () => {
+      commInterface.init(initPayload);
+
+      if (connectDevice) await commInterface.startCommunication(deviceId);
+
+      //Waiting for normal tick to get data - in order to device not be busy
+      await snooze(350);
+
+      previousValue = commInterface.getVariable(deviceId, variableId).Value;
+
+      return commInterface.getVariableFromDevice(deviceId, variableId);
+    };
+
+    it("should get value directly from device and set it to Value of variable", async () => {
+      //offset = 7 -> two registers = first = 8, second = 9 -> 8 + 9 * 2^16 = 589832
+      let result = await exec();
+
+      let variable = commInterface.getVariable(deviceId, variableId);
+
+      expect(variable.Value).toEqual(589832);
+    });
+
+    it("should return new value", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(589832);
+    });
+
+    it("should throw if device is not active", async () => {
+      connectDevice = false;
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if device does not exists", async () => {
+      deviceId = 8765;
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if variable does not exists", async () => {
+      variableId = 8765;
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("setVariableInDevice", () => {
+    let initPayload;
+    let deviceId;
+    let variableId;
+    let connectDevice;
+    let previousValue;
+    let newValue;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1236";
+      variableId = "0009";
+
+      connectDevice = true;
+
+      //[8, 4] =>  4 * 2 ^16 + 8 => 262144 + 8 => 262152
+      newValue = 262152;
+    });
+
+    let exec = async () => {
+      commInterface.init(initPayload);
+
+      if (connectDevice) await commInterface.startCommunication(deviceId);
+
+      //Waiting for normal tick to get data - in order to device not be busy
+      await snooze(350);
+
+      previousValue = commInterface.getVariable(deviceId, variableId).Value;
+
+      return commInterface.setVariableInDevice(deviceId, variableId, newValue);
+    };
+
+    it("should set new value in modbus device according to value given as argument", async () => {
+      await exec();
+
+      let variable = commInterface.getVariable(deviceId, variableId);
+
+      expect(variable.Value).toEqual(newValue);
+    });
+
+    it("should call modbus client set function with value given as argument", async () => {
+      await exec();
+
+      let device = commInterface.getDevice(deviceId);
+      let variable = commInterface.getVariable(deviceId, variableId);
+
+      expect(device.MBDriver._client.writeRegisters).toHaveBeenCalledTimes(1);
+      expect(device.MBDriver._client.writeRegisters.mock.calls[0][0]).toEqual(
+        variable.Offset
+      );
+      expect(device.MBDriver._client.writeRegisters.mock.calls[0][1]).toEqual([
+        8,
+        4
+      ]);
+    });
+
+    it("should throw if device does not exists", () => {
+      deviceId = "8765";
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if variable does not exists", () => {
+      variableId = "8765";
       expect(
         new Promise(async (resolve, reject) => {
           try {

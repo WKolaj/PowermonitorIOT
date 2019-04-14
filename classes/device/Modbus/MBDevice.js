@@ -496,6 +496,8 @@ class MBDevice extends Device {
    * @description Method for editing Device
    */
   async editWithPayload(payload) {
+    let wasActiveBefore = this.IsActive;
+
     await super.editWithPayload(payload);
 
     let changeAssociatedWithMBDriver =
@@ -524,10 +526,11 @@ class MBDevice extends Device {
         payload.timeout,
         payload.unitId
       );
+      this._recreateAllVariables();
       this._refreshRequestGroups();
     }
 
-    if (shouldBeReconnected) {
+    if (shouldBeReconnected || (!wasActiveBefore && payload.isActive)) {
       await this.connect();
     }
 

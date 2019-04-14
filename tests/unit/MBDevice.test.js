@@ -3128,7 +3128,9 @@ describe("MBDevice", () => {
     let payload;
     let variables;
     let initVariablesMockFunc;
+    let createVariablesMockFunc;
     let realInitVariableFunc;
+    let realCreateVariablesMockFunc;
     let isActive;
 
     let connectMockFunc;
@@ -3152,9 +3154,9 @@ describe("MBDevice", () => {
       unitId = 1;
       isActive = false;
       variables = [
-        { Id: "var1", Name: "name1" },
-        { Id: "var2", Name: "name2" },
-        { Id: "var3", Name: "name3" }
+        { Id: "var1", Name: "name1", Payload: { Id: "var1", Name: "name1" } },
+        { Id: "var2", Name: "name2", Payload: { Id: "var2", Name: "name2" } },
+        { Id: "var3", Name: "name3", Payload: { Id: "var3", Name: "name3" } }
       ];
       type = "test type";
 
@@ -3180,8 +3182,15 @@ describe("MBDevice", () => {
         }
       };
 
+      createVariablesMockFunc = function(payload) {
+        this.Variables[payload.Id] = payload;
+      };
+
       realInitVariableFunc = MBDevice.prototype._initVariables;
+      realCreateVariablesMockFunc = MBDevice.prototype.createVariable;
+
       MBDevice.prototype._initVariables = initVariablesMockFunc;
+      MBDevice.prototype.createVariable = createVariablesMockFunc;
 
       device = new MBDevice(payload);
       device._refreshRequestGroups = refreshGroupMockFunc;
@@ -3199,6 +3208,7 @@ describe("MBDevice", () => {
 
     afterEach(() => {
       MBDevice.prototype._initVariables = realInitVariableFunc;
+      MBDevice.prototype.createVariable = realCreateVariablesMockFunc;
     });
 
     let exec = () => {
@@ -3310,7 +3320,8 @@ describe("MBDevice", () => {
       await exec();
       expect(disconnectMockFunc).toHaveBeenCalledBefore(connectMockFunc);
 
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+      //For every removed variable and once after that
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
     });
 
     it("should not call connect or disconnect if device is active and ipAdress, portNumber, unitId and timeout are undefined - but change other attributes", async () => {
@@ -3325,6 +3336,7 @@ describe("MBDevice", () => {
       expect(disconnectMockFunc).not.toHaveBeenCalled();
       expect(device.Name).toEqual(editedName);
 
+      //For every removed variable and once after that
       expect(refreshGroupMockFunc).not.toHaveBeenCalled();
     });
 
@@ -3345,7 +3357,8 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+      //For every removed variable and once after that
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least ipAdress is defined - and change other attributes", async () => {
@@ -3365,7 +3378,8 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+      //For every removed variable and once after that
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least PortNumber is defined - and change other attributes", async () => {
@@ -3385,7 +3399,8 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+      //For every removed variable and once after that
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least Timeout is defined - and change other attributes", async () => {
@@ -3405,7 +3420,8 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+      //For every removed variable and once after that
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least unitId is defined - and change other attributes", async () => {
@@ -3425,7 +3441,8 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+      //For every removed variable and once after that
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
     });
 
     it("should return device after edditing", async () => {

@@ -35,7 +35,6 @@ class MBVariable extends Variable {
       throw new Error(
         `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
       );
-
     this._offset = payload.offset;
     this._length = payload.length;
     this._fcode = payload.fCode;
@@ -152,7 +151,6 @@ class MBVariable extends Variable {
         let result = await this.Device.MBDriver.invokeRequests([
           this.GetSingleRequest
         ]);
-
         return resolve(this.Value);
       } catch (err) {
         return reject(err);
@@ -233,6 +231,8 @@ class MBVariable extends Variable {
     payload.fCode = this.FCode;
     payload.value = this.Value;
     payload.type = this.Type;
+    payload.getSingleFCode = this.GetSingleFCode;
+    payload.setSingleFCode = this.SetSingleFCode;
 
     return payload;
   }

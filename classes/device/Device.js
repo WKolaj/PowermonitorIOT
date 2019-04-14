@@ -165,6 +165,23 @@ class Device {
     //Setting new values if they are given in payload
     if (payload.name) this._name = payload.name;
   }
+
+  /**
+   * @description Method for reacreating all variables
+   */
+  _recreateAllVariables() {
+    let oldVariables = Object.values(this.Variables);
+
+    //Removing old variables
+    for (let variable of oldVariables) {
+      this.removeVariable(variable.Id);
+    }
+
+    //Adding new onces based on old payload
+    for (let variable of oldVariables) {
+      this.createVariable(variable.Payload);
+    }
+  }
 }
 
 module.exports = Device;

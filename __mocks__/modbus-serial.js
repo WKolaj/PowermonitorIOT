@@ -5,13 +5,63 @@ class FakeModbusRTU {
   constructor() {
     let self = this;
     //delay of answering in ms
-    this.timeDelay = 100;
+    this.timeDelay = 10;
 
     //Data to be returned - key is unitId
-    this.coilsData = { 1: [true, false, true, false] };
-    this.discreteInputsData = { 1: [false, true, false, true] };
-    this.holdingRegistersData = { 1: [1, 2, 3, 4] };
-    this.inputRegistersData = { 1: [4, 3, 2, 1] };
+    this.coilsData = {
+      1: [
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false
+      ]
+    };
+    this.discreteInputsData = {
+      1: [
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+        true
+      ]
+    };
+    this.holdingRegistersData = {
+      1: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    };
+    this.inputRegistersData = {
+      1: [16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+    };
     this.busy = false;
     this._id = 1;
     this._port = 502;
@@ -22,7 +72,19 @@ class FakeModbusRTU {
     });
 
     this.setID = jest.fn(id => {
+      let previousId = self._id;
+
+      let oldCoilsData = self.coilsData[previousId];
+      let oldDiscreteInputsData = self.discreteInputsData[previousId];
+      let oldHoldingRegistersData = self.holdingRegistersData[previousId];
+      let oldInputRegistersData = self.inputRegistersData[previousId];
+
       self._id = id;
+
+      self.coilsData = { [id]: oldCoilsData };
+      self.discreteInputsData = { [id]: oldDiscreteInputsData };
+      self.holdingRegistersData = { [id]: oldHoldingRegistersData };
+      self.inputRegistersData = { [id]: oldInputRegistersData };
     });
 
     this.setTimeout = jest.fn(duration => {
@@ -87,6 +149,7 @@ class FakeModbusRTU {
       await snooze(self.timeDelay);
 
       self.busy = false;
+
       return {
         data: self.getPartOfArray(
           self.holdingRegistersData[self._id],

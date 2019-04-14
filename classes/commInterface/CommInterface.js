@@ -136,6 +136,34 @@ class CommInterface {
   }
 
   /**
+   * @description Method for getting all variable ids
+   */
+  getAllVariableIds() {
+    let allIds = [];
+
+    let allDevices = this.getAllDevices();
+
+    for (let device of allDevices) {
+      let deviceVariables = Object.values(device.Variables);
+
+      for (let variable of deviceVariables) {
+        allIds.push(variable.Id);
+      }
+    }
+
+    return allIds;
+  }
+
+  /**
+   * @description Checking if variable of id exists
+   * @param {string} variableId Variable id
+   */
+  _doesVariableExistis(variableId) {
+    let allVariables = this.getAllVariableIds();
+    return allVariables.includes(variableId);
+  }
+
+  /**
    * @description Getting all variables from device
    * @param {string} deviceId Device Id
    */
@@ -229,6 +257,14 @@ class CommInterface {
    * @param {object} payload payload of variable
    */
   createVariable(deviceId, payload) {
+    if (payload.id && this._doesVariableExistis(payload.id)) {
+      throw new Error(
+        `Variable of id: ${
+          payload.id
+        } cannot be added becouse it already exists!`
+      );
+    }
+
     let device = this.getDevice(deviceId);
     return device.createVariable(payload);
   }

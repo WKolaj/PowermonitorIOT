@@ -331,6 +331,7 @@ class MBDriver {
 
         //Connected successfully - clear timeout and resolve the promise
         clearTimeout(handle);
+
         return resolve(true);
       } catch (err) {
         //Error while connecting
