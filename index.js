@@ -1,4 +1,5 @@
 const commInterface = require("./classes/commInterface/CommInterface");
+const ArchiveManager = require("./classes/archiveManager/ArchiveManager");
 
 let json = {
   "5c9f8a7fd04bb119b3ad229f": {
@@ -438,21 +439,63 @@ let json = {
   }
 };
 
-commInterface.init(json);
+// commInterface.init(json);
 
-//console.log(Object.values(commInterface.Devices)[0].MBDriver._client.isOpen());
+// commInterface.startCommunicationWithAllDevices();
 
-commInterface.startCommunicationWithAllDevices();
+// for (let device of Object.values(commInterface.Devices)) {
+//   device.Events.on("Refreshed", args => {
+//     console.log(args[2]);
+//     console.log(args[1]);
 
-for (let device of Object.values(commInterface.Devices)) {
-  device.Events.on("Refreshed", args => {
-    console.log(args[2]);
-    let allIds = Object.keys(args[1]);
-    for (let id of allIds) {
-      console.log(`${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`);
-    }
-  });
-}
+//     //let allIds = Object.keys(args[1]);
+//     // for (let id of allIds) {
+//     //   console.log(`${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`);
+//     // }
+//   });
+// }
+
+// let am = new ArchiveManager("testDB.db");
+
+// let variable1Payload = {
+//   Id: "1234",
+//   Type: "float"
+// };
+
+// let variable2Payload = {
+//   Id: "1235",
+//   Type: "boolean"
+// };
+
+// let index = 0;
+
+// let variables = {};
+
+// setInterval(() => {}, 1000);
+// let max = 1000000;
+
+// let exec = async () => {
+//   await am.init();
+//   await am.addVariable(variable1Payload);
+//   await am.addVariable(variable2Payload);
+
+// for (let i = 0; i < max; i++) {
+//   variables["1235"] = i + 1000;
+//   await am.insertValues(i, variables);
+//   console.log(i);
+// }
+
+// console.log("ended");
+// };
+
+// exec();
+
+// let getValue = async date => {
+//   let value = await am.getValue(date, "1235");
+//   console.log(value);
+// };
+
+//clearDirectory("database/test/db1");
 
 console.log("Press any key to exit");
 
@@ -462,55 +505,41 @@ process.stdin.resume();
 // on any data into stdin
 process.stdin.on("data", async function(key) {
   if (key.indexOf("q") == 0) {
-    await process.exit();
+    process.exit();
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("1") == 0) {
-    commInterface.setVariableInDevice(
-      "5c9f8a7fd04bb119b3ad229f",
-      "5c9f8a7fd04bb119b3ad22a0",
-      Math.random() * 100
-    );
+    getValue(100000);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("2") == 0) {
-    console.log(
-      await commInterface.getVariableFromDevice(
-        "5c9f8a7fd04bb119b3ad229f",
-        "5c9f8a7fd04bb119b3ad22a0"
-      )
-    );
+    getValue(200000);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("3") == 0) {
-    let payload =
-      device.IPAdress == "192.168.1.8"
-        ? { ipAdress: "192.168.1.9" }
-        : { ipAdress: "192.168.1.8" };
-    device.editWithPayload(payload);
+    getValue(300000);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("4") == 0) {
-    let payload = device.UnitId == 1 ? { unitId: 2 } : { unitId: 1 };
-    device.editWithPayload(payload);
+    getValue(400000);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("5") == 0) {
-    console.log(JSON.stringify(commInterface.Payload));
+    getValue(500000);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("6") == 0) {
-    commInterface.startCommunicationWithAllDevices();
+    getValue(600000);
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("7") == 0) {
-    commInterface.stopCommunicationWithAllDevices();
+    getValue(700000);
   }
 });

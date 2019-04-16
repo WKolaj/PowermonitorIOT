@@ -54,6 +54,14 @@ class MBByteArrayVariable extends MBVariable {
   }
 
   /**
+   * @description Should variable be archived
+   */
+  get Archived() {
+    //Byte array cannot be archived
+    return false;
+  }
+
+  /**
    * @description Getting bit from byte
    * @param {number} byteNumber Byte number
    * @param {number} bitNumber Bit number

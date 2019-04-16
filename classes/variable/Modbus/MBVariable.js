@@ -70,13 +70,6 @@ class MBVariable extends Variable {
   }
 
   /**
-   * @description Type of variable
-   */
-  get Type() {
-    return this._type;
-  }
-
-  /**
    * @description Modbus function code
    */
   get FCode() {

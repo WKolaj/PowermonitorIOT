@@ -16,6 +16,7 @@ class Variable {
     this._device = device;
     this._name = payload.name;
     this._events = new EventEmitter();
+    this._type = undefined;
 
     //If time sample not defined - defininf as 1
     if (!payload.timeSample) payload.timeSample = 1;
@@ -70,6 +71,13 @@ class Variable {
    */
   set TimeSample(value) {
     this._tickId = Sampler.convertTimeSampleToTickId(value);
+  }
+
+  /**
+   * @description Type of variable
+   */
+  get Type() {
+    return this._type;
   }
 
   /**

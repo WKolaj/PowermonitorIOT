@@ -1,9 +1,17 @@
+const path = require("path");
+const config = require("config");
+const sqlite3 = require("sqlite3");
+
 class ArchiveManager {
   constructor(fileName) {
+    if (!fileName) throw new Error("fileName cannot be empty!");
+
     this._fileName = fileName;
     this._initialized = false;
     this._busy = false;
     this._variables = {};
+    this._dbPath = config.get("db1Path");
+    this._filePath = path.join(this._dbPath, this._fileName);
   }
 
   get Variables() {
@@ -14,6 +22,14 @@ class ArchiveManager {
     return this._fileName;
   }
 
+  get FilePath() {
+    return this._filePath;
+  }
+
+  get DBPath() {
+    return this._dbPath;
+  }
+
   get Initialized() {
     return this._initialized;
   }
@@ -22,10 +38,12 @@ class ArchiveManager {
     return this._busy;
   }
 
-  getColumnType(variable) {
-    let payload = variable.Payload;
+  get DB() {
+    return this._db;
+  }
 
-    switch (payload.type) {
+  getColumnType(variable) {
+    switch (variable.Type) {
       case "boolean": {
         return "INTEGER";
       }
@@ -59,19 +77,23 @@ class ArchiveManager {
       }
       default: {
         throw new Error(
-          `Given variable type is not recognized: ${payload.type}`
+          `Given variable type is not recognized: ${variable.Type}`
         );
       }
     }
   }
 
   getColumnName(variable) {
-    return `col_${variable.Id}`;
+    return this.getColumnNameById(variable.Id);
+  }
+
+  getColumnNameById(variableId) {
+    return `col_${variableId}`;
   }
 
   checkIfInitialzed() {
     if (!this.Initialized) {
-      throw new Error("Archive manager not init");
+      throw new Error("Archive manager not initialized");
     }
 
     return true;
@@ -81,53 +103,211 @@ class ArchiveManager {
     if (this.Busy) {
       throw new Error("Device is busy");
     }
+    return false;
+  }
+
+  doesVariableIdExists(variableId) {
+    return variableId in this.Variables;
   }
 
   checkIfVariableExists(variable) {
-    if (variable.Id in this.Variables) {
+    if (this.doesVariableIdExists(variable.Id)) {
       throw new Error(`Variable of id ${variable.Id} already exists!`);
     }
+
+    return false;
   }
 
   async addVariable(variable) {
-    this.checkIfInitialzed();
-    this.checkIfVariableExists();
-    this.checkIfBusy();
-    this._busy = true;
+    //Returning promise - in order to implement async/await instead of callback functions
+    return new Promise(async (resolve, reject) => {
+      try {
+        this.checkIfInitialzed();
+        this.checkIfVariableExists(variable);
+        this.checkIfBusy();
 
-    let columnType = this.getColumnType(variable);
-    let columnName = this.getColumnName(variable);
+        let columnType = this.getColumnType(variable);
+        let columnName = this.getColumnName(variable);
 
-    let self = this;
+        let doesColumnAlreadyExists = await this.doesColumnExist(columnName);
 
-    this.db.run(
-      `ALTER TABLE data ADD COLUMN ${columnName} ${columnType};`,
-      function(err) {
-        if (err) {
+        if (doesColumnAlreadyExists) {
+          this.Variables[variable.Id] = variable;
+          return resolve(true);
+        } else {
+          this._busy = true;
+
+          let self = this;
+
+          this.DB.run(
+            `ALTER TABLE data ADD COLUMN ${columnName} ${columnType};`,
+            function(err) {
+              self._busy = false;
+              if (err) {
+                return reject(err);
+              }
+              self.Variables[variable.Id] = variable;
+              return resolve(true);
+            }
+          );
+        }
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  async doesColumnExist(columnId) {
+    return new Promise((resolve, reject) => {
+      try {
+        this.checkIfInitialzed();
+        this.checkIfBusy();
+
+        this._busy = true;
+
+        let self = this;
+
+        this.DB.all(`PRAGMA table_info(data);`, function(err, rows) {
           self._busy = false;
           if (err) {
-            return console.log(err.message);
+            return reject(err);
           }
-          self.Variables[variable.Id] = variable;
-        }
+
+          //Checking all rows one by one - if one of them has desired name - return true
+          for (let row of rows) {
+            if (row.name === columnId) {
+              return resolve(true);
+            }
+          }
+
+          return resolve(false);
+        });
+      } catch (err) {
+        return reject(err);
       }
-    );
+    });
   }
 
   async init() {
-    if (!this.Initialized && !this.Busy) {
+    //Returning promise - in order to implement async/await instead of callback functions
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.Initialized && !this.Busy) {
+          this._busy = true;
+
+          this._db = new sqlite3.Database(this.FilePath);
+
+          let self = this;
+
+          this.DB.run(
+            `CREATE TABLE IF NOT EXISTS data (date INTEGER, PRIMARY KEY(date) );`,
+            function(err) {
+              self._busy = false;
+              if (err) {
+                return reject(err);
+              }
+              self._initialized = true;
+              return resolve(true);
+            }
+          );
+        }
+      } catch (err) {
+        this._busy = false;
+        return reject(err);
+      }
+    });
+  }
+
+  filterPayloadWithAddedVariables(payload) {
+    let payloadToReturn = {};
+
+    let allVariableIds = Object.keys(payload);
+
+    for (let variableId of allVariableIds) {
+      if (variableId in this.Variables) {
+        payloadToReturn[variableId] = payload[variableId];
+      }
+    }
+
+    return payloadToReturn;
+  }
+
+  prepareInsertQueryString(filteredPayload) {
+    let firstPart = "INSERT INTO data(date";
+
+    let secondPart = ") VALUES (?";
+
+    let filteredVariableIds = Object.keys(filteredPayload);
+
+    for (let varaibleId of filteredVariableIds) {
+      firstPart += `,${this.getColumnNameById(varaibleId)}`;
+      secondPart += ",?";
+    }
+
+    secondPart += ");";
+
+    return firstPart + secondPart;
+  }
+
+  async insertValues(date, payload) {
+    return new Promise((resolve, reject) => {
+      this.checkIfInitialzed();
+      this.checkIfBusy();
+
       this._busy = true;
 
-      this.db = new sqlite3.Database(`database/${fileName}.db`);
+      try {
+        let filteredPayload = this.filterPayloadWithAddedVariables(payload);
 
-      this.db.run(`CREATE TABLE data (date INTEGER);`, function(err) {
-        this._initialized = true;
+        let insertQuery = this.prepareInsertQueryString(filteredPayload);
+
+        let valuesToBeInserted = [date, ...Object.values(filteredPayload)];
+
+        this.DB.run(insertQuery, valuesToBeInserted, err => {
+          this._busy = false;
+
+          if (err) {
+            return reject(err);
+          }
+
+          return resolve(true);
+        });
+      } catch (err) {
         this._busy = false;
-        if (err) {
-          return console.log(err.message);
-        }
-      });
-    }
+        return reject(err);
+      }
+    });
+  }
+
+  async getValue(date, variableId) {
+    return new Promise((resolve, reject) => {
+      try {
+        if (!this.doesVariableIdExists(variableId))
+          throw new Error(`There is no variable of id ${variableId}`);
+        this.checkIfInitialzed();
+        this.checkIfBusy();
+        this._busy = true;
+
+        let columnName = this.getColumnNameById(variableId);
+
+        this.DB.get(
+          `SELECT date, ${columnName} FROM data WHERE date <= ${date} ORDER BY date DESC LIMIT 1`,
+          (err, row) => {
+            this._busy = false;
+
+            if (err) {
+              return reject(err);
+            }
+
+            return resolve(row);
+          }
+        );
+      } catch (err) {
+        this._busy = false;
+
+        return reject(err);
+      }
+    });
   }
 }
 

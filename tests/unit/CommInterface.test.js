@@ -3507,10 +3507,11 @@ describe("CommInterface", () => {
 
     it("should throw if device is not active", async () => {
       connectDevice = false;
-      expect(
+      await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
+            resolve(true);
           } catch (err) {
             return reject(err);
           }
@@ -3520,10 +3521,11 @@ describe("CommInterface", () => {
 
     it("should throw if device does not exists", async () => {
       deviceId = 8765;
-      expect(
+      await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
+            resolve(true);
           } catch (err) {
             return reject(err);
           }
@@ -3533,10 +3535,11 @@ describe("CommInterface", () => {
 
     it("should throw if variable does not exists", async () => {
       variableId = 8765;
-      expect(
+      await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
+            resolve(true);
           } catch (err) {
             return reject(err);
           }
@@ -3601,12 +3604,13 @@ describe("CommInterface", () => {
       ]);
     });
 
-    it("should throw if device does not exists", () => {
+    it("should throw if device does not exists", async () => {
       deviceId = "8765";
-      expect(
+      await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
+            resolve(true);
           } catch (err) {
             return reject(err);
           }
@@ -3614,12 +3618,13 @@ describe("CommInterface", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should throw if variable does not exists", () => {
+    it("should throw if variable does not exists", async () => {
       variableId = "8765";
-      expect(
+      await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
+            resolve(true);
           } catch (err) {
             return reject(err);
           }
