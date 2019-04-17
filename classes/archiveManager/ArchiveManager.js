@@ -278,12 +278,13 @@ class ArchiveManager {
   async insertValues(date, payload) {
     return new Promise((resolve, reject) => {
       this.checkIfInitialzed();
-      this.checkIfBusy();
+      //Insert data is possible while busy
+      //this.checkIfBusy();
 
       if (payload === undefined || payload === null || isObjectEmpty(payload))
         return resolve(false);
 
-      this._busy = true;
+      //this._busy = true;
 
       try {
         let filteredPayload = this.filterPayloadWithAddedVariables(payload);
@@ -293,7 +294,7 @@ class ArchiveManager {
         let valuesToBeInserted = [date, ...Object.values(filteredPayload)];
 
         this.DB.run(insertQuery, valuesToBeInserted, err => {
-          this._busy = false;
+          //this._busy = false;
 
           if (err) {
             return reject(err);
@@ -302,7 +303,7 @@ class ArchiveManager {
           return resolve(true);
         });
       } catch (err) {
-        this._busy = false;
+        //this._busy = false;
         return reject(err);
       }
     });

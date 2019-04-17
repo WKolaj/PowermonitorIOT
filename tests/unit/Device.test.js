@@ -2,6 +2,7 @@ const Device = require("../../classes/device/Device");
 const config = require("config");
 const fs = require("fs");
 const path = require("path");
+const sqlite3 = require("sqlite3");
 
 //Method for deleting file
 let clearFile = async file => {
@@ -33,6 +34,97 @@ let clearDirectory = async directory => {
       }
 
       return resolve(true);
+    });
+  });
+};
+
+//Method for checking if table exists
+let checkIfTableExists = (dbFile, tableName) => {
+  return new Promise(async (resolve, reject) => {
+    let db = new sqlite3.Database(dbFile);
+
+    db.get(
+      `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`,
+      function(err, row) {
+        if (err) {
+          return reject(err);
+        }
+        return row ? resolve(true) : resolve(false);
+      }
+    );
+  });
+};
+
+//Method for checking if table exists
+let checkIfColumnExists = (dbFile, tableName, columnName, columnType) => {
+  return new Promise(async (resolve, reject) => {
+    let db = new sqlite3.Database(dbFile);
+
+    db.all(`PRAGMA table_info(${tableName});`, function(err, rows) {
+      if (err) {
+        return reject(err);
+      }
+
+      //Checking all rows one by one - if one of them has desired name - return true
+      for (let row of rows) {
+        if (row.name === columnName && row.type === columnType) {
+          return resolve(true);
+        }
+      }
+
+      return resolve(false);
+    });
+  });
+};
+
+let createDatabaseFile = dbFile => {
+  let db = new sqlite3.Database(dbFile);
+};
+
+let createDatabaseTable = (dbFile, tableName) => {
+  return new Promise(async (resolve, reject) => {
+    let db = new sqlite3.Database(dbFile);
+
+    db.run(
+      `CREATE TABLE IF NOT EXISTS ${tableName} (date INTEGER, PRIMARY KEY(date) );`,
+      err => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(true);
+      }
+    );
+  });
+};
+
+let createDatabaseColumn = (dbFile, tableName, columnName, columnType) => {
+  return new Promise(async (resolve, reject) => {
+    let db = new sqlite3.Database(dbFile);
+
+    db.run(
+      `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnType};`,
+      err => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(true);
+      }
+    );
+  });
+};
+
+let readAllDataFromTable = (dbFile, tableName) => {
+  return new Promise(async (resolve, reject) => {
+    let db = new sqlite3.Database(dbFile);
+
+    db.all(`SELECT * FROM ${tableName};`, (err, rows) => {
+      if (err) {
+        return reject(err);
+      }
+
+      return resolve(rows);
     });
   });
 };
@@ -695,6 +787,111 @@ describe("Device", () => {
 
       expect(device.Name).toBeDefined();
       expect(device.Name).toEqual(name);
+    });
+  });
+
+  describe("archiveData", () => {
+    let name;
+    let device;
+    let variable;
+    let variableId;
+    let variableType;
+    let variableArchived;
+    let payload;
+    let tickNumber;
+    let archiveValue;
+    let archivePayload;
+
+    let insertSecondTime;
+    let archiveSecondPayload;
+    let tickNumberSecond;
+    let archiveSecondValue;
+    let variable2;
+
+    beforeEach(() => {
+      name = "test name";
+      variableId = "testVariable";
+      variableType = "int32";
+      variableArchived = true;
+      tickNumber = 1234;
+      archiveValue = 9876;
+      insertSecondTime = false;
+
+      tickNumberSecond = 1235;
+      archiveSecondValue = 9877;
+    });
+
+    let exec = async () => {
+      variable = {
+        Id: variableId,
+        Type: variableType,
+        Archived: variableArchived,
+        Value: archiveValue
+      };
+
+      payload = { name: name };
+      device = new Device();
+      await device.init(payload);
+      await device.addVariable(variable);
+
+      archivePayload = {
+        [variableId]: variable
+      };
+
+      if (insertSecondTime) {
+        //Inserting two times almost at once
+
+        variable2 = {
+          Id: variableId,
+          Type: variableType,
+          Archived: variableArchived,
+          Value: archiveSecondValue
+        };
+
+        archiveSecondPayload = {
+          [variableId]: variable2
+        };
+
+        return Promise.all([
+          device.archiveData(tickNumber, archivePayload),
+          device.archiveData(tickNumberSecond, archiveSecondPayload)
+        ]);
+      } else {
+        //Inserting one time
+        return device.archiveData(tickNumber, archivePayload);
+      }
+    };
+
+    it("should insert value into database", async () => {
+      await exec();
+
+      let valueFromDB = await device.getValueFromDB(variableId, tickNumber);
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+
+      let expectedPayload = { [columnName]: archiveValue };
+      expect(valueFromDB).toMatchObject(expectedPayload);
+    });
+
+    it("should insert two values if invoked almost at one time", async () => {
+      insertSecondTime = true;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+
+      let valueFromDB1 = await device.getValueFromDB(variableId, tickNumber);
+      let expectedPayload1 = { [columnName]: archiveValue, date: tickNumber };
+      expect(valueFromDB1).toMatchObject(expectedPayload1);
+
+      let valueFromDB2 = await device.getValueFromDB(
+        variableId,
+        tickNumberSecond
+      );
+      let expectedPayload2 = {
+        [columnName]: archiveSecondValue,
+        date: tickNumberSecond
+      };
+      expect(valueFromDB2).toMatchObject(expectedPayload2);
     });
   });
 });
