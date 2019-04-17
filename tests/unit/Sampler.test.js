@@ -279,8 +279,8 @@ describe("Sampler", () => {
       return sampler._refreshAllDevices(tickNumber);
     };
 
-    it("Should invoke refresh of all devices with the parameter of tickNumber", () => {
-      exec();
+    it("Should invoke refresh of all devices with the parameter of tickNumber", async () => {
+      await exec();
 
       expect(device1RefreshMock).toHaveBeenCalledTimes(1);
       expect(device1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
@@ -290,12 +290,21 @@ describe("Sampler", () => {
       expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
     });
 
-    it("Should not throw if one of devices throws an error while refreshing", () => {
+    it("Should not throw if one of devices throws an error while refreshing", async () => {
       device1Mock.refresh = jest.fn().mockImplementation(() => {
         throw new Error();
       });
 
-      expect(() => exec()).not.toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
     });
   });
 
@@ -360,8 +369,8 @@ describe("Sampler", () => {
       return sampler._emitTick(tickNumber);
     };
 
-    it("Should invoke refresh of all devices with the parameter of tickNumber", () => {
-      exec();
+    it("Should invoke refresh of all devices with the parameter of tickNumber", async () => {
+      await exec();
 
       expect(device1RefreshMock).toHaveBeenCalledTimes(1);
       expect(device1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
@@ -371,30 +380,48 @@ describe("Sampler", () => {
       expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
     });
 
-    it("Should not throw if one of devices throws an error while refreshing", () => {
+    it("Should not throw if one of devices throws an error while refreshing", async () => {
       device1Mock.refresh = jest.fn().mockImplementation(() => {
         throw new Error();
       });
 
-      expect(() => exec()).not.toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
     });
 
-    it("Should invoke event OnTick", () => {
-      exec();
+    it("Should invoke event OnTick", async () => {
+      await exec();
       expect(tickEventHandler).toHaveBeenCalledTimes(1);
       expect(tickEventHandler.mock.calls[0][0][0]).toEqual(tickNumber);
     });
 
-    it("Should set new value of lastTimeTickNumber", () => {
-      exec();
+    it("Should set new value of lastTimeTickNumber", async () => {
+      await exec();
       expect(sampler._lastTickTimeNumber).toEqual(tickNumber);
     });
 
-    it("Should not throw if one of events throw an error", () => {
+    it("Should not throw if one of events throw an error", async () => {
       sampler.Events.on("OnTick", args => {
         throw new Error("This is na error");
       });
-      expect(() => exec()).not.toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
     });
   });
 

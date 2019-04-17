@@ -14,7 +14,7 @@ class CommInterface {
    * @description method for initializing communication interface based on payload
    * @param payload payload to initalize
    */
-  init(payload) {
+  async init(payload) {
     if (!this.Initialized) {
       this._sampler = new Sampler();
       this._devices = {};
@@ -25,7 +25,7 @@ class CommInterface {
         let allDevicesPayloads = Object.values(payload);
 
         for (let devicePayload of allDevicesPayloads) {
-          this.createNewDevice(devicePayload);
+          await this.createNewDevice(devicePayload);
         }
       }
     }
@@ -183,7 +183,7 @@ class CommInterface {
    * @description Method for creating new device based on payload
    * @param {object} payload
    */
-  createNewDevice(payload) {
+  async createNewDevice(payload) {
     if (!payload) throw new Error("Given payload cannot be empty");
     if (!payload.type)
       throw new Error("Given device payload has no type defined");
@@ -196,7 +196,9 @@ class CommInterface {
         return this._createMBDevice(payload);
       }
       default: {
-        throw new Error(`Given device type is not recognized: ${payload.type}`);
+        return Promise.reject(
+          new Error(`Given device type is not recognized: ${payload.type}`)
+        );
       }
     }
   }
@@ -205,12 +207,19 @@ class CommInterface {
    * @description Method for creating MBDevice based on payload
    * @param {object} payload
    */
-  _createMBDevice(payload) {
-    let newDevice = new MBDevice(payload);
-    this.Devices[newDevice.Id] = newDevice;
-    this.Sampler.addDevice(newDevice);
-
-    return newDevice;
+  async _createMBDevice(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new MBDevice();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
   }
 
   /**
@@ -256,7 +265,7 @@ class CommInterface {
    * @param {string} deviceId Id of device
    * @param {object} payload payload of variable
    */
-  createVariable(deviceId, payload) {
+  async createVariable(deviceId, payload) {
     if (payload.id && this._doesVariableExistis(payload.id)) {
       throw new Error(
         `Variable of id: ${
@@ -283,12 +292,26 @@ class CommInterface {
   }
 
   /**
+   * @description Method for getting variable from device
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   * @param {number} date date of sample
+   */
+  async getVariableFromDatabase(deviceId, variableId, date) {
+    let device = this.getDevice(deviceId);
+    let variable = device.getVariable(variableId);
+    if (!variable)
+      throw new Error(`There is no variable of given id ${variableId}`);
+    return device.getValueFromDB(variableId, date);
+  }
+
+  /**
    * @description Method for editting variable in device
    * @param {string} deviceId Id of device
    * @param {string} variableId Id of variable
    * @param {object} payload variable payload
    */
-  editVariable(deviceId, variableId, payload) {
+  async editVariable(deviceId, variableId, payload) {
     let device = this.getDevice(deviceId);
     return device.editVariable(variableId, payload);
   }
@@ -298,7 +321,7 @@ class CommInterface {
    * @param {string} deviceId Id of device
    * @param {string} variableId Id of variable
    */
-  removeVariable(deviceId, variableId) {
+  async removeVariable(deviceId, variableId) {
     let device = this.getDevice(deviceId);
     return device.removeVariable(variableId);
   }

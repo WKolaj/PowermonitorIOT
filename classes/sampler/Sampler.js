@@ -75,10 +75,10 @@ class Sampler {
    * @description Solving emiting tick
    * @param {number} tickNumber Actual tick number
    */
-  _emitTick(tickNumber) {
+  async _emitTick(tickNumber) {
     try {
       //Refreshing all devices
-      this._refreshAllDevices(tickNumber);
+      await this._refreshAllDevices(tickNumber);
 
       //emiting tick event
       this.Events.emit("OnTick", [tickNumber]);
@@ -94,11 +94,11 @@ class Sampler {
    * @description Refreshing all devices
    * @param {number} tickNumber Actual tick number
    */
-  _refreshAllDevices(tickNumber) {
+  async _refreshAllDevices(tickNumber) {
     let allDeviceNames = Object.keys(this.AllDevices);
     for (let deviceName of allDeviceNames) {
       try {
-        this.AllDevices[deviceName].refresh(tickNumber);
+        await this.AllDevices[deviceName].refresh(tickNumber);
       } catch (err) {
         console.log(err);
       }

@@ -135,9 +135,11 @@ describe("ArchiveManager", () => {
   //Path to secondary database
   let db2Path;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     db1Path = config.get("db1Path");
     db2Path = config.get("db2Path");
+    await clearDirectory(db1Path);
+    await clearDirectory(db2Path);
   });
 
   afterEach(async () => {

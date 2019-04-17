@@ -16,10 +16,17 @@ const MBUInt32Variable = require("../../variable/Modbus/MBUInt32Variable");
 class MBDevice extends Device {
   /**
    * @description Modbus device
-   * @param {object} payload device payload
    */
-  constructor(payload) {
-    super(payload);
+  constructor() {
+    super();
+  }
+
+  /**
+   * @description Method for initializing device
+   * @param {object} payload Device payload
+   */
+  async init(payload) {
+    await super.init(payload);
 
     if (!payload.ipAdress) throw new Error("ipAdress cannot be empty");
     if (!payload.portNumber) throw new Error("port number cannot be empty");
@@ -42,7 +49,7 @@ class MBDevice extends Device {
     this._requests = {};
 
     //Initializing variables if they are given in payload
-    if (payload.variables) this._initVariables(payload.variables);
+    if (payload.variables) await this._initVariables(payload.variables);
 
     //If type is given in payload - set it according to payload - otherwise set default mbDevice type
     this._type = payload.type ? payload.type : "mbDevice";
@@ -54,9 +61,9 @@ class MBDevice extends Device {
   /**
    * @description Method for initializing variables
    */
-  _initVariables(variables) {
+  async _initVariables(variables) {
     for (let variable of variables) {
-      this.createVariable(variable);
+      await this.createVariable(variable);
     }
   }
 
@@ -153,7 +160,7 @@ class MBDevice extends Device {
    * @description creating variable and adding it to the Device
    * @param {object} payload Payload of variable to be created
    */
-  createVariable(payload) {
+  async createVariable(payload) {
     if (!payload) throw new Error("Given payload cannot be empty");
     if (!payload.type)
       throw new Error("Given variable payload has no type defined");
@@ -205,17 +212,17 @@ class MBDevice extends Device {
    * @param {string} id Id of variable to be edited
    * @param {*} payload Payload of eddition
    */
-  editVariable(id, payload) {
+  async editVariable(id, payload) {
     if (!this.Variables[id])
       throw new Error(`Variable of given id: ${id} does not exist in device`);
 
     let variableToEdit = this.Variables[id];
 
-    this.removeVariable(id);
+    await this.removeVariable(id);
 
     let variableToAdd = variableToEdit.editWithPayload(payload);
 
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
 
     return variableToAdd;
   }
@@ -224,7 +231,7 @@ class MBDevice extends Device {
    * @description Method for creating boolean variable
    * @param {*} payload Payload of edition
    */
-  _createBooleanVariable(payload) {
+  async _createBooleanVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -235,7 +242,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBBooleanVariable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -243,7 +250,7 @@ class MBDevice extends Device {
    * @description Method for creating byteArray variable
    * @param {*} payload Payload of edition
    */
-  _createByteArrayVariable(payload) {
+  async _createByteArrayVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -256,7 +263,7 @@ class MBDevice extends Device {
       throw new Error("variable length in payload is not defined");
 
     let variableToAdd = new MBByteArrayVariable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -264,7 +271,7 @@ class MBDevice extends Device {
    * @description Method for creating float variable
    * @param {*} payload Payload of edition
    */
-  _createFloatVariable(payload) {
+  async _createFloatVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -275,7 +282,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBFloatVariable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -283,7 +290,7 @@ class MBDevice extends Device {
    * @description Method for creating swapped float variable
    * @param {*} payload Payload of edition
    */
-  _createSwappedFloatVariable(payload) {
+  async _createSwappedFloatVariable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -294,7 +301,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedFloatVariable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -302,7 +309,7 @@ class MBDevice extends Device {
    * @description Method for creating int16 variable
    * @param {*} payload Payload of edition
    */
-  _createInt16Variable(payload) {
+  async _createInt16Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -313,7 +320,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBInt16Variable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -321,7 +328,7 @@ class MBDevice extends Device {
    * @description Method for creating int32 variable
    * @param {*} payload Payload of edition
    */
-  _createInt32Variable(payload) {
+  async _createInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -332,7 +339,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBInt32Variable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -340,7 +347,7 @@ class MBDevice extends Device {
    * @description Method for creating swapped int32 variable
    * @param {*} payload Payload of edition
    */
-  _createSwappedInt32Variable(payload) {
+  async _createSwappedInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -351,7 +358,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedInt32Variable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -359,7 +366,7 @@ class MBDevice extends Device {
    * @description Method for creating uint16 variable
    * @param {*} payload Payload of edition
    */
-  _createUInt16Variable(payload) {
+  async _createUInt16Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -370,7 +377,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBUInt16Variable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -378,7 +385,7 @@ class MBDevice extends Device {
    * @description Method for creating uint32 variable
    * @param {*} payload Payload of edition
    */
-  _createUInt32Variable(payload) {
+  async _createUInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -389,7 +396,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBUInt32Variable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
@@ -397,7 +404,7 @@ class MBDevice extends Device {
    * @description Method for creating swapped uint32 variable
    * @param {*} payload Payload of edition
    */
-  _createSwappedUInt32Variable(payload) {
+  async _createSwappedUInt32Variable(payload) {
     if (!payload.timeSample)
       throw new Error("time sample in payload is not defined");
     if (!payload.name)
@@ -408,15 +415,15 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedUInt32Variable(this, payload);
-    this.addVariable(variableToAdd);
+    await this.addVariable(variableToAdd);
     return variableToAdd;
   }
 
   /**
    * @description Adding variable to device
    */
-  addVariable(variable) {
-    super.addVariable(variable);
+  async addVariable(variable) {
+    await super.addVariable(variable);
     this._refreshRequestGroups();
   }
 
@@ -424,7 +431,7 @@ class MBDevice extends Device {
    * @description Removing variable from device
    * @param {string} id device id
    */
-  removeVariable(id) {
+  async removeVariable(id) {
     let deletedVariable = super.removeVariable(id);
     this._refreshRequestGroups();
 
@@ -526,7 +533,7 @@ class MBDevice extends Device {
         payload.timeout,
         payload.unitId
       );
-      this._recreateAllVariables();
+      await this._recreateAllVariables();
       this._refreshRequestGroups();
     }
 

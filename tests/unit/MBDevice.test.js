@@ -9,9 +9,73 @@ const MBSwappedInt32Variable = require("../../classes/variable/Modbus/MBSwappedI
 const MBSwappedUInt32Variable = require("../../classes/variable/Modbus/MBSwappedUInt32Variable");
 const MBUInt16Variable = require("../../classes/variable/Modbus/MBUInt16Variable");
 const MBUInt32Variable = require("../../classes/variable/Modbus/MBUInt32Variable");
+const config = require("config");
+const fs = require("fs");
+const path = require("path");
+
+//Method for deleting file
+let clearFile = async file => {
+  return new Promise((resolve, reject) => {
+    fs.unlink(file, err => {
+      if (err) {
+        return reject(err);
+      }
+
+      return resolve(true);
+    });
+  });
+};
+
+//Method for clearing directory
+let clearDirectory = async directory => {
+  return new Promise(async (resolve, reject) => {
+    fs.readdir(directory, async (err, files) => {
+      if (err) {
+        return reject(err);
+      }
+
+      for (const file of files) {
+        try {
+          await clearFile(path.join(directory, file));
+        } catch (err) {
+          return reject(err);
+        }
+      }
+
+      return resolve(true);
+    });
+  });
+};
 
 describe("MBDevice", () => {
+  //Database directory should be cleared
+  let db1Path;
+  let db2Path;
+  beforeEach(async () => {
+    db1Path = config.get("db1Path");
+    db2Path = config.get("db2Path");
+  });
+
+  afterEach(async () => {
+    await clearDirectory(db1Path);
+    await clearDirectory(db2Path);
+  });
+
   describe("constructor", () => {
+    let exec = async () => {
+      return new MBDevice();
+    };
+
+    it("should create new device and set initialized to false", async () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Initialized).toBeFalsy();
+    });
+  });
+
+  describe("init", () => {
+    let device;
     let name;
     let ipAdress;
     let portNumber;
@@ -52,7 +116,7 @@ describe("MBDevice", () => {
       MBDevice.prototype.connect = realConnectFunc;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -63,40 +127,40 @@ describe("MBDevice", () => {
         type: type,
         isActive: isActive
       };
-
-      return new MBDevice(payload);
+      device = new MBDevice(payload);
+      return device.init(payload);
     };
 
-    it("should create new Device and set its name, ipAdress, portNumber, timeout and unitId", () => {
-      let result = exec();
+    it("should create new Device and set its name, ipAdress, portNumber, timeout and unitId", async () => {
+      await exec();
 
-      expect(result).toBeDefined();
-      expect(result.Name).toEqual(name);
-      expect(result.IPAdress).toEqual(ipAdress);
-      expect(result.PortNumber).toEqual(portNumber);
-      expect(result.Timeout).toEqual(timeout);
-      expect(result.UnitId).toEqual(unitId);
+      expect(device).toBeDefined();
+      expect(device.Name).toEqual(name);
+      expect(device.IPAdress).toEqual(ipAdress);
+      expect(device.PortNumber).toEqual(portNumber);
+      expect(device.Timeout).toEqual(timeout);
+      expect(device.UnitId).toEqual(unitId);
 
       expect(mockConnectFunc).not.toHaveBeenCalled();
     });
 
-    it("should initiazle variables to empty object if no variables are given", () => {
+    it("should initiazle variables to empty object if no variables are given", async () => {
       variables = undefined;
-      let result = exec();
+      await exec();
 
       expect(initVariablesMockFunc).not.toHaveBeenCalled();
-      expect(result.Variables).toEqual({});
+      expect(device.Variables).toEqual({});
     });
 
-    it("should initialize variables by calling initVariables if variables in payload are passed", () => {
-      exec();
+    it("should initialize variables by calling initVariables if variables in payload are passed", async () => {
+      await exec();
 
       expect(initVariablesMockFunc).toHaveBeenCalledTimes(1);
       expect(initVariablesMockFunc.mock.calls[0][0]).toEqual(variables);
     });
 
-    it("should set MBDriver based on given arguments", () => {
-      let device = exec();
+    it("should set MBDriver based on given arguments", async () => {
+      await exec();
 
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver.IPAdress).toEqual(ipAdress);
@@ -105,63 +169,108 @@ describe("MBDevice", () => {
       expect(device.MBDriver.UnitId).toEqual(unitId);
     });
 
-    it("should set mbRequestGrouper", () => {
-      let device = exec();
+    it("should set mbRequestGrouper", async () => {
+      await exec();
 
       expect(device.RequestGrouper).toBeDefined();
       expect(device.RequestGrouper.MBDevice).toEqual(device);
     });
 
-    it("should set requests to empty object", () => {
-      let device = exec();
+    it("should set requests to empty object", async () => {
+      await exec();
 
       expect(device.Requests).toBeDefined();
       expect(device.Requests).toEqual({});
     });
 
-    it("should throw if name is empty", () => {
+    it("should throw if name is empty", async () => {
       name = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if ipAdress is empty", () => {
+    it("should throw if ipAdress is empty", async () => {
       ipAdress = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if unitId is empty", () => {
+    it("should throw if unitId is empty", async () => {
       unitId = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if timeout is empty", () => {
+    it("should throw if timeout is empty", async () => {
       timeout = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if portNumber is empty", () => {
+    it("should throw if portNumber is empty", async () => {
       portNumber = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should set type to mbDevice if no type is provided in payload", () => {
-      let result = exec();
+    it("should set type to mbDevice if no type is provided in payload", async () => {
+      await exec();
 
-      expect(result.Type).toBeDefined();
-      expect(result.Type).toEqual("mbDevice");
+      expect(device.Type).toBeDefined();
+      expect(device.Type).toEqual("mbDevice");
     });
 
-    it("should set type to type given in payload if it exists", () => {
+    it("should set type to type given in payload if it exists", async () => {
       type = "test type";
-      let result = exec();
+      await exec();
 
-      expect(result.Type).toBeDefined();
-      expect(result.Type).toEqual(type);
+      expect(device.Type).toBeDefined();
+      expect(device.Type).toEqual(type);
     });
 
-    it("should call connect if device is active according to payload", () => {
+    it("should call connect if device is active according to payload", async () => {
       isActive = true;
-      exec();
+      await exec();
 
       expect(mockConnectFunc).toHaveBeenCalledTimes(1);
     });
@@ -176,7 +285,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -189,7 +298,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -213,7 +323,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -226,7 +336,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -250,7 +361,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -263,7 +374,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -287,7 +399,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -300,7 +412,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -324,7 +437,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -337,7 +450,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -361,7 +475,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -374,7 +488,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -398,7 +513,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -411,7 +526,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -435,7 +551,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -448,7 +564,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -472,7 +589,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -485,7 +602,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -509,7 +627,7 @@ describe("MBDevice", () => {
     let unitId;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -522,7 +640,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
     });
 
     let exec = () => {
@@ -581,7 +700,7 @@ describe("MBDevice", () => {
       MBDevice.prototype._initVariables = realInitVariableFunc;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -593,6 +712,7 @@ describe("MBDevice", () => {
       };
 
       device = new MBDevice(payload);
+      await device.init(payload);
       device._driver._active = isActive;
 
       return device.Payload;
@@ -645,7 +765,7 @@ describe("MBDevice", () => {
     let driverConnectMock;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -658,7 +778,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       driverConnectMock = jest.fn();
       device._driver.connect = driverConnectMock;
     });
@@ -684,7 +805,7 @@ describe("MBDevice", () => {
     let driverDisconnectMock;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -698,6 +819,7 @@ describe("MBDevice", () => {
         unitId: unitId
       };
       device = new MBDevice(payload);
+      await device.init(payload);
       driverDisconnectMock = jest.fn();
       device._driver.disconnect = driverDisconnectMock;
     });
@@ -736,7 +858,7 @@ describe("MBDevice", () => {
     let name;
     let device;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 502;
@@ -772,6 +894,7 @@ describe("MBDevice", () => {
         unitId: unitId
       };
       device = new MBDevice(payload);
+      await device.init(payload);
       device._mbRequestGrouper = mockRequestGroupper;
 
       //Adding directly to collection - in order not to call refreshRequestGroup while adding
@@ -938,7 +1061,7 @@ describe("MBDevice", () => {
     let timeout;
     let unitId;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 502;
@@ -1074,6 +1197,7 @@ describe("MBDevice", () => {
         unitId: unitId
       };
       device = new MBDevice(payload);
+      await device.init(payload);
       device.Events.on("Refreshed", args => {
         mockOnRefreshEvent(args);
       });
@@ -1091,7 +1215,7 @@ describe("MBDevice", () => {
       device._events = mockEventEmitter;
     });
 
-    let exec = () => {
+    let exec = async () => {
       device.MBDriver._active = isDeviceActive;
       device.MBDriver.invokeRequests = mockInvokeRequestsFn;
       return device.refresh(tickNumber);
@@ -1264,7 +1388,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -1273,7 +1397,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -1289,16 +1414,16 @@ describe("MBDevice", () => {
       return device._createBooleanVariable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -1309,42 +1434,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = true;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -1387,7 +1548,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -1396,7 +1557,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -1413,16 +1575,16 @@ describe("MBDevice", () => {
       return device._createByteArrayVariable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -1433,47 +1595,92 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = [1, 2, 3, 4, 5, 6, 7, 8];
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Length in payload is empty", () => {
+    it("should throw if Length in payload is empty", async () => {
       varLength = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -1514,7 +1721,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -1523,7 +1730,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -1539,16 +1747,16 @@ describe("MBDevice", () => {
       return device._createFloatVariable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -1559,42 +1767,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234.4321;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -1635,7 +1879,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -1644,7 +1888,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -1660,16 +1905,16 @@ describe("MBDevice", () => {
       return device._createSwappedFloatVariable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -1680,42 +1925,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234.4321;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -1756,7 +2037,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -1765,7 +2046,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -1781,16 +2063,16 @@ describe("MBDevice", () => {
       return device._createInt32Variable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -1801,42 +2083,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -1877,7 +2195,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -1886,7 +2204,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -1902,16 +2221,16 @@ describe("MBDevice", () => {
       return device._createSwappedInt32Variable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -1922,42 +2241,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -1998,7 +2353,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2007,7 +2362,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -2023,16 +2379,16 @@ describe("MBDevice", () => {
       return device._createUInt32Variable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -2043,42 +2399,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -2119,7 +2511,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2128,7 +2520,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -2144,16 +2537,16 @@ describe("MBDevice", () => {
       return device._createSwappedUInt32Variable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -2164,42 +2557,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -2240,7 +2669,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2249,7 +2678,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -2265,16 +2695,16 @@ describe("MBDevice", () => {
       return device._createInt16Variable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -2285,42 +2715,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -2361,7 +2827,7 @@ describe("MBDevice", () => {
       varValue = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2370,7 +2836,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -2386,16 +2853,16 @@ describe("MBDevice", () => {
       return device._createUInt16Variable(variablePayload);
     };
 
-    it("should create, add to variables and return new variable ", () => {
-      let result = exec();
+    it("should create, add to variables and return new variable ", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(device.Variables[result.Id]).toBeDefined();
       expect(device.Variables[result.Id]).toEqual(result);
     });
 
-    it("variable should be created based on given payload ", () => {
-      let result = exec();
+    it("variable should be created based on given payload ", async () => {
+      let result = await exec();
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
@@ -2406,42 +2873,78 @@ describe("MBDevice", () => {
       expect(result.FCode).toEqual(varFcode);
     });
 
-    it("variable set id of variable if it is given in payload", () => {
+    it("variable set id of variable if it is given in payload", async () => {
       varId = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Id).toEqual(varId);
     });
 
-    it("variable set value of variable if it is given in payload", () => {
+    it("variable set value of variable if it is given in payload", async () => {
       varValue = 1234;
-      let result = exec();
+      let result = await exec();
 
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", () => {
+    it("should throw if TimeSample in payload is empty", async () => {
       varTimeSample = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Name in payload is empty", () => {
+    it("should throw if Name in payload is empty", async () => {
       varName = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if Offset in payload is empty", () => {
+    it("should throw if Offset in payload is empty", async () => {
       varOffset = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if FCode in payload is empty", () => {
+    it("should throw if FCode in payload is empty", async () => {
       varFcode = undefined;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should refresh requests group", () => {
-      exec();
+    it("should refresh requests group", async () => {
+      await exec();
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
   });
@@ -2539,7 +3042,7 @@ describe("MBDevice", () => {
         .mockReturnValue(_createSwappedUInt32VariableMockFuncResult);
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2547,7 +3050,8 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
 
       variablePayload = {
         type: varType,
@@ -2572,9 +3076,9 @@ describe("MBDevice", () => {
       return device.createVariable(variablePayload);
     };
 
-    it("should create and return boolean variable if payload type is boolean", () => {
+    it("should create and return boolean variable if payload type is boolean", async () => {
       varType = "boolean";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).toHaveBeenCalledTimes(1);
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2594,9 +3098,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createBooleanVariableMockFuncResult);
     });
 
-    it("should create and return byteArray variable if payload type is boolean", () => {
+    it("should create and return byteArray variable if payload type is boolean", async () => {
       varType = "byteArray";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).toHaveBeenCalledTimes(1);
@@ -2615,9 +3119,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createByteArrayVariableMockFuncResult);
     });
 
-    it("should create and return float variable if payload type is boolean", () => {
+    it("should create and return float variable if payload type is boolean", async () => {
       varType = "float";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2636,9 +3140,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createFloatVariableMockFuncResult);
     });
 
-    it("should create and return int16 variable if payload type is boolean", () => {
+    it("should create and return int16 variable if payload type is boolean", async () => {
       varType = "int16";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2657,9 +3161,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createInt16VariableMockFuncResult);
     });
 
-    it("should create and return int32 variable if payload type is boolean", () => {
+    it("should create and return int32 variable if payload type is boolean", async () => {
       varType = "int32";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2678,9 +3182,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createInt32VariableMockFuncResult);
     });
 
-    it("should create and return swapped float variable if payload type is boolean", () => {
+    it("should create and return swapped float variable if payload type is boolean", async () => {
       varType = "swappedFloat";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2699,9 +3203,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createSwappedFloatVariableMockFuncResult);
     });
 
-    it("should create and return swapped int32 variable if payload type is boolean", () => {
+    it("should create and return swapped int32 variable if payload type is boolean", async () => {
       varType = "swappedInt32";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2720,9 +3224,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createSwappedInt32VariableMockFuncResult);
     });
 
-    it("should create and return swapped uint32 variable if payload type is boolean", () => {
+    it("should create and return swapped uint32 variable if payload type is boolean", async () => {
       varType = "swappedUInt32";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2741,9 +3245,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createSwappedUInt32VariableMockFuncResult);
     });
 
-    it("should create and return uint16 variable if payload type is boolean", () => {
+    it("should create and return uint16 variable if payload type is boolean", async () => {
       varType = "uInt16";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2762,9 +3266,9 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createUInt16VariableMockFuncResult);
     });
 
-    it("should create and return uint32 variable if payload type is boolean", () => {
+    it("should create and return uint32 variable if payload type is boolean", async () => {
       varType = "uInt32";
-      let result = exec();
+      let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
       expect(_createByteArrayVariableMockFunc).not.toHaveBeenCalled();
@@ -2783,13 +3287,22 @@ describe("MBDevice", () => {
       expect(result).toEqual(_createUInt32VariableMockFuncResult);
     });
 
-    it("should throw if payload.type is not recognized", () => {
+    it("should throw if payload.type is not recognized", async () => {
       varType = "unrecognizedType";
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if payload is empty", () => {
+    it("should throw if payload is empty", async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2797,12 +3310,22 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
 
-      expect(() => device.createVariable()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.createVariable();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if payload.type is empty", () => {
+    it("should throw if payload.type is empty", async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2810,15 +3333,34 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId
       };
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
 
-      expect(() => device.createVariable({})).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.createVariable({});
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if varaible with given id already", () => {
+    it("should throw if varaible with given id already", async () => {
       payload.id = "1234";
       device.Variables["1234"] = "already defined variable";
-      expect(() => device.createVariable(payload)).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.createVariable(payload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
   });
 
@@ -2833,6 +3375,8 @@ describe("MBDevice", () => {
     let refreshGroupMock;
     let variableId;
     let variableName;
+    let variableType;
+    let variableArchived;
     let variable;
 
     beforeEach(() => {
@@ -2844,9 +3388,11 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
       variableId = 1234;
       variableName = "test variable";
+      variableType = "int32";
+      variableArchived = true;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2855,43 +3401,64 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variable = {
         Id: variableId,
-        Name: variableName
+        Name: variableName,
+        Archived: variableArchived,
+        Type: variableType
       };
 
       return device.addVariable(variable);
     };
 
-    it("should add variable to variables", () => {
-      exec();
+    it("should add variable to variables", async () => {
+      await exec();
 
       expect(device.Variables[variableId]).toBeDefined();
       expect(device.Variables[variableId]).toEqual(variable);
     });
 
-    it("should add variable again after it was deleted", () => {
-      exec();
-      device.removeVariable(variable.Id);
-      device.addVariable(variable);
+    it("should add variable to archive manager if archived is set to true", async () => {
+      await exec();
+
+      expect(
+        device.ArchiveManager.doesVariableIdExists(variableId)
+      ).toBeTruthy();
+    });
+
+    it("should not add variable to archive manager if archived is set to false", async () => {
+      variableArchived = false;
+
+      await exec();
+
+      expect(
+        device.ArchiveManager.doesVariableIdExists(variableId)
+      ).toBeFalsy();
+    });
+
+    it("should add variable again after it was deleted", async () => {
+      await exec();
+      await device.removeVariable(variable.Id);
+      await device.addVariable(variable);
       expect(device.Variables[variableId]).toBeDefined();
       expect(device.Variables[variableId]).toEqual(variable);
     });
 
-    it("should replace given variable if name already existis", () => {
-      exec();
+    it("should replace given variable if name already existis", async () => {
+      await exec();
       let newVariable = { Id: variableId, Name: "new" };
 
-      device.addVariable(newVariable);
+      await device.addVariable(newVariable);
       expect(device.Variables[variableId]).not.toEqual(variable);
       expect(device.Variables[variableId]).toEqual(newVariable);
     });
 
-    it("should call refresh groups after adding variable", () => {
-      exec();
+    it("should call refresh groups after adding variable", async () => {
+      await exec();
 
       expect(refreshGroupMock).toHaveBeenCalledTimes(1);
     });
@@ -2921,7 +3488,7 @@ describe("MBDevice", () => {
       variableName = "test variable";
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2930,7 +3497,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variable = {
@@ -2938,24 +3506,32 @@ describe("MBDevice", () => {
         Name: variableName
       };
 
-      device.addVariable(variable);
+      await device.addVariable(variable);
 
       return device.removeVariable(variableId);
     };
 
-    it("should remove variable from variables", () => {
-      exec();
+    it("should remove variable from variables", async () => {
+      await exec();
 
       expect(device.Variables[variableId]).not.toBeDefined();
     });
 
-    it("should return removed variable", () => {
-      let result = exec();
+    it("should return removed variable", async () => {
+      let result = await exec();
 
       expect(result).toEqual(variable);
     });
 
-    it("should throw if there is no variable of such id", () => {
+    it("should remove variable from archive manager", async () => {
+      await exec();
+
+      expect(
+        device.ArchiveManager.doesVariableIdExists(variableId)
+      ).toBeFalsy();
+    });
+
+    it("should throw if there is no variable of such id", async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
@@ -2964,7 +3540,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variable = {
@@ -2972,15 +3549,24 @@ describe("MBDevice", () => {
         Name: variableName
       };
 
-      device.addVariable(variable);
+      await device.addVariable(variable);
 
       let newVariable = { Id: "new test name" };
 
-      expect(() => device.removeVariable(newVariable)).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.removeVariable(newVariable);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should call refresh groups after adding variable", () => {
-      exec();
+    it("should call refresh groups after adding variable", async () => {
+      await exec();
 
       //First time while adding second while removing
       expect(refreshGroupMock).toHaveBeenCalledTimes(2);
@@ -3005,6 +3591,7 @@ describe("MBDevice", () => {
     let varType;
     let varId;
     let varValue;
+    let varArchived;
     let variable;
 
     let editVariablePayload;
@@ -3014,6 +3601,7 @@ describe("MBDevice", () => {
     let editVarFcode;
     let editVarId;
     let editVarValue;
+    let editVarArchived;
 
     beforeEach(() => {
       name = "test name";
@@ -3030,6 +3618,7 @@ describe("MBDevice", () => {
       varOffset = 2;
       varFcode = 3;
       varValue = 123;
+      varArchived = true;
 
       editVarId = undefined;
       editVarTimeSample = 2;
@@ -3037,18 +3626,21 @@ describe("MBDevice", () => {
       editVarOffset = 3;
       editVarFcode = 4;
       editVarValue = 321;
+      editVarArchived = true;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         ipAdress: ipAdress,
         portNumber: portNumber,
         timeout: timeout,
-        unitId: unitId
+        unitId: unitId,
+        archived: varArchived
       };
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMock;
 
       variablePayload = {
@@ -3061,7 +3653,7 @@ describe("MBDevice", () => {
         value: varValue
       };
 
-      variable = device.createVariable(variablePayload);
+      variable = await device.createVariable(variablePayload);
 
       editVariablePayload = {
         id: editVarId,
@@ -3069,14 +3661,15 @@ describe("MBDevice", () => {
         name: editVarName,
         offset: editVarOffset,
         fCode: editVarFcode,
-        value: editVarValue
+        value: editVarValue,
+        archived: editVarArchived
       };
 
       return device.editVariable(varId, editVariablePayload);
     };
 
-    it("should create and return new variable based on payload and assing it in device - instead of previous one ", () => {
-      let result = exec();
+    it("should create and return new variable based on payload and assing it in device - instead of previous one ", async () => {
+      let result = await exec();
 
       let editedVariable = device.Variables[varId];
       expect(editedVariable).toBeDefined();
@@ -3095,13 +3688,55 @@ describe("MBDevice", () => {
       expect(result).toEqual(editedVariable);
     });
 
-    it("should throw if there is no variable of given id", () => {
-      exec();
-      expect(() => device.editVariable(8765, editVariablePayload)).toThrow();
+    it("should remove old variable from ArchiveManager and add new one - if varaible is archived", async () => {
+      let result = await exec();
+
+      let editedVariable = device.Variables[varId];
+      expect(device.ArchiveManager.doesVariableIdExists(varId)).toBeTruthy();
+
+      expect(Object.values(device.ArchiveManager.Variables)).toContain(
+        editedVariable
+      );
+      expect(Object.values(device.ArchiveManager.Variables)).not.toContain(
+        variable
+      );
     });
 
-    it("should not set id to new if it exists in payload", () => {
+    it("should remove old variable from ArchiveManager and add not add new one - if edited varaible is not archived", async () => {
+      editVarArchived = false;
+
+      let result = await exec();
+
+      let editedVariable = device.Variables[varId];
+      expect(device.ArchiveManager.doesVariableIdExists(varId)).toBeFalsy();
+
+      expect(Object.values(device.ArchiveManager.Variables)).not.toContain(
+        editedVariable
+      );
+      expect(Object.values(device.ArchiveManager.Variables)).not.toContain(
+        variable
+      );
+    });
+
+    it("should throw if there is no variable of given id", async () => {
+      await exec();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.editVariable(8765, editVariablePayload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should not set id to new if it exists in payload", async () => {
       editVarId = 8765;
+
+      await exec();
 
       let editedVariable = device.Variables[varId];
       expect(editedVariable).toBeDefined();
@@ -3109,8 +3744,8 @@ describe("MBDevice", () => {
       expect(editedVariable.Id).toEqual(varId);
     });
 
-    it("should call refresh groups", () => {
-      exec();
+    it("should call refresh groups", async () => {
+      await exec();
 
       //Three times - first time addding variable second removing while editing, thrid - adding new generated variable
       expect(refreshGroupMock).toHaveBeenCalledTimes(3);
@@ -3146,7 +3781,7 @@ describe("MBDevice", () => {
     let editedVariables;
     let editedPayload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 502;
@@ -3192,7 +3827,8 @@ describe("MBDevice", () => {
       MBDevice.prototype._initVariables = initVariablesMockFunc;
       MBDevice.prototype.createVariable = createVariablesMockFunc;
 
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device._refreshRequestGroups = refreshGroupMockFunc;
       device.connect = connectMockFunc;
       device.disconnect = disconnectMockFunc;
@@ -3211,7 +3847,7 @@ describe("MBDevice", () => {
       MBDevice.prototype.createVariable = realCreateVariablesMockFunc;
     });
 
-    let exec = () => {
+    let exec = async () => {
       device._driver._active = isActive;
 
       editedPayload = {
@@ -3452,7 +4088,7 @@ describe("MBDevice", () => {
     });
   });
 
-  describe("Connected", () => {
+  describe("_initVariables", () => {
     let name;
     let device;
     let ipAdress;
@@ -3466,7 +4102,7 @@ describe("MBDevice", () => {
     let variable3;
     let variables;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
       portNumber = 1234;
@@ -3480,7 +4116,8 @@ describe("MBDevice", () => {
         unitId: unitId
       };
       createVariableMockFn = jest.fn();
-      device = new MBDevice(payload);
+      device = new MBDevice();
+      await device.init(payload);
       device.createVariable = createVariableMockFn;
       variable1 = { Id: "var1", name: "variable1" };
       variable2 = { Id: "var2", name: "variable2" };
@@ -3489,11 +4126,11 @@ describe("MBDevice", () => {
     });
 
     let exec = () => {
-      device._initVariables(variables);
+      return device._initVariables(variables);
     };
 
-    it("should call create variable for each variable in given collection", () => {
-      exec();
+    it("should call create variable for each variable in given collection", async () => {
+      await exec();
 
       expect(createVariableMockFn).toHaveBeenCalledTimes(variables.length);
       expect(createVariableMockFn.mock.calls[0][0]).toEqual(variable1);

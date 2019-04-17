@@ -6,8 +6,8 @@ let json = {
     id: "5c9f8a7fd04bb119b3ad229f",
     name: "PAC3200",
     isActive: false,
-    timeout: 2000,
-    ipAdress: "192.168.0.211",
+    timeout: 500,
+    ipAdress: "10.10.10.110",
     unitId: 1,
     portNumber: 502,
     variables: [
@@ -18,7 +18,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -27,16 +28,19 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
+        id: "123456",
         timeSample: 1,
         name: "Napiecie L3-N",
         offset: 5,
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -45,7 +49,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -54,7 +59,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -63,7 +69,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -72,7 +79,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -81,7 +89,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -90,7 +99,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -99,7 +109,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -108,7 +119,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -117,7 +129,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -126,7 +139,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -135,7 +149,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -144,7 +159,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -153,7 +169,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -162,7 +179,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -171,7 +189,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -180,7 +199,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -189,7 +209,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -198,7 +219,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -207,7 +229,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -216,7 +239,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -225,7 +249,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -234,7 +259,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -243,7 +269,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -252,7 +279,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -261,7 +289,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -270,7 +299,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -279,7 +309,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -288,7 +319,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -297,7 +329,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -306,7 +339,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -315,7 +349,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -324,7 +359,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -333,7 +369,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -342,7 +379,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -351,7 +389,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -360,7 +399,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -369,7 +409,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -378,7 +419,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -387,7 +429,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -396,7 +439,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -405,7 +449,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -414,7 +459,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -423,7 +469,8 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       },
       {
         timeSample: 1,
@@ -432,28 +479,35 @@ let json = {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat"
+        type: "swappedFloat",
+        archived: true
       }
     ],
     type: "mbDevice"
   }
 };
 
-// commInterface.init(json);
+let exec = async () => {
+  await commInterface.init(json);
 
-// commInterface.startCommunicationWithAllDevices();
+  commInterface.startCommunicationWithAllDevices();
 
-// for (let device of Object.values(commInterface.Devices)) {
-//   device.Events.on("Refreshed", args => {
-//     console.log(args[2]);
-//     console.log(args[1]);
+  for (let device of Object.values(commInterface.Devices)) {
+    device.Events.on("Refreshed", args => {
+      console.log(args[2]);
+      //console.log(args[1]);
 
-//     //let allIds = Object.keys(args[1]);
-//     // for (let id of allIds) {
-//     //   console.log(`${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`);
-//     // }
-//   });
-// }
+      let allIds = Object.keys(args[1]);
+      for (let id of allIds) {
+        console.log(
+          `${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`
+        );
+      }
+    });
+  }
+};
+
+exec();
 
 // let am = new ArchiveManager("testDB.db");
 
@@ -490,10 +544,14 @@ let json = {
 
 // exec();
 
-// let getValue = async date => {
-//   let value = await am.getValue(date, "1235");
-//   console.log(value);
-// };
+let getValue = async (deviceId, variableId, date) => {
+  let value = await commInterface.getVariableFromDatabase(
+    deviceId,
+    variableId,
+    date
+  );
+  console.log(value);
+};
 
 //clearDirectory("database/test/db1");
 
@@ -510,11 +568,12 @@ process.stdin.on("data", async function(key) {
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("1") == 0) {
-    getValue(100000);
+    getValue("5c9f8a7fd04bb119b3ad229f", "123456", "1555496260");
   }
 
   // without rawmode, it returns EOL with the string
   if (key.indexOf("2") == 0) {
+    11;
     getValue(200000);
   }
 

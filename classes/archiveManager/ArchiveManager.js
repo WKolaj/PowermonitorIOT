@@ -1,6 +1,7 @@
 const path = require("path");
 const config = require("config");
 const sqlite3 = require("sqlite3");
+const { isObjectEmpty } = require("../../utility/utility");
 
 class ArchiveManager {
   constructor(fileName) {
@@ -218,6 +219,31 @@ class ArchiveManager {
     });
   }
 
+  async removeVariable(variableId) {
+    //Returning promise - in order to implement async/await instead of callback functions
+    return new Promise(async (resolve, reject) => {
+      try {
+        this.checkIfInitialzed();
+
+        //Rejecting if variable does not exist
+        if (!this.doesVariableIdExists(variableId))
+          return reject(
+            new Error(`variable does not exists - id ${variableId}`)
+          );
+
+        this.checkIfBusy();
+
+        this._busy = true;
+        delete this.Variables[variableId];
+        this._busy = false;
+
+        return resolve(true);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
   filterPayloadWithAddedVariables(payload) {
     let payloadToReturn = {};
 
@@ -254,6 +280,9 @@ class ArchiveManager {
       this.checkIfInitialzed();
       this.checkIfBusy();
 
+      if (payload === undefined || payload === null || isObjectEmpty(payload))
+        return resolve(false);
+
       this._busy = true;
 
       try {
@@ -285,8 +314,9 @@ class ArchiveManager {
         if (!this.doesVariableIdExists(variableId))
           throw new Error(`There is no variable of id ${variableId}`);
         this.checkIfInitialzed();
-        this.checkIfBusy();
-        this._busy = true;
+        //in case of getting value - there is no need to check if device is busy
+        //this.checkIfBusy();
+        //this._busy = true;
 
         let columnName = this.getColumnNameById(variableId);
 
@@ -303,7 +333,7 @@ class ArchiveManager {
           }
         );
       } catch (err) {
-        this._busy = false;
+        //this._busy = false;
 
         return reject(err);
       }
