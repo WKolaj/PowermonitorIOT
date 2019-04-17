@@ -323,7 +323,7 @@ class ArchiveManager {
         this.DB.get(
           `SELECT date, ${columnName} FROM data WHERE date <= ${date} ORDER BY date DESC LIMIT 1`,
           (err, row) => {
-            this._busy = false;
+            //this._busy = false;
 
             if (err) {
               return reject(err);

@@ -44,11 +44,13 @@ class Sampler {
   /**
    * @description Method called every tick of Interval handler
    */
-  _tick() {
+  async _tick() {
     //Invoking only if sampler is active
     if (this.Active) {
       let tickNumber = Sampler.convertDateToTickNumber(Date.now());
-      if (this._shouldEmitTick(tickNumber)) this._emitTick(tickNumber);
+      if (this._shouldEmitTick(tickNumber)) {
+        await this._emitTick(tickNumber);
+      }
     }
   }
 
@@ -77,14 +79,14 @@ class Sampler {
    */
   async _emitTick(tickNumber) {
     try {
+      //setting last tick number to actual
+      this._lastTickTimeNumber = tickNumber;
+
       //Refreshing all devices
       await this._refreshAllDevices(tickNumber);
 
       //emiting tick event
       this.Events.emit("OnTick", [tickNumber]);
-
-      //setting last tick number to actual
-      this._lastTickTimeNumber = tickNumber;
     } catch (err) {
       console.log(err);
     }

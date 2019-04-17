@@ -191,7 +191,6 @@ class Device {
     if (result) {
       this.Events.emit("Refreshed", [this, result, tickNumber]);
     }
-
     await this.archiveData(tickNumber, result);
   }
 

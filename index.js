@@ -7,7 +7,7 @@ let json = {
     name: "PAC3200",
     isActive: false,
     timeout: 500,
-    ipAdress: "10.10.10.110",
+    ipAdress: "192.168.0.211",
     unitId: 1,
     portNumber: 502,
     variables: [
@@ -492,19 +492,19 @@ let exec = async () => {
 
   commInterface.startCommunicationWithAllDevices();
 
-  for (let device of Object.values(commInterface.Devices)) {
-    device.Events.on("Refreshed", args => {
-      console.log(args[2]);
-      //console.log(args[1]);
+  // for (let device of Object.values(commInterface.Devices)) {
+  //   device.Events.on("Refreshed", args => {
+  //     console.log(args[2]);
+  //     //console.log(args[1]);
 
-      let allIds = Object.keys(args[1]);
-      for (let id of allIds) {
-        console.log(
-          `${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`
-        );
-      }
-    });
-  }
+  //     // let allIds = Object.keys(args[1]);
+  //     // for (let id of allIds) {
+  //     //   console.log(
+  //     //     `${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`
+  //     //   );
+  //     // }
+  //   });
+  // }
 };
 
 exec();

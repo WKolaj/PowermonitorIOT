@@ -1626,24 +1626,43 @@ describe("ArchiveManager", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should set busy to false after operation", async () => {
+    it("should not set busy to false after operation", async () => {
+      busy = true;
+      let result = await exec();
+
+      expect(archiveManager.Busy).toBeTruthy();
+    });
+
+    it("should not set busy to true after operation", async () => {
+      busy = false;
       let result = await exec();
 
       expect(archiveManager.Busy).toBeFalsy();
     });
 
-    it("should throw and not insert any data if manager is busy", async () => {
+    it("should not throw and get data even if manager is busy", async () => {
       busy = true;
+      let result;
+
       await expect(
         new Promise(async (resolve, reject) => {
           try {
-            await exec();
+            result = await exec();
             return resolve(true);
           } catch (err) {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
+      ).resolves.toBeDefined();
+
+      let column2Name = archiveManager.getColumnNameById(variable2Id);
+
+      let expectedResult = {
+        date: date2,
+        [column2Name]: variable2Value2
+      };
+
+      expect(result).toEqual(expectedResult);
     });
 
     it("should throw and not insert any data  if manager is not initialized", async () => {
