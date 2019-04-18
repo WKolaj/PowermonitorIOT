@@ -44,12 +44,12 @@ class Sampler {
   /**
    * @description Method called every tick of Interval handler
    */
-  async _tick() {
+  _tick() {
     //Invoking only if sampler is active
     if (this.Active) {
       let tickNumber = Sampler.convertDateToTickNumber(Date.now());
       if (this._shouldEmitTick(tickNumber)) {
-        await this._emitTick(tickNumber);
+        this._emitTick(tickNumber);
       }
     }
   }
@@ -97,14 +97,22 @@ class Sampler {
    * @param {number} tickNumber Actual tick number
    */
   async _refreshAllDevices(tickNumber) {
+    let refreshPromises = [];
+
     let allDeviceNames = Object.keys(this.AllDevices);
+
     for (let deviceName of allDeviceNames) {
-      try {
-        await this.AllDevices[deviceName].refresh(tickNumber);
-      } catch (err) {
-        console.log(err);
-      }
+      let newPromise = new Promise(async (resolve, reject) => {
+        try {
+          await this.AllDevices[deviceName].refresh(tickNumber);
+          resolve(true);
+        } catch (err) {
+          resolve(err);
+        }
+      });
+      refreshPromises.push(newPromise);
     }
+    await Promise.all(refreshPromises);
   }
 
   /**

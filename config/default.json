@@ -1,4 +1,4 @@
 {
-  "db1Path": "database/db1",
-  "db2Path": "database/db2"
+  "db1Path": "/media/wk/DATA1",
+  "db2Path": "database/db1"
 }

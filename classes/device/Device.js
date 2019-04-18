@@ -58,7 +58,8 @@ class Device {
    * @description Is archive manager initialized
    */
   get ArchiveManagerInitialized() {
-    return this.ArchiveManager.Initialized;
+    if (this.ArchiveManager) return this.ArchiveManager.Initialized;
+    else return false;
   }
 
   /**
@@ -191,7 +192,7 @@ class Device {
     if (result) {
       this.Events.emit("Refreshed", [this, result, tickNumber]);
     }
-    await this.archiveData(tickNumber, result);
+    this.archiveData(tickNumber, result);
   }
 
   /**

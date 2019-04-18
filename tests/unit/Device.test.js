@@ -38,6 +38,11 @@ let clearDirectory = async directory => {
   });
 };
 
+//Method for checking if file exists
+let checkIfFileExists = filePath => {
+  return fs.existsSync(filePath);
+};
+
 //Method for checking if table exists
 let checkIfTableExists = (dbFile, tableName) => {
   return new Promise(async (resolve, reject) => {
@@ -132,6 +137,7 @@ let readAllDataFromTable = (dbFile, tableName) => {
 describe("Device", () => {
   let db1Path;
   let db2Path;
+
   beforeEach(async () => {
     db1Path = config.get("db1Path");
     db2Path = config.get("db2Path");
@@ -244,6 +250,28 @@ describe("Device", () => {
       expect(device2.Id).toEqual(device1.Id);
       expect(device2.Name).toEqual(device1.Name);
     });
+
+    it("should init archive manager", async () => {
+      await exec();
+
+      expect(device.ArchiveManagerInitialized).toBeTruthy();
+    });
+
+    it("should create database file associated with id", async () => {
+      await exec();
+
+      let filePath = path.join(db1Path, `archive_${device.Id}.db`);
+      let fileExists = checkIfFileExists(filePath);
+      expect(fileExists).toEqual(true);
+    });
+
+    it("should create table data in db file", async () => {
+      await exec();
+
+      let filePath = path.join(db1Path, `archive_${device.Id}.db`);
+      let fileExists = await checkIfTableExists(filePath, "data");
+      expect(fileExists).toEqual(true);
+    });
   });
 
   describe("get Events", () => {
@@ -315,6 +343,40 @@ describe("Device", () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(device._variables);
+    });
+  });
+
+  describe("get ArchiveManagerInitialized", () => {
+    let name;
+    let device;
+    let payload;
+    let init;
+
+    beforeEach(() => {
+      name = "test name";
+      init = true;
+    });
+
+    let exec = async () => {
+      payload = { name: name };
+      device = new Device();
+      if (init) await device.init(payload);
+      return device.ArchiveManagerInitialized;
+    };
+
+    it("should return true if archive manager is initialized", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(true);
+    });
+
+    it("should return false if archive manager is initialized", async () => {
+      init = false;
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(false);
     });
   });
 
@@ -861,6 +923,16 @@ describe("Device", () => {
         return device.archiveData(tickNumber, archivePayload);
       }
     };
+
+    it("should not insert value into database if Archive manager is not initialized", async () => {
+      await exec();
+
+      let valueFromDB = await device.getValueFromDB(variableId, tickNumber);
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+
+      let expectedPayload = { [columnName]: archiveValue };
+      expect(valueFromDB).toMatchObject(expectedPayload);
+    });
 
     it("should insert value into database", async () => {
       await exec();

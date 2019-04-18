@@ -278,8 +278,7 @@ class ArchiveManager {
   async insertValues(date, payload) {
     return new Promise((resolve, reject) => {
       this.checkIfInitialzed();
-      //Insert data is possible while busy
-      //this.checkIfBusy();
+      this.checkIfBusy();
 
       if (payload === undefined || payload === null || isObjectEmpty(payload))
         return resolve(false);

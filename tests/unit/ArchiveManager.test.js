@@ -1354,7 +1354,7 @@ describe("ArchiveManager", () => {
       expect(row[`col_${variable2Id}`]).toEqual(null);
     });
 
-    it("should not throw and insert data even if manager is busy", async () => {
+    it("should throw and not insert data even if manager is busy", async () => {
       busy = true;
       await expect(
         new Promise(async (resolve, reject) => {
@@ -1365,19 +1365,11 @@ describe("ArchiveManager", () => {
             return reject(err);
           }
         })
-      ).resolves.toBeDefined();
+      ).rejects.toBeDefined();
 
       let rows = await readAllDataFromTable(filePath, "data");
 
-      expect(rows.length).toEqual(1);
-
-      let row = rows[0];
-
-      expect(row[`date`]).toEqual(date);
-      expect(row[`col_${variable1Id}`]).toEqual(variable1Value);
-      expect(row[`col_${variable2Id}`]).toEqual(variable2Value);
-      expect(row[`col_${variable3Id}`]).toEqual(variable3Value);
-      expect(row[`col_${variable4Id}`]).toEqual(variable4Value);
+      expect(rows.length).toEqual(0);
     });
 
     it("should throw and not insert any data  if manager is not initialized", async () => {
