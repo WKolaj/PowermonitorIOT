@@ -1452,28 +1452,93 @@ let json = {
     type: "mbDevice"
   }
 };
+let json2 = {
+  "5c9f8a7fd04bb119b3ad229f": {
+    id: "5c9f8a7fd04bb119b3ad229f",
+    name: "Test meter",
+    calculationElements: [
+      {
+        id: "5cbca778e7bc41181cbdfa15",
+        name: "test sum elements",
+        type: "sumElement",
+        archived: true,
+        plusVariables: [{ id: "12345", factor: 2 }, { id: "12346", factor: 3 }],
+        minusVariables: [{ id: "12347", factor: 4 }]
+      }
+    ],
+    isActive: true,
+    timeout: 500,
+    ipAdress: "192.168.1.11",
+    unitId: 1,
+    portNumber: 502,
+    variables: [
+      {
+        id: "12345",
+        timeSample: 1,
+        name: "Napiecie L1-N",
+        archived: true,
+        unit: "",
+        offset: 1,
+        length: 2,
+        fCode: 3,
+        value: 1,
+        type: "swappedFloat",
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      },
+      {
+        id: "12346",
+        timeSample: 1,
+        name: "Napiecie L2-N",
+        archived: true,
+        unit: "",
+        offset: 3,
+        length: 2,
+        fCode: 3,
+        value: 2,
+        type: "swappedFloat",
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      },
+      {
+        id: "12347",
+        timeSample: 1,
+        name: "Napiecie L3-N",
+        archived: true,
+        unit: "",
+        offset: 5,
+        length: 2,
+        fCode: 3,
+        value: 3,
+        type: "swappedFloat",
+        getSingleFCode: 3,
+        setSingleFCode: 16
+      }
+    ],
+    type: "mbDevice"
+  }
+};
 
-// let exec = async () => {
-//   await commInterface.init(json);
+let exec = async () => {
+  await commInterface.init(json2);
+  commInterface.startCommunicationWithAllDevices();
 
-//   commInterface.startCommunicationWithAllDevices();
+  for (let device of Object.values(commInterface.Devices)) {
+    device.Events.on("Refreshed", args => {
+      console.log(args[2]);
+      //console.log(args[1]);
 
-//   for (let device of Object.values(commInterface.Devices)) {
-//     device.Events.on("Refreshed", args => {
-//       console.log(args[2]);
-//       //console.log(args[1]);
+      let allIds = Object.keys(args[1]);
+      for (let id of allIds) {
+        console.log(
+          `${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`
+        );
+      }
+    });
+  }
+};
 
-//       // let allIds = Object.keys(args[1]);
-//       // for (let id of allIds) {
-//       //   console.log(
-//       //     `${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`
-//       //   );
-//       // }
-//     });
-//   }
-// };
-
-// exec();
+exec();
 
 // // let am = new ArchiveManager("testDB.db");
 

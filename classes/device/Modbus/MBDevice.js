@@ -51,6 +51,10 @@ class MBDevice extends Device {
     //Initializing variables if they are given in payload
     if (payload.variables) await this._initVariables(payload.variables);
 
+    //Has to be invoked here instead of based class - due to the fact that, variables should be initialized first
+    if (payload.calculationElements)
+      await this._initCalculationElements(payload.calculationElements);
+
     //If type is given in payload - set it according to payload - otherwise set default mbDevice type
     this._type = payload.type ? payload.type : "mbDevice";
 

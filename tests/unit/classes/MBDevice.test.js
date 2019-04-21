@@ -1281,22 +1281,35 @@ describe("MBDevice", () => {
       );
     });
 
-    it("should not invoke Refreshed event with all changed variables if there was an error", async () => {
+    it("should invoke Refreshed event with all changed variables event if there was an error", async () => {
       mockInvokeRequestsFn = jest.fn().mockImplementation(() => {
         throw new Error("Test error");
       });
 
       await exec();
 
-      expect(mockEventEmitterEmitMethod).not.toHaveBeenCalled();
+      expect(mockEventEmitterEmitMethod).toHaveBeenCalledTimes(1);
+      expect(mockEventEmitterEmitMethod.mock.calls[0][0]).toEqual("Refreshed");
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][0]).toEqual(device);
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]).toEqual({});
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][2]).toEqual(
+        tickNumber
+      );
     });
 
-    it("should not invoke Refreshed event with all changed variables if device is not active", async () => {
+    it("should invoke Refreshed event event if if device is not active, with refreshing only calculation elements", async () => {
       isDeviceActive = false;
 
       await exec();
 
-      expect(mockEventEmitterEmitMethod).not.toHaveBeenCalled();
+      expect(mockEventEmitterEmitMethod).toHaveBeenCalledTimes(1);
+      expect(mockEventEmitterEmitMethod.mock.calls[0][0]).toEqual("Refreshed");
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][0]).toEqual(device);
+      //Empty values - associated with calculation elements
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][1]).toEqual({});
+      expect(mockEventEmitterEmitMethod.mock.calls[0][1][2]).toEqual(
+        tickNumber
+      );
     });
 
     it("should not throw if requests are empty", async () => {

@@ -770,12 +770,19 @@ describe("Device", () => {
       );
     });
 
-    it("should not invoke Refreshed Event if refresh result is empty", async () => {
+    it("should invoke Refreshed Event if refresh result is empty, but only refreshing calculation elements", async () => {
       _refreshMockResolvedValue = null;
 
       let result = await exec();
 
-      expect(eventEmitterMockEmitMethod).not.toHaveBeenCalled();
+      expect(eventEmitterMockEmitMethod).toHaveBeenCalledTimes(1);
+      expect(eventEmitterMockEmitMethod.mock.calls[0][0]).toEqual("Refreshed");
+      expect(eventEmitterMockEmitMethod.mock.calls[0][1][0]).toEqual(device);
+      //Empty values - associated with calculation elements
+      expect(eventEmitterMockEmitMethod.mock.calls[0][1][1]).toEqual({});
+      expect(eventEmitterMockEmitMethod.mock.calls[0][1][2]).toEqual(
+        tickNumber
+      );
     });
   });
 

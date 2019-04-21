@@ -1,6 +1,7 @@
 const EventEmitter = require("events");
 const mongoose = require("mongoose");
 const ArchiveManager = require("../archiveManager/ArchiveManager");
+const SumElement = require("../calculationElement/SumElement");
 
 class Device {
   /**
@@ -20,6 +21,7 @@ class Device {
 
     this._name = payload.name;
     this._variables = {};
+    this._calculationElements = {};
 
     //Events of device
     this._events = new EventEmitter();
@@ -38,6 +40,12 @@ class Device {
     await this._initArchiveManager();
 
     this._initialized = true;
+  }
+
+  async _initCalculationElements(calculationElements) {
+    for (let calculationElement of calculationElements) {
+      await this.createCalculationElement(calculationElement);
+    }
   }
 
   /**
@@ -118,6 +126,10 @@ class Device {
     return this._variables;
   }
 
+  get CalculationElements() {
+    return this._calculationElements;
+  }
+
   /**
    * @description Adding variable to device
    */
@@ -163,6 +175,59 @@ class Device {
     throw new Error("Not implemented");
   }
 
+  async addCalculationElement(calculationElement) {
+    this.CalculationElements[calculationElement.Id] = calculationElement;
+    if (calculationElement.Archived)
+      await this.ArchiveManager.addCalculationElement(calculationElement);
+  }
+
+  async removeCalculationElement(id) {
+    if (!(id in this.CalculationElements))
+      throw Error(`There is no such calculation element in device - id:${id}`);
+
+    let calculationElementToDelete = this.CalculationElements[id];
+
+    //Removing variable from Archive manager if exist
+    if (this.ArchiveManager.doesCalculationElementIdExists(id)) {
+      await this.ArchiveManager.removeCalculationElement(id);
+    }
+
+    delete this.CalculationElements[id];
+
+    return calculationElementToDelete;
+  }
+
+  async createCalculationElement(payload) {
+    if (!payload) throw new Error("Given payload cannot be empty");
+    if (!payload.type)
+      throw new Error("Given calculation element payload has no type defined");
+
+    if (payload.id && this.CalculationElements[payload.id])
+      throw new Error(
+        `Calculation element with id ${payload.id} already exists!`
+      );
+    switch (payload.type) {
+      case "sumElement": {
+        return this._createSumElement(payload);
+      }
+      default: {
+        throw new Error(
+          `Given calculation element is not recognized: ${payload.type}`
+        );
+      }
+    }
+  }
+
+  async _createSumElement(payload) {
+    if (!payload.name)
+      throw new Error("Calculation element name in payload is not defined");
+
+    let calculationElementToAdd = new SumElement(this);
+    await calculationElementToAdd.init(payload);
+    await this.addCalculationElement(calculationElementToAdd);
+    return calculationElementToAdd;
+  }
+
   static divideVariablesByTickId(variables) {
     let variablesToReturn = {};
 
@@ -184,15 +249,24 @@ class Device {
     return this.Variables[id];
   }
 
+  getCalculationElement(id) {
+    return this.CalculationElements[id];
+  }
+
   /**
    * @description Refreshing variables based on tickNumber
    */
   async refresh(tickNumber) {
     let result = await this._refresh(tickNumber);
-    if (result) {
-      this.Events.emit("Refreshed", [this, result, tickNumber]);
+    let finalResult = await this._refreshCalculationElements(
+      tickNumber,
+      result
+    );
+
+    if (finalResult) {
+      this.Events.emit("Refreshed", [this, finalResult, tickNumber]);
     }
-    this.archiveData(tickNumber, result);
+    this.archiveData(tickNumber, finalResult);
   }
 
   /**
@@ -200,6 +274,22 @@ class Device {
    */
   async _refresh(tickNumber) {
     throw new Error("Not implemented");
+  }
+
+  async _refreshCalculationElements(tickNumber, payloadToAppend) {
+    if (!payloadToAppend) payloadToAppend = {};
+
+    let allCalculationElements = Object.values(this.CalculationElements);
+    for (let calculationElement of allCalculationElements) {
+      try {
+        let result = await calculationElement.refresh(tickNumber);
+        payloadToAppend[calculationElement.Id] = calculationElement;
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    return payloadToAppend;
   }
 
   /**
@@ -261,10 +351,17 @@ class Device {
    * @description Method for generating payload - overriding in child classes
    */
   _generatePayload() {
-    return {
+    let initialPayload = {
       id: this.Id,
-      name: this.Name
+      name: this.Name,
+      calculationElements: []
     };
+
+    for (let calculationElement of Object.values(this.CalculationElements)) {
+      initialPayload.calculationElements.push(calculationElement.Payload);
+    }
+
+    return initialPayload;
   }
 
   /**

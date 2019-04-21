@@ -11,12 +11,17 @@ class ArchiveManager {
     this._initialized = false;
     this._busy = false;
     this._variables = {};
+    this._calculationElements = {};
     this._dbPath = config.get("db1Path");
     this._filePath = path.join(this._dbPath, this._fileName);
   }
 
   get Variables() {
     return this._variables;
+  }
+
+  get CalculationElements() {
+    return this._calculationElements;
   }
 
   get FileName() {
@@ -92,6 +97,31 @@ class ArchiveManager {
     return `col_${variableId}`;
   }
 
+  getColumnTypeCalculationElement(calculationElement) {
+    switch (calculationElement.ValueType) {
+      case "boolean": {
+        return "INTEGER";
+      }
+      case "float": {
+        return "REAL";
+      }
+      case "integer": {
+        return "INTEGER";
+      }
+      default: {
+        throw new Error(
+          `Given variable type is not recognized: ${
+            calculationElement.ValueType
+          }`
+        );
+      }
+    }
+  }
+
+  getColumnNameOfCalculationElement(calculationElement) {
+    return this.getColumnNameById(calculationElement.Id);
+  }
+
   checkIfInitialzed() {
     if (!this.Initialized) {
       throw new Error("Archive manager not initialized");
@@ -114,6 +144,20 @@ class ArchiveManager {
   checkIfVariableExists(variable) {
     if (this.doesVariableIdExists(variable.Id)) {
       throw new Error(`Variable of id ${variable.Id} already exists!`);
+    }
+
+    return false;
+  }
+
+  doesCalculationElementIdExists(calculationElementId) {
+    return calculationElementId in this.CalculationElements;
+  }
+
+  checkIfCalculationElementExists(calculationElement) {
+    if (this.doesCalculationElementIdExists(calculationElement.Id)) {
+      throw new Error(
+        `CalculationElement of id ${calculationElement.Id} already exists!`
+      );
     }
 
     return false;
@@ -152,6 +196,103 @@ class ArchiveManager {
             }
           );
         }
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  async removeVariable(variableId) {
+    //Returning promise - in order to implement async/await instead of callback functions
+    return new Promise(async (resolve, reject) => {
+      try {
+        this.checkIfInitialzed();
+
+        //Rejecting if variable does not exist
+        if (!this.doesVariableIdExists(variableId))
+          return reject(
+            new Error(`variable does not exists - id ${variableId}`)
+          );
+
+        this.checkIfBusy();
+
+        this._busy = true;
+        delete this.Variables[variableId];
+        this._busy = false;
+
+        return resolve(true);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  async addCalculationElement(calculationElement) {
+    //Returning promise - in order to implement async/await instead of callback functions
+    return new Promise(async (resolve, reject) => {
+      try {
+        this.checkIfInitialzed();
+        this.checkIfCalculationElementExists(calculationElement);
+        this.checkIfBusy();
+
+        let columnType = this.getColumnTypeCalculationElement(
+          calculationElement
+        );
+        let columnName = this.getColumnNameOfCalculationElement(
+          calculationElement
+        );
+
+        let doesColumnAlreadyExists = await this.doesColumnExist(columnName);
+
+        if (doesColumnAlreadyExists) {
+          this.CalculationElements[calculationElement.Id] = calculationElement;
+          return resolve(true);
+        } else {
+          this._busy = true;
+
+          let self = this;
+
+          this.DB.run(
+            `ALTER TABLE data ADD COLUMN ${columnName} ${columnType};`,
+            function(err) {
+              self._busy = false;
+              if (err) {
+                return reject(err);
+              }
+              self.CalculationElements[
+                calculationElement.Id
+              ] = calculationElement;
+              return resolve(true);
+            }
+          );
+        }
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  async removeCalculationElement(calculationElementId) {
+    //Returning promise - in order to implement async/await instead of callback functions
+    return new Promise(async (resolve, reject) => {
+      try {
+        this.checkIfInitialzed();
+
+        //Rejecting if variable does not exist
+        if (!this.doesCalculationElementIdExists(calculationElementId))
+          return reject(
+            new Error(
+              `Calculation element does not exists - id ${calculationElementId}`
+            )
+          );
+
+        this.checkIfBusy();
+
+        this._busy = true;
+        delete this.CalculationElements[calculationElementId];
+        this._busy = false;
+
+        return resolve(true);
       } catch (err) {
         return reject(err);
       }
@@ -219,31 +360,6 @@ class ArchiveManager {
     });
   }
 
-  async removeVariable(variableId) {
-    //Returning promise - in order to implement async/await instead of callback functions
-    return new Promise(async (resolve, reject) => {
-      try {
-        this.checkIfInitialzed();
-
-        //Rejecting if variable does not exist
-        if (!this.doesVariableIdExists(variableId))
-          return reject(
-            new Error(`variable does not exists - id ${variableId}`)
-          );
-
-        this.checkIfBusy();
-
-        this._busy = true;
-        delete this.Variables[variableId];
-        this._busy = false;
-
-        return resolve(true);
-      } catch (err) {
-        return reject(err);
-      }
-    });
-  }
-
   filterPayloadWithAddedVariables(payload) {
     let payloadToReturn = {};
 
@@ -253,8 +369,11 @@ class ArchiveManager {
       if (variableId in this.Variables) {
         payloadToReturn[variableId] = payload[variableId];
       }
+      //if variableId is inside calculationElements - also add it to return payload
+      if (variableId in this.CalculationElements) {
+        payloadToReturn[variableId] = payload[variableId];
+      }
     }
-
     return payloadToReturn;
   }
 
