@@ -1,4 +1,4 @@
-const MBRequestGrouper = require("../../classes/driver/Modbus/MBRequestGrouper");
+const MBRequestGrouper = require("../../../classes/driver/Modbus/MBRequestGrouper");
 
 describe("MBRequestGrouper", () => {
   describe("constructor", () => {

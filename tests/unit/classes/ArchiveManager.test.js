@@ -1,133 +1,17 @@
-const ArchiveManager = require("../../classes/archiveManager/ArchiveManager");
+const ArchiveManager = require("../../../classes/archiveManager/ArchiveManager");
 const config = require("config");
 const fs = require("fs");
 const path = require("path");
-const sqlite3 = require("sqlite3");
 
-//Method for deleting file
-let clearFile = async file => {
-  return new Promise((resolve, reject) => {
-    fs.unlink(file, err => {
-      if (err) {
-        return reject(err);
-      }
-
-      return resolve(true);
-    });
-  });
-};
-
-//Method for clearing directory
-let clearDirectory = async directory => {
-  return new Promise(async (resolve, reject) => {
-    fs.readdir(directory, async (err, files) => {
-      if (err) {
-        return reject(err);
-      }
-
-      for (const file of files) {
-        try {
-          await clearFile(path.join(directory, file));
-        } catch (err) {
-          return reject(err);
-        }
-      }
-
-      return resolve(true);
-    });
-  });
-};
-
-//Method for checking if table exists
-let checkIfTableExists = (dbFile, tableName) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.get(
-      `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`,
-      function(err, row) {
-        if (err) {
-          return reject(err);
-        }
-        return row ? resolve(true) : resolve(false);
-      }
-    );
-  });
-};
-
-//Method for checking if table exists
-let checkIfColumnExists = (dbFile, tableName, columnName, columnType) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.all(`PRAGMA table_info(${tableName});`, function(err, rows) {
-      if (err) {
-        return reject(err);
-      }
-
-      //Checking all rows one by one - if one of them has desired name - return true
-      for (let row of rows) {
-        if (row.name === columnName && row.type === columnType) {
-          return resolve(true);
-        }
-      }
-
-      return resolve(false);
-    });
-  });
-};
-
-let createDatabaseFile = dbFile => {
-  let db = new sqlite3.Database(dbFile);
-};
-
-let createDatabaseTable = (dbFile, tableName) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.run(
-      `CREATE TABLE IF NOT EXISTS ${tableName} (date INTEGER, PRIMARY KEY(date) );`,
-      err => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve(true);
-      }
-    );
-  });
-};
-
-let createDatabaseColumn = (dbFile, tableName, columnName, columnType) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.run(
-      `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnType};`,
-      err => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve(true);
-      }
-    );
-  });
-};
-
-let readAllDataFromTable = (dbFile, tableName) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.all(`SELECT * FROM ${tableName};`, (err, rows) => {
-      if (err) {
-        return reject(err);
-      }
-
-      return resolve(rows);
-    });
-  });
-};
+let {
+  clearDirectory,
+  checkIfTableExists,
+  checkIfColumnExists,
+  createDatabaseFile,
+  createDatabaseTable,
+  createDatabaseColumn,
+  readAllDataFromTable
+} = require("../../tools/tools.js");
 
 describe("ArchiveManager", () => {
   //Path to primary database
@@ -138,8 +22,6 @@ describe("ArchiveManager", () => {
   beforeEach(async () => {
     db1Path = config.get("db1Path");
     db2Path = config.get("db2Path");
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
   });
 
   afterEach(async () => {

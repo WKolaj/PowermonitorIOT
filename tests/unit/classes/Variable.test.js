@@ -1,5 +1,5 @@
-const Variable = require("../../classes/variable/Variable");
-const Sampler = require("../../classes/sampler/Sampler");
+const Variable = require("../../../classes/variable/Variable");
+const Sampler = require("../../../classes/sampler/Sampler");
 const _ = require("lodash");
 
 describe("Variable", () => {

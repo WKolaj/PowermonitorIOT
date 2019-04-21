@@ -1,10 +1,7 @@
-const MBRequest = require("../../classes/driver/Modbus/MBRequest");
-const MBInt16Variable = require("../../classes/variable/Modbus/MBInt16Variable");
-const MBInt32Variable = require("../../classes/variable/Modbus/MBInt32Variable");
+const MBRequest = require("../../../classes/driver/Modbus/MBRequest");
+const MBInt16Variable = require("../../../classes/variable/Modbus/MBInt16Variable");
+const MBInt32Variable = require("../../../classes/variable/Modbus/MBInt32Variable");
 const _ = require("lodash");
-
-//Function for hanging thread
-const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 describe("MBRequest", () => {
   describe("constructor", () => {

@@ -1,4 +1,4 @@
-const MBByteArrayVariable = require("../../classes/variable/Modbus/MBByteArrayVariable");
+const MBByteArrayVariable = require("../../../classes/variable/Modbus/MBByteArrayVariable");
 
 describe("MBByteArrayVariable", () => {
   describe("constructor", () => {

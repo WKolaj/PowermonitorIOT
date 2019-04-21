@@ -1,7 +1,6 @@
-let MBDriver = require("../../classes/driver/Modbus/MBDriver");
+let MBDriver = require("../../../classes/driver/Modbus/MBDriver");
 
-//Function for hanging thread
-const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
+let { snooze } = require("../../tools/tools.js");
 
 function MockModbusRTU() {
   this._id = 0;

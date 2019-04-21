@@ -1,6 +1,6 @@
-const MBUInt32Variable = require("../../classes/variable/Modbus/MBUInt32Variable");
+const MBBooleanVariable = require("../../../classes/variable/Modbus/MBBooleanVariable");
 
-describe("MBUInt32Variable", () => {
+describe("MBBooleanVariable", () => {
   describe("constructor", () => {
     let device;
     let name;
@@ -17,7 +17,7 @@ describe("MBUInt32Variable", () => {
         }
       };
       name = "Test var name";
-      fcode = 3;
+      fcode = 1;
       offset = 1;
     });
 
@@ -27,10 +27,14 @@ describe("MBUInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      return new MBUInt32Variable(device, payload);
+      return new MBBooleanVariable(device, payload);
     };
 
-    it("should create new MBUInt32Variable based on given arguments", () => {
+    it("should throw if payload is empty", () => {
+      expect(() => new MBBooleanVariable(device)).toThrow();
+    });
+
+    it("should create new MBBoleanVariable based on given arguments", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -40,43 +44,39 @@ describe("MBUInt32Variable", () => {
       expect(result.Offset).toEqual(offset);
     });
 
+    it("should set length to 1", () => {
+      let result = exec();
+
+      expect(result.Length).toEqual(1);
+    });
+
     it("should set default value if value is not given in payload", () => {
       let result = exec();
 
-      expect(result.Value).toEqual(0);
+      expect(result.Value).toEqual(false);
     });
 
-    it("should set length to 2", () => {
-      let result = exec();
-
-      expect(result.Length).toEqual(2);
-    });
-
-    it("should throw if payload is empty", () => {
-      expect(() => new MBUInt32Variable(device)).toThrow();
-    });
-
-    it("should throw if fcode is no associated with analog variable - fCode 1", () => {
-      fcode = 1;
+    it("should throw if fcode is no associated with boolean variable - fCode 3", () => {
+      fcode = 3;
       expect(() => exec()).toThrow();
     });
 
-    it("should set GetSingleFCode = 3", () => {
+    it("should set GetSingleFCode = 1", () => {
       let result = exec();
 
-      expect(result.GetSingleFCode).toEqual(3);
+      expect(result.GetSingleFCode).toEqual(1);
     });
 
-    it("should set SetSingleFCode = 16", () => {
+    it("should set SetSingleFCode = 15", () => {
       let result = exec();
 
-      expect(result.SetSingleFCode).toEqual(16);
+      expect(result.SetSingleFCode).toEqual(15);
     });
 
     it("should set Type to corresponding type", () => {
       let result = exec();
 
-      expect(result.Type).toEqual("uInt32");
+      expect(result.Type).toEqual("boolean");
     });
   });
 
@@ -97,7 +97,7 @@ describe("MBUInt32Variable", () => {
         }
       };
       name = "Test var name";
-      fcode = 3;
+      fcode = 1;
       offset = 1;
     });
 
@@ -107,17 +107,17 @@ describe("MBUInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt32Variable(device, payload);
+      mbVariable = new MBBooleanVariable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
-    it("should return all fCodes associated with analog operations", () => {
+    it("should return all fCodes associated with boolean operations", () => {
       let result = exec();
 
       expect(result.length).toEqual(3);
-      expect(result).toContain(3);
-      expect(result).toContain(4);
-      expect(result).toContain(16);
+      expect(result).toContain(1);
+      expect(result).toContain(2);
+      expect(result).toContain(15);
     });
   });
 
@@ -139,12 +139,9 @@ describe("MBUInt32Variable", () => {
         }
       };
       name = "Test var name";
-      fcode = 3;
+      fcode = 1;
       offset = 1;
-      //65535 => 5678 * 65535 = 372113408
-      //1234 => + 1234
-      // 372114642
-      dataToConvert = [1234, 5678];
+      dataToConvert = [true];
     });
 
     let exec = () => {
@@ -153,25 +150,21 @@ describe("MBUInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt32Variable(device, payload);
+      mbVariable = new MBBooleanVariable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
-    it("should convert data to value and return it", () => {
+    it("should convert data to value and return it if data is [true]", () => {
       let result = exec();
 
-      expect(result).toEqual(372114642);
+      expect(result).toEqual(true);
     });
 
-    it("should be able to convert large positive values (instead of negative)", () => {
-      //65535 => 65536×65535
-      //1234 => + 1234
-      //4294902994
-      dataToConvert = [1234, 65535];
-
+    it("should convert data to value and return it if data is [false]", () => {
+      dataToConvert = [false];
       let result = exec();
 
-      expect(result).toEqual(4294902994);
+      expect(result).toEqual(false);
     });
   });
 
@@ -193,9 +186,9 @@ describe("MBUInt32Variable", () => {
         }
       };
       name = "Test var name";
-      fcode = 3;
+      fcode = 1;
       offset = 1;
-      valueToConvert = 372114642;
+      valueToConvert = true;
     });
 
     let exec = () => {
@@ -204,21 +197,21 @@ describe("MBUInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt32Variable(device, payload);
+      mbVariable = new MBBooleanVariable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
-    it("should convert value to data and return it", () => {
+    it("should convert value to data and return it if value is true", () => {
       let result = exec();
-      //console.log(result);
-      expect(result).toEqual([1234, 5678]);
+
+      expect(result).toEqual([true]);
     });
 
-    it("should be able to convert negative values", () => {
-      valueToConvert = -64302;
+    it("should convert value to data and return it if value is false", () => {
+      valueToConvert = false;
       let result = exec();
 
-      expect(result).toEqual([1234, 65535]);
+      expect(result).toEqual([false]);
     });
   });
 
@@ -256,21 +249,21 @@ describe("MBUInt32Variable", () => {
         }
       };
       offset = 2;
-      length = 2;
-      fcode = 3;
-      getSingleFCode = 3;
-      setSingleFCode = 16;
-      value = 1234;
+      length = 3;
+      fcode = 1;
+      getSingleFCode = 1;
+      setSingleFCode = 15;
+      value = true;
       timeSample = 3;
 
       editTimeSample = 5;
       editName = "Edited name";
       editOffset = 6;
-      editLength = 2;
-      editFCode = 16;
-      editValue = 4321;
-      editGetSingleFCode = 4;
-      editSetSingleFCode = 16;
+      editLength = 1;
+      editFCode = 15;
+      editValue = false;
+      editGetSingleFCode = 1;
+      editSetSingleFCode = 15;
     });
 
     let exec = () => {
@@ -288,7 +281,7 @@ describe("MBUInt32Variable", () => {
       setValueMockFunction = jest.fn();
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
-      variable = new MBUInt32Variable(device, payload);
+      variable = new MBBooleanVariable(device, payload);
 
       editPayload = {
         timeSample: editTimeSample,
@@ -316,12 +309,12 @@ describe("MBUInt32Variable", () => {
       expect(result.FCode).toEqual(editFCode);
       expect(result.Offset).toEqual(editOffset);
       expect(result.Length).toEqual(editLength);
-      expect(result.GetSingleFCode).toEqual(fcode);
-      expect(result.SetSingleFCode).toEqual(16);
+      expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should generate identical variable with payload with appropriate parameters if no parameters are passed in payload", () => {
+    it("should generate identical variable with payload with appropriate parameters if only timeSample", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -447,12 +440,12 @@ describe("MBUInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set Length to 2 - despite value in payload", () => {
+    it("should alwyas set Length to 1 - despite value in payload", () => {
       editLength = 1234;
 
       let result = exec();
 
-      expect(result.Length).toEqual(2);
+      expect(result.Length).toEqual(1);
     });
 
     it("should generate variable with FCode equal to FCode given in payload", () => {
@@ -480,21 +473,12 @@ describe("MBUInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set GetSingleFCode to fcode if fcode is read function - despite value in payload", () => {
+    it("should alwyas set GetSingleFCode to 1 - despite value in payload", () => {
       editGetSingleFCode = 1234;
 
       let result = exec();
 
-      expect(result.GetSingleFCode).toEqual(fcode);
-    });
-
-    it("should alwyas set GetSingleFCode to 3 if fcode is write function - despite value in payload", () => {
-      editGetSingleFCode = 1234;
-      editFCode = 16;
-
-      let result = exec();
-
-      expect(result.GetSingleFCode).toEqual(3);
+      expect(result.GetSingleFCode).toEqual(1);
     });
 
     it("should generate variable with Value equal to Value given in payload", () => {
@@ -522,12 +506,62 @@ describe("MBUInt32Variable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should alwyas set SetSingleFCode to 16 - despite value in payload", () => {
+    it("should generate variable with GetSingleFCode equal to GetSingleFCode given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editFCode = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editSetSingleFCode = undefined;
+      editValue = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      expect(result.Value).toEqual(value);
+    });
+
+    it("should alwyas set SetSingleFCode to 15 - despite value in payload", () => {
       editSetSingleFCode = 1234;
 
       let result = exec();
 
-      expect(result.SetSingleFCode).toEqual(16);
+      expect(result.SetSingleFCode).toEqual(15);
+    });
+
+    it("should generate variable with SetSingleFCode equal to SetSingleFCode given in payload", () => {
+      editTimeSample = undefined;
+      editName = undefined;
+      editFCode = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editGetSingleFCode = undefined;
+      editValue = undefined;
+
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
+      expect(result.Value).toEqual(value);
     });
   });
 });

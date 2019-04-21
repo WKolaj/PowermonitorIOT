@@ -1,40 +1,12 @@
 const config = require("config");
-const fs = require("fs");
-const path = require("path");
 
-//Method for deleting file
-let clearFile = async file => {
-  return new Promise((resolve, reject) => {
-    fs.unlink(file, err => {
-      if (err) {
-        return reject(err);
-      }
-
-      return resolve(true);
-    });
-  });
-};
-
-//Method for clearing directory
-let clearDirectory = async directory => {
-  return new Promise(async (resolve, reject) => {
-    fs.readdir(directory, async (err, files) => {
-      if (err) {
-        return reject(err);
-      }
-
-      for (const file of files) {
-        try {
-          await clearFile(path.join(directory, file));
-        } catch (err) {
-          return reject(err);
-        }
-      }
-
-      return resolve(true);
-    });
-  });
-};
+let {
+  checkIfFileExists,
+  checkIfTableExists,
+  checkIfColumnExists,
+  clearDirectory,
+  snooze
+} = require("../../tools/tools.js");
 
 let commInterface;
 
@@ -57,7 +29,7 @@ let testPayload = JSON.stringify({
         fCode: 3,
         value: 1,
         type: "int16",
-        archived: true,
+        archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit1"
@@ -85,7 +57,7 @@ let testPayload = JSON.stringify({
         fCode: 16,
         value: 3.3,
         type: "float",
-        archived: true,
+        archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit3"
@@ -125,7 +97,7 @@ let testPayload = JSON.stringify({
         fCode: 4,
         value: 5,
         type: "swappedInt32",
-        archived: true,
+        archived: false,
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit5"
@@ -165,7 +137,7 @@ let testPayload = JSON.stringify({
         fCode: 3,
         value: 7,
         type: "uInt16",
-        archived: true,
+        archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit7"
@@ -193,7 +165,7 @@ let testPayload = JSON.stringify({
         fCode: 3,
         value: 9,
         type: "uInt32",
-        archived: true,
+        archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit9"
@@ -203,15 +175,13 @@ let testPayload = JSON.stringify({
   }
 });
 
-const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
-
 describe("CommInterface", () => {
   let db1Path;
   let db2Path;
 
   //Creating seperate commInterface to all tests
   beforeEach(() => {
-    commInterface = require("../../classes/commInterface/CommInterface.js");
+    commInterface = require("../../../classes/commInterface/CommInterface.js");
     db1Path = config.get("db1Path");
     db2Path = config.get("db2Path");
   });
@@ -239,8 +209,20 @@ describe("CommInterface", () => {
   describe("init", () => {
     let initPayload;
 
-    beforeEach(() => {
+    //Path to primary database
+    let db1Path;
+    //Path to secondary database
+    let db2Path;
+
+    beforeEach(async () => {
+      db1Path = config.get("db1Path");
+      db2Path = config.get("db2Path");
       initPayload = JSON.parse(testPayload);
+    });
+
+    afterEach(async () => {
+      await clearDirectory(db1Path);
+      await clearDirectory(db2Path);
     });
 
     let exec = async () => {
@@ -366,6 +348,157 @@ describe("CommInterface", () => {
           expect(
             device.MBDriver._client.connectTCP.mock.calls[i][1]
           ).toMatchObject({ port: device.PortNumber });
+        }
+      }
+    });
+
+    it("should add all variables to their ArchiveManager - if variable is archived", async () => {
+      await exec();
+
+      let allDevicesIds = Object.keys(initPayload);
+
+      for (let deviceId of allDevicesIds) {
+        let device = commInterface.getDevice(deviceId);
+        let devicePayload = initPayload[deviceId];
+
+        let allVariablesId = devicePayload.variables.map(
+          variable => variable.id
+        );
+
+        for (let variableId of allVariablesId) {
+          let variable = commInterface.getVariable(deviceId, variableId);
+
+          if (variable.Archived) {
+            expect(Object.values(device.ArchiveManager.Variables)).toContain(
+              variable
+            );
+          }
+        }
+      }
+    });
+
+    it("should not add any variables to their ArchiveManager - if variable is not archived", async () => {
+      await exec();
+
+      let allDevicesIds = Object.keys(initPayload);
+
+      for (let deviceId of allDevicesIds) {
+        let device = commInterface.getDevice(deviceId);
+        let devicePayload = initPayload[deviceId];
+
+        let allVariablesId = devicePayload.variables.map(
+          variable => variable.id
+        );
+
+        for (let variableId of allVariablesId) {
+          let variable = commInterface.getVariable(deviceId, variableId);
+
+          if (!variable.Archived) {
+            expect(
+              Object.values(device.ArchiveManager.Variables)
+            ).not.toContain(variable);
+          }
+        }
+      }
+    });
+
+    it("should create all database file for all devices", async () => {
+      await exec();
+
+      let allDevicesIds = Object.keys(initPayload);
+
+      for (let deviceId of allDevicesIds) {
+        let device = commInterface.getDevice(deviceId);
+
+        let fileForDeviceExists = await checkIfFileExists(
+          device.ArchiveManager.FilePath
+        );
+        expect(fileForDeviceExists).toEqual(true);
+
+        let dataTableForDeviceExists = await checkIfTableExists(
+          device.ArchiveManager.FilePath,
+          "data"
+        );
+
+        expect(dataTableForDeviceExists).toEqual(true);
+
+        let dateColumnForDeviceExists = await checkIfColumnExists(
+          device.ArchiveManager.FilePath,
+          "data",
+          "date",
+          "INTEGER"
+        );
+
+        expect(dateColumnForDeviceExists).toEqual(true);
+      }
+    });
+
+    it("should create columns for all variables that are archived", async () => {
+      await exec();
+
+      let allDevicesIds = Object.keys(initPayload);
+
+      for (let deviceId of allDevicesIds) {
+        let device = commInterface.getDevice(deviceId);
+        let devicePayload = initPayload[deviceId];
+
+        let allVariablesId = devicePayload.variables.map(
+          variable => variable.id
+        );
+
+        for (let variableId of allVariablesId) {
+          let variable = commInterface.getVariable(deviceId, variableId);
+
+          if (variable.Archived) {
+            let columnName = device.ArchiveManager.getColumnNameById(
+              variableId
+            );
+            let columnType = device.ArchiveManager.getColumnType(variable);
+
+            let columnExists = await checkIfColumnExists(
+              device.ArchiveManager.FilePath,
+              "data",
+              columnName,
+              columnType
+            );
+
+            expect(columnExists).toBeTruthy();
+          }
+        }
+      }
+    });
+
+    it("should not create columns for any variables that are not archived", async () => {
+      await exec();
+
+      let allDevicesIds = Object.keys(initPayload);
+
+      for (let deviceId of allDevicesIds) {
+        let device = commInterface.getDevice(deviceId);
+        let devicePayload = initPayload[deviceId];
+
+        let allVariablesId = devicePayload.variables.map(
+          variable => variable.id
+        );
+
+        for (let variableId of allVariablesId) {
+          let variable = commInterface.getVariable(deviceId, variableId);
+
+          if (!variable.Archived) {
+            let columnName = device.ArchiveManager.getColumnNameById(
+              variableId
+            );
+            let columnType = device.ArchiveManager.getColumnType(variable);
+
+            let columnExists = await checkIfColumnExists(
+              device.ArchiveManager.FilePath,
+              "data",
+              columnName,
+              columnType
+            );
+
+            expect(columnExists).toBeFalsy();
+          }
         }
       }
     });
@@ -2182,6 +2315,14 @@ describe("CommInterface", () => {
 
       expect(commInterface.Sampler.AllDevices[deviceId]).not.toBeDefined();
     });
+
+    it("should not delete database file associated with device", async () => {
+      let result = await exec();
+
+      let fileExists = checkIfFileExists(result.ArchiveManager.FilePath);
+
+      expect(fileExists).toBeTruthy();
+    });
   });
 
   describe("editDevice", () => {
@@ -2632,7 +2773,7 @@ describe("CommInterface", () => {
           fCode: 4,
           value: 2,
           type: "int32",
-          archived: true,
+          archived: false,
           getSingleFCode: 4,
           setSingleFCode: 16
         },
@@ -2986,6 +3127,111 @@ describe("CommInterface", () => {
         ).toMatchObject({ port: createPortNumber });
       }
     });
+
+    it("should create database for added device", async () => {
+      let result = await exec();
+
+      let databaseFileExists = await checkIfFileExists(
+        result.ArchiveManager.FilePath
+      );
+
+      expect(databaseFileExists).toBeTruthy();
+    });
+
+    it("should create data table and date column for added device", async () => {
+      let result = await exec();
+
+      let dataTableExists = await checkIfTableExists(
+        result.ArchiveManager.FilePath,
+        "data"
+      );
+
+      let columnExists = await checkIfColumnExists(
+        result.ArchiveManager.FilePath,
+        "data",
+        "date",
+        "INTEGER"
+      );
+
+      expect(dataTableExists).toBeTruthy();
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should create column for every archived variable", async () => {
+      let result = await exec();
+
+      for (let variablePayload of createVariables) {
+        let variable = commInterface.getVariable(result.Id, variablePayload.id);
+
+        if (variable.Archived) {
+          let variableColumnName = result.ArchiveManager.getColumnNameById(
+            variable.Id
+          );
+          let variableTypeName = result.ArchiveManager.getColumnType(variable);
+
+          let columnExists = await checkIfColumnExists(
+            result.ArchiveManager.FilePath,
+            "data",
+            variableColumnName,
+            variableTypeName
+          );
+
+          expect(columnExists).toBeTruthy();
+        }
+      }
+    });
+
+    it("should not create column for not archived variables", async () => {
+      let result = await exec();
+
+      for (let variablePayload of createVariables) {
+        let variable = commInterface.getVariable(result.Id, variablePayload.id);
+
+        if (!variable.Archived) {
+          let variableColumnName = result.ArchiveManager.getColumnNameById(
+            variable.Id
+          );
+          let variableTypeName = result.ArchiveManager.getColumnType(variable);
+
+          let columnExists = await checkIfColumnExists(
+            result.ArchiveManager.FilePath,
+            "data",
+            variableColumnName,
+            variableTypeName
+          );
+
+          expect(columnExists).toBeFalsy();
+        }
+      }
+    });
+
+    it("should add every archived variable to archive manager", async () => {
+      let result = await exec();
+
+      for (let variablePayload of createVariables) {
+        let variable = commInterface.getVariable(result.Id, variablePayload.id);
+
+        if (variable.Archived) {
+          expect(Object.values(result.ArchiveManager.Variables)).toContain(
+            variable
+          );
+        }
+      }
+    });
+
+    it("should not add not archived variable to archive manager", async () => {
+      let result = await exec();
+
+      for (let variablePayload of createVariables) {
+        let variable = commInterface.getVariable(result.Id, variablePayload.id);
+
+        if (!variable.Archived) {
+          expect(Object.values(result.ArchiveManager.Variables)).not.toContain(
+            variable
+          );
+        }
+      }
+    });
   });
 
   describe("createVariable", () => {
@@ -3217,6 +3463,93 @@ describe("CommInterface", () => {
         Object.values(commInterface.getDevice(deviceId).Variables).length
       ).toEqual(3);
     });
+
+    it("should add variable to ArchiveManager if it is archived", async () => {
+      variableArchived = true;
+      let result = await exec();
+
+      expect(Object.values(result.Device.ArchiveManager.Variables)).toContain(
+        result
+      );
+    });
+
+    it("should not add variable to ArchiveManager if it is archived", async () => {
+      variableArchived = false;
+      let result = await exec();
+
+      expect(
+        Object.values(result.Device.ArchiveManager.Variables)
+      ).not.toContain(result);
+    });
+
+    it("should create column in database file if variables are archived", async () => {
+      variableArchived = true;
+
+      let result = await exec();
+
+      let dbFilePath = result.Device.ArchiveManager.FilePath;
+      let columnName = result.Device.ArchiveManager.getColumnNameById(
+        result.Id
+      );
+      let columnType = result.Device.ArchiveManager.getColumnType(result);
+
+      let columnExists = checkIfColumnExists(
+        dbFilePath,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should not create column in database file if variables are not archived", async () => {
+      variableArchived = false;
+
+      let result = await exec();
+
+      let dbFilePath = result.Device.ArchiveManager.FilePath;
+      let columnName = result.Device.ArchiveManager.getColumnNameById(
+        result.Id
+      );
+      let columnType = result.Device.ArchiveManager.getColumnType(result);
+
+      let columnExists = await checkIfColumnExists(
+        dbFilePath,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeFalsy();
+    });
+
+    it("should not throw if column in database already exists", async () => {
+      variableArchived = true;
+
+      let result = await exec();
+
+      await commInterface.removeVariable(deviceId, variableId);
+
+      //Checking if adding variable again throws
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await commInterface.createVariable(deviceId, variablePayload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      let createdVariable = commInterface.getVariable(deviceId, variableId);
+
+      //Checking if adding variable again was successfull
+      expect(createdVariable).toBeDefined();
+      expect(createdVariable.Payload).toBeDefined();
+      expect(createdVariable.Payload).toMatchObject(variablePayload);
+    });
   });
 
   describe("getVariable", () => {
@@ -3338,6 +3671,20 @@ describe("CommInterface", () => {
       ).rejects.toBeDefined();
 
       expect(commInterface.getAllVariableIds().length).toEqual(9);
+    });
+
+    it("should not remove column of variable", async () => {
+      let variable = await exec();
+
+      let filePath = variable.Device.ArchiveManager.FilePath;
+      let columnName = variable.Device.ArchiveManager.getColumnNameById(
+        variableId
+      );
+      let columnType = variable.Device.ArchiveManager.getColumnType(variable);
+
+      let columnExists = checkIfColumnExists(filePath, columnName, columnType);
+
+      expect(columnExists).toBeTruthy();
     });
   });
 
@@ -3766,6 +4113,101 @@ describe("CommInterface", () => {
           }
         })
       ).rejects.toBeDefined();
+    });
+
+    it("should add variable to ArchiveManager if it was previosly false and now set to true", async () => {
+      let varIndex = initPayload[deviceId].variables.findIndex(
+        variable => variable.id === variableId
+      );
+      let variablePayload = initPayload[deviceId].variables[varIndex];
+
+      variablePayload.archived = false;
+      editVariableArchived = true;
+
+      let result = await exec();
+
+      expect(Object.values(result.Device.ArchiveManager.Variables)).toContain(
+        result
+      );
+    });
+
+    it("should add variable to ArchiveManager and remove previous one if it was previosly true and now set also to true", async () => {
+      let varIndex = initPayload[deviceId].variables.findIndex(
+        variable => variable.id === variableId
+      );
+      let variablePayload = initPayload[deviceId].variables[varIndex];
+
+      variablePayload.archived = true;
+      editVariableArchived = true;
+
+      let result = await exec();
+
+      expect(Object.values(result.Device.ArchiveManager.Variables)).toContain(
+        result
+      );
+
+      //Old variable should have been removed and new added - so length of variables should be equal to previous one
+      let archivedVariablesCount = initPayload[deviceId].variables.filter(
+        variable => variable.archived
+      ).length;
+
+      expect(
+        Object.values(result.Device.ArchiveManager.Variables).length
+      ).toEqual(archivedVariablesCount);
+    });
+
+    it("should create column for variable if archived was previously false and it is set to true in editPayload", async () => {
+      let varIndex = initPayload[deviceId].variables.findIndex(
+        variable => variable.id === variableId
+      );
+      let variablePayload = initPayload[deviceId].variables[varIndex];
+
+      variablePayload.archived = false;
+      editVariableArchived = true;
+
+      let result = await exec();
+
+      let filePath = result.Device.ArchiveManager.FilePath;
+      let columnName = result.Device.ArchiveManager.getColumnNameById(
+        variableId
+      );
+      let columnType = result.Device.ArchiveManager.getColumnType(result);
+
+      let columnExists = await checkIfColumnExists(
+        filePath,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should not create column for variable if archived was previously false and it is set to true in editPayload", async () => {
+      let varIndex = initPayload[deviceId].variables.findIndex(
+        variable => variable.id === variableId
+      );
+      let variablePayload = initPayload[deviceId].variables[varIndex];
+
+      variablePayload.archived = false;
+      editVariableArchived = false;
+
+      let result = await exec();
+
+      let filePath = result.Device.ArchiveManager.FilePath;
+      let columnName = result.Device.ArchiveManager.getColumnNameById(
+        variableId
+      );
+      let columnType = result.Device.ArchiveManager.getColumnType(result);
+
+      let columnExists = await checkIfColumnExists(
+        filePath,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeFalsy();
     });
   });
 

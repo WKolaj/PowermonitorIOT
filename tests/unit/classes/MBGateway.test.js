@@ -1,7 +1,4 @@
-let MBGateway = require("../../classes/driver/Modbus/MBGateway");
-
-//Function for hanging thread
-const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
+let MBGateway = require("../../../classes/driver/Modbus/MBGateway");
 
 function MockModbusRTU() {
   this._id = 0;

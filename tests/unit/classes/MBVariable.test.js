@@ -1,4 +1,4 @@
-const MBVariable = require("../../classes/variable/Modbus/MBVariable");
+const MBVariable = require("../../../classes/variable/Modbus/MBVariable");
 
 describe("MBVariable", () => {
   describe("constructor", () => {

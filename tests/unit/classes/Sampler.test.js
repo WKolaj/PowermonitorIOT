@@ -1,4 +1,4 @@
-const Sampler = require("../../classes/sampler/Sampler");
+const Sampler = require("../../../classes/sampler/Sampler");
 
 describe("Sampler", () => {
   describe("constructor", () => {

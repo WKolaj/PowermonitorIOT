@@ -1,6 +1,6 @@
-const MBSwappedInt32Variable = require("../../classes/variable/Modbus/MBSwappedInt32Variable");
+const MBInt32Variable = require("../../../classes/variable/Modbus/MBInt32Variable");
 
-describe("MBSwappedInt32Variable", () => {
+describe("MBInt32Variable", () => {
   describe("constructor", () => {
     let device;
     let name;
@@ -27,10 +27,10 @@ describe("MBSwappedInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      return new MBSwappedInt32Variable(device, payload);
+      return new MBInt32Variable(device, payload);
     };
 
-    it("should create new MBSwappedInt32Variable based on given arguments", () => {
+    it("should create new MBInt32Variable based on given arguments", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -47,7 +47,7 @@ describe("MBSwappedInt32Variable", () => {
     });
 
     it("should throw if payload is empty", () => {
-      expect(() => new MBSwappedInt32Variable(device)).toThrow();
+      expect(() => new MBInt32Variable(device)).toThrow();
     });
 
     it("should set length to 2", () => {
@@ -76,7 +76,7 @@ describe("MBSwappedInt32Variable", () => {
     it("should set Type to corresponding type", () => {
       let result = exec();
 
-      expect(result.Type).toEqual("swappedInt32");
+      expect(result.Type).toEqual("int32");
     });
   });
 
@@ -107,7 +107,7 @@ describe("MBSwappedInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBSwappedInt32Variable(device, payload);
+      mbVariable = new MBInt32Variable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -144,7 +144,7 @@ describe("MBSwappedInt32Variable", () => {
       //65535 => 5678 * 65535 = 372113408
       //1234 => + 1234
       // 372114642
-      dataToConvert = [5678, 1234];
+      dataToConvert = [1234, 5678];
     });
 
     let exec = () => {
@@ -153,7 +153,7 @@ describe("MBSwappedInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBSwappedInt32Variable(device, payload);
+      mbVariable = new MBInt32Variable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -167,7 +167,7 @@ describe("MBSwappedInt32Variable", () => {
       //65535 => -1 * 65535
       //1234 => + 1234
       // -64302
-      dataToConvert = [65535, 1234];
+      dataToConvert = [1234, 65535];
 
       let result = exec();
 
@@ -204,21 +204,21 @@ describe("MBSwappedInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBSwappedInt32Variable(device, payload);
+      mbVariable = new MBInt32Variable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
     it("should convert value to data and return it", () => {
       let result = exec();
       //console.log(result);
-      expect(result).toEqual([5678, 1234]);
+      expect(result).toEqual([1234, 5678]);
     });
 
     it("should be able to convert negative values", () => {
       valueToConvert = -64302;
       let result = exec();
 
-      expect(result).toEqual([65535, 1234]);
+      expect(result).toEqual([1234, 65535]);
     });
   });
 
@@ -288,7 +288,7 @@ describe("MBSwappedInt32Variable", () => {
       setValueMockFunction = jest.fn();
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
-      variable = new MBSwappedInt32Variable(device, payload);
+      variable = new MBInt32Variable(device, payload);
 
       editPayload = {
         timeSample: editTimeSample,

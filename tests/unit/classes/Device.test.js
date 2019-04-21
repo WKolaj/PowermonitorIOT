@@ -1,138 +1,14 @@
-const Device = require("../../classes/device/Device");
+const Device = require("../../../classes/device/Device");
 const config = require("config");
-const fs = require("fs");
 const path = require("path");
-const sqlite3 = require("sqlite3");
 
-//Method for deleting file
-let clearFile = async file => {
-  return new Promise((resolve, reject) => {
-    fs.unlink(file, err => {
-      if (err) {
-        return reject(err);
-      }
-
-      return resolve(true);
-    });
-  });
-};
-
-//Method for clearing directory
-let clearDirectory = async directory => {
-  return new Promise(async (resolve, reject) => {
-    fs.readdir(directory, async (err, files) => {
-      if (err) {
-        return reject(err);
-      }
-
-      for (const file of files) {
-        try {
-          await clearFile(path.join(directory, file));
-        } catch (err) {
-          return reject(err);
-        }
-      }
-
-      return resolve(true);
-    });
-  });
-};
-
-//Method for checking if file exists
-let checkIfFileExists = filePath => {
-  return fs.existsSync(filePath);
-};
-
-//Method for checking if table exists
-let checkIfTableExists = (dbFile, tableName) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.get(
-      `SELECT name FROM sqlite_master WHERE type='table' AND name='${tableName}';`,
-      function(err, row) {
-        if (err) {
-          return reject(err);
-        }
-        return row ? resolve(true) : resolve(false);
-      }
-    );
-  });
-};
-
-//Method for checking if table exists
-let checkIfColumnExists = (dbFile, tableName, columnName, columnType) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.all(`PRAGMA table_info(${tableName});`, function(err, rows) {
-      if (err) {
-        return reject(err);
-      }
-
-      //Checking all rows one by one - if one of them has desired name - return true
-      for (let row of rows) {
-        if (row.name === columnName && row.type === columnType) {
-          return resolve(true);
-        }
-      }
-
-      return resolve(false);
-    });
-  });
-};
-
-let createDatabaseFile = dbFile => {
-  let db = new sqlite3.Database(dbFile);
-};
-
-let createDatabaseTable = (dbFile, tableName) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.run(
-      `CREATE TABLE IF NOT EXISTS ${tableName} (date INTEGER, PRIMARY KEY(date) );`,
-      err => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve(true);
-      }
-    );
-  });
-};
-
-let createDatabaseColumn = (dbFile, tableName, columnName, columnType) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.run(
-      `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnType};`,
-      err => {
-        if (err) {
-          return reject(err);
-        }
-
-        return resolve(true);
-      }
-    );
-  });
-};
-
-let readAllDataFromTable = (dbFile, tableName) => {
-  return new Promise(async (resolve, reject) => {
-    let db = new sqlite3.Database(dbFile);
-
-    db.all(`SELECT * FROM ${tableName};`, (err, rows) => {
-      if (err) {
-        return reject(err);
-      }
-
-      return resolve(rows);
-    });
-  });
-};
+let {
+  clearDirectory,
+  checkIfTableExists,
+  checkIfFileExists,
+  checkIfColumnExists,
+  snooze
+} = require("../../tools/tools.js");
 
 describe("Device", () => {
   let db1Path;
@@ -551,6 +427,107 @@ describe("Device", () => {
       expect(device.Variables[variableId]).not.toEqual(variable);
       expect(device.Variables[variableId]).toEqual(newVariable);
     });
+
+    it("should create new column in database file based on variable id", async () => {
+      variableArchived = true;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+      let columnExists = await checkIfColumnExists(
+        device.ArchiveManager.FilePath,
+        "data",
+        columnName,
+        "INTEGER"
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should not create new column in database file based on variable id if variable archive if false", async () => {
+      variableArchived = false;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+      let columnExists = await checkIfColumnExists(
+        device.ArchiveManager.FilePath,
+        "data",
+        columnName,
+        "INTEGER"
+      );
+
+      expect(columnExists).toBeFalsy();
+    });
+
+    it("should create new column with Integer type in database file based on variable id and variable Integer type", async () => {
+      variableType = "int32";
+      variableArchived = true;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+      let columnExists = await checkIfColumnExists(
+        device.ArchiveManager.FilePath,
+        "data",
+        columnName,
+        "INTEGER"
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should create new column with REAL type in database file based on variable id and variable Float type", async () => {
+      variableType = "float";
+      variableArchived = true;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+      let columnExists = await checkIfColumnExists(
+        device.ArchiveManager.FilePath,
+        "data",
+        columnName,
+        "REAL"
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should create new column with INTEGER type in database file based on variable id and variable Boolean type", async () => {
+      variableType = "boolean";
+      variableArchived = true;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+      let columnExists = await checkIfColumnExists(
+        device.ArchiveManager.FilePath,
+        "data",
+        columnName,
+        "INTEGER"
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should not throw if column already exists", async () => {
+      variableArchived = true;
+
+      await exec();
+      await device.removeVariable(variableId);
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.addVariable(variable);
+            resolve(true);
+          } catch (err) {
+            reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+    });
   });
 
   describe("removeVariable", () => {
@@ -564,7 +541,7 @@ describe("Device", () => {
 
     beforeEach(() => {
       name = "test name";
-      variableId = "test variable";
+      variableId = "testVariable";
       variableType = "int32";
       variableArchived = false;
     });
@@ -598,6 +575,21 @@ describe("Device", () => {
       expect(
         device.ArchiveManager.doesVariableIdExists(variableId)
       ).toBeFalsy();
+    });
+
+    it("should not remove variable column from database", async () => {
+      variableArchived = true;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(variableId);
+      let columnExists = await checkIfColumnExists(
+        device.ArchiveManager.FilePath,
+        "data",
+        columnName,
+        "INTEGER"
+      );
+      expect(columnExists).toBeTruthy();
     });
 
     it("should throw if there is no variable of such id", async () => {

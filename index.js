@@ -1453,71 +1453,71 @@ let json = {
   }
 };
 
-let exec = async () => {
-  await commInterface.init(json);
-
-  commInterface.startCommunicationWithAllDevices();
-
-  for (let device of Object.values(commInterface.Devices)) {
-    device.Events.on("Refreshed", args => {
-      console.log(args[2]);
-      //console.log(args[1]);
-
-      // let allIds = Object.keys(args[1]);
-      // for (let id of allIds) {
-      //   console.log(
-      //     `${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`
-      //   );
-      // }
-    });
-  }
-};
-
-exec();
-
-// let am = new ArchiveManager("testDB.db");
-
-// let variable1Payload = {
-//   Id: "1234",
-//   Type: "float"
-// };
-
-// let variable2Payload = {
-//   Id: "1235",
-//   Type: "boolean"
-// };
-
-// let index = 0;
-
-// let variables = {};
-
-// setInterval(() => {}, 1000);
-// let max = 1000000;
-
 // let exec = async () => {
-//   await am.init();
-//   await am.addVariable(variable1Payload);
-//   await am.addVariable(variable2Payload);
+//   await commInterface.init(json);
 
-// for (let i = 0; i < max; i++) {
-//   variables["1235"] = i + 1000;
-//   await am.insertValues(i, variables);
-//   console.log(i);
-// }
+//   commInterface.startCommunicationWithAllDevices();
 
-// console.log("ended");
+//   for (let device of Object.values(commInterface.Devices)) {
+//     device.Events.on("Refreshed", args => {
+//       console.log(args[2]);
+//       //console.log(args[1]);
+
+//       // let allIds = Object.keys(args[1]);
+//       // for (let id of allIds) {
+//       //   console.log(
+//       //     `${args[0].Name} ${args[1][id].Name}: ${args[1][id].Value}`
+//       //   );
+//       // }
+//     });
+//   }
 // };
 
 // exec();
 
-let getValue = async (deviceId, variableId, date) => {
-  let value = await commInterface.getVariableFromDatabase(
-    deviceId,
-    variableId,
-    date
-  );
-  console.log(value);
-};
+// // let am = new ArchiveManager("testDB.db");
+
+// // let variable1Payload = {
+// //   Id: "1234",
+// //   Type: "float"
+// // };
+
+// // let variable2Payload = {
+// //   Id: "1235",
+// //   Type: "boolean"
+// // };
+
+// // let index = 0;
+
+// // let variables = {};
+
+// // setInterval(() => {}, 1000);
+// // let max = 1000000;
+
+// // let exec = async () => {
+// //   await am.init();
+// //   await am.addVariable(variable1Payload);
+// //   await am.addVariable(variable2Payload);
+
+// // for (let i = 0; i < max; i++) {
+// //   variables["1235"] = i + 1000;
+// //   await am.insertValues(i, variables);
+// //   console.log(i);
+// // }
+
+// // console.log("ended");
+// // };
+
+// // exec();
+
+// let getValue = async (deviceId, variableId, date) => {
+//   let value = await commInterface.getVariableFromDatabase(
+//     deviceId,
+//     variableId,
+//     date
+//   );
+//   console.log(value);
+// };
 
 //clearDirectory("database/test/db1");
 

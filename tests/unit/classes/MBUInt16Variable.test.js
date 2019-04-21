@@ -1,6 +1,6 @@
-const MBInt32Variable = require("../../classes/variable/Modbus/MBInt32Variable");
+const MBUInt16Variable = require("../../../classes/variable/Modbus/MBUInt16Variable");
 
-describe("MBInt32Variable", () => {
+describe("MBUInt16Variable", () => {
   describe("constructor", () => {
     let device;
     let name;
@@ -27,10 +27,10 @@ describe("MBInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      return new MBInt32Variable(device, payload);
+      return new MBUInt16Variable(device, payload);
     };
 
-    it("should create new MBInt32Variable based on given arguments", () => {
+    it("should create new MBUInt16Variable based on given arguments", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -47,13 +47,13 @@ describe("MBInt32Variable", () => {
     });
 
     it("should throw if payload is empty", () => {
-      expect(() => new MBInt32Variable(device)).toThrow();
+      expect(() => new MBUInt16Variable(device)).toThrow();
     });
 
-    it("should set length to 2", () => {
+    it("should set length to 1", () => {
       let result = exec();
 
-      expect(result.Length).toEqual(2);
+      expect(result.Length).toEqual(1);
     });
 
     it("should throw if fcode is no associated with analog variable - fCode 1", () => {
@@ -76,7 +76,7 @@ describe("MBInt32Variable", () => {
     it("should set Type to corresponding type", () => {
       let result = exec();
 
-      expect(result.Type).toEqual("int32");
+      expect(result.Type).toEqual("uInt16");
     });
   });
 
@@ -107,7 +107,7 @@ describe("MBInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBInt32Variable(device, payload);
+      mbVariable = new MBUInt16Variable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -141,10 +141,7 @@ describe("MBInt32Variable", () => {
       name = "Test var name";
       fcode = 3;
       offset = 1;
-      //65535 => 5678 * 65535 = 372113408
-      //1234 => + 1234
-      // 372114642
-      dataToConvert = [1234, 5678];
+      dataToConvert = [1234];
     });
 
     let exec = () => {
@@ -153,25 +150,22 @@ describe("MBInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBInt32Variable(device, payload);
+      mbVariable = new MBUInt16Variable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
     it("should convert data to value and return it", () => {
       let result = exec();
 
-      expect(result).toEqual(372114642);
+      expect(result).toEqual(1234);
     });
 
-    it("should be able to covert negative values", () => {
-      //65535 => -1 * 65535
-      //1234 => + 1234
-      // -64302
-      dataToConvert = [1234, 65535];
+    it("should be able to covert large positive numbers - instead of negative", () => {
+      dataToConvert = [65535];
 
       let result = exec();
 
-      expect(result).toEqual(-64302);
+      expect(result).toEqual(65535);
     });
   });
 
@@ -195,7 +189,7 @@ describe("MBInt32Variable", () => {
       name = "Test var name";
       fcode = 3;
       offset = 1;
-      valueToConvert = 372114642;
+      valueToConvert = 1234;
     });
 
     let exec = () => {
@@ -204,21 +198,21 @@ describe("MBInt32Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBInt32Variable(device, payload);
+      mbVariable = new MBUInt16Variable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
     it("should convert value to data and return it", () => {
       let result = exec();
-      //console.log(result);
-      expect(result).toEqual([1234, 5678]);
+
+      expect(result).toEqual([1234]);
     });
 
     it("should be able to convert negative values", () => {
-      valueToConvert = -64302;
+      valueToConvert = -1;
       let result = exec();
 
-      expect(result).toEqual([1234, 65535]);
+      expect(result).toEqual([65535]);
     });
   });
 
@@ -256,7 +250,7 @@ describe("MBInt32Variable", () => {
         }
       };
       offset = 2;
-      length = 2;
+      length = 1;
       fcode = 3;
       getSingleFCode = 3;
       setSingleFCode = 16;
@@ -266,7 +260,7 @@ describe("MBInt32Variable", () => {
       editTimeSample = 5;
       editName = "Edited name";
       editOffset = 6;
-      editLength = 2;
+      editLength = 1;
       editFCode = 16;
       editValue = 4321;
       editGetSingleFCode = 4;
@@ -288,7 +282,7 @@ describe("MBInt32Variable", () => {
       setValueMockFunction = jest.fn();
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
-      variable = new MBInt32Variable(device, payload);
+      variable = new MBUInt16Variable(device, payload);
 
       editPayload = {
         timeSample: editTimeSample,
@@ -447,12 +441,12 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set Length to 2 - despite value in payload", () => {
+    it("should alwyas set Length to 1 - despite value in payload", () => {
       editLength = 1234;
 
       let result = exec();
 
-      expect(result.Length).toEqual(2);
+      expect(result.Length).toEqual(1);
     });
 
     it("should generate variable with FCode equal to FCode given in payload", () => {

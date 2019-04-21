@@ -1,6 +1,6 @@
-const MBUInt16Variable = require("../../classes/variable/Modbus/MBUInt16Variable");
+const MBSwappedUInt32Variable = require("../../../classes/variable/Modbus/MBSwappedUInt32Variable");
 
-describe("MBUInt16Variable", () => {
+describe("MBSwappedUInt32Variable", () => {
   describe("constructor", () => {
     let device;
     let name;
@@ -27,10 +27,10 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      return new MBUInt16Variable(device, payload);
+      return new MBSwappedUInt32Variable(device, payload);
     };
 
-    it("should create new MBUInt16Variable based on given arguments", () => {
+    it("should create new MBSwappedUInt32Variable based on given arguments", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -40,25 +40,25 @@ describe("MBUInt16Variable", () => {
       expect(result.Offset).toEqual(offset);
     });
 
+    it("should set length to 2", () => {
+      let result = exec();
+
+      expect(result.Length).toEqual(2);
+    });
+
     it("should set default value if value is not given in payload", () => {
       let result = exec();
 
       expect(result.Value).toEqual(0);
     });
 
-    it("should throw if payload is empty", () => {
-      expect(() => new MBUInt16Variable(device)).toThrow();
-    });
-
-    it("should set length to 1", () => {
-      let result = exec();
-
-      expect(result.Length).toEqual(1);
-    });
-
     it("should throw if fcode is no associated with analog variable - fCode 1", () => {
       fcode = 1;
       expect(() => exec()).toThrow();
+    });
+
+    it("should throw if payload is empty", () => {
+      expect(() => new MBSwappedUInt32Variable(device)).toThrow();
     });
 
     it("should set GetSingleFCode = 3", () => {
@@ -76,7 +76,7 @@ describe("MBUInt16Variable", () => {
     it("should set Type to corresponding type", () => {
       let result = exec();
 
-      expect(result.Type).toEqual("uInt16");
+      expect(result.Type).toEqual("swappedUInt32");
     });
   });
 
@@ -107,7 +107,7 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt16Variable(device, payload);
+      mbVariable = new MBSwappedUInt32Variable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -141,7 +141,10 @@ describe("MBUInt16Variable", () => {
       name = "Test var name";
       fcode = 3;
       offset = 1;
-      dataToConvert = [1234];
+      //65535 => 5678 * 65535 = 372113408
+      //1234 => + 1234
+      // 372114642
+      dataToConvert = [5678, 1234];
     });
 
     let exec = () => {
@@ -150,22 +153,25 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt16Variable(device, payload);
+      mbVariable = new MBSwappedUInt32Variable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
     it("should convert data to value and return it", () => {
       let result = exec();
 
-      expect(result).toEqual(1234);
+      expect(result).toEqual(372114642);
     });
 
-    it("should be able to covert large positive numbers - instead of negative", () => {
-      dataToConvert = [65535];
+    it("should be able to convert large positive values (instead of negative)", () => {
+      //65535 => 65536×65535
+      //1234 => + 1234
+      //4294902994
+      dataToConvert = [65535, 1234];
 
       let result = exec();
 
-      expect(result).toEqual(65535);
+      expect(result).toEqual(4294902994);
     });
   });
 
@@ -189,7 +195,7 @@ describe("MBUInt16Variable", () => {
       name = "Test var name";
       fcode = 3;
       offset = 1;
-      valueToConvert = 1234;
+      valueToConvert = 372114642;
     });
 
     let exec = () => {
@@ -198,21 +204,21 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt16Variable(device, payload);
+      mbVariable = new MBSwappedUInt32Variable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
     it("should convert value to data and return it", () => {
       let result = exec();
-
-      expect(result).toEqual([1234]);
+      //console.log(result);
+      expect(result).toEqual([5678, 1234]);
     });
 
     it("should be able to convert negative values", () => {
-      valueToConvert = -1;
+      valueToConvert = -64302;
       let result = exec();
 
-      expect(result).toEqual([65535]);
+      expect(result).toEqual([65535, 1234]);
     });
   });
 
@@ -250,7 +256,7 @@ describe("MBUInt16Variable", () => {
         }
       };
       offset = 2;
-      length = 1;
+      length = 2;
       fcode = 3;
       getSingleFCode = 3;
       setSingleFCode = 16;
@@ -260,7 +266,7 @@ describe("MBUInt16Variable", () => {
       editTimeSample = 5;
       editName = "Edited name";
       editOffset = 6;
-      editLength = 1;
+      editLength = 2;
       editFCode = 16;
       editValue = 4321;
       editGetSingleFCode = 4;
@@ -282,7 +288,7 @@ describe("MBUInt16Variable", () => {
       setValueMockFunction = jest.fn();
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
-      variable = new MBUInt16Variable(device, payload);
+      variable = new MBSwappedUInt32Variable(device, payload);
 
       editPayload = {
         timeSample: editTimeSample,
@@ -441,12 +447,12 @@ describe("MBUInt16Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set Length to 1 - despite value in payload", () => {
+    it("should alwyas set Length to 2 - despite value in payload", () => {
       editLength = 1234;
 
       let result = exec();
 
-      expect(result.Length).toEqual(1);
+      expect(result.Length).toEqual(2);
     });
 
     it("should generate variable with FCode equal to FCode given in payload", () => {

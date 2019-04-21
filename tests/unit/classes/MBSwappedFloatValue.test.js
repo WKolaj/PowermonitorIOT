@@ -1,6 +1,6 @@
-const MBFloatVariable = require("../../classes/variable/Modbus/MBFloatVariable");
+const MBSwappedFloatVariable = require("../../../classes/variable/Modbus/MBSwappedFloatVariable");
 
-describe("MBFloatVariable", () => {
+describe("MBSwappedFloatVariable", () => {
   describe("constructor", () => {
     let device;
     let name;
@@ -27,10 +27,10 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      return new MBFloatVariable(device, payload);
+      return new MBSwappedFloatVariable(device, payload);
     };
 
-    it("should create new MBFloatVariable based on given arguments", () => {
+    it("should create new MBSwappedFloatVariable based on given arguments", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -40,21 +40,25 @@ describe("MBFloatVariable", () => {
       expect(result.Offset).toEqual(offset);
     });
 
+    it("should throw if payload is empty", () => {
+      expect(() => new MBSwappedFloatVariable(device)).toThrow();
+    });
+
     it("should set length to 2", () => {
       let result = exec();
 
       expect(result.Length).toEqual(2);
     });
 
+    it("should throw if fcode is no associated with analog variable - fCode 1", () => {
+      fcode = 1;
+      expect(() => exec()).toThrow();
+    });
+
     it("should set default value if value is not given in payload", () => {
       let result = exec();
 
       expect(result.Value).toEqual(0);
-    });
-
-    it("should throw if fcode is no associated with analog variable - fCode 1", () => {
-      fcode = 1;
-      expect(() => exec()).toThrow();
     });
 
     it("should set GetSingleFCode = 3", () => {
@@ -69,14 +73,10 @@ describe("MBFloatVariable", () => {
       expect(result.SetSingleFCode).toEqual(16);
     });
 
-    it("should throw if payload is empty", () => {
-      expect(() => new MBFloatVariable(device)).toThrow();
-    });
-
     it("should set Type to corresponding type", () => {
       let result = exec();
 
-      expect(result.Type).toEqual("float");
+      expect(result.Type).toEqual("swappedFloat");
     });
   });
 
@@ -107,7 +107,7 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBFloatVariable(device, payload);
+      mbVariable = new MBSwappedFloatVariable(device, payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -128,6 +128,7 @@ describe("MBFloatVariable", () => {
     let offset;
     let mbVariable;
     let dataToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -140,7 +141,7 @@ describe("MBFloatVariable", () => {
       name = "Test var name";
       fcode = 3;
       offset = 1;
-      dataToConvert = [59769, 17142];
+      dataToConvert = [17142, 59769];
     });
 
     let exec = () => {
@@ -149,7 +150,7 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBFloatVariable(device, payload);
+      mbVariable = new MBSwappedFloatVariable(device, payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -189,14 +190,14 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBFloatVariable(device, payload);
+      mbVariable = new MBSwappedFloatVariable(device, payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
     it("should convert value to data and return it", () => {
       let result = exec();
 
-      expect(result).toEqual([59769, 17142]);
+      expect(result).toEqual([17142, 59769]);
     });
   });
 
@@ -266,7 +267,7 @@ describe("MBFloatVariable", () => {
       setValueMockFunction = jest.fn();
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
-      variable = new MBFloatVariable(device, payload);
+      variable = new MBSwappedFloatVariable(device, payload);
 
       editPayload = {
         timeSample: editTimeSample,
