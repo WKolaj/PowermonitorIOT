@@ -4,6 +4,10 @@ const sqlite3 = require("sqlite3");
 const { isObjectEmpty } = require("../../utility/utility");
 
 class ArchiveManager {
+  /**
+   * @description Class for archiving device data
+   * @param {string} fileName
+   */
   constructor(fileName) {
     if (!fileName) throw new Error("fileName cannot be empty!");
 
@@ -16,47 +20,71 @@ class ArchiveManager {
     this._filePath = path.join(this._dbPath, this._fileName);
   }
 
+  /**
+   * @description Variables associated with archive manager
+   */
   get Variables() {
     return this._variables;
   }
 
+  /**
+   * @description Calculation elements associated with archive manager
+   */
   get CalculationElements() {
     return this._calculationElements;
   }
 
+  /**
+   * @description File name of database file
+   */
   get FileName() {
     return this._fileName;
   }
 
+  /**
+   * @description Whole file path of database file
+   */
   get FilePath() {
     return this._filePath;
   }
 
+  /**
+   * @description Database path
+   */
   get DBPath() {
     return this._dbPath;
   }
 
+  /**
+   * @description is Archive manager initialized
+   */
   get Initialized() {
     return this._initialized;
   }
 
+  /**
+   * @description is device busy
+   */
   get Busy() {
     return this._busy;
   }
 
+  /**
+   * @description sqlite database object
+   */
   get DB() {
     return this._db;
   }
 
+  /**
+   * @description Method for getting column type of variable
+   * @param {object} variable
+   */
   getColumnType(variable) {
     switch (variable.Type) {
       case "boolean": {
         return "INTEGER";
       }
-      // TO DO
-      // case "byteArray": {
-      //   return this._createByteArrayVariable(payload);
-      // }
       case "float": {
         return "REAL";
       }
@@ -89,14 +117,26 @@ class ArchiveManager {
     }
   }
 
+  /**
+   * @description Method for getting column name based on variable
+   * @param {object} variable variable object
+   */
   getColumnName(variable) {
     return this.getColumnNameById(variable.Id);
   }
 
+  /**
+   * @description Method for getting column name based on variable or calculation element id
+   * @param {string} variableId id of variable or calculation element
+   */
   getColumnNameById(variableId) {
     return `col_${variableId}`;
   }
 
+  /**
+   * @description Method for getting column type on the basis of calculation element
+   * @param {object} calculationElement Calculation element
+   */
   getColumnTypeCalculationElement(calculationElement) {
     switch (calculationElement.ValueType) {
       case "boolean": {
@@ -118,10 +158,17 @@ class ArchiveManager {
     }
   }
 
+  /**
+   * @description Method for getting column name based on calculation element
+   * @param {object} calculationElement Calculation element
+   */
   getColumnNameOfCalculationElement(calculationElement) {
     return this.getColumnNameById(calculationElement.Id);
   }
 
+  /**
+   * @description Method for checking if manager is initialized - throws if not
+   */
   checkIfInitialzed() {
     if (!this.Initialized) {
       throw new Error("Archive manager not initialized");
@@ -130,6 +177,9 @@ class ArchiveManager {
     return true;
   }
 
+  /**
+   * @description Method for checking if manager is busy - throws if yes
+   */
   checkIfBusy() {
     if (this.Busy) {
       throw new Error("Device is busy");
@@ -137,10 +187,18 @@ class ArchiveManager {
     return false;
   }
 
+  /**
+   * @description Method or checking if variable of given id is already added to manager
+   * @param {string} variableId
+   */
   doesVariableIdExists(variableId) {
     return variableId in this.Variables;
   }
 
+  /**
+   * @description Method for checking if variable is already added - throws if it is added
+   * @param {object} variable variable to check
+   */
   checkIfVariableExists(variable) {
     if (this.doesVariableIdExists(variable.Id)) {
       throw new Error(`Variable of id ${variable.Id} already exists!`);
@@ -149,10 +207,18 @@ class ArchiveManager {
     return false;
   }
 
+  /**
+   * @description Method for checking if calculation element is already added to manager
+   * @param {string} calculationElementId id of element
+   */
   doesCalculationElementIdExists(calculationElementId) {
     return calculationElementId in this.CalculationElements;
   }
 
+  /**
+   * @description Method for checking if calculation element is already aded - throw if it is added
+   * @param {object} calculationElement
+   */
   checkIfCalculationElementExists(calculationElement) {
     if (this.doesCalculationElementIdExists(calculationElement.Id)) {
       throw new Error(
@@ -163,6 +229,10 @@ class ArchiveManager {
     return false;
   }
 
+  /**
+   * @description Method for adding variable to manager
+   * @param {object} variable variable to add
+   */
   async addVariable(variable) {
     //Returning promise - in order to implement async/await instead of callback functions
     return new Promise(async (resolve, reject) => {
@@ -202,6 +272,10 @@ class ArchiveManager {
     });
   }
 
+  /**
+   * @description Method for removing variable from manager
+   * @param {string} variableId id of variable
+   */
   async removeVariable(variableId) {
     //Returning promise - in order to implement async/await instead of callback functions
     return new Promise(async (resolve, reject) => {
@@ -217,16 +291,21 @@ class ArchiveManager {
         this.checkIfBusy();
 
         this._busy = true;
+        let variableToDelete = this.Variables[variableId];
         delete this.Variables[variableId];
         this._busy = false;
 
-        return resolve(true);
+        return resolve(variableToDelete);
       } catch (err) {
         return reject(err);
       }
     });
   }
 
+  /**
+   * @description Method for adding calculation element to manager
+   * @param {object} calculationElement calculation element to add
+   */
   async addCalculationElement(calculationElement) {
     //Returning promise - in order to implement async/await instead of callback functions
     return new Promise(async (resolve, reject) => {
@@ -272,6 +351,10 @@ class ArchiveManager {
     });
   }
 
+  /**
+   * @description Method for removing calulcation element from manager
+   * @param {string} calculationElementId calculation element id
+   */
   async removeCalculationElement(calculationElementId) {
     //Returning promise - in order to implement async/await instead of callback functions
     return new Promise(async (resolve, reject) => {
@@ -289,16 +372,21 @@ class ArchiveManager {
         this.checkIfBusy();
 
         this._busy = true;
+        let elementToDelete = this.CalculationElements[calculationElementId];
         delete this.CalculationElements[calculationElementId];
         this._busy = false;
 
-        return resolve(true);
+        return resolve(elementToDelete);
       } catch (err) {
         return reject(err);
       }
     });
   }
 
+  /**
+   * @description Method for checking if column exists
+   * @param {string} columnId name of column
+   */
   async doesColumnExist(columnId) {
     return new Promise((resolve, reject) => {
       try {
@@ -330,6 +418,9 @@ class ArchiveManager {
     });
   }
 
+  /**
+   * @description Method for initializing manager
+   */
   async init() {
     //Returning promise - in order to implement async/await instead of callback functions
     return new Promise((resolve, reject) => {
@@ -360,6 +451,10 @@ class ArchiveManager {
     });
   }
 
+  /**
+   * @description Method for filtering all variables and caluculation elements in payload on the basis of added ones
+   * @param {object} payload Payload to filter
+   */
   filterPayloadWithAddedVariables(payload) {
     let payloadToReturn = {};
 
@@ -377,6 +472,10 @@ class ArchiveManager {
     return payloadToReturn;
   }
 
+  /**
+   * @description Method for creating query string to insert all elements to database
+   * @param {object} filteredPayload Payload storing variables to insert - should be prevoiously filtered
+   */
   prepareInsertQueryString(filteredPayload) {
     let firstPart = "INSERT INTO data(date";
 
@@ -394,6 +493,11 @@ class ArchiveManager {
     return firstPart + secondPart;
   }
 
+  /**
+   * @description Method for inserting values to database
+   * @param {number} date Tick id of operation
+   * @param {object} payload payload, with ids and values
+   */
   async insertValues(date, payload) {
     return new Promise((resolve, reject) => {
       this.checkIfInitialzed();
@@ -427,11 +531,22 @@ class ArchiveManager {
     });
   }
 
+  /**
+   * @description Method for getting values from database
+   * @param {*} date Date of values to check
+   * @param {*} variableId id of variable/calculation element to get
+   */
   async getValue(date, variableId) {
     return new Promise((resolve, reject) => {
       try {
-        if (!this.doesVariableIdExists(variableId))
-          throw new Error(`There is no variable of id ${variableId}`);
+        let noVariableOfGivenId = !this.doesVariableIdExists(variableId);
+        let noCalculationElementOfGivenId = !this.doesCalculationElementIdExists(
+          variableId
+        );
+        if (noVariableOfGivenId && noCalculationElementOfGivenId)
+          throw new Error(
+            `There is no variable and calculation element of id ${variableId}`
+          );
         this.checkIfInitialzed();
         //in case of getting value - there is no need to check if device is busy
         //this.checkIfBusy();
