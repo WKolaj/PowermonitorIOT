@@ -1462,8 +1462,11 @@ let json2 = {
         name: "test sum elements",
         type: "sumElement",
         archived: true,
-        plusVariables: [{ id: "12345", factor: 2 }, { id: "12346", factor: 3 }],
-        minusVariables: [{ id: "12347", factor: 4 }]
+        variables: [
+          { id: "12345", factor: 2 },
+          { id: "12346", factor: 3 },
+          { id: "12347", factor: -1 }
+        ]
       }
     ],
     isActive: true,
