@@ -2,6 +2,7 @@ const EventEmitter = require("events");
 const mongoose = require("mongoose");
 const ArchiveManager = require("../archiveManager/ArchiveManager");
 const SumElement = require("../calculationElement/SumElement");
+const Sampler = require("../../classes/sampler/Sampler");
 
 class Device {
   /**
@@ -42,6 +43,10 @@ class Device {
     this._initialized = true;
   }
 
+  /**
+   * @description Method for initializing calculation elements
+   * @param {*} calculationElements Payload of calculation elements
+   */
   async _initCalculationElements(calculationElements) {
     for (let calculationElement of calculationElements) {
       await this.createCalculationElement(calculationElement);
@@ -126,6 +131,9 @@ class Device {
     return this._variables;
   }
 
+  /**
+   * @description Calculation elements associated with device
+   */
   get CalculationElements() {
     return this._calculationElements;
   }
@@ -175,12 +183,20 @@ class Device {
     throw new Error("Not implemented");
   }
 
+  /**
+   * @description Method for adding calculation element to device
+   * @param {object} calculationElement calculation element to add
+   */
   async addCalculationElement(calculationElement) {
     this.CalculationElements[calculationElement.Id] = calculationElement;
     if (calculationElement.Archived)
       await this.ArchiveManager.addCalculationElement(calculationElement);
   }
 
+  /**
+   * @description Method for removing calculation element from device
+   * @param {string} id id of calculation to remove
+   */
   async removeCalculationElement(id) {
     if (!(id in this.CalculationElements))
       throw Error(`There is no such calculation element in device - id:${id}`);
@@ -197,6 +213,10 @@ class Device {
     return calculationElementToDelete;
   }
 
+  /**
+   * @description Method for creating calculaction element
+   * @param {object} payload payload to create calculation element
+   */
   async createCalculationElement(payload) {
     if (!payload) throw new Error("Given payload cannot be empty");
     if (!payload.type)
@@ -218,6 +238,10 @@ class Device {
     }
   }
 
+  /**
+   * @description Method for creating calculaction element
+   * @param {object} payload payload to create calculation element
+   */
   async _createSumElement(payload) {
     if (!payload.name)
       throw new Error("Calculation element name in payload is not defined");
@@ -228,6 +252,10 @@ class Device {
     return calculationElementToAdd;
   }
 
+  /**
+   * @description Method for dividing variables by tickId
+   * @param {object} variables variables that should be devided by tickId
+   */
   static divideVariablesByTickId(variables) {
     let variablesToReturn = {};
 
@@ -249,6 +277,10 @@ class Device {
     return this.Variables[id];
   }
 
+  /**
+   * @description Getting calculation element of given id
+   * @param {string} id calculation element id
+   */
   getCalculationElement(id) {
     return this.CalculationElements[id];
   }
@@ -282,8 +314,15 @@ class Device {
     let allCalculationElements = Object.values(this.CalculationElements);
     for (let calculationElement of allCalculationElements) {
       try {
-        let result = await calculationElement.refresh(tickNumber);
-        payloadToAppend[calculationElement.Id] = calculationElement;
+        if (
+          Sampler.doesTickIdMatchesTick(
+            tickNumber,
+            calculationElement.SampleTime
+          )
+        ) {
+          let result = await calculationElement.refresh(tickNumber);
+          payloadToAppend[calculationElement.Id] = calculationElement;
+        }
       } catch (err) {
         console.log(err);
       }

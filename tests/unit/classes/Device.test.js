@@ -59,13 +59,19 @@ describe("Device", () => {
       expect(device.Name).toEqual(name);
     });
 
-    it("should initiazle variables to empty object", async () => {
+    it("should initialize variables to empty object", async () => {
       await exec();
 
       expect(device.Variables).toEqual({});
     });
 
-    it("should initiazle event object", async () => {
+    it("should initialize calculation elements to empty object", async () => {
+      await exec();
+
+      expect(device.CalculationElements).toEqual({});
+    });
+
+    it("should initialize event object", async () => {
       await exec();
 
       expect(device.Events).toBeDefined();
@@ -147,6 +153,174 @@ describe("Device", () => {
       let filePath = path.join(db1Path, `archive_${device.Id}.db`);
       let fileExists = await checkIfTableExists(filePath, "data");
       expect(fileExists).toEqual(true);
+    });
+  });
+
+  describe("_initCalculationElements", () => {
+    let name;
+    let payload;
+    let device;
+
+    let calculationElement1Id;
+    let calculationElement1Type;
+    let calculationElement1Archived;
+    let calculationElement1Name;
+    let calculationElement1SampleTime;
+    let calculationElement1Payload;
+    let calculationElement1Variables;
+    let calculationElement1Add;
+
+    let calculationElement2Id;
+    let calculationElement2Type;
+    let calculationElement2Archived;
+    let calculationElement2Name;
+    let calculationElement2SampleTime;
+    let calculationElement2Payload;
+    let calculationElement2Add;
+
+    let calculationElement3Id;
+    let calculationElement3Type;
+    let calculationElement3Archived;
+    let calculationElement3Name;
+    let calculationElement3SampleTime;
+    let calculationElement3Payload;
+    let calculationElement3Variables;
+    let calculationElement3Add;
+
+    let calculationElementVariablesPayload;
+
+    beforeEach(() => {
+      name = "test name";
+
+      calculationElement1Id = "1001";
+      calculationElement1Type = "sumElement";
+      calculationElement1Archived = true;
+      calculationElement1Name = "test calculation element1";
+      calculationElement1SampleTime = 1;
+      //variables have to be empty - device doesn't have any variables!
+      calculationElement1Variables = [];
+      calculationElement1Add = true;
+
+      calculationElement2Id = "1002";
+      calculationElement2Type = "sumElement";
+      calculationElement2Archived = true;
+      calculationElement2Name = "test calculation element2";
+      calculationElement2SampleTime = 2;
+      //variables have to be empty - device doesn't have any variables!
+      calculationElement2Variables = [];
+      calculationElement2Add = true;
+
+      calculationElement3Id = "1003";
+      calculationElement3Type = "sumElement";
+      calculationElement3Archived = true;
+      calculationElement3Name = "test calculation element3";
+      calculationElement3SampleTime = 2;
+      //variables have to be empty - device doesn't have any variables!
+      calculationElement3Variables = [];
+      calculationElement3Add = true;
+    });
+
+    let exec = async () => {
+      calculationElementVariablesPayload = [];
+
+      calculationElement1Payload = {
+        id: calculationElement1Id,
+        type: calculationElement1Type,
+        archived: calculationElement1Archived,
+        name: calculationElement1Name,
+        sampleTime: calculationElement1SampleTime,
+        variables: calculationElement1Variables
+      };
+
+      calculationElement2Payload = {
+        id: calculationElement2Id,
+        type: calculationElement2Type,
+        archived: calculationElement2Archived,
+        name: calculationElement2Name,
+        sampleTime: calculationElement2SampleTime,
+        variables: calculationElement2Variables
+      };
+
+      calculationElement3Payload = {
+        id: calculationElement3Id,
+        type: calculationElement3Type,
+        archived: calculationElement3Archived,
+        name: calculationElement3Name,
+        sampleTime: calculationElement3SampleTime,
+        variables: calculationElement3Variables
+      };
+
+      if (calculationElement1Add)
+        calculationElementVariablesPayload.push(calculationElement1Payload);
+
+      if (calculationElement2Add)
+        calculationElementVariablesPayload.push(calculationElement2Payload);
+
+      if (calculationElement3Add)
+        calculationElementVariablesPayload.push(calculationElement3Payload);
+
+      payload = {
+        name: name
+      };
+
+      device = new Device(payload);
+      await device.init(payload);
+      await device._initCalculationElements(calculationElementVariablesPayload);
+    };
+
+    it("should create calculationElements based on payload", async () => {
+      await exec();
+
+      expect(Object.keys(device.CalculationElements).length).toEqual(3);
+      expect(device.CalculationElements[calculationElement1Id]).toBeDefined();
+
+      expect(device.CalculationElements[calculationElement1Id].Id).toEqual(
+        calculationElement1Id
+      );
+      expect(device.CalculationElements[calculationElement1Id].Name).toEqual(
+        calculationElement1Name
+      );
+      expect(
+        device.CalculationElements[calculationElement1Id].Archived
+      ).toEqual(calculationElement1Archived);
+      expect(
+        device.CalculationElements[calculationElement1Id].SampleTime
+      ).toEqual(calculationElement1SampleTime);
+
+      expect(device.CalculationElements[calculationElement2Id].Id).toEqual(
+        calculationElement2Id
+      );
+      expect(device.CalculationElements[calculationElement2Id].Name).toEqual(
+        calculationElement2Name
+      );
+      expect(
+        device.CalculationElements[calculationElement2Id].Archived
+      ).toEqual(calculationElement2Archived);
+      expect(
+        device.CalculationElements[calculationElement2Id].SampleTime
+      ).toEqual(calculationElement2SampleTime);
+
+      expect(device.CalculationElements[calculationElement3Id].Id).toEqual(
+        calculationElement3Id
+      );
+      expect(device.CalculationElements[calculationElement3Id].Name).toEqual(
+        calculationElement3Name
+      );
+      expect(
+        device.CalculationElements[calculationElement3Id].Archived
+      ).toEqual(calculationElement3Archived);
+      expect(
+        device.CalculationElements[calculationElement3Id].SampleTime
+      ).toEqual(calculationElement3SampleTime);
+    });
+
+    it("should not create any calculationElements if there are no calculationElements in payload", async () => {
+      calculationElement1Add = false;
+      calculationElement2Add = false;
+      calculationElement3Add = false;
+
+      await exec();
+      expect(device.CalculationElements).toEqual({});
     });
   });
 
@@ -730,19 +904,112 @@ describe("Device", () => {
     let eventEmitterMock;
     let eventEmitterMockEmitMethod;
 
+    let sumElement1;
+    let sumElement1Payload;
+    let sumElement1Id;
+    let sumElement1SampleTime;
+    let sumElement1RefreshMockFunc;
+    let sumElement1RefreshMockFuncResult;
+    let addSumElement1;
+
+    let sumElement2;
+    let sumElement2Payload;
+    let sumElement2Id;
+    let sumElement2SampleTime;
+    let sumElement2RefreshMockFunc;
+    let sumElement2RefreshMockFuncResult;
+    let addSumElement2;
+
+    let sumElement3;
+    let sumElement3Payload;
+    let sumElement3Id;
+    let sumElement3SampleTime;
+    let sumElement3RefreshMockFunc;
+    let sumElement3RefreshMockFuncResult;
+    let addSumElement3;
+
     beforeEach(() => {
       name = "test name";
       tickNumber = 15;
-      _refreshMockResolvedValue = 1234;
+      _refreshMockResolvedValue = { "1234": 4321 };
       eventEmitterMockEmitMethod = jest.fn();
       eventEmitterMock = { emit: eventEmitterMockEmitMethod };
+
+      sumElement1Id = "1001";
+      sumElement1SampleTime = 1;
+
+      sumElement2Id = "1002";
+      sumElement2SampleTime = 2;
+
+      sumElement3Id = "1003";
+      sumElement3SampleTime = 3;
+
+      sumElement1RefreshMockFuncResult = "refreshMock1";
+      sumElement2RefreshMockFuncResult = "refreshMock2";
+      sumElement3RefreshMockFuncResult = "refreshMock3";
+
+      addSumElement1 = true;
+      addSumElement2 = true;
+      addSumElement3 = true;
     });
 
     let exec = async () => {
       payload = { name: name };
+
+      sumElement1Payload = {
+        id: sumElement1Id,
+        name: "sumElement1",
+        type: "sumElement",
+        archived: false,
+        unit: "",
+        sampleTime: sumElement1SampleTime
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: "sumElement2",
+        type: "sumElement",
+        archived: false,
+        unit: "",
+        sampleTime: sumElement2SampleTime
+      };
+
+      sumElement3Payload = {
+        id: sumElement3Id,
+        name: "sumElement3",
+        type: "sumElement",
+        archived: false,
+        unit: "",
+        sampleTime: sumElement3SampleTime
+      };
+
       _refreshMock = jest.fn().mockResolvedValue(_refreshMockResolvedValue);
+      sumElement1RefreshMockFunc = jest
+        .fn()
+        .mockResolvedValue(sumElement1RefreshMockFuncResult);
+      sumElement2RefreshMockFunc = jest
+        .fn()
+        .mockResolvedValue(sumElement2RefreshMockFuncResult);
+      sumElement3RefreshMockFunc = jest
+        .fn()
+        .mockResolvedValue(sumElement3RefreshMockFuncResult);
+
       device = new Device();
       await device.init(payload);
+
+      if (addSumElement1)
+        sumElement1 = await device.createCalculationElement(sumElement1Payload);
+
+      if (addSumElement2)
+        sumElement2 = await device.createCalculationElement(sumElement2Payload);
+
+      if (addSumElement3)
+        sumElement3 = await device.createCalculationElement(sumElement3Payload);
+
+      sumElement1.refresh = sumElement1RefreshMockFunc;
+      sumElement2.refresh = sumElement2RefreshMockFunc;
+      sumElement3.refresh = sumElement3RefreshMockFunc;
+
       device._refresh = _refreshMock;
       device._events = eventEmitterMock;
 
@@ -762,15 +1029,28 @@ describe("Device", () => {
       expect(eventEmitterMockEmitMethod).toHaveBeenCalledTimes(1);
       expect(eventEmitterMockEmitMethod.mock.calls[0][0]).toEqual("Refreshed");
       expect(eventEmitterMockEmitMethod.mock.calls[0][1][0]).toEqual(device);
-      expect(eventEmitterMockEmitMethod.mock.calls[0][1][1]).toEqual(
-        _refreshMockResolvedValue
-      );
+
+      //Checking refresh object - refresh result value + refresh results of all calculation elements that suits tickNumber
+      let refreshObjectResult = eventEmitterMockEmitMethod.mock.calls[0][1][1];
+
+      expect(refreshObjectResult).toBeDefined();
+      expect(Object.keys(refreshObjectResult).length).toEqual(3);
+      expect(refreshObjectResult["1234"]).toEqual(4321);
+      expect(refreshObjectResult[sumElement1Id]).toEqual(sumElement1);
+      expect(refreshObjectResult[sumElement3Id]).toEqual(sumElement3);
+
       expect(eventEmitterMockEmitMethod.mock.calls[0][1][2]).toEqual(
         tickNumber
       );
     });
 
-    it("should invoke Refreshed Event if refresh result is empty, but only refreshing calculation elements", async () => {
+    it("should invoke Refreshed Event with empty object if refresh result is empty", async () => {
+      //100 does not correspond with tickID = 15
+      sumElement1SampleTime = 100;
+      sumElement2SampleTime = 100;
+      sumElement3SampleTime = 100;
+      tickNumber = 15;
+
       _refreshMockResolvedValue = null;
 
       let result = await exec();

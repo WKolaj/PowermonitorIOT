@@ -20,14 +20,25 @@ class CalculationElement {
     if (!payload.name)
       throw new Error("Name of calulcation element should be defined");
 
+    if (!payload.sampleTime)
+      throw new Error("Sample time of calulcation element should be defined");
+
     if (!payload.id) payload.id = CalculationElement.generateRandId();
 
     this._id = payload.id;
     this._name = payload.name;
+    this._sampleTime = payload.sampleTime;
 
     payload.archived ? (this._archived = true) : (this._archived = false);
 
     if (payload.unit) this._unit = payload.unit;
+  }
+
+  /**
+   * @description Sample time of calculation element
+   */
+  get SampleTime() {
+    return this._sampleTime;
   }
 
   /**
@@ -101,6 +112,9 @@ class CalculationElement {
     return this._generatePayload();
   }
 
+  /**
+   * @description Tick number of last operation
+   */
   get LastTickNumber() {
     return this._lastTickNumber;
   }
@@ -195,6 +209,7 @@ class CalculationElement {
     payloadToReturn.type = this.TypeName;
     payloadToReturn.archived = this.Archived;
     payloadToReturn.unit = this.Unit;
+    payloadToReturn.sampleTime = this.SampleTime;
 
     return payloadToReturn;
   }

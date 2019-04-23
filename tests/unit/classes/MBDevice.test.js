@@ -59,6 +59,8 @@ describe("MBDevice", () => {
     let isActive;
     let mockConnectFunc;
     let realConnectFunc;
+    let mockInitCalculationElementFunc;
+    let realInitCalculationElementFunc;
 
     beforeEach(() => {
       name = "test name";
@@ -71,19 +73,29 @@ describe("MBDevice", () => {
         { Id: "var2", Name: "name2" },
         { Id: "var3", Name: "name3" }
       ];
+      calculationElements = [
+        { type: "sumElement", id: "0001", name: "testElement1", sampleTime: 1 },
+        { type: "sumElement", id: "0002", name: "testElement2", sampleTime: 2 },
+        { type: "sumElement", id: "0003", name: "testElement3", sampleTime: 3 }
+      ];
       type = undefined;
       isActive = false;
       realInitVariableFunc = MBDevice.prototype._initVariables;
       realConnectFunc = MBDevice.prototype.connect;
+      realInitCalculationElementFunc =
+        MBDevice.prototype._initCalculationElements;
       initVariablesMockFunc = jest.fn();
       mockConnectFunc = jest.fn();
+      mockInitCalculationElementFunc = jest.fn();
       MBDevice.prototype._initVariables = initVariablesMockFunc;
       MBDevice.prototype.connect = mockConnectFunc;
+      MBDevice.prototype._initCalculationElements = mockInitCalculationElementFunc;
     });
 
     afterEach(() => {
       MBDevice.prototype._initVariables = realInitVariableFunc;
       MBDevice.prototype.connect = realConnectFunc;
+      MBDevice.prototype._initCalculationElements = realInitCalculationElementFunc;
     });
 
     let exec = async () => {
@@ -94,6 +106,7 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId,
         variables: variables,
+        calculationElements: calculationElements,
         type: type,
         isActive: isActive
       };
@@ -127,6 +140,15 @@ describe("MBDevice", () => {
 
       expect(initVariablesMockFunc).toHaveBeenCalledTimes(1);
       expect(initVariablesMockFunc.mock.calls[0][0]).toEqual(variables);
+    });
+
+    it("should initialize calculateElements by calling initCalculationElements if calculationElements in payload are passed", async () => {
+      await exec();
+
+      expect(mockInitCalculationElementFunc).toHaveBeenCalledTimes(1);
+      expect(mockInitCalculationElementFunc.mock.calls[0][0]).toEqual(
+        calculationElements
+      );
     });
 
     it("should set MBDriver based on given arguments", async () => {
@@ -3429,6 +3451,137 @@ describe("MBDevice", () => {
     });
   });
 
+  describe("_createSumElement", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+
+    let calculationElement1Id;
+    let calculationElement1Type;
+    let calculationElement1Payload;
+    let calculationElement1Archived;
+    let calculationElement1Name;
+    let calculationElement1SampleTime;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+
+      calculationElement1Id = "0001";
+      calculationElement1Type = "sumElement";
+      calculationElement1Archived = true;
+      calculationElement1Name = "test sum element";
+      calculationElement1SampleTime = 5;
+    });
+
+    let exec = async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice();
+      await device.init(payload);
+
+      calculationElement1Payload = {
+        id: calculationElement1Id,
+        type: calculationElement1Type,
+        archived: calculationElement1Archived,
+        name: calculationElement1Name,
+        sampleTime: calculationElement1SampleTime
+      };
+
+      return device._createSumElement(calculationElement1Payload);
+    };
+
+    it("should add sumElement to device", async () => {
+      let result = await exec();
+
+      expect(device.CalculationElements[calculationElement1Id]).toEqual(result);
+    });
+
+    it("should create and return sumElement according to its payload", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(calculationElement1Id);
+      expect(result.Name).toEqual(calculationElement1Name);
+      expect(result.TypeName).toEqual(calculationElement1Type);
+      expect(result.Archived).toEqual(calculationElement1Archived);
+      expect(result.Value).toEqual(0);
+    });
+
+    it("should create column in database if archived is true", async () => {
+      let result = await exec();
+
+      let databaseFileName = device.ArchiveManager.FilePath;
+      let columnName = device.ArchiveManager.getColumnNameById(
+        calculationElement1Id
+      );
+      let columnType = device.ArchiveManager.getColumnTypeCalculationElement(
+        result
+      );
+
+      let columnExists = await checkIfColumnExists(
+        databaseFileName,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should add sumElement to ArchiveManager if archived is true", async () => {
+      let result = await exec();
+
+      expect(
+        device.ArchiveManager.CalculationElements[calculationElement1Id]
+      ).toEqual(result);
+    });
+
+    it("should not create column in database if archived is true", async () => {
+      calculationElement1Archived = false;
+      let result = await exec();
+
+      let databaseFileName = device.ArchiveManager.FilePath;
+      let columnName = device.ArchiveManager.getColumnNameById(
+        calculationElement1Id
+      );
+      let columnType = device.ArchiveManager.getColumnTypeCalculationElement(
+        result
+      );
+
+      let columnExists = await checkIfColumnExists(
+        databaseFileName,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeFalsy();
+    });
+
+    it("should not add sumElement to ArchiveManager if archived is true", async () => {
+      calculationElement1Archived = false;
+      let result = await exec();
+
+      expect(
+        device.ArchiveManager.CalculationElements[calculationElement1Id]
+      ).not.toBeDefined();
+    });
+  });
+
   describe("createVariable", () => {
     let name;
     let device;
@@ -4266,6 +4419,82 @@ describe("MBDevice", () => {
     });
   });
 
+  describe("getVariable", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let refreshGroupMock;
+    let variableId;
+    let variableName;
+    let variable;
+
+    let getVariableId;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+      variableId = 1234;
+      variableName = "test variable";
+      getVariableId = variableId;
+    });
+
+    let exec = async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice();
+      await device.init(payload);
+      device._refreshRequestGroups = refreshGroupMock;
+
+      variable = {
+        Id: variableId,
+        Name: variableName
+      };
+
+      await device.addVariable(variable);
+
+      return device.getVariable(getVariableId);
+    };
+
+    it("should return variable of given id", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(variable);
+    });
+
+    it("should not throw but return undefined if there is no variable of given id", async () => {
+      getVariableId = "8765";
+
+      let result;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(result).not.toBeDefined();
+    });
+  });
+
   describe("editWithPayload", () => {
     let device;
     let name;
@@ -4602,6 +4831,473 @@ describe("MBDevice", () => {
     });
   });
 
+  describe("createCalculationElement", () => {
+    let name;
+    let device;
+    let payload;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+
+    let calculationElement1Payload;
+    let calculationElement1Id;
+    let calculationElement1Type;
+    let calculationElement1Archived;
+    let calculationElement1Name;
+    let calculationElement1SampleTime;
+
+    let _createSumElementMockFunc;
+    let _createSumElementMockFuncResult;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      refreshGroupMock = jest.fn();
+
+      calculationElement1Id = "1001";
+      calculationElement1Type = "sumElement";
+      calculationElement1Archived = true;
+      calculationElement1Name = "testSumElement";
+      calculationElement1SampleTime = 5;
+
+      _createSumElementMockFuncResult = "test Result";
+      _createSumElementMockFunc = jest
+        .fn()
+        .mockResolvedValue(_createSumElementMockFuncResult);
+    });
+
+    let exec = async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice();
+      await device.init(payload);
+
+      calculationElement1Payload = {
+        id: calculationElement1Id,
+        type: calculationElement1Type,
+        timeSample: calculationElement1SampleTime,
+        name: calculationElement1Name,
+        archived: calculationElement1Archived
+      };
+
+      device._createSumElement = _createSumElementMockFunc;
+
+      return device.createCalculationElement(calculationElement1Payload);
+    };
+
+    it("should create and return sumElement if payload type is sumElement", async () => {
+      calculationElement1Type = "sumElement";
+      let result = await exec();
+
+      expect(_createSumElementMockFunc).toHaveBeenCalledTimes(1);
+
+      expect(_createSumElementMockFunc.mock.calls[0][0]).toEqual(
+        calculationElement1Payload
+      );
+
+      expect(result).toEqual(_createSumElementMockFuncResult);
+    });
+
+    it("should throw if payload.type is not recognized", async () => {
+      calculationElement1Type = "unrecognizedType";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if payload is empty", async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice();
+      await device.init(payload);
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.createCalculationElement();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if payload.type is empty", async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+      device = new MBDevice();
+      await device.init(payload);
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.createCalculationElement({});
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calculationElement with given id already", async () => {
+      calculationElement1Payload.id = "1234";
+      device.CalculationElements["1234"] = "already defined variable";
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.createCalculationElement(calculationElement1Payload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("addCalculationElement", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let calculationElementId;
+    let calculationElementName;
+    let calculationElementType;
+    let calculationElementArchived;
+    let calculationElementSampleTime;
+    let calculationElementValueType;
+    let calculationElement;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      calculationElementId = "1001";
+      calculationElementName = "calculation element test";
+      calculationElementType = "sumElement";
+      calculationElementArchived = true;
+      calculationElementSampleTime = 5;
+      calculationElementValueType = "float";
+    });
+
+    let exec = async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice();
+      await device.init(payload);
+
+      calculationElement = {
+        Id: calculationElementId,
+        Name: calculationElementName,
+        Archived: calculationElementArchived,
+        TypeName: calculationElementType,
+        ValueType: calculationElementValueType,
+        SampleTime: calculationElementSampleTime
+      };
+
+      return device.addCalculationElement(calculationElement);
+    };
+
+    it("should add calculationElement to calculationElements", async () => {
+      await exec();
+
+      expect(device.CalculationElements[calculationElementId]).toBeDefined();
+      expect(device.CalculationElements[calculationElementId]).toEqual(
+        calculationElement
+      );
+    });
+
+    it("should add variable to archive manager if archived is set to true", async () => {
+      await exec();
+      expect(
+        device.ArchiveManager.doesCalculationElementIdExists(
+          calculationElementId
+        )
+      ).toBeTruthy();
+    });
+
+    it("should not add variable to archive manager if archived is set to false", async () => {
+      calculationElementArchived = false;
+
+      await exec();
+
+      expect(
+        device.ArchiveManager.doesCalculationElementIdExists(
+          calculationElementId
+        )
+      ).toBeFalsy();
+    });
+
+    it("should add variable again after it was deleted", async () => {
+      await exec();
+      await device.removeCalculationElement(calculationElementId);
+      await device.addCalculationElement(calculationElement);
+      expect(device.CalculationElements[calculationElementId]).toBeDefined();
+      expect(device.CalculationElements[calculationElementId]).toEqual(
+        calculationElement
+      );
+    });
+
+    it("should replace given calculationElement if name already existis", async () => {
+      await exec();
+      let newCalcElement = {
+        Id: calculationElementId,
+        Name: "newElement",
+        Archived: false,
+        TypeName: "sumElement",
+        SampleTime: 10
+      };
+
+      await device.addCalculationElement(newCalcElement);
+      expect(device.CalculationElements[calculationElementId]).not.toEqual(
+        calculationElement
+      );
+      expect(device.CalculationElements[calculationElementId]).toEqual(
+        newCalcElement
+      );
+    });
+  });
+
+  describe("removeCalculationElement", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let calculationElementId;
+    let calculationElementName;
+    let calculationElementType;
+    let calculationElementArchived;
+    let calculationElementSampleTime;
+    let calculationElementValueType;
+    let calculationElement;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      calculationElementId = "1001";
+      calculationElementName = "calculation element test";
+      calculationElementType = "sumElement";
+      calculationElementArchived = true;
+      calculationElementSampleTime = 5;
+      calculationElementValueType = "float";
+    });
+
+    let exec = async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice();
+      await device.init(payload);
+
+      calculationElement = {
+        Id: calculationElementId,
+        Name: calculationElementName,
+        Archived: calculationElementArchived,
+        TypeName: calculationElementType,
+        ValueType: calculationElementValueType,
+        SampleTime: calculationElementSampleTime
+      };
+
+      await device.addCalculationElement(calculationElement);
+
+      return device.removeCalculationElement(calculationElementId);
+    };
+
+    it("should remove calculationElement from calculationElements", async () => {
+      await exec();
+
+      expect(
+        device.CalculationElements[calculationElementId]
+      ).not.toBeDefined();
+    });
+
+    it("should return removed calculationElement", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(calculationElement);
+    });
+
+    it("should remove calculationElement from archive manager", async () => {
+      await exec();
+
+      expect(
+        device.ArchiveManager.doesCalculationElementIdExists(
+          calculationElementId
+        )
+      ).toBeFalsy();
+    });
+
+    it("should throw if there is no calculationElement of such id", async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice();
+      await device.init(payload);
+
+      calculationElement = {
+        Id: calculationElementId,
+        Name: calculationElementName,
+        Archived: calculationElementArchived,
+        TypeName: calculationElementType,
+        ValueType: calculationElementValueType,
+        SampleTime: calculationElementSampleTime
+      };
+
+      await device.addCalculationElement(calculationElement);
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await device.removeVariable("9999");
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getCalculationElement", () => {
+    let name;
+    let ipAdress;
+    let portNumber;
+    let timeout;
+    let unitId;
+    let payload;
+    let device;
+    let calculationElementId;
+    let calculationElementName;
+    let calculationElementType;
+    let calculationElementArchived;
+    let calculationElementSampleTime;
+    let calculationElementValueType;
+    let calculationElement;
+    let getElementId;
+
+    beforeEach(() => {
+      name = "test name";
+      ipAdress = "192.168.0.10";
+      portNumber = 502;
+      timeout = 2000;
+      unitId = 1;
+      calculationElementId = "1001";
+      calculationElementName = "calculation element test";
+      calculationElementType = "sumElement";
+      calculationElementArchived = true;
+      calculationElementSampleTime = 5;
+      calculationElementValueType = "float";
+      getElementId = calculationElementId;
+    });
+
+    let exec = async () => {
+      payload = {
+        name: name,
+        ipAdress: ipAdress,
+        portNumber: portNumber,
+        timeout: timeout,
+        unitId: unitId
+      };
+
+      device = new MBDevice();
+      await device.init(payload);
+
+      calculationElement = {
+        Id: calculationElementId,
+        Name: calculationElementName,
+        Archived: calculationElementArchived,
+        TypeName: calculationElementType,
+        ValueType: calculationElementValueType,
+        SampleTime: calculationElementSampleTime
+      };
+
+      await device.addCalculationElement(calculationElement);
+
+      return device.getCalculationElement(getElementId);
+    };
+
+    it("should return calculationElement of given id", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(calculationElement);
+    });
+
+    it("should not throw but return undefined if there is no variable of given id", async () => {
+      getElementId = "8765";
+
+      let result;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(result).not.toBeDefined();
+    });
+  });
+
   describe("_initVariables", () => {
     let name;
     let device;
@@ -4655,6 +5351,304 @@ describe("MBDevice", () => {
     it("should not throw if variables are empty", () => {
       variables = [];
       expect(() => exec()).not.toThrow();
+    });
+  });
+
+  describe("_refreshCalculationElements", () => {
+    let device;
+    let devicePayload;
+    let variable1;
+    let variable1Payload;
+    let variable2;
+    let variable2Payload;
+    let variable3;
+    let variable3Payload;
+
+    let sumElement1;
+    let sumElement1Payload;
+    let sumElement1RefreshMockFunc;
+    let sumElement1RefreshMockFuncResult;
+
+    let sumElement2;
+    let sumElement2Payload;
+    let sumElement2RefreshMockFunc;
+    let sumElement2RefreshMockFuncResult;
+
+    let sumElement3;
+    let sumElement3Payload;
+    let sumElement3RefreshMockFunc;
+    let sumElement3RefreshMockFuncResult;
+
+    let initialRefreshResultPayload;
+    let tickNumber;
+
+    beforeEach(() => {
+      devicePayload = {
+        type: "mbDevice",
+        name: "test name",
+        ipAdress: "192.168.0.10",
+        portNumber: 502,
+        timeout: 2000,
+        unitId: 1
+      };
+
+      initialRefreshResultPayload = {};
+
+      variable1Payload = {
+        id: "0001",
+        timeSample: 1,
+        name: "testVariable1",
+        offset: 2,
+        length: 2,
+        fCode: 3,
+        value: 3,
+        type: "float",
+        archived: false
+      };
+
+      variable2Payload = {
+        id: "0002",
+        timeSample: 1,
+        name: "testVariable2",
+        offset: 4,
+        length: 2,
+        fCode: 3,
+        value: 3,
+        type: "float",
+        archived: false
+      };
+
+      variable3Payload = {
+        id: "0003",
+        timeSample: 1,
+        name: "testVariable3",
+        offset: 6,
+        length: 2,
+        fCode: 3,
+        value: 3,
+        type: "float",
+        archived: false
+      };
+
+      sumElement1Payload = {
+        id: "1001",
+        type: "sumElement",
+        archive: false,
+        name: "sumElement1",
+        sampleTime: 1,
+        variables: [
+          {
+            id: "0001",
+            factor: 1
+          },
+          {
+            id: "0002",
+            factor: 2
+          }
+        ]
+      };
+
+      sumElement2Payload = {
+        id: "1002",
+        type: "sumElement",
+        archive: false,
+        name: "sumElement2",
+        sampleTime: 2,
+        variables: [
+          {
+            id: "0002",
+            factor: 2
+          },
+          {
+            id: "0003",
+            factor: 3
+          }
+        ]
+      };
+
+      sumElement3Payload = {
+        id: "1003",
+        type: "sumElement",
+        archive: false,
+        name: "sumElement3",
+        sampleTime: 3,
+        variables: [
+          {
+            id: "0001",
+            factor: 1
+          },
+          {
+            id: "0002",
+            factor: 2
+          },
+          {
+            id: "0003",
+            factor: 3
+          }
+        ]
+      };
+
+      tickNumber = 15;
+
+      sumElement1RefreshMockFuncResult = "refreshResult1";
+      sumElement2RefreshMockFuncResult = "refreshResult2";
+      sumElement3RefreshMockFuncResult = "refreshResult3";
+
+      sumElement1RefreshMockFunc = jest
+        .fn()
+        .mockResolvedValue(sumElement1RefreshMockFuncResult);
+      sumElement2RefreshMockFunc = jest
+        .fn()
+        .mockResolvedValue(sumElement2RefreshMockFuncResult);
+      sumElement3RefreshMockFunc = jest
+        .fn()
+        .mockResolvedValue(sumElement3RefreshMockFuncResult);
+    });
+
+    let exec = async () => {
+      device = new MBDevice();
+      await device.init(devicePayload);
+
+      variable1 = await device.createVariable(variable1Payload);
+      variable2 = await device.createVariable(variable2Payload);
+      variable3 = await device.createVariable(variable3Payload);
+
+      sumElement1 = await device.createCalculationElement(sumElement1Payload);
+      sumElement2 = await device.createCalculationElement(sumElement2Payload);
+      sumElement3 = await device.createCalculationElement(sumElement3Payload);
+
+      sumElement1.refresh = sumElement1RefreshMockFunc;
+      sumElement2.refresh = sumElement2RefreshMockFunc;
+      sumElement3.refresh = sumElement3RefreshMockFunc;
+
+      return device._refreshCalculationElements(
+        tickNumber,
+        initialRefreshResultPayload
+      );
+    };
+
+    it("should call refresh method of all calculation elements that corresponds to tickNumber", async () => {
+      sumElement1Payload.sampleTime = 1;
+      sumElement2Payload.sampleTime = 2;
+      sumElement3Payload.sampleTime = 3;
+      tickNumber = 15;
+
+      let result = await exec();
+
+      //tickId = 15 -> 15 can be divded by 3 and 1 so only first (sampleTime:1) and third (sampleTime:2) calculationElement should be refreshed
+      expect(sumElement1RefreshMockFunc).toHaveBeenCalledTimes(1);
+      expect(sumElement1RefreshMockFunc.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(sumElement2RefreshMockFunc).not.toHaveBeenCalled();
+
+      expect(sumElement3RefreshMockFunc).toHaveBeenCalledTimes(1);
+      expect(sumElement3RefreshMockFunc.mock.calls[0][0]).toEqual(tickNumber);
+    });
+
+    it("should not call refresh method of any calculation elements if none corresponds to tickNumber", async () => {
+      sumElement1Payload.sampleTime = 2;
+      sumElement2Payload.sampleTime = 3;
+      sumElement3Payload.sampleTime = 4;
+      tickNumber = 13;
+
+      let result = await exec();
+
+      expect(sumElement1RefreshMockFunc).not.toHaveBeenCalled();
+      expect(sumElement2RefreshMockFunc).not.toHaveBeenCalled();
+      expect(sumElement3RefreshMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should call refresh method of all calculation elements if all corresponds to tickNumber", async () => {
+      sumElement1Payload.sampleTime = 1;
+      sumElement2Payload.sampleTime = 2;
+      sumElement3Payload.sampleTime = 3;
+      tickNumber = 6;
+
+      let result = await exec();
+
+      expect(sumElement1RefreshMockFunc).toHaveBeenCalledTimes(1);
+      expect(sumElement1RefreshMockFunc.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(sumElement2RefreshMockFunc).toHaveBeenCalledTimes(1);
+      expect(sumElement2RefreshMockFunc.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(sumElement3RefreshMockFunc).toHaveBeenCalledTimes(1);
+      expect(sumElement3RefreshMockFunc.mock.calls[0][0]).toEqual(tickNumber);
+    });
+
+    it("should append payload given as an argument with resolved values by refresh function", async () => {
+      sumElement1Payload.sampleTime = 1;
+      sumElement2Payload.sampleTime = 2;
+      sumElement3Payload.sampleTime = 3;
+      tickNumber = 15;
+
+      let result = await exec();
+
+      expect(initialRefreshResultPayload).toBeDefined();
+      expect(Object.keys(initialRefreshResultPayload).length).toEqual(2);
+
+      expect(initialRefreshResultPayload[sumElement1Payload.id]).toBeDefined();
+      expect(initialRefreshResultPayload[sumElement1Payload.id]).toEqual(
+        sumElement1
+      );
+
+      expect(
+        initialRefreshResultPayload[sumElement2Payload.id]
+      ).not.toBeDefined();
+
+      expect(initialRefreshResultPayload[sumElement3Payload.id]).toBeDefined();
+      expect(initialRefreshResultPayload[sumElement3Payload.id]).toEqual(
+        sumElement3
+      );
+    });
+
+    it("should return payload given as an argument", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(initialRefreshResultPayload);
+    });
+
+    it("should not throw if one of refresh function rejects", async () => {
+      sumElement3RefreshMockFunc = jest
+        .fn()
+        .mockRejectedValue(new Error("test error"));
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      //Checking if all method were called correctly
+      expect(sumElement1RefreshMockFunc).toHaveBeenCalledTimes(1);
+      expect(sumElement1RefreshMockFunc.mock.calls[0][0]).toEqual(tickNumber);
+
+      expect(sumElement2RefreshMockFunc).not.toHaveBeenCalled();
+
+      expect(sumElement3RefreshMockFunc).toHaveBeenCalledTimes(1);
+      expect(sumElement3RefreshMockFunc.mock.calls[0][0]).toEqual(tickNumber);
+
+      //Checking if result is correct
+      expect(initialRefreshResultPayload).toBeDefined();
+      expect(Object.keys(initialRefreshResultPayload).length).toEqual(1);
+
+      expect(initialRefreshResultPayload[sumElement1Payload.id]).toBeDefined();
+      expect(initialRefreshResultPayload[sumElement1Payload.id]).toEqual(
+        sumElement1
+      );
+
+      expect(
+        initialRefreshResultPayload[sumElement2Payload.id]
+      ).not.toBeDefined();
+
+      expect(
+        initialRefreshResultPayload[sumElement3Payload.id]
+      ).not.toBeDefined();
     });
   });
 });

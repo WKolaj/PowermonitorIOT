@@ -134,17 +134,23 @@ class MBDevice extends Device {
     return this._driver.IsActive;
   }
 
-  /**@description Connecting to modbus device */
+  /**
+   * @description Connecting to modbus device
+   * */
   connect() {
     return this._driver.connect();
   }
 
-  /**@description Connecting to modbus device */
+  /**
+   * @description Connecting to modbus device
+   * */
   disconnect() {
     return this._driver.disconnect();
   }
 
-  /**@description Rebuilding all request groups */
+  /**
+   * @description Rebuilding all request groups
+   * */
   _refreshRequestGroups() {
     this._requests = {};
     let allVariables = Device.divideVariablesByTickId(

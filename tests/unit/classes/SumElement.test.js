@@ -103,6 +103,7 @@ describe("SumElement", () => {
     let sumElementPayload;
     let sumElementId;
     let sumElementName;
+    let sumElementSampleTime;
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
@@ -163,6 +164,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       addVariables = true;
       customVariablesPayload = undefined;
@@ -267,6 +269,7 @@ describe("SumElement", () => {
         type: sumElementType,
         archived: sumElementArchived,
         unit: sumElementUnit,
+        sampleTime: sumElementSampleTime,
         variables: addVariables
           ? [
               sumElementVariable1Payload,
@@ -287,6 +290,7 @@ describe("SumElement", () => {
       expect(sumElement.Id).toEqual(sumElementId);
       expect(sumElement.Archived).toEqual(sumElementArchived);
       expect(sumElement.Unit).toEqual(sumElementUnit);
+      expect(sumElement.SampleTime).toEqual(sumElementSampleTime);
     });
 
     it("should assign variables based on given payload", async () => {
@@ -418,6 +422,21 @@ describe("SumElement", () => {
         })
       ).rejects.toBeDefined();
     });
+
+    it("should throw if sampleTime is not defined in payload", async () => {
+      sumElementSampleTime = undefined;
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
   });
 
   describe("get Value", () => {
@@ -433,6 +452,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
 
     let sumElementValue;
 
@@ -446,6 +466,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = false;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       sumElementValue = 4321;
     });
@@ -472,7 +493,8 @@ describe("SumElement", () => {
         name: sumElementName,
         type: sumElementType,
         archived: sumElementArchived,
-        unit: sumElementUnit
+        unit: sumElementUnit,
+        sampleTime: sumElementSampleTime
       };
 
       sumElement = new SumElement(device);
@@ -509,6 +531,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
 
     let sumElementValue;
 
@@ -524,6 +547,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       sumElementValue = 4321;
       onValueChangedMockFunc = jest.fn();
@@ -551,7 +575,8 @@ describe("SumElement", () => {
         name: sumElementName,
         type: sumElementType,
         archived: sumElementArchived,
-        unit: sumElementUnit
+        unit: sumElementUnit,
+        sampleTime: sumElementSampleTime
       };
 
       sumElement = new SumElement(device);
@@ -627,6 +652,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
     let sumElementVariable1Payload;
     let sumElementVariable1Id;
     let sumElementVariable1Factor;
@@ -684,6 +710,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       addVariables = true;
       customVariablesPayload = undefined;
@@ -788,6 +815,7 @@ describe("SumElement", () => {
         type: sumElementType,
         archived: sumElementArchived,
         unit: sumElementUnit,
+        sampleTime: sumElementSampleTime,
         variables: addVariables
           ? [
               sumElementVariable1Payload,
@@ -810,6 +838,7 @@ describe("SumElement", () => {
         name: sumElementName,
         archived: sumElementArchived,
         type: sumElementType,
+        sampleTime: sumElementSampleTime,
         variables: [
           { id: sumElementVariable1Id, factor: sumElementVariable1Factor },
           { id: sumElementVariable2Id, factor: sumElementVariable2Factor },
@@ -863,6 +892,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
 
     let sumElementValue;
 
@@ -876,6 +906,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       sumElementValue = 4321;
     });
@@ -902,7 +933,8 @@ describe("SumElement", () => {
         name: sumElementName,
         type: sumElementType,
         archived: sumElementArchived,
-        unit: sumElementUnit
+        unit: sumElementUnit,
+        sampleTime: sumElementSampleTime
       };
 
       sumElement = new SumElement(device);
@@ -930,6 +962,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
 
     let sumElementValue;
 
@@ -943,6 +976,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       sumElementValue = 4321;
     });
@@ -969,7 +1003,8 @@ describe("SumElement", () => {
         name: sumElementName,
         type: sumElementType,
         archived: sumElementArchived,
-        unit: sumElementUnit
+        unit: sumElementUnit,
+        sampleTime: sumElementSampleTime
       };
 
       sumElement = new SumElement(device);
@@ -997,6 +1032,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
 
     let addVariableId;
     let addVariableFactor;
@@ -1012,6 +1048,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       sumElementValue = 4321;
 
@@ -1040,7 +1077,8 @@ describe("SumElement", () => {
         name: sumElementName,
         type: sumElementType,
         archived: sumElementArchived,
-        unit: sumElementUnit
+        unit: sumElementUnit,
+        sampleTime: sumElementSampleTime
       };
 
       sumElement = new SumElement(device);
@@ -1128,6 +1166,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
 
     let addVariableId;
     let addVariableFactor;
@@ -1144,6 +1183,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       sumElementValue = 4321;
 
@@ -1173,7 +1213,8 @@ describe("SumElement", () => {
         name: sumElementName,
         type: sumElementType,
         archived: sumElementArchived,
-        unit: sumElementUnit
+        unit: sumElementUnit,
+        sampleTime: sumElementSampleTime
       };
 
       sumElement = new SumElement(device);
@@ -1280,6 +1321,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
     let sumElementVariable1Payload;
     let sumElementVariable1Id;
     let sumElementVariable1Factor;
@@ -1337,6 +1379,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       addVariables = true;
       customVariablesPayload = undefined;
@@ -1441,6 +1484,7 @@ describe("SumElement", () => {
         type: sumElementType,
         archived: sumElementArchived,
         unit: sumElementUnit,
+        sampleTime: sumElementSampleTime,
         variables: addVariables
           ? [
               sumElementVariable1Payload,
@@ -1579,6 +1623,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
     let sumElementVariable1Payload;
     let sumElementVariable1Id;
     let sumElementVariable1Factor;
@@ -1639,6 +1684,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       addVariables = true;
       customVariablesPayload = undefined;
@@ -1743,6 +1789,7 @@ describe("SumElement", () => {
         type: sumElementType,
         archived: sumElementArchived,
         unit: sumElementUnit,
+        sampleTime: sumElementSampleTime,
         variables: addVariables
           ? [
               sumElementVariable1Payload,
@@ -1829,6 +1876,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
     let sumElementVariable1Payload;
     let sumElementVariable1Id;
     let sumElementVariable1Factor;
@@ -1889,6 +1937,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       addVariables = true;
       customVariablesPayload = undefined;
@@ -1993,6 +2042,7 @@ describe("SumElement", () => {
         type: sumElementType,
         archived: sumElementArchived,
         unit: sumElementUnit,
+        sampleTime: sumElementSampleTime,
         variables: addVariables
           ? [
               sumElementVariable1Payload,
@@ -2050,6 +2100,7 @@ describe("SumElement", () => {
     let sumElementType;
     let sumElementArchived;
     let sumElementUnit;
+    let sumElementSampleTime;
 
     let elementLastTickNumber;
     let tickNumber;
@@ -2069,6 +2120,7 @@ describe("SumElement", () => {
       sumElementType = "sumElement";
       sumElementArchived = false;
       sumElementUnit = "TestUnit";
+      sumElementSampleTime = 2;
 
       tickNumber = 101;
       lastTickNumber = 100;
@@ -2106,6 +2158,7 @@ describe("SumElement", () => {
         name: sumElementName,
         type: sumElementType,
         archived: sumElementArchived,
+        sampleTime: sumElementSampleTime,
         unit: sumElementUnit
       };
 
