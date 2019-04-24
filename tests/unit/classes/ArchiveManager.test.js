@@ -2172,8 +2172,7 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(variable2Id);
 
       let expectedResult = {
-        date: date2,
-        [column2Name]: variable2Value2
+        [date2]: variable2Value2
       };
 
       expect(result).toEqual(expectedResult);
@@ -2187,8 +2186,7 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(variable2Id);
 
       let expectedResult = {
-        date: date1,
-        [column2Name]: variable2Value1
+        [date1]: variable2Value1
       };
 
       expect(result).toEqual(expectedResult);
@@ -2202,8 +2200,7 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(variable2Id);
 
       let expectedResult = {
-        date: date4,
-        [column2Name]: variable2Value4
+        [date4]: variable2Value4
       };
 
       expect(result).toEqual(expectedResult);
@@ -2217,20 +2214,19 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(variable2Id);
 
       let expectedResult = {
-        date: date4,
-        [column2Name]: variable2Value4
+        [date4]: variable2Value4
       };
 
       expect(result).toEqual(expectedResult);
     });
 
-    it("should get undefined if date of variable is smaller than its first occurance in database", async () => {
+    it("should get {} if date of variable is smaller than its first occurance in database", async () => {
       //Getting data from date4 and variable2
       getVariableDate = date1 - 1;
 
       let result = await exec();
 
-      expect(result).not.toBeDefined();
+      expect(result).toEqual({});
     });
 
     it("should retrieve data of calculation element from database according to date and given element", async () => {
@@ -2241,8 +2237,7 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(calculationElement2Id);
 
       let expectedResult = {
-        date: date2,
-        [column2Name]: calculationElement2Value2
+        [date2]: calculationElement2Value2
       };
 
       expect(result).toEqual(expectedResult);
@@ -2257,8 +2252,7 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(calculationElement2Id);
 
       let expectedResult = {
-        date: date1,
-        [column2Name]: calculationElement2Value1
+        [date1]: calculationElement2Value1
       };
 
       expect(result).toEqual(expectedResult);
@@ -2273,8 +2267,7 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(calculationElement2Id);
 
       let expectedResult = {
-        date: date4,
-        [column2Name]: calculationElement2Value4
+        [date4]: calculationElement2Value4
       };
 
       expect(result).toEqual(expectedResult);
@@ -2289,24 +2282,23 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(calculationElement2Id);
 
       let expectedResult = {
-        date: date4,
-        [column2Name]: calculationElement2Value4
+        [date4]: calculationElement2Value4
       };
 
       expect(result).toEqual(expectedResult);
     });
 
-    it("should get undefined if date of calculation element is smaller than its first occurance in database", async () => {
+    it("should get {} if date of calculation element is smaller than its first occurance in database", async () => {
       getVariableId = calculationElement2Id;
       //Getting data from date4 and calculationelement2
       getVariableDate = date1 - 1;
 
       let result = await exec();
 
-      expect(result).not.toBeDefined();
+      expect(result).toEqual({});
     });
 
-    it("should get undefined if there is no data in database", async () => {
+    it("should get {} if there is no data in database", async () => {
       addVariable2ToInsertPayload1 = false;
       addVariable2ToInsertPayload2 = false;
       addVariable2ToInsertPayload3 = false;
@@ -2318,7 +2310,7 @@ describe("ArchiveManager", () => {
 
       let result = await exec();
 
-      expect(result).not.toBeDefined();
+      expect(result).toEqual({});
     });
 
     it("should throw if there is no variable and calculation element with given id", async () => {
@@ -2367,8 +2359,7 @@ describe("ArchiveManager", () => {
       let column2Name = archiveManager.getColumnNameById(variable2Id);
 
       let expectedResult = {
-        date: date2,
-        [column2Name]: variable2Value2
+        [date2]: variable2Value2
       };
 
       expect(result).toEqual(expectedResult);

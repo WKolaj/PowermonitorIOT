@@ -658,6 +658,7 @@ describe("MBDevice", () => {
     let type;
     let payload;
     let variables;
+    let calculateElements;
     let initVariablesMockFunc;
     let realInitVariableFunc;
     let isActive;
@@ -670,9 +671,53 @@ describe("MBDevice", () => {
       unitId = 1;
       isActive = false;
       variables = [
-        { Id: "var1", Name: "name1", Payload: "variable1" },
-        { Id: "var2", Name: "name2", Payload: "variable2" },
-        { Id: "var3", Name: "name3", Payload: "variable3" }
+        {
+          Id: "var1",
+          Name: "name1",
+          Payload: "variable1",
+          Type: "float",
+          Value: 1
+        },
+        {
+          Id: "var2",
+          Name: "name2",
+          Payload: "variable2",
+          Type: "float",
+          Value: 2
+        },
+        {
+          Id: "var3",
+          Name: "name3",
+          Payload: "variable3",
+          Type: "float",
+          Value: 3
+        }
+      ];
+      calculationElements = [
+        {
+          id: "0001",
+          archived: false,
+          type: "sumElement",
+          sampleTime: 1,
+          name: "sumElement1",
+          unit: "A"
+        },
+        {
+          id: "0002",
+          archived: false,
+          type: "sumElement",
+          sampleTime: 2,
+          name: "sumElement2",
+          unit: "A"
+        },
+        {
+          id: "0003",
+          archived: false,
+          type: "sumElement",
+          sampleTime: 3,
+          name: "sumElement3",
+          unit: "A"
+        }
       ];
       type = "test type";
 
@@ -700,6 +745,7 @@ describe("MBDevice", () => {
         timeout: timeout,
         unitId: unitId,
         variables: variables,
+        calculationElements: calculationElements,
         type: type
       };
 
@@ -721,7 +767,8 @@ describe("MBDevice", () => {
         ipAdress: device.IPAdress,
         portNumber: device.PortNumber,
         type: device.Type,
-        variables: ["variable1", "variable2", "variable3"]
+        variables: ["variable1", "variable2", "variable3"],
+        calculationElements: calculationElements
       };
       expect(result).toBeDefined();
       expect(result).toMatchObject(expectedPayload);
@@ -740,7 +787,27 @@ describe("MBDevice", () => {
         ipAdress: device.IPAdress,
         portNumber: device.PortNumber,
         type: device.Type,
-        variables: []
+        variables: [],
+        calculationElements: calculationElements
+      };
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(expectedPayload);
+    });
+
+    it("should return payload based on device parameters when device has no calculation elements", async () => {
+      calculateElements = [];
+
+      let result = await exec();
+
+      let expectedPayload = {
+        id: device.Id,
+        name: device.Name,
+        timeout: device.Timeout,
+        unitId: device.UnitId,
+        ipAdress: device.IPAdress,
+        portNumber: device.PortNumber,
+        type: device.Type,
+        variables: ["variable1", "variable2", "variable3"]
       };
       expect(result).toBeDefined();
       expect(result).toMatchObject(expectedPayload);

@@ -1076,7 +1076,9 @@ describe("Device", () => {
     });
 
     let exec = async () => {
-      payload = { name: name };
+      payload = {
+        name: name
+      };
       device = new Device();
       await device.init(payload);
       return device._generatePayload();
@@ -1206,20 +1208,26 @@ describe("Device", () => {
     it("should not insert value into database if Archive manager is not initialized", async () => {
       await exec();
 
-      let valueFromDB = await device.getValueFromDB(variableId, tickNumber);
+      let valueFromDB = await device.getVariableValueFromDB(
+        variableId,
+        tickNumber
+      );
       let columnName = device.ArchiveManager.getColumnNameById(variableId);
 
-      let expectedPayload = { [columnName]: archiveValue };
+      let expectedPayload = { [tickNumber]: archiveValue };
       expect(valueFromDB).toMatchObject(expectedPayload);
     });
 
     it("should insert value into database", async () => {
       await exec();
 
-      let valueFromDB = await device.getValueFromDB(variableId, tickNumber);
+      let valueFromDB = await device.getVariableValueFromDB(
+        variableId,
+        tickNumber
+      );
       let columnName = device.ArchiveManager.getColumnNameById(variableId);
 
-      let expectedPayload = { [columnName]: archiveValue };
+      let expectedPayload = { [tickNumber]: archiveValue };
       expect(valueFromDB).toMatchObject(expectedPayload);
     });
 
@@ -1230,17 +1238,19 @@ describe("Device", () => {
 
       let columnName = device.ArchiveManager.getColumnNameById(variableId);
 
-      let valueFromDB1 = await device.getValueFromDB(variableId, tickNumber);
-      let expectedPayload1 = { [columnName]: archiveValue, date: tickNumber };
+      let valueFromDB1 = await device.getVariableValueFromDB(
+        variableId,
+        tickNumber
+      );
+      let expectedPayload1 = { [tickNumber]: archiveValue };
       expect(valueFromDB1).toMatchObject(expectedPayload1);
 
-      let valueFromDB2 = await device.getValueFromDB(
+      let valueFromDB2 = await device.getVariableValueFromDB(
         variableId,
         tickNumberSecond
       );
       let expectedPayload2 = {
-        [columnName]: archiveSecondValue,
-        date: tickNumberSecond
+        [tickNumberSecond]: archiveSecondValue
       };
       expect(valueFromDB2).toMatchObject(expectedPayload2);
     });

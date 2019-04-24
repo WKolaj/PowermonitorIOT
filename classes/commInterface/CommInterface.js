@@ -103,7 +103,8 @@ class CommInterface {
     for (let device of allDevices) {
       collectionToReturn[device.Id] = {
         name: device.Name,
-        variables: {}
+        variables: {},
+        calculationElements: {}
       };
 
       let allVariables = Object.values(device.Variables);
@@ -113,7 +114,18 @@ class CommInterface {
           value: variable.Value
         };
       }
+
+      let allCalculationElements = Object.values(device.CalculationElements);
+      for (let calculationElement of allCalculationElements) {
+        collectionToReturn[device.Id]["calculationElements"][
+          calculationElement.Id
+        ] = {
+          name: calculationElement.Name,
+          value: calculationElement.Value
+        };
+      }
     }
+
     return collectionToReturn;
   }
 
@@ -127,11 +139,20 @@ class CommInterface {
     for (let device of allDevices) {
       collectionToReturn[device.Id] = {};
 
+      //Inserting all variables values
       let allVariables = Object.values(device.Variables);
       for (let variable of allVariables) {
         collectionToReturn[device.Id][variable.Id] = variable.Value;
       }
+
+      //Inserting all calculation elements values
+      let allCalculationElements = Object.values(device.CalculationElements);
+      for (let calculationElement of allCalculationElements) {
+        collectionToReturn[device.Id][calculationElement.Id] =
+          calculationElement.Value;
+      }
     }
+
     return collectionToReturn;
   }
 
@@ -155,12 +176,40 @@ class CommInterface {
   }
 
   /**
+   * @description Method for getting all calculation elements ids
+   */
+  getAllCalculationElementsIds() {
+    let allIds = [];
+
+    let allDevices = this.getAllDevices();
+
+    for (let device of allDevices) {
+      let deviceElements = Object.values(device.CalculationElements);
+
+      for (let element of deviceElements) {
+        allIds.push(element.Id);
+      }
+    }
+
+    return allIds;
+  }
+
+  /**
    * @description Checking if variable of id exists
    * @param {string} variableId Variable id
    */
   _doesVariableExistis(variableId) {
     let allVariables = this.getAllVariableIds();
     return allVariables.includes(variableId);
+  }
+
+  /**
+   * @description Checking if calculation element of id exists
+   * @param {string} calculationElementId Calculation element id
+   */
+  _doesCalculationElementExistis(calculationElementId) {
+    let allCalcElements = this.getAllCalculationElementsIds();
+    return allCalcElements.includes(calculationElementId);
   }
 
   /**
@@ -302,7 +351,23 @@ class CommInterface {
     let variable = device.getVariable(variableId);
     if (!variable)
       throw new Error(`There is no variable of given id ${variableId}`);
-    return device.getValueFromDB(variableId, date);
+    return device.getVariableValueFromDB(variableId, date);
+  }
+
+  /**
+   * @description Method for getting calculation element from device
+   * @param {string} deviceId Id of device
+   * @param {string} calculationElement Id of calculation element
+   * @param {number} date date of sample
+   */
+  async getCalculationElementFromDatabase(deviceId, calculationElement, date) {
+    let device = this.getDevice(deviceId);
+    let variable = device.getCalculationElement(calculationElement);
+    if (!variable)
+      throw new Error(
+        `There is no calculation element of given id ${calculationElement}`
+      );
+    return device.getCalculationElementValueFromDB(calculationElement, date);
   }
 
   /**
@@ -324,6 +389,49 @@ class CommInterface {
   async removeVariable(deviceId, variableId) {
     let device = this.getDevice(deviceId);
     return device.removeVariable(variableId);
+  }
+
+  /**
+   * @description Method for creating calculation element in device
+   * @param {string} deviceId Id of device
+   * @param {object} payload payload of calculation element
+   */
+  async createCalculationElement(deviceId, payload) {
+    if (payload.id && this._doesCalculationElementExistis(payload.id)) {
+      throw new Error(
+        `Calculation element of id: ${
+          payload.id
+        } cannot be added becouse it already exists!`
+      );
+    }
+
+    let device = this.getDevice(deviceId);
+    return device.createCalculationElement(payload);
+  }
+
+  /**
+   * @description Method for getting calculation element
+   * @param {string} deviceId Id of device
+   * @param {string} calculationElementId Id of calculation element
+   */
+  getCalculationElement(deviceId, calculationElementId) {
+    let device = this.getDevice(deviceId);
+    let calculationElement = device.getCalculationElement(calculationElementId);
+    if (!calculationElement)
+      throw new Error(
+        `There is no calculationElement of given id ${calculationElementId}`
+      );
+    return calculationElement;
+  }
+
+  /**
+   * @description Method for removing variable in device
+   * @param {string} deviceId Id of device
+   * @param {string} calculationElement Id of variable
+   */
+  async removeCalculationElement(deviceId, calculationElement) {
+    let device = this.getDevice(deviceId);
+    return device.removeCalculationElement(calculationElement);
   }
 
   /**

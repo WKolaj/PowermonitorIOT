@@ -563,7 +563,11 @@ class ArchiveManager {
               return reject(err);
             }
 
-            return resolve(row);
+            if (row) {
+              return resolve({ [row.date]: row[columnName] });
+            } else {
+              return resolve({});
+            }
           }
         );
       } catch (err) {

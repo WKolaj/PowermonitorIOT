@@ -63,6 +63,44 @@ let testPayload = JSON.stringify({
         unit: "unit3"
       }
     ],
+    calculationElements: [
+      {
+        id: "1001",
+        type: "sumElement",
+        archived: true,
+        sampleTime: 1,
+        name: "sumElement1",
+        unit: "A",
+        variables: [
+          {
+            id: "0001",
+            factor: 1
+          },
+          {
+            id: "0002",
+            factor: 2
+          }
+        ]
+      },
+      {
+        id: "1002",
+        type: "sumElement",
+        archived: true,
+        sampleTime: 2,
+        unit: "B",
+        name: "sumElement2",
+        variables: [
+          {
+            id: "0002",
+            factor: 2
+          },
+          {
+            id: "0003",
+            factor: 3
+          }
+        ]
+      }
+    ],
     type: "mbDevice"
   },
   "1235": {
@@ -171,6 +209,44 @@ let testPayload = JSON.stringify({
         unit: "unit9"
       }
     ],
+    calculationElements: [
+      {
+        id: "3001",
+        type: "sumElement",
+        archived: true,
+        sampleTime: 1,
+        name: "sumElement1",
+        unit: "C",
+        variables: [
+          {
+            id: "0007",
+            factor: 1
+          },
+          {
+            id: "0008",
+            factor: 2
+          }
+        ]
+      },
+      {
+        id: "3002",
+        type: "sumElement",
+        archived: true,
+        sampleTime: 2,
+        name: "sumElement2",
+        unit: "D",
+        variables: [
+          {
+            id: "0008",
+            factor: 2
+          },
+          {
+            id: "0009",
+            factor: 3
+          }
+        ]
+      }
+    ],
     type: "mbDevice"
   }
 });
@@ -240,14 +316,14 @@ describe("CommInterface", () => {
       expect(commInterface.Sampler.Active).toBeTruthy();
     });
 
-    it("should create devices and variables based on given payload", async () => {
+    it("should create devices and variables and calculation elements based on given payload", async () => {
       await exec();
 
       expect(commInterface.Payload).toBeDefined();
       expect(commInterface.Payload).toMatchObject(initPayload);
     });
 
-    it("should create devices and variables based on given payload if there is only one device", async () => {
+    it("should create devices and variables and calculation elements based on given payload if there is only one device", async () => {
       let firstDevice = Object.values(initPayload)[0];
 
       initPayload = {
@@ -260,11 +336,21 @@ describe("CommInterface", () => {
       expect(commInterface.Payload).toMatchObject(initPayload);
     });
 
-    it("should create devices and variables based on given payload if there is empty variables field in devices", async () => {
+    it("should create devices and variables and calculation elements based on given payload if there is empty variables field in devices", async () => {
       let allDevices = Object.values(initPayload);
 
       for (let device of allDevices) {
         initPayload[device.id].variables = [];
+        //variables should be removed also from allSumElements
+        if (initPayload[device.id].calculationElements) {
+          let allCalcElements = Object.values(
+            initPayload[device.id].calculationElements
+          );
+
+          for (let element of allCalcElements) {
+            element.variables = [];
+          }
+        }
       }
 
       await exec();
@@ -402,6 +488,66 @@ describe("CommInterface", () => {
       }
     });
 
+    it("should add all calculationElements to their ArchiveManager - if calculationElement is archived", async () => {
+      await exec();
+
+      let allDevicesIds = Object.keys(initPayload);
+
+      for (let deviceId of allDevicesIds) {
+        let device = commInterface.getDevice(deviceId);
+        let devicePayload = initPayload[deviceId];
+
+        if (devicePayload.calculationElements) {
+          let allCalcElementsId = devicePayload.calculationElements.map(
+            element => element.id
+          );
+
+          for (let elementId of allCalcElementsId) {
+            let calcElement = commInterface.getCalculationElement(
+              deviceId,
+              elementId
+            );
+
+            if (calcElement.Archived) {
+              expect(
+                Object.values(device.ArchiveManager.CalculationElements)
+              ).toContain(calcElement);
+            }
+          }
+        }
+      }
+    });
+
+    it("should not add any calculationElements to their ArchiveManager - if calculationElement is not archived", async () => {
+      await exec();
+
+      let allDevicesIds = Object.keys(initPayload);
+
+      for (let deviceId of allDevicesIds) {
+        let device = commInterface.getDevice(deviceId);
+        let devicePayload = initPayload[deviceId];
+
+        if (devicePayload.calculationElements) {
+          let allCalcElementsId = devicePayload.calculationElements.map(
+            element => element.id
+          );
+
+          for (let elementId of allCalcElementsId) {
+            let calcElement = commInterface.getCalculationElement(
+              deviceId,
+              elementId
+            );
+
+            if (!calcElement.Archived) {
+              expect(
+                Object.values(device.ArchiveManager.CalculationElements)
+              ).not.toContain(calcElement);
+            }
+          }
+        }
+      }
+    });
+
     it("should create all database file for all devices", async () => {
       await exec();
 
@@ -514,6 +660,7 @@ describe("CommInterface", () => {
     let unitId;
     let isActive;
     let variables;
+    let calculationElements;
     let payload;
 
     beforeEach(() => {
@@ -526,6 +673,7 @@ describe("CommInterface", () => {
       unitId = 1;
       isActive = false;
       variables = undefined;
+      calculationElements = undefined;
     });
 
     let exec = async () => {
@@ -540,7 +688,8 @@ describe("CommInterface", () => {
         timeout: timeout,
         unitId: unitId,
         isActive: isActive,
-        variables: variables
+        variables: variables,
+        calculationElements: calculationElements
       };
 
       return commInterface.createNewDevice(payload);
@@ -565,6 +714,7 @@ describe("CommInterface", () => {
       expect(device.UnitId).toEqual(unitId);
       expect(device.IsActive).toEqual(isActive);
       expect(device.Variables).toMatchObject({});
+      expect(device.CalculationElements).toMatchObject({});
     });
 
     it("should return created device", async () => {
@@ -604,7 +754,7 @@ describe("CommInterface", () => {
       );
     });
 
-    it("should create a new modbus device together with its variables if they are given", async () => {
+    it("should create a new modbus device together with its variables and calculationElements if they are given", async () => {
       let varaible1Payload = {
         id: "1234",
         timeSample: 2,
@@ -636,7 +786,49 @@ describe("CommInterface", () => {
         archived: true
       };
 
+      let calculationElement1Payload = {
+        id: "2001",
+        sampleTime: 1,
+        type: "sumElement",
+        archived: true,
+        unit: "A",
+        name: "sumElement1",
+        variables: [
+          {
+            id: "1234",
+            factor: 2
+          },
+          {
+            id: "1235",
+            factor: 3
+          }
+        ]
+      };
+
+      let calculationElement2Payload = {
+        id: "2002",
+        sampleTime: 2,
+        type: "sumElement",
+        archived: true,
+        unit: "A",
+        name: "sumElement2",
+        variables: [
+          {
+            id: "1235",
+            factor: 2
+          },
+          {
+            id: "1236",
+            factor: 3
+          }
+        ]
+      };
+
       variables = [varaible1Payload, varaible2Payload, varaible3Payload];
+      calculationElements = [
+        calculationElement1Payload,
+        calculationElement2Payload
+      ];
 
       let device = await exec();
 
@@ -667,9 +859,39 @@ describe("CommInterface", () => {
       expect(allVariables[2].Offset).toEqual(varaible3Payload.offset);
       expect(allVariables[2].FCode).toEqual(varaible3Payload.fCode);
       expect(allVariables[2].Value).toEqual(varaible3Payload.value);
+      expect(device.Variables).toBeDefined();
+
+      let allCalcElements = Object.values(device.CalculationElements);
+
+      expect(allCalcElements.length).toEqual(2);
+      expect(allCalcElements[0].Id).toEqual(calculationElement1Payload.id);
+      expect(allCalcElements[0].TimeSample).toEqual(
+        calculationElement1Payload.timeSample
+      );
+      expect(allCalcElements[0].Name).toEqual(calculationElement1Payload.name);
+      expect(allCalcElements[0].TypeName).toEqual(
+        calculationElement1Payload.type
+      );
+      expect(allCalcElements[0].Unit).toEqual(calculationElement1Payload.unit);
+      expect(allCalcElements[0].Archived).toEqual(
+        calculationElement1Payload.archived
+      );
+
+      expect(allCalcElements[1].Id).toEqual(calculationElement2Payload.id);
+      expect(allCalcElements[1].TimeSample).toEqual(
+        calculationElement2Payload.timeSample
+      );
+      expect(allCalcElements[1].Name).toEqual(calculationElement2Payload.name);
+      expect(allCalcElements[1].TypeName).toEqual(
+        calculationElement2Payload.type
+      );
+      expect(allCalcElements[1].Unit).toEqual(calculationElement2Payload.unit);
+      expect(allCalcElements[1].Archived).toEqual(
+        calculationElement2Payload.archived
+      );
     });
 
-    it("should create a new device together with its variables if they are given - and create their ids if not given", async () => {
+    it("should create a new device together with its variables and calculationElements if they are given - and create their ids if not given", async () => {
       let varaible1Payload = {
         timeSample: 2,
         name: "test variable 1",
@@ -695,7 +917,29 @@ describe("CommInterface", () => {
         archived: true
       };
 
+      let calculationElement1Payload = {
+        sampleTime: 1,
+        type: "sumElement",
+        archived: true,
+        unit: "A",
+        name: "sumElement1",
+        variables: []
+      };
+
+      let calculationElement2Payload = {
+        sampleTime: 2,
+        type: "sumElement",
+        archived: true,
+        unit: "A",
+        name: "sumElement2",
+        variables: []
+      };
+
       variables = [varaible1Payload, varaible2Payload, varaible3Payload];
+      calculationElements = [
+        calculationElement1Payload,
+        calculationElement2Payload
+      ];
 
       let device = await exec();
 
@@ -723,6 +967,35 @@ describe("CommInterface", () => {
       expect(allVariables[2].Type).toEqual(varaible3Payload.type);
       expect(allVariables[2].Offset).toEqual(varaible3Payload.offset);
       expect(allVariables[2].FCode).toEqual(varaible3Payload.fCode);
+
+      let allCalcElements = Object.values(device.CalculationElements);
+
+      expect(allCalcElements.length).toEqual(2);
+      expect(allCalcElements[0].Id).toBeDefined();
+      expect(allCalcElements[0].TimeSample).toEqual(
+        calculationElement1Payload.timeSample
+      );
+      expect(allCalcElements[0].Name).toEqual(calculationElement1Payload.name);
+      expect(allCalcElements[0].TypeName).toEqual(
+        calculationElement1Payload.type
+      );
+      expect(allCalcElements[0].Unit).toEqual(calculationElement1Payload.unit);
+      expect(allCalcElements[0].Archived).toEqual(
+        calculationElement1Payload.archived
+      );
+
+      expect(allCalcElements[1].Id).toBeDefined();
+      expect(allCalcElements[1].TimeSample).toEqual(
+        calculationElement2Payload.timeSample
+      );
+      expect(allCalcElements[1].Name).toEqual(calculationElement2Payload.name);
+      expect(allCalcElements[1].TypeName).toEqual(
+        calculationElement2Payload.type
+      );
+      expect(allCalcElements[1].Unit).toEqual(calculationElement2Payload.unit);
+      expect(allCalcElements[1].Archived).toEqual(
+        calculationElement2Payload.archived
+      );
     });
 
     it("should create a new device together with its variables if they are given - and set default values if they are not given", async () => {
@@ -1043,6 +1316,12 @@ describe("CommInterface", () => {
     let device1Variables;
     let device2Variables;
 
+    let device1CalculationElements;
+    let device2CalculationElements;
+
+    let device1;
+    let device2;
+
     let variable1Payload;
     let variable1Id;
     let variable1TimeSample;
@@ -1096,6 +1375,30 @@ describe("CommInterface", () => {
     let variable6Offset;
     let variable6FCode;
     let variable6Value;
+
+    let sumElement1Payload;
+    let sumElement1Id;
+    let sumElement1SampleTime;
+    let sumElement1Name;
+    let sumElement1Type;
+    let sumElement1Archived;
+    let sumElement1Value;
+
+    let sumElement2Payload;
+    let sumElement2Id;
+    let sumElement2SampleTime;
+    let sumElement2Name;
+    let sumElement2Type;
+    let sumElement2Archived;
+    let sumElement2Value;
+
+    let sumElement3Payload;
+    let sumElement3Id;
+    let sumElement3SampleTime;
+    let sumElement3Name;
+    let sumElement3Type;
+    let sumElement3Archived;
+    let sumElement3Value;
 
     beforeEach(async () => {
       device1Id = "1234";
@@ -1163,6 +1466,27 @@ describe("CommInterface", () => {
       variable6Offset = 7;
       variable6FCode = 16;
       variable6Value = 6;
+
+      sumElement1Id = "1001";
+      sumElement1SampleTime = 1;
+      sumElement1Name = "sumElement1";
+      sumElement1Type = "sumElement";
+      sumElement1Archived = false;
+      sumElement1Value = 123;
+
+      sumElement2Id = "1002";
+      sumElement2SampleTime = 2;
+      sumElement2Name = "sumElement2";
+      sumElement2Type = "sumElement";
+      sumElement2Archived = false;
+      sumElement2Value = 321;
+
+      sumElement3Id = "1003";
+      sumElement3SampleTime = 3;
+      sumElement3Name = "sumElement3";
+      sumElement3Type = "sumElement";
+      sumElement3Archived = false;
+      sumElement3Value = 1234;
     });
 
     let exec = async () => {
@@ -1228,9 +1552,36 @@ describe("CommInterface", () => {
         value: variable6Value
       };
 
+      sumElement1Payload = {
+        id: sumElement1Id,
+        name: sumElement1Name,
+        type: sumElement1Type,
+        archived: sumElement1Archived,
+        sampleTime: sumElement1SampleTime
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: sumElement2Name,
+        type: sumElement2Type,
+        archived: sumElement2Archived,
+        sampleTime: sumElement2SampleTime
+      };
+
+      sumElement3Payload = {
+        id: sumElement3Id,
+        name: sumElement3Name,
+        type: sumElement3Type,
+        archived: sumElement3Archived,
+        sampleTime: sumElement3SampleTime
+      };
+
       device1Variables = [variable1Payload, variable2Payload, variable3Payload];
 
       device2Variables = [variable4Payload, variable5Payload, variable6Payload];
+
+      device1CalculationElements = [sumElement1Payload];
+      device2CalculationElements = [sumElement2Payload, sumElement3Payload];
 
       device1Payload = {
         id: device1Id,
@@ -1241,7 +1592,8 @@ describe("CommInterface", () => {
         timeout: device1Timeout,
         unitId: device1UnitId,
         isActive: device1IsActive,
-        variables: device1Variables
+        variables: device1Variables,
+        calculationElements: device1CalculationElements
       };
 
       device2Payload = {
@@ -1253,11 +1605,21 @@ describe("CommInterface", () => {
         timeout: device2Timeout,
         unitId: device2UnitId,
         isActive: device2IsActive,
-        variables: device2Variables
+        variables: device2Variables,
+        calculationElements: device2CalculationElements
       };
 
-      await commInterface.createNewDevice(device1Payload);
-      await commInterface.createNewDevice(device2Payload);
+      device1 = await commInterface.createNewDevice(device1Payload);
+      device2 = await commInterface.createNewDevice(device2Payload);
+
+      if (sumElement1Value)
+        device1.CalculationElements[sumElement1Id].Value = sumElement1Value;
+
+      if (sumElement2Value)
+        device2.CalculationElements[sumElement2Id].Value = sumElement2Value;
+
+      if (sumElement3Value)
+        device2.CalculationElements[sumElement3Id].Value = sumElement3Value;
 
       return commInterface.getMainData();
     };
@@ -1283,6 +1645,9 @@ describe("CommInterface", () => {
               name: "test variable 3",
               value: 3
             }
+          },
+          calculationElements: {
+            "1001": { name: "sumElement1", value: 123 }
           }
         },
         "1235": {
@@ -1302,6 +1667,10 @@ describe("CommInterface", () => {
               name: "test variable 6",
               value: 6
             }
+          },
+          calculationElements: {
+            "1002": { name: "sumElement2", value: 321 },
+            "1003": { name: "sumElement3", value: 1234 }
           }
         }
       };
@@ -1412,6 +1781,177 @@ describe("CommInterface", () => {
       expect(result).toBeDefined();
       expect(result).toMatchObject(validResult);
     });
+
+    it("should return valid object if one of device does not have any calculation elements", async () => {
+      await commInterface.init();
+
+      variable1Payload = {
+        id: variable1Id,
+        timeSample: variable1TimeSample,
+        name: variable1Name,
+        type: variable1Type,
+        offset: variable1Offset,
+        fCode: variable1FCode,
+        value: variable1Value
+      };
+
+      variable2Payload = {
+        id: variable2Id,
+        timeSample: variable2TimeSample,
+        name: variable2Name,
+        type: variable2Type,
+        offset: variable2Offset,
+        fCode: variable2FCode,
+        value: variable2Value
+      };
+
+      variable3Payload = {
+        id: variable3Id,
+        timeSample: variable3TimeSample,
+        name: variable3Name,
+        type: variable3Type,
+        offset: variable3Offset,
+        fCode: variable3FCode,
+        value: variable3Value
+      };
+
+      variable4Payload = {
+        id: variable4Id,
+        timeSample: variable4TimeSample,
+        name: variable4Name,
+        type: variable4Type,
+        offset: variable4Offset,
+        fCode: variable4FCode,
+        value: variable4Value
+      };
+
+      variable5Payload = {
+        id: variable5Id,
+        timeSample: variable5TimeSample,
+        name: variable5Name,
+        type: variable5Type,
+        offset: variable5Offset,
+        fCode: variable5FCode,
+        value: variable5Value
+      };
+
+      variable6Payload = {
+        id: variable6Id,
+        timeSample: variable6TimeSample,
+        name: variable6Name,
+        type: variable6Type,
+        offset: variable6Offset,
+        fCode: variable6FCode,
+        value: variable6Value
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: sumElement2Name,
+        type: sumElement2Type,
+        archived: sumElement2Archived,
+        sampleTime: sumElement2SampleTime
+      };
+
+      sumElement3Payload = {
+        id: sumElement3Id,
+        name: sumElement3Name,
+        type: sumElement3Type,
+        archived: sumElement3Archived,
+        sampleTime: sumElement3SampleTime
+      };
+
+      device1Variables = [variable1Payload, variable2Payload, variable3Payload];
+
+      device2Variables = [variable4Payload, variable5Payload, variable6Payload];
+
+      device2CalculationElements = [sumElement2Payload, sumElement3Payload];
+
+      device1Payload = {
+        id: device1Id,
+        name: device1Name,
+        type: deviceType,
+        ipAdress: device1Adress,
+        portNumber: device1PortNumber,
+        timeout: device1Timeout,
+        unitId: device1UnitId,
+        isActive: device1IsActive,
+        variables: device1Variables
+      };
+
+      device2Payload = {
+        id: device2Id,
+        name: device2Name,
+        type: deviceType,
+        ipAdress: device2Adress,
+        portNumber: device2PortNumber,
+        timeout: device2Timeout,
+        unitId: device2UnitId,
+        isActive: device2IsActive,
+        variables: device2Variables,
+        calculationElements: device2CalculationElements
+      };
+
+      device1 = await commInterface.createNewDevice(device1Payload);
+      device2 = await commInterface.createNewDevice(device2Payload);
+
+      if (sumElement2Value)
+        device2.CalculationElements[sumElement2Id].Value = sumElement2Value;
+
+      if (sumElement3Value)
+        device2.CalculationElements[sumElement3Id].Value = sumElement3Value;
+
+      let result = commInterface.getMainData();
+
+      let validResult = {
+        "1234": {
+          name: "test device 1",
+          variables: {
+            "0001": {
+              name: "test variable 1",
+              value: 1
+            },
+
+            "0002": {
+              name: "test variable 2",
+              value: 2
+            },
+
+            "0003": {
+              name: "test variable 3",
+              value: 3
+            }
+          },
+          calculationElements: {}
+        },
+        "1235": {
+          name: "test device 2",
+          variables: {
+            "0004": {
+              name: "test variable 4",
+              value: true
+            },
+
+            "0005": {
+              name: "test variable 5",
+              value: 5
+            },
+
+            "0006": {
+              name: "test variable 6",
+              value: 6
+            }
+          },
+          calculationElements: {
+            "1002": { name: "sumElement2", value: 321 },
+            "1003": { name: "sumElement3", value: 1234 }
+          }
+        }
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validResult);
+    });
   });
 
   describe("getAllValues", () => {
@@ -1492,6 +2032,30 @@ describe("CommInterface", () => {
     let variable6FCode;
     let variable6Value;
 
+    let sumElement1Payload;
+    let sumElement1Id;
+    let sumElement1SampleTime;
+    let sumElement1Name;
+    let sumElement1Type;
+    let sumElement1Archived;
+    let sumElement1Value;
+
+    let sumElement2Payload;
+    let sumElement2Id;
+    let sumElement2SampleTime;
+    let sumElement2Name;
+    let sumElement2Type;
+    let sumElement2Archived;
+    let sumElement2Value;
+
+    let sumElement3Payload;
+    let sumElement3Id;
+    let sumElement3SampleTime;
+    let sumElement3Name;
+    let sumElement3Type;
+    let sumElement3Archived;
+    let sumElement3Value;
+
     beforeEach(async () => {
       device1Id = "1234";
       device1Name = "test device 1";
@@ -1558,6 +2122,27 @@ describe("CommInterface", () => {
       variable6Offset = 7;
       variable6FCode = 16;
       variable6Value = 6;
+
+      sumElement1Id = "1001";
+      sumElement1SampleTime = 1;
+      sumElement1Name = "sumElement1";
+      sumElement1Type = "sumElement";
+      sumElement1Archived = false;
+      sumElement1Value = 123;
+
+      sumElement2Id = "1002";
+      sumElement2SampleTime = 2;
+      sumElement2Name = "sumElement2";
+      sumElement2Type = "sumElement";
+      sumElement2Archived = false;
+      sumElement2Value = 321;
+
+      sumElement3Id = "1003";
+      sumElement3SampleTime = 3;
+      sumElement3Name = "sumElement3";
+      sumElement3Type = "sumElement";
+      sumElement3Archived = false;
+      sumElement3Value = 1234;
     });
 
     let exec = async () => {
@@ -1623,9 +2208,36 @@ describe("CommInterface", () => {
         value: variable6Value
       };
 
+      sumElement1Payload = {
+        id: sumElement1Id,
+        name: sumElement1Name,
+        type: sumElement1Type,
+        archived: sumElement1Archived,
+        sampleTime: sumElement1SampleTime
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: sumElement2Name,
+        type: sumElement2Type,
+        archived: sumElement2Archived,
+        sampleTime: sumElement2SampleTime
+      };
+
+      sumElement3Payload = {
+        id: sumElement3Id,
+        name: sumElement3Name,
+        type: sumElement3Type,
+        archived: sumElement3Archived,
+        sampleTime: sumElement3SampleTime
+      };
+
       device1Variables = [variable1Payload, variable2Payload, variable3Payload];
 
       device2Variables = [variable4Payload, variable5Payload, variable6Payload];
+
+      device1CalculationElements = [sumElement1Payload];
+      device2CalculationElements = [sumElement2Payload, sumElement3Payload];
 
       device1Payload = {
         id: device1Id,
@@ -1636,23 +2248,34 @@ describe("CommInterface", () => {
         timeout: device1Timeout,
         unitId: device1UnitId,
         isActive: device1IsActive,
-        variables: device1Variables
+        variables: device1Variables,
+        calculationElements: device1CalculationElements
       };
 
       device2Payload = {
         id: device2Id,
         name: device2Name,
-        type: device2Type,
+        type: deviceType,
         ipAdress: device2Adress,
         portNumber: device2PortNumber,
         timeout: device2Timeout,
         unitId: device2UnitId,
         isActive: device2IsActive,
-        variables: device2Variables
+        variables: device2Variables,
+        calculationElements: device2CalculationElements
       };
 
-      await commInterface.createNewDevice(device1Payload);
-      await commInterface.createNewDevice(device2Payload);
+      device1 = await commInterface.createNewDevice(device1Payload);
+      device2 = await commInterface.createNewDevice(device2Payload);
+
+      if (sumElement1Value)
+        device1.CalculationElements[sumElement1Id].Value = sumElement1Value;
+
+      if (sumElement2Value)
+        device2.CalculationElements[sumElement2Id].Value = sumElement2Value;
+
+      if (sumElement3Value)
+        device2.CalculationElements[sumElement3Id].Value = sumElement3Value;
 
       return commInterface.getAllValues();
     };
@@ -1666,12 +2289,16 @@ describe("CommInterface", () => {
 
           "0002": 2,
 
-          "0003": 3
+          "0003": 3,
+
+          "1001": 123
         },
         "1235": {
           "0004": true,
           "0005": 5,
-          "0006": 6
+          "0006": 6,
+          "1002": 321,
+          "1003": 1234
         }
       };
 
@@ -1720,9 +2347,34 @@ describe("CommInterface", () => {
         value: variable6Value
       };
 
-      device1Variables = undefined;
+      sumElement1Payload = {
+        id: sumElement1Id,
+        name: sumElement1Name,
+        type: sumElement1Type,
+        archived: sumElement1Archived,
+        sampleTime: sumElement1SampleTime
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: sumElement2Name,
+        type: sumElement2Type,
+        archived: sumElement2Archived,
+        sampleTime: sumElement2SampleTime
+      };
+
+      sumElement3Payload = {
+        id: sumElement3Id,
+        name: sumElement3Name,
+        type: sumElement3Type,
+        archived: sumElement3Archived,
+        sampleTime: sumElement3SampleTime
+      };
 
       device2Variables = [variable4Payload, variable5Payload, variable6Payload];
+
+      device1CalculationElements = [sumElement1Payload];
+      device2CalculationElements = [sumElement2Payload, sumElement3Payload];
 
       device1Payload = {
         id: device1Id,
@@ -1733,7 +2385,8 @@ describe("CommInterface", () => {
         timeout: device1Timeout,
         unitId: device1UnitId,
         isActive: device1IsActive,
-        variables: device1Variables
+        variables: device1Variables,
+        calculationElements: device1CalculationElements
       };
 
       device2Payload = {
@@ -1745,28 +2398,236 @@ describe("CommInterface", () => {
         timeout: device2Timeout,
         unitId: device2UnitId,
         isActive: device2IsActive,
-        variables: device2Variables
+        variables: device2Variables,
+        calculationElements: device2CalculationElements
       };
 
-      await commInterface.createNewDevice(device1Payload);
-      await commInterface.createNewDevice(device2Payload);
+      device1 = await commInterface.createNewDevice(device1Payload);
+      device2 = await commInterface.createNewDevice(device2Payload);
+
+      if (sumElement1Value)
+        device1.CalculationElements[sumElement1Id].Value = sumElement1Value;
+
+      if (sumElement2Value)
+        device2.CalculationElements[sumElement2Id].Value = sumElement2Value;
+
+      if (sumElement3Value)
+        device2.CalculationElements[sumElement3Id].Value = sumElement3Value;
 
       let result = commInterface.getAllValues();
 
       let validResult = {
-        "1234": {},
+        "1234": {
+          "1001": 123
+        },
         "1235": {
           "0004": true,
           "0005": 5,
-          "0006": 6
+          "0006": 6,
+          "1002": 321,
+          "1003": 1234
         }
       };
+      expect(result).toBeDefined();
+      expect(result).toMatchObject(validResult);
+    });
+
+    it("should return valid object if one of device does not have any calculationElement", async () => {
+      await commInterface.init();
+
+      variable1Payload = {
+        id: variable1Id,
+        timeSample: variable1TimeSample,
+        name: variable1Name,
+        type: variable1Type,
+        offset: variable1Offset,
+        fCode: variable1FCode,
+        value: variable1Value
+      };
+
+      variable2Payload = {
+        id: variable2Id,
+        timeSample: variable2TimeSample,
+        name: variable2Name,
+        type: variable2Type,
+        offset: variable2Offset,
+        fCode: variable2FCode,
+        value: variable2Value
+      };
+
+      variable3Payload = {
+        id: variable3Id,
+        timeSample: variable3TimeSample,
+        name: variable3Name,
+        type: variable3Type,
+        offset: variable3Offset,
+        fCode: variable3FCode,
+        value: variable3Value
+      };
+
+      variable4Payload = {
+        id: variable4Id,
+        timeSample: variable4TimeSample,
+        name: variable4Name,
+        type: variable4Type,
+        offset: variable4Offset,
+        fCode: variable4FCode,
+        value: variable4Value
+      };
+
+      variable5Payload = {
+        id: variable5Id,
+        timeSample: variable5TimeSample,
+        name: variable5Name,
+        type: variable5Type,
+        offset: variable5Offset,
+        fCode: variable5FCode,
+        value: variable5Value
+      };
+
+      variable6Payload = {
+        id: variable6Id,
+        timeSample: variable6TimeSample,
+        name: variable6Name,
+        type: variable6Type,
+        offset: variable6Offset,
+        fCode: variable6FCode,
+        value: variable6Value
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: sumElement2Name,
+        type: sumElement2Type,
+        archived: sumElement2Archived,
+        sampleTime: sumElement2SampleTime
+      };
+
+      sumElement3Payload = {
+        id: sumElement3Id,
+        name: sumElement3Name,
+        type: sumElement3Type,
+        archived: sumElement3Archived,
+        sampleTime: sumElement3SampleTime
+      };
+
+      device1Variables = [variable1Payload, variable2Payload, variable3Payload];
+
+      device2Variables = [variable4Payload, variable5Payload, variable6Payload];
+
+      device2CalculationElements = [sumElement2Payload, sumElement3Payload];
+
+      device1Payload = {
+        id: device1Id,
+        name: device1Name,
+        type: deviceType,
+        ipAdress: device1Adress,
+        portNumber: device1PortNumber,
+        timeout: device1Timeout,
+        unitId: device1UnitId,
+        isActive: device1IsActive,
+        variables: device1Variables,
+        calculationElements: device1CalculationElements
+      };
+
+      device2Payload = {
+        id: device2Id,
+        name: device2Name,
+        type: deviceType,
+        ipAdress: device2Adress,
+        portNumber: device2PortNumber,
+        timeout: device2Timeout,
+        unitId: device2UnitId,
+        isActive: device2IsActive,
+        variables: device2Variables,
+        calculationElements: device2CalculationElements
+      };
+
+      device1 = await commInterface.createNewDevice(device1Payload);
+      device2 = await commInterface.createNewDevice(device2Payload);
+
+      if (sumElement2Value)
+        device2.CalculationElements[sumElement2Id].Value = sumElement2Value;
+
+      if (sumElement3Value)
+        device2.CalculationElements[sumElement3Id].Value = sumElement3Value;
+
+      let result = commInterface.getAllValues();
+
+      let validResult = {
+        "1234": {
+          "0001": 1,
+
+          "0002": 2,
+
+          "0003": 3
+        },
+        "1235": {
+          "0004": true,
+          "0005": 5,
+          "0006": 6,
+          "1002": 321,
+          "1003": 1234
+        }
+      };
+
       expect(result).toBeDefined();
       expect(result).toMatchObject(validResult);
     });
   });
 
   describe("getAllVariables", () => {
+    let deviceId;
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1234";
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+      return commInterface.getAllVariables(deviceId);
+    };
+
+    it("should return all variables of device of given id", async () => {
+      let result = await exec();
+
+      let variable1 = commInterface.getVariable("1234", "0001");
+      let variable2 = commInterface.getVariable("1234", "0002");
+      let variable3 = commInterface.getVariable("1234", "0003");
+
+      expect(result.length).toEqual(3);
+      expect(result).toContain(variable1);
+      expect(result).toContain(variable2);
+      expect(result).toContain(variable3);
+    });
+
+    it("should throw if there is no device of given id", async () => {
+      deviceId = "4321";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should return empty array if device has no variables", async () => {
+      initPayload[deviceId].variables = undefined;
+
+      let result = await exec();
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe("getAllCalculationElementsIds", () => {
     let deviceId;
     let initPayload;
 
@@ -2720,517 +3581,6 @@ describe("CommInterface", () => {
 
       expect(result.Id).toBeDefined();
       expect(result.Id).toEqual(deviceId);
-    });
-  });
-
-  describe("createDevice", () => {
-    let initPayload;
-    let deviceId;
-    let createPayload;
-    let createId;
-    let createName;
-    let createIsActive;
-    let createTimeout;
-    let createIpAdress;
-    let createUnitId;
-    let createPortNumber;
-    let createVariables;
-
-    beforeEach(() => {
-      createId = undefined;
-      createName = "Created device";
-      createIsActive = false;
-      createTimeout = 4000;
-      createIpAdress = "192.168.0.17";
-      createUnitId = 5;
-      createPortNumber = 602;
-      createVariables = undefined;
-      createType = "mbDevice";
-
-      initPayload = JSON.parse(testPayload);
-      deviceId = "1235";
-
-      createVariables = [
-        {
-          id: "1001",
-          timeSample: 2,
-          name: "test variable 11",
-          offset: 5,
-          length: 1,
-          fCode: 3,
-          value: 1,
-          type: "int16",
-          archived: true,
-          getSingleFCode: 3,
-          setSingleFCode: 16
-        },
-        {
-          id: "1002",
-          timeSample: 3,
-          name: "test variable 12",
-          offset: 6,
-          length: 2,
-          fCode: 4,
-          value: 2,
-          type: "int32",
-          archived: false,
-          getSingleFCode: 4,
-          setSingleFCode: 16
-        },
-        {
-          id: "1003",
-          timeSample: 4,
-          name: "test variable 13",
-          offset: 7,
-          length: 2,
-          fCode: 16,
-          value: 3.3,
-          type: "float",
-          archived: true,
-          getSingleFCode: 3,
-          setSingleFCode: 16
-        }
-      ];
-    });
-
-    let exec = async () => {
-      createPayload = {
-        id: createId,
-        name: createName,
-        isActive: createIsActive,
-        timeout: createTimeout,
-        ipAdress: createIpAdress,
-        unitId: createUnitId,
-        portNumber: createPortNumber,
-        variables: createVariables,
-        type: createType
-      };
-
-      await commInterface.init(initPayload);
-
-      return commInterface.createNewDevice(createPayload);
-    };
-
-    it("should return created device", async () => {
-      let result = await exec();
-
-      let allDevices = commInterface.getAllDevices();
-
-      let createDevice = allDevices[allDevices.length - 1];
-
-      expect(result).toBeDefined();
-      expect(result).toEqual(createDevice);
-    });
-
-    it("should create new device based on given payload", async () => {
-      let result = await exec();
-
-      expect(result.Name).toEqual(createName);
-      expect(result.IsActive).toEqual(createIsActive);
-      expect(result.Timeout).toEqual(createTimeout);
-      expect(result.IPAdress).toEqual(createIpAdress);
-      expect(result.UnitId).toEqual(createUnitId);
-      expect(result.PortNumber).toEqual(createPortNumber);
-      expect(result.Type).toEqual(createType);
-
-      let allVariables = Object.values(result.Variables);
-
-      expect(allVariables).toBeDefined();
-      expect(allVariables.length).toBeDefined();
-      expect(allVariables.length).toEqual(createVariables.length);
-
-      for (let i = 0; i < allVariables.length; i++) {
-        expect(allVariables[i].Payload).toMatchObject(createVariables[i]);
-      }
-
-      //Should create device with new id
-      expect(result.Id).toBeDefined();
-    });
-
-    it("should create new device based on given payload when variables are empty", async () => {
-      createVariables = undefined;
-
-      let result = await exec();
-
-      expect(result.Name).toEqual(createName);
-      expect(result.IsActive).toEqual(createIsActive);
-      expect(result.Timeout).toEqual(createTimeout);
-      expect(result.IPAdress).toEqual(createIpAdress);
-      expect(result.UnitId).toEqual(createUnitId);
-      expect(result.PortNumber).toEqual(createPortNumber);
-      expect(result.Type).toEqual(createType);
-
-      expect(result.Variables).toBeDefined();
-      expect(result.Variables).toEqual({});
-    });
-
-    it("should create device with given id if id is defined", async () => {
-      createId = "8765";
-
-      let result = await exec();
-
-      expect(result.Name).toEqual(createName);
-      expect(result.IsActive).toEqual(createIsActive);
-      expect(result.Timeout).toEqual(createTimeout);
-      expect(result.IPAdress).toEqual(createIpAdress);
-      expect(result.UnitId).toEqual(createUnitId);
-      expect(result.PortNumber).toEqual(createPortNumber);
-      expect(result.Type).toEqual(createType);
-
-      //Should create device with new id
-      expect(result.Id).toBeDefined();
-      expect(result.Id).toEqual(createId);
-    });
-
-    it("should throw and not add any device if device of given id already exists", async () => {
-      createId = "1234";
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if name in payload does not exists", async () => {
-      createName = undefined;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should not throw but add new device with isActive set to false if isActive in payload does not exists", async () => {
-      createIsActive = undefined;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).resolves.toBeDefined();
-
-      let allDevices = commInterface.getAllDevices();
-
-      expect(allDevices.length).toEqual(Object.keys(initPayload).length + 1);
-
-      let createdDevice = allDevices[allDevices.length - 1];
-
-      expect(createdDevice).toBeDefined();
-      expect(createdDevice.IsActive).toBeFalsy();
-    });
-
-    it("should throw and not add any device if timeout in payload does not exists", async () => {
-      createTimeout = undefined;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if IPAdress in payload does not exists", async () => {
-      createIpAdress = undefined;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if UnitId in payload does not exists", async () => {
-      createUnitId = undefined;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if PortNumber in payload does not exists", async () => {
-      createPortNumber = undefined;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if Type in payload does not exists", async () => {
-      createType = undefined;
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if one of variable is invalid", async () => {
-      createVariables[1] = {
-        id: "1002",
-        timeSample: 3,
-        name: "test variable 12",
-        offset: 6,
-        length: 2,
-        fCode: 1234,
-        value: 2,
-        type: "int32",
-        archived: true,
-        getSingleFCode: 4,
-        setSingleFCode: 16
-      };
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if payload is undefined", async () => {
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await commInterface.init(initPayload);
-
-            await commInterface.createNewDevice();
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should throw and not add any device if payload is empty", async () => {
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await commInterface.init(initPayload);
-
-            await commInterface.createNewDevice({});
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-
-      expect(commInterface.getAllDevices().length).toEqual(
-        Object.keys(initPayload).length
-      );
-    });
-
-    it("should connect device if isActive is true", async () => {
-      createIsActive = true;
-
-      let result = await exec();
-
-      expect(result.IsActive).toBeTruthy();
-      expect(result.MBDriver._client.connectTCP).toHaveBeenCalled();
-
-      for (
-        let i = 0;
-        i < result.MBDriver._client.connectTCP.mock.calls.length;
-        i++
-      ) {
-        expect(result.MBDriver._client.connectTCP.mock.calls[i][0]).toEqual(
-          createIpAdress
-        );
-        expect(
-          result.MBDriver._client.connectTCP.mock.calls[i][1]
-        ).toMatchObject({ port: createPortNumber });
-      }
-    });
-
-    it("should create database for added device", async () => {
-      let result = await exec();
-
-      let databaseFileExists = await checkIfFileExists(
-        result.ArchiveManager.FilePath
-      );
-
-      expect(databaseFileExists).toBeTruthy();
-    });
-
-    it("should create data table and date column for added device", async () => {
-      let result = await exec();
-
-      let dataTableExists = await checkIfTableExists(
-        result.ArchiveManager.FilePath,
-        "data"
-      );
-
-      let columnExists = await checkIfColumnExists(
-        result.ArchiveManager.FilePath,
-        "data",
-        "date",
-        "INTEGER"
-      );
-
-      expect(dataTableExists).toBeTruthy();
-      expect(columnExists).toBeTruthy();
-    });
-
-    it("should create column for every archived variable", async () => {
-      let result = await exec();
-
-      for (let variablePayload of createVariables) {
-        let variable = commInterface.getVariable(result.Id, variablePayload.id);
-
-        if (variable.Archived) {
-          let variableColumnName = result.ArchiveManager.getColumnNameById(
-            variable.Id
-          );
-          let variableTypeName = result.ArchiveManager.getColumnType(variable);
-
-          let columnExists = await checkIfColumnExists(
-            result.ArchiveManager.FilePath,
-            "data",
-            variableColumnName,
-            variableTypeName
-          );
-
-          expect(columnExists).toBeTruthy();
-        }
-      }
-    });
-
-    it("should not create column for not archived variables", async () => {
-      let result = await exec();
-
-      for (let variablePayload of createVariables) {
-        let variable = commInterface.getVariable(result.Id, variablePayload.id);
-
-        if (!variable.Archived) {
-          let variableColumnName = result.ArchiveManager.getColumnNameById(
-            variable.Id
-          );
-          let variableTypeName = result.ArchiveManager.getColumnType(variable);
-
-          let columnExists = await checkIfColumnExists(
-            result.ArchiveManager.FilePath,
-            "data",
-            variableColumnName,
-            variableTypeName
-          );
-
-          expect(columnExists).toBeFalsy();
-        }
-      }
-    });
-
-    it("should add every archived variable to archive manager", async () => {
-      let result = await exec();
-
-      for (let variablePayload of createVariables) {
-        let variable = commInterface.getVariable(result.Id, variablePayload.id);
-
-        if (variable.Archived) {
-          expect(Object.values(result.ArchiveManager.Variables)).toContain(
-            variable
-          );
-        }
-      }
-    });
-
-    it("should not add not archived variable to archive manager", async () => {
-      let result = await exec();
-
-      for (let variablePayload of createVariables) {
-        let variable = commInterface.getVariable(result.Id, variablePayload.id);
-
-        if (!variable.Archived) {
-          expect(Object.values(result.ArchiveManager.Variables)).not.toContain(
-            variable
-          );
-        }
-      }
     });
   });
 
@@ -4211,6 +4561,474 @@ describe("CommInterface", () => {
     });
   });
 
+  describe("createCalculationElement", () => {
+    let initPayload;
+    let deviceId;
+    let calculationElementId;
+    let calculationElementName;
+    let calculationElementType;
+    let calculationElementTimeSample;
+    let calculationElementArchived;
+    let calculationElementUnit;
+    let calculationElementVariables;
+    let calculationElementVariable1Payload;
+    let calculationElementVariable1Add;
+    let calculationElementVariable1Id;
+    let calculationElementVariable1Factor;
+    let calculationElementVariable2Payload;
+    let calculationElementVariable2Add;
+    let calculationElementVariable2Id;
+    let calculationElementVariable2Factor;
+    let calculationElementVariable3Payload;
+    let calculationElementVariable3Add;
+    let calculationElementVariable3Id;
+    let calculationElementVariable3Factor;
+    let calculationElementPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+
+      calculationElementId = "9001";
+      calculationElementName = "sumElement1";
+      calculationElementType = "sumElement";
+      calculationElementTimeSample = 5;
+      calculationElementArchived = true;
+      calculationElementUnit = "A";
+
+      calculationElementVariable1Id = "0004";
+      calculationElementVariable1Factor = 1;
+
+      calculationElementVariable1Id = "0005";
+      calculationElementVariable1Factor = 2;
+
+      calculationElementVariable1Id = "0006";
+      calculationElementVariable1Factor = 3;
+    });
+
+    let exec = async () => {
+      calculationElementVariable1Payload = {
+        id: calculationElementVariable1Id,
+        factor: calculationElementVariable1Factor
+      };
+
+      calculationElementVariable2Payload = {
+        id: calculationElementVariable2Id,
+        factor: calculationElementVariable2Factor
+      };
+
+      calculationElementVariable3Payload = {
+        id: calculationElementVariable3Id,
+        factor: calculationElementVariable3Factor
+      };
+
+      calculationElementVariables = [];
+
+      if (calculationElementVariable1Add)
+        calculationElementVariables.push(calculationElementVariable1Payload);
+
+      if (calculationElementVariable2Add)
+        calculationElementVariables.push(calculationElementVariable2Payload);
+
+      if (calculationElementVariable3Add)
+        calculationElementVariables.push(calculationElementVariable3Payload);
+
+      calculationElementPayload = {
+        id: calculationElementId,
+        name: calculationElementName,
+        type: calculationElementType,
+        sampleTime: calculationElementTimeSample,
+        archived: calculationElementArchived,
+        unit: calculationElementUnit,
+        variables: calculationElementVariables
+      };
+
+      await commInterface.init(initPayload);
+      return commInterface.createCalculationElement(
+        deviceId,
+        calculationElementPayload
+      );
+    };
+
+    it("should create new calculationElement based on given payload", async () => {
+      let result = await exec();
+
+      let createdElement = commInterface.getCalculationElement(
+        deviceId,
+        calculationElementId
+      );
+
+      expect(createdElement).toBeDefined();
+      expect(createdElement.Payload).toBeDefined();
+      expect(createdElement.Payload).toMatchObject(calculationElementPayload);
+    });
+
+    it("should return created variable", async () => {
+      let result = await exec();
+
+      let createdElement = commInterface.getCalculationElement(
+        deviceId,
+        calculationElementId
+      );
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(createdElement);
+    });
+
+    it("should set own variable id if id is not defined inside payload", async () => {
+      calculationElementId = undefined;
+
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toBeDefined();
+
+      let createdElement = commInterface.getCalculationElement(
+        deviceId,
+        result.Id
+      );
+
+      expect(result).toEqual(createdElement);
+    });
+
+    it("should automatically set archived to false if it is not provided in payload", async () => {
+      calculationElementArchived = undefined;
+
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Archived).toBeDefined();
+      expect(result.Archived).toBeFalsy();
+    });
+
+    it("should automatically set value to default value eg. 0 ", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Value).toBeDefined();
+      expect(result.Value).toEqual(0);
+    });
+
+    it("should automatically set unit to empty string if it is not provided in payload", async () => {
+      calculationElementUnit = undefined;
+
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Unit).toBeDefined();
+      expect(result.Unit).toEqual("");
+    });
+
+    it("should throw and not add element if name is not given in payload", async () => {
+      calculationElementName = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).CalculationElements)
+          .length
+      ).toEqual(0);
+    });
+
+    it("should throw and not add element if sampleTime is not given in payload", async () => {
+      calculationElementTimeSample = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).CalculationElements)
+          .length
+      ).toEqual(0);
+    });
+
+    it("should throw and not add element if element of given id already exists", async () => {
+      await exec();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await commInterface.createCalculationElement(
+              deviceId,
+              calculationElementPayload
+            );
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(
+        Object.values(commInterface.getDevice(deviceId).CalculationElements)
+          .length
+      ).toEqual(1);
+    });
+
+    it("should add calculationElement to ArchiveManager if it is archived", async () => {
+      calculationElementArchived = true;
+      let result = await exec();
+
+      expect(
+        Object.values(result.Device.ArchiveManager.CalculationElements)
+      ).toContain(result);
+    });
+
+    it("should not add variable to ArchiveManager if it is archived", async () => {
+      calculationElementArchived = false;
+      let result = await exec();
+
+      expect(
+        Object.values(result.Device.ArchiveManager.CalculationElements)
+      ).not.toContain(result);
+    });
+
+    it("should create column in database file if variables are archived", async () => {
+      calculationElementArchived = true;
+
+      let result = await exec();
+
+      let dbFilePath = result.Device.ArchiveManager.FilePath;
+      let columnName = result.Device.ArchiveManager.getColumnNameById(
+        result.Id
+      );
+      let columnType = result.Device.ArchiveManager.getColumnTypeCalculationElement(
+        result
+      );
+
+      let columnExists = checkIfColumnExists(
+        dbFilePath,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should not create column in database file if variables are not archived", async () => {
+      calculationElementArchived = false;
+
+      let result = await exec();
+
+      let dbFilePath = result.Device.ArchiveManager.FilePath;
+      let columnName = result.Device.ArchiveManager.getColumnNameById(
+        result.Id
+      );
+      let columnType = result.Device.ArchiveManager.getColumnTypeCalculationElement(
+        result
+      );
+
+      let columnExists = await checkIfColumnExists(
+        dbFilePath,
+        "data",
+        columnName,
+        columnType
+      );
+
+      expect(columnExists).toBeFalsy();
+    });
+
+    it("should not throw if column in database already exists", async () => {
+      calculationElementArchived = true;
+
+      let result = await exec();
+
+      await commInterface.removeCalculationElement(
+        deviceId,
+        calculationElementId
+      );
+
+      //Checking if adding variable again throws
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await commInterface.createCalculationElement(
+              deviceId,
+              calculationElementPayload
+            );
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      let createdCalculationElement = commInterface.getCalculationElement(
+        deviceId,
+        calculationElementId
+      );
+
+      //Checking if adding variable again was successfull
+      expect(createdCalculationElement).toBeDefined();
+      expect(createdCalculationElement.Payload).toBeDefined();
+      expect(createdCalculationElement.Payload).toMatchObject(
+        calculationElementPayload
+      );
+    });
+  });
+
+  describe("getCalculationElement", () => {
+    let initPayload;
+    let deviceId;
+    let calcElementId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1236";
+      calcElementId = "3001";
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+      return commInterface.getCalculationElement(deviceId, calcElementId);
+    };
+
+    it("should return calculationElement if it exists", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(
+        commInterface.getDevice(deviceId).CalculationElements[calcElementId]
+      );
+    });
+
+    it("should throw if device does not exists", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calculationElement does not exists", async () => {
+      calcElementId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("removeCalculationElement", () => {
+    let initPayload;
+    let deviceId;
+    let calculationElementId;
+    let calculationElementToRemove;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1236";
+      calculationElementId = "3001";
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+      calculationElementToRemove = commInterface.getCalculationElement(
+        deviceId,
+        calculationElementId
+      );
+      return commInterface.removeCalculationElement(
+        deviceId,
+        calculationElementId
+      );
+    };
+
+    it("should remove calculationElement of given id", async () => {
+      let result = await exec();
+
+      let allCalculationElementIds = commInterface.getAllCalculationElementsIds();
+
+      expect(allCalculationElementIds).not.toContain(calculationElementId);
+    });
+
+    it("should return removed calculation element", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(calculationElementToRemove);
+    });
+
+    it("should throw and don't delete element if it does not exist", async () => {
+      calculationElementId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllCalculationElementsIds().length).toEqual(4);
+    });
+
+    it("should throw if element does not exists", async () => {
+      calculationElementId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(commInterface.getAllCalculationElementsIds().length).toEqual(4);
+    });
+
+    it("should not remove column of element", async () => {
+      let element = await exec();
+
+      let filePath = element.Device.ArchiveManager.FilePath;
+      let columnName = element.Device.ArchiveManager.getColumnNameById(
+        calculationElementId
+      );
+      let columnType = element.Device.ArchiveManager.getColumnTypeCalculationElement(
+        element
+      );
+
+      let columnExists = checkIfColumnExists(filePath, columnName, columnType);
+
+      expect(columnExists).toBeTruthy();
+    });
+  });
+
   describe("getVariableFromDevice", () => {
     let initPayload;
     let deviceId;
@@ -4374,6 +5192,244 @@ describe("CommInterface", () => {
           try {
             await exec();
             resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getVariableFromDatabase", () => {
+    let initPayload;
+    let deviceId;
+    let tickId1;
+    let tickId2;
+    let tickId3;
+    let value1;
+    let value2;
+    let value3;
+    let variableId;
+    let tickId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1236";
+      variableId = "0008";
+
+      tickId1 = 101;
+      tickId2 = 103;
+      tickId3 = 105;
+
+      value1 = 123.321;
+      value2 = 234.432;
+      value3 = 345.543;
+
+      tickId = tickId2;
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+
+      if (tickId1 && value1)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId1, {
+            [variableId]: value1
+          });
+
+      if (tickId2 && value2)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId2, {
+            [variableId]: value2
+          });
+
+      if (tickId3 && value3)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId3, {
+            [variableId]: value3
+          });
+
+      return commInterface.getVariableFromDatabase(
+        deviceId,
+        variableId,
+        tickId
+      );
+    };
+
+    it("should get value from database", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId]: value2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of highest date if given date is greater than given in databse from database", async () => {
+      tickId = 109;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId3]: value3
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of highest date, lower than given in method if there is no date in database", async () => {
+      tickId = 104;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId2]: value2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return {} if date is smaller than written in database", async () => {
+      tickId = 99;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should throw if there is no variable of given id", async () => {
+      variableId = 987654321;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getCalculationElementFromDatabase", () => {
+    let initPayload;
+    let deviceId;
+    let tickId1;
+    let tickId2;
+    let tickId3;
+    let value1;
+    let value2;
+    let value3;
+    let calculationElementId;
+    let tickId;
+
+    beforeEach(() => {
+      deviceId = "1236";
+      calculationElementId = "3001";
+
+      initPayload = JSON.parse(testPayload);
+
+      initPayload[deviceId].calculationElements[0].archived = true;
+      initPayload[deviceId].calculationElements[1].archived = true;
+
+      tickId1 = 101;
+      tickId2 = 103;
+      tickId3 = 105;
+
+      value1 = 123.321;
+      value2 = 234.432;
+      value3 = 345.543;
+
+      tickId = tickId2;
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+
+      if (tickId1 && value1)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId1, {
+            [calculationElementId]: value1
+          });
+
+      if (tickId2 && value2)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId2, {
+            [calculationElementId]: value2
+          });
+
+      if (tickId3 && value3)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId3, {
+            [calculationElementId]: value3
+          });
+
+      return commInterface.getCalculationElementFromDatabase(
+        deviceId,
+        calculationElementId,
+        tickId
+      );
+    };
+
+    it("should get value from database", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId]: value2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of highest date if given date is greater than given in databse from database", async () => {
+      tickId = 109;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId3]: value3
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of highest date, lower than given in method if there is no date in database", async () => {
+      tickId = 104;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId2]: value2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return {} if date is smaller than written in database", async () => {
+      tickId = 99;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should throw if there is no variable of given id", async () => {
+      calculationElementId = 987654321;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
           } catch (err) {
             return reject(err);
           }

@@ -308,6 +308,11 @@ class Device {
     throw new Error("Not implemented");
   }
 
+  /**
+   * @description Method for refreshing all calculation elements associated with device - if the correspond to tick number
+   * @param {*} tickNumber Tick number
+   * @param {*} payloadToAppend Payload to append by results of refresh
+   */
   async _refreshCalculationElements(tickNumber, payloadToAppend) {
     if (!payloadToAppend) payloadToAppend = {};
 
@@ -428,11 +433,23 @@ class Device {
     }
   }
 
-  async getValueFromDB(variableId, date) {
+  async getVariableValueFromDB(variableId, date) {
     if (!variableId in this.Variables)
       throw new Error(`There is no variable of given id: ${variableId}`);
     return this.ArchiveManager.doesVariableIdExists(variableId)
       ? this.ArchiveManager.getValue(date, variableId)
+      : Promise.resolve(undefined);
+  }
+
+  async getCalculationElementValueFromDB(calculationElementId, date) {
+    if (!calculationElementId in this.CalculationElements)
+      throw new Error(
+        `There is no calculation element of given id: ${calculationElementId}`
+      );
+    return this.ArchiveManager.doesCalculationElementIdExists(
+      calculationElementId
+    )
+      ? this.ArchiveManager.getValue(date, calculationElementId)
       : Promise.resolve(undefined);
   }
 }
