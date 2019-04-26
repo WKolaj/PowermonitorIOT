@@ -2,6 +2,7 @@ const EventEmitter = require("events");
 const mongoose = require("mongoose");
 const ArchiveManager = require("../archiveManager/ArchiveManager");
 const SumElement = require("../calculationElement/SumElement");
+const FactorElement = require("../calculationElement/FactorElement");
 const Sampler = require("../../classes/sampler/Sampler");
 
 class Device {
@@ -230,6 +231,9 @@ class Device {
       case "sumElement": {
         return this._createSumElement(payload);
       }
+      case "factorElement": {
+        return this._createFactorElement(payload);
+      }
       default: {
         throw new Error(
           `Given calculation element is not recognized: ${payload.type}`
@@ -247,6 +251,20 @@ class Device {
       throw new Error("Calculation element name in payload is not defined");
 
     let calculationElementToAdd = new SumElement(this);
+    await calculationElementToAdd.init(payload);
+    await this.addCalculationElement(calculationElementToAdd);
+    return calculationElementToAdd;
+  }
+
+  /**
+   * @description Method for creating factor element
+   * @param {object} payload payload to create factor element
+   */
+  async _createFactorElement(payload) {
+    if (!payload.name)
+      throw new Error("Calculation element name in payload is not defined");
+
+    let calculationElementToAdd = new FactorElement(this);
     await calculationElementToAdd.init(payload);
     await this.addCalculationElement(calculationElementToAdd);
     return calculationElementToAdd;

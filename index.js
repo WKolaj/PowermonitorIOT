@@ -1523,213 +1523,66 @@ let json2 = {
 };
 
 let json3 = {
-  "1234": {
-    calculationElements: [
-      {
-        archived: false,
-        id: "1001",
-        name: "sumElement1",
-        sampleTime: 1,
-        type: "sumElement",
-        unit: "",
-        variables: [{ factor: 1, id: "0001" }, { factor: 2, id: "0002" }]
-      },
-      {
-        archived: false,
-        id: "1002",
-        name: "sumElement2",
-        sampleTime: 2,
-        type: "sumElement",
-        unit: "",
-        variables: [{ factor: 2, id: "0002" }, { factor: 3, id: "0003" }]
-      }
-    ],
-    id: "1234",
-    ipAdress: "192.168.0.1",
+  "5c9f8a7fd04bb119b3ad229f": {
+    id: "5c9f8a7fd04bb119b3ad229f",
+    name: "PAC3200",
     isActive: false,
-    name: "test device 1",
-    portNumber: 502,
-    timeout: 2000,
-    type: "mbDevice",
+    timeout: 500,
+    ipAdress: "192.168.0.211",
     unitId: 1,
+    portNumber: 502,
     variables: [
       {
-        archived: false,
+        timeSample: 1,
+        name: "Napiecie L1-N",
+        offset: 1,
+        length: 2,
         fCode: 3,
-        getSingleFCode: 3,
-        id: "0001",
-        length: 1,
-        name: "test variable 1",
-        offset: 5,
-        setSingleFCode: 16,
-        timeSample: 2,
-        type: "int16",
-        unit: "unit1",
-        value: 1
-      },
-      {
-        archived: true,
-        fCode: 4,
-        getSingleFCode: 4,
-        id: "0002",
-        length: 2,
-        name: "test variable 2",
-        offset: 6,
-        setSingleFCode: 16,
-        timeSample: 3,
-        type: "int32",
-        unit: "unit2",
-        value: 2
-      },
-      {
-        archived: false,
-        fCode: 16,
-        getSingleFCode: 3,
-        id: "0003",
-        length: 2,
-        name: "test variable 3",
-        offset: 7,
-        setSingleFCode: 16,
-        timeSample: 4,
-        type: "float",
-        unit: "unit3",
-        value: 3.3
-      }
-    ]
-  },
-  "1235": {
-    calculationElements: [],
-    id: "1235",
-    ipAdress: "192.168.0.2",
-    isActive: false,
-    name: "test device 2",
-    portNumber: 502,
-    timeout: 2000,
-    type: "mbDevice",
-    unitId: 1,
-    variables: [
-      {
-        archived: true,
-        fCode: 1,
-        getSingleFCode: 1,
-        id: "0004",
-        length: 1,
-        name: "test variable 4",
-        offset: 5,
-        setSingleFCode: 15,
-        timeSample: 2,
-        type: "boolean",
-        unit: "unit4",
-        value: true
-      },
-      {
-        archived: false,
-        fCode: 4,
-        getSingleFCode: 4,
-        id: "0005",
-        length: 2,
-        name: "test variable 5",
-        offset: 6,
-        setSingleFCode: 16,
-        timeSample: 3,
-        type: "swappedInt32",
-        unit: "unit5",
-        value: 5
-      },
-      {
-        archived: true,
-        fCode: 16,
-        getSingleFCode: 3,
-        id: "0006",
-        length: 2,
-        name: "test variable 6",
-        offset: 7,
-        setSingleFCode: 16,
-        timeSample: 4,
+        value: 1,
         type: "swappedFloat",
-        unit: "unit6",
-        value: 6.6
-      }
-    ]
-  },
-  "1236": {
-    calculationElements: [
-      {
-        archived: false,
-        id: "3001",
-        name: "sumElement1",
-        sampleTime: 1,
-        type: "sumElement",
-        unit: "",
-        variables: [{ factor: 1, id: "0007" }, { factor: 2, id: "0008" }]
+        archived: true
       },
       {
-        archived: false,
-        id: "3002",
-        name: "sumElement2",
-        sampleTime: 2,
-        type: "sumElement",
-        unit: "",
-        variables: [{ factor: 2, id: "0008" }, { factor: 3, id: "0009" }]
+        id: "1001",
+        timeSample: 1,
+        name: "Napiecie L2-N",
+        offset: 3,
+        length: 2,
+        fCode: 3,
+        value: 2,
+        type: "swappedFloat",
+        archived: true
+      },
+      {
+        id: "123456",
+        timeSample: 1,
+        name: "Napiecie L3-N",
+        offset: 5,
+        length: 2,
+        fCode: 3,
+        value: 3,
+        type: "swappedFloat",
+        archived: true
       }
     ],
-    id: "1236",
-    ipAdress: "192.168.0.3",
-    isActive: false,
-    name: "test device 3",
-    portNumber: 502,
-    timeout: 2000,
-    type: "mbDevice",
-    unitId: 1,
-    variables: [
+    calculationElements: [
       {
-        archived: false,
-        fCode: 3,
-        getSingleFCode: 3,
-        id: "0007",
-        length: 1,
-        name: "test variable 4",
-        offset: 4,
-        setSingleFCode: 16,
-        timeSample: 2,
-        type: "uInt16",
-        unit: "unit7",
-        value: 7
-      },
-      {
+        id: "9999",
+        name: "test factor",
+        sampleTime: 5,
+        factor: 2,
+        unit: "A",
         archived: true,
-        fCode: 4,
-        getSingleFCode: 4,
-        id: "0008",
-        length: 2,
-        name: "test variable 5",
-        offset: 5,
-        setSingleFCode: 16,
-        timeSample: 3,
-        type: "swappedUInt32",
-        unit: "unit8",
-        value: 8
-      },
-      {
-        archived: false,
-        fCode: 3,
-        getSingleFCode: 3,
-        id: "0009",
-        length: 2,
-        name: "test variable 6",
-        offset: 7,
-        setSingleFCode: 16,
-        timeSample: 4,
-        type: "uInt32",
-        unit: "unit9",
-        value: 9
+        variableId: "1001",
+        type: "factorElement"
       }
-    ]
+    ],
+    type: "mbDevice"
   }
 };
 
 let exec = async () => {
-  await commInterface.init(json2);
+  await commInterface.init(json3);
   commInterface.startCommunicationWithAllDevices();
 
   for (let device of Object.values(commInterface.Devices)) {
