@@ -3632,6 +3632,8 @@ describe("CommInterface", () => {
       };
 
       await commInterface.init(initPayload);
+      //waiting for device to be initialized
+      await snooze(500);
       return commInterface.createVariable(deviceId, variablePayload);
     };
 
@@ -4093,6 +4095,8 @@ describe("CommInterface", () => {
 
       originalVariable = commInterface.getVariable(deviceId, variableId);
 
+      //Waiting for commInterface to initialize
+      await snooze(500);
       return commInterface.editVariable(
         deviceId,
         variableId,

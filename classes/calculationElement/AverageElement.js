@@ -46,63 +46,6 @@ class AverageElement extends CalculationElement {
   }
 
   /**
-   * @description Method for resetting values
-   */
-  _resetValues() {
-    this._values = [];
-  }
-
-  /**
-   * @description Method for adding new value
-   * @param {number} newValue new value to add
-   * @param {number} tickId tickId of new value
-   */
-  _addValue(newValue, tickId) {
-    let valueObject = {
-      tickId: tickId,
-      value: newValue
-    };
-
-    this.Values.push(valueObject);
-  }
-
-  /**
-   * @description Method for calculation average of values
-   * @param {number} tickId tickId of ending Period Time
-   */
-  _getAverage(tickId) {
-    let valueSum = 0;
-    let tickSum = 0;
-
-    for (let i = 0; i < this.Values.length; i++) {
-      let value = this.Values[i].value;
-
-      let tickDelta = 0;
-      //First time - assuming first value was valid for sampleTime
-      if (i === this.Values.length - 1) {
-        tickDelta = tickId - this.Values[i].tickId;
-      } else {
-        tickDelta = this.Values[i + 1].tickId - this.Values[i].tickId;
-      }
-
-      valueSum += value * this.Factor * tickDelta;
-      tickSum += tickDelta;
-    }
-
-    return valueSum / tickSum;
-  }
-
-  /**
-   * @description Method for refreshing value
-   * @param {number} tickId tickId of new operation
-   */
-  _refreshAverage(tickId) {
-    //MaxTickId - calculation of average should be performed based on MaxTickId of current period
-    this.Value = this._getAverage(this.MaxTickId);
-    return this.Value;
-  }
-
-  /**
    * @description Calculation interval associated with element
    */
   get CalculationInterval() {
@@ -173,26 +116,116 @@ class AverageElement extends CalculationElement {
     return "float";
   }
 
+  /**
+   * @description Method for calculating minimum tick id of given interval
+   * @param {number} tickId current tick id
+   * @param {number} calculationInterval calculation interval of average element
+   */
   static calculateMinTickId(tickId, calculationInterval) {
     if (calculationInterval <= 0) return tickId;
     return tickId - (tickId % calculationInterval);
   }
 
+  /**
+   * @description Method for calculating maximum tick id of given interval
+   * @param {number} tickId current tick id
+   * @param {number} calculationInterval calculation interval of average element
+   */
   static calculateMaxTickId(tickId, calculationInterval) {
     if (calculationInterval <= 0) return tickId;
     return tickId - (tickId % calculationInterval) + calculationInterval;
   }
 
+  /**
+   * @description Method for resetting values
+   */
+  _resetValues() {
+    this._values = [];
+  }
+
+  /**
+   * @description Method for adding new value
+   * @param {number} newValue new value to add
+   * @param {number} tickId tickId of new value
+   */
+  _addValue(newValue, tickId) {
+    if (newValue === null || newValue === undefined) {
+      throw new Error("newValue cannot be empty!");
+    }
+
+    if (tickId === null || tickId === undefined) {
+      throw new Error("tickId cannot be empty!");
+    }
+
+    let valueObject = {
+      tickId: tickId,
+      value: newValue
+    };
+
+    this.Values.push(valueObject);
+  }
+
+  /**
+   * @description Method for calculation average of values
+   * @param {number} tickId tickId of ending Period Time
+   */
+  _getAverage(tickId) {
+    if (this.Values.length === 0) {
+      return 0;
+    }
+
+    let valueSum = 0;
+    let tickSum = 0;
+
+    for (let i = 0; i < this.Values.length; i++) {
+      let value = this.Values[i].value;
+
+      let tickDelta = 0;
+      //First time - assuming first value was valid for sampleTime
+      if (i === this.Values.length - 1) {
+        tickDelta = tickId - this.Values[i].tickId;
+      } else {
+        tickDelta = this.Values[i + 1].tickId - this.Values[i].tickId;
+      }
+
+      valueSum += value * this.Factor * tickDelta;
+      tickSum += tickDelta;
+    }
+
+    return valueSum / tickSum;
+  }
+
+  /**
+   * @description Method for refreshing value
+   */
+  _refreshAverage() {
+    //MaxTickId - calculation of average should be performed based on MaxTickId of current period
+    this.Value = this._getAverage(this.MaxTickId);
+    return this.Value;
+  }
+
+  /**
+   * @description Method for checking if new calculation period should start
+   * @param {number} tickId tickId to check
+   */
   _shouldStartNewCalculationPeriod(tickId) {
     return tickId >= this.MaxTickId || tickId < this.MinTickId;
   }
 
-  _endCurrentCalculationPeriod(tickId, value) {
-    let valueToReturn = this._refreshAverage(tickId);
+  /**
+   * @description Method for closing current calculation period
+   */
+  _endCurrentCalculationPeriod() {
+    let valueToReturn = this._refreshAverage();
     this._resetValues();
     return valueToReturn;
   }
 
+  /**
+   * @description Method for setting new calculation period in average element
+   * @param {number} tickId tickIdOfNewPeriod
+   * @param {number} value new value
+   */
   _setNewCalculationPeriod(tickId, value) {
     this._minTickId = AverageElement.calculateMinTickId(
       tickId,
@@ -231,10 +264,7 @@ class AverageElement extends CalculationElement {
     }
 
     //In case new average period should be calculated
-    let valueToReturn = this._endCurrentCalculationPeriod(
-      tickNumber,
-      this.Variable.Value
-    );
+    let valueToReturn = this._endCurrentCalculationPeriod();
     this._setNewCalculationPeriod(tickNumber, this.Variable.Value);
 
     return valueToReturn;
