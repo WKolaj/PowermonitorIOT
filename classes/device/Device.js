@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const ArchiveManager = require("../archiveManager/ArchiveManager");
 const SumElement = require("../calculationElement/SumElement");
 const FactorElement = require("../calculationElement/FactorElement");
+const AverageElement = require("../calculationElement/AverageElement");
 const Sampler = require("../../classes/sampler/Sampler");
 
 class Device {
@@ -234,6 +235,9 @@ class Device {
       case "factorElement": {
         return this._createFactorElement(payload);
       }
+      case "averageElement": {
+        return this._createAverageElement(payload);
+      }
       default: {
         throw new Error(
           `Given calculation element is not recognized: ${payload.type}`
@@ -265,6 +269,20 @@ class Device {
       throw new Error("Calculation element name in payload is not defined");
 
     let calculationElementToAdd = new FactorElement(this);
+    await calculationElementToAdd.init(payload);
+    await this.addCalculationElement(calculationElementToAdd);
+    return calculationElementToAdd;
+  }
+
+  /**
+   * @description Method for creating calculaction element
+   * @param {object} payload payload to create calculation element
+   */
+  async _createAverageElement(payload) {
+    if (!payload.name)
+      throw new Error("Calculation element name in payload is not defined");
+
+    let calculationElementToAdd = new AverageElement(this);
     await calculationElementToAdd.init(payload);
     await this.addCalculationElement(calculationElementToAdd);
     return calculationElementToAdd;
@@ -344,7 +362,10 @@ class Device {
           )
         ) {
           let result = await calculationElement.refresh(tickNumber);
-          payloadToAppend[calculationElement.Id] = calculationElement;
+
+          //appending result only if refreshing object is not empty
+          if (result !== null && result !== undefined)
+            payloadToAppend[calculationElement.Id] = calculationElement;
         }
       } catch (err) {
         console.log(err);

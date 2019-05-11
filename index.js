@@ -1528,53 +1528,33 @@ let json3 = {
     name: "PAC3200",
     isActive: false,
     timeout: 500,
-    ipAdress: "192.168.0.211",
+    ipAdress: "localhost",
     unitId: 1,
     portNumber: 502,
     variables: [
       {
+        id: "123456",
         timeSample: 1,
         name: "Napiecie L1-N",
         offset: 1,
-        length: 2,
+        length: 1,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
-        archived: true
-      },
-      {
-        id: "1001",
-        timeSample: 1,
-        name: "Napiecie L2-N",
-        offset: 3,
-        length: 2,
-        fCode: 3,
-        value: 2,
-        type: "swappedFloat",
-        archived: true
-      },
-      {
-        id: "123456",
-        timeSample: 1,
-        name: "Napiecie L3-N",
-        offset: 5,
-        length: 2,
-        fCode: 3,
-        value: 3,
-        type: "swappedFloat",
+        type: "int16",
         archived: true
       }
     ],
     calculationElements: [
       {
         id: "9999",
-        name: "test factor",
-        sampleTime: 5,
-        factor: 2,
+        name: "test average",
+        sampleTime: 1,
+        calculationInterval: 10,
+        factor: 1,
         unit: "A",
         archived: true,
-        variableId: "1001",
-        type: "factorElement"
+        variableId: "123456",
+        type: "averageElement"
       }
     ],
     type: "mbDevice"

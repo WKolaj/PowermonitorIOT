@@ -140,6 +140,9 @@ class CalculationElement {
   async refresh(tickNumber) {
     let refreshResult = {};
     if (this.LastTickNumber) {
+      //Checking if time is increasing - skipping old async refresh actions
+      if (tickNumber < this.LastTickNumber) return refreshResult;
+
       refreshResult = await this._onRefresh(this.LastTickNumber, tickNumber);
     } else {
       refreshResult = await this._onFirstRefresh(tickNumber);
