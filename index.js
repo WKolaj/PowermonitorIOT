@@ -1554,7 +1554,8 @@ let json3 = {
         unit: "A",
         archived: true,
         variableId: "123456",
-        type: "averageElement"
+        type: "increaseElement",
+        overflow: 1000
       }
     ],
     type: "mbDevice"
