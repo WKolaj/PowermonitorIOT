@@ -5430,6 +5430,8 @@ describe("MBDevice", () => {
     let variable2Payload;
     let variable3;
     let variable3Payload;
+    let isDeviceConnected;
+    let isDeviceActive;
 
     let sumElement1;
     let sumElement1Payload;
@@ -5458,6 +5460,9 @@ describe("MBDevice", () => {
         timeout: 2000,
         unitId: 1
       };
+
+      isDeviceConnected = true;
+      isDeviceActive = true;
 
       initialRefreshResultPayload = {};
 
@@ -5576,6 +5581,9 @@ describe("MBDevice", () => {
       device = new MBDevice();
       await device.init(devicePayload);
 
+      device._driver._active = isDeviceActive;
+      device._driver._client.isOpen = isDeviceConnected;
+
       variable1 = await device.createVariable(variable1Payload);
       variable2 = await device.createVariable(variable2Payload);
       variable3 = await device.createVariable(variable3Payload);
@@ -5617,6 +5625,26 @@ describe("MBDevice", () => {
       sumElement2Payload.sampleTime = 3;
       sumElement3Payload.sampleTime = 4;
       tickNumber = 13;
+
+      let result = await exec();
+
+      expect(sumElement1RefreshMockFunc).not.toHaveBeenCalled();
+      expect(sumElement2RefreshMockFunc).not.toHaveBeenCalled();
+      expect(sumElement3RefreshMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should not call refresh method of any calculation elements if device is not active", async () => {
+      isDeviceActive = false;
+
+      let result = await exec();
+
+      expect(sumElement1RefreshMockFunc).not.toHaveBeenCalled();
+      expect(sumElement2RefreshMockFunc).not.toHaveBeenCalled();
+      expect(sumElement3RefreshMockFunc).not.toHaveBeenCalled();
+    });
+
+    it("should not call refresh method of any calculation elements if device is not connected", async () => {
+      isDeviceConnected = false;
 
       let result = await exec();
 

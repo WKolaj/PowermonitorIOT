@@ -137,14 +137,14 @@ class Device {
    * @description Is device connected? - should be override in child classes
    */
   get Connected() {
-    throw new Error("Not implemented");
+    return true;
   }
 
   /**
    * @description Is device active? this means, if driver is enabled to exchange data - should be override in child classes
    */
   get IsActive() {
-    throw new Error("Not implemented");
+    return true;
   }
 
   /**
@@ -345,11 +345,7 @@ class Device {
       result
     );
 
-    if (
-      finalResult !== undefined ||
-      finalResult === null ||
-      finalResult === {}
-    ) {
+    if (finalResult) {
       this.Events.emit("Refreshed", [this, finalResult, tickNumber]);
       this.archiveData(tickNumber, finalResult);
     }
@@ -368,10 +364,10 @@ class Device {
    * @param {*} payloadToAppend Payload to append by results of refresh
    */
   async _refreshCalculationElements(tickNumber, payloadToAppend) {
-    //if device is not connected or not active - return null
-    if (!this.IsActive || !this.Connected) return null;
-
     if (!payloadToAppend) payloadToAppend = {};
+
+    //if device is not connected or not active - return null
+    if (!this.IsActive || !this.Connected) return payloadToAppend;
 
     let allCalculationElements = Object.values(this.CalculationElements);
     for (let calculationElement of allCalculationElements) {
