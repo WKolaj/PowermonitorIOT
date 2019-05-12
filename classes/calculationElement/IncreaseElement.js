@@ -178,9 +178,9 @@ class IncreaseElement extends CalculationElement {
   _calculateIncrease() {
     //If counter overflow was reached
     if (this.MaxValue < this.MinValue) {
-      return this.Overflow - this.MinValue + this.MaxValue;
+      return this.Factor * (this.Overflow - this.MinValue + this.MaxValue);
     }
-    return this.MaxValue - this.MinValue;
+    return this.Factor * (this.MaxValue - this.MinValue);
   }
 
   /**
@@ -273,7 +273,6 @@ class IncreaseElement extends CalculationElement {
     } else {
       //If calculation mechanism in not active - check if it should be active and than activate it - start ne calculation period
       if (this._shouldStartCalculation(tickNumber)) {
-        console.log("starting calc period");
         this._setNewCalculationPeriod(tickNumber, this.Variable.Value);
         this._calculationActive = true;
       }
