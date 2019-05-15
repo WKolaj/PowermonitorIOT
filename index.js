@@ -1562,8 +1562,21 @@ let json3 = {
   }
 };
 
+let json4 = {
+  "5c9f8a7fd04bb119b3ad229f": {
+    id: "5c9f8a7fd04bb119b3ad229f",
+    name: "PAC3200",
+    isActive: false,
+    timeout: 500,
+    ipAdress: "localhost",
+    unitId: 1,
+    portNumber: 502,
+    type: "PAC3200TCP"
+  }
+};
+
 let exec = async () => {
-  await commInterface.init(json3);
+  await commInterface.init(json4);
   commInterface.startCommunicationWithAllDevices();
 
   for (let device of Object.values(commInterface.Devices)) {

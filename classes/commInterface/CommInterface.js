@@ -2,6 +2,8 @@ const Sampler = require("../sampler/Sampler");
 
 const MBDevice = require("../device/Modbus/MBDevice");
 
+const PAC3200TCP = require("../device/Modbus/Meters/PAC3200TCP");
+
 class CommInterface {
   /**
    * @description class representing communication interface of App
@@ -244,6 +246,9 @@ class CommInterface {
       case "mbDevice": {
         return this._createMBDevice(payload);
       }
+      case "PAC3200TCP": {
+        return this._createPAC3200TCPDevice(payload);
+      }
       default: {
         return Promise.reject(
           new Error(`Given device type is not recognized: ${payload.type}`)
@@ -260,6 +265,25 @@ class CommInterface {
     return new Promise(async (resolve, reject) => {
       try {
         let newDevice = new MBDevice();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for creating PAC3200TCP based on payload
+   * @param {object} payload
+   */
+  async _createPAC3200TCPDevice(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new PAC3200TCP();
         await newDevice.init(payload);
         this.Devices[newDevice.Id] = newDevice;
         this.Sampler.addDevice(newDevice);

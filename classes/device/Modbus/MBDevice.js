@@ -55,7 +55,7 @@ class MBDevice extends Device {
     if (payload.calculationElements)
       await this._initCalculationElements(payload.calculationElements);
 
-    //If type is given in payload - set it according to payload - otherwise set default mbDevice type
+    //If type is given in payload - set it according to payload - mechanism implemented to support child classes - otherwise set default mbDevice type
     this._type = payload.type ? payload.type : "mbDevice";
 
     //Connecting if device should be active according to payload
