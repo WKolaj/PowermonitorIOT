@@ -13,6 +13,14 @@ class CommInterface {
   }
 
   /**
+   * @description method for assigning commInterface to project
+   * @param {Object} project Project of application
+   */
+  assignToProject(project) {
+    this._project = project;
+  }
+
+  /**
    * @description method for initializing communication interface based on payload
    * @param payload payload to initalize
    */
@@ -31,6 +39,13 @@ class CommInterface {
         }
       }
     }
+  }
+
+  /**
+   * @description application project associated with device
+   */
+  get Project() {
+    return this._project;
   }
 
   /**
@@ -224,6 +239,15 @@ class CommInterface {
   }
 
   /**
+   * @description Getting all calculation elements from device
+   * @param {string} deviceId Device Id
+   */
+  getAllCalculationElements(deviceId) {
+    let device = this.getDevice(deviceId);
+    return Object.values(device.CalculationElements);
+  }
+
+  /**
    * @description Getting all devices
    */
   getAllDevices() {
@@ -296,6 +320,17 @@ class CommInterface {
   }
 
   /**
+   * @description Method for checking if device of given id exists
+   * @param {string} deviceId Id of device
+   */
+  doesDeviceExist(deviceId) {
+    //If commInterface was not initialized - Devices will be empty
+    if (!this.Devices) return false;
+
+    return this.Devices[deviceId] !== undefined;
+  }
+
+  /**
    * @description Method for getting device by device id
    * @param {string} deviceId Id of device
    */
@@ -349,6 +384,20 @@ class CommInterface {
 
     let device = this.getDevice(deviceId);
     return device.createVariable(payload);
+  }
+  /**
+   * @description Method for checking if variable exists
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   */
+  doesVariableExists(deviceId, variableId) {
+    //If commInterface was not initialized - Devices will be empty
+    if (!this.Devices) return false;
+
+    let device = this.Devices[deviceId];
+    if (!device) return false;
+    let variable = device.getVariable(variableId);
+    return variable !== undefined;
   }
 
   /**
@@ -490,6 +539,52 @@ class CommInterface {
     }
 
     return payloadToReturn;
+  }
+
+  /**
+   * @description Method for getting variable or calculation element - depending on given id
+   * @param {object} deviceId Id of device
+   * @param {string} elementId Id of variable or calculationElement
+   */
+  async getElement(deviceId, elementId) {
+    let device = await this.getDevice(deviceId);
+
+    return device.getElement(elementId);
+  }
+
+  /**
+   * @description Method for getting variable from device
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   */
+  async getValueOfElement(deviceId, elementId) {
+    let element = this.getElement(deviceId, elementId);
+    if (!element)
+      throw new Error(
+        `There is no variable or calcElement of given id ${elementId}`
+      );
+
+    let device = await this.getDevice(deviceId);
+
+    return device.getValueOfElement(elementId);
+  }
+
+  /**
+   * @description Method for getting variable from device
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   * @param {number} date date of sample
+   */
+  async getValueOfElementFromDB(deviceId, elementId, date) {
+    let element = this.getElement(deviceId, elementId);
+    if (!element)
+      throw new Error(
+        `There is no variable or calcElement of given id ${elementId}`
+      );
+
+    let device = await this.getDevice(deviceId);
+
+    return device.getValueOfElementFromDB(elementId, date);
   }
 }
 

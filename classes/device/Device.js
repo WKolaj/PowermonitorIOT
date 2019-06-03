@@ -526,6 +526,50 @@ class Device {
       ? this.ArchiveManager.getValue(date, calculationElementId)
       : Promise.resolve(undefined);
   }
+
+  /**
+   * @description Method for getting Variable or CalculationElement depending on id
+   * @param {string} elementId id of variable or calculation element
+   */
+  getElement(elementId) {
+    //Checking if there is a variable of given id or element of given id
+    let variable = this.Variables[elementId];
+    let element = this.CalculationElements[elementId];
+
+    if (variable) return variable;
+    if (element) return element;
+  }
+
+  /**
+   * @description Method for getting value of Variable or CalculationElement depending on id
+   * @param {string} elementId
+   */
+  getValueOfElement(elementId) {
+    //Checking if there is a variable of given id or element of given id
+    let variable = this.Variables[elementId];
+    let element = this.CalculationElements[elementId];
+
+    if (variable) return variable.Value;
+    if (element) return element.Value;
+  }
+
+  /**
+   * @description Method for getting value of Variable or CalculationElement depending on id from DB
+   * @param {string} elementId id of variable or calculation element
+   * @param {number} date
+   */
+  getValueOfElementFromDB(elementId, date) {
+    //Checking if there is a variable of given id or element of given id
+    let variable = this.Variables[elementId];
+    let element = this.CalculationElements[elementId];
+
+    if (variable) {
+      return this.getVariableValueFromDB(elementId, date);
+    }
+    if (element) {
+      return this.getCalculationElementValueFromDB(elementId, date);
+    }
+  }
 }
 
 module.exports = Device;

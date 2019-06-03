@@ -62,3 +62,9 @@ typings/
 
 # Database folder
 database
+
+#memoryTest folder
+_memoryTest
+
+#projectTest folder
+_projTest
