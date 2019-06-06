@@ -2,10 +2,16 @@ const PAC3200TCP = require("../../../classes/device/Modbus/Meters/PAC3200TCP");
 const config = require("config");
 
 let {
-  clearDirectory,
+  clearDirectoryAsync,
+  checkIfTableExists,
   checkIfColumnExists,
+  checkIfFileExistsAsync,
+  createDatabaseFile,
+  createDatabaseTable,
+  createDatabaseColumn,
+  readAllDataFromTable,
   snooze
-} = require("../../tools/tools.js");
+} = require("../../../utilities/utilities");
 
 describe("PAC3200TCP", () => {
   //Database directory should be cleared
@@ -17,8 +23,8 @@ describe("PAC3200TCP", () => {
   });
 
   afterEach(async () => {
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
+    await clearDirectoryAsync(db1Path);
+    await clearDirectoryAsync(db2Path);
   });
 
   describe("init", () => {

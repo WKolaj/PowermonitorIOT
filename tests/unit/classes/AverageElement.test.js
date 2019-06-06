@@ -2,15 +2,7 @@ const AverageElement = require("../../../classes/calculationElement/AverageEleme
 const config = require("config");
 const MBDevice = require("../../../classes/device/Modbus/MBDevice");
 
-let {
-  clearDirectory,
-  checkIfTableExists,
-  checkIfColumnExists,
-  createDatabaseFile,
-  createDatabaseTable,
-  createDatabaseColumn,
-  readAllDataFromTable
-} = require("../../tools/tools.js");
+let { clearDirectoryAsync } = require("../../../utilities/utilities");
 
 describe("AverageElement", () => {
   //Path to primary database
@@ -24,8 +16,8 @@ describe("AverageElement", () => {
   });
 
   afterEach(async () => {
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
+    await clearDirectoryAsync(db1Path);
+    await clearDirectoryAsync(db2Path);
   });
 
   describe("constructor", () => {

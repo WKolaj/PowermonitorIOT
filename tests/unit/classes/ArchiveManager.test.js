@@ -4,14 +4,14 @@ const fs = require("fs");
 const path = require("path");
 
 let {
-  clearDirectory,
+  clearDirectoryAsync,
   checkIfTableExists,
   checkIfColumnExists,
   createDatabaseFile,
   createDatabaseTable,
   createDatabaseColumn,
   readAllDataFromTable
-} = require("../../tools/tools.js");
+} = require("../../../utilities/utilities");
 
 describe("ArchiveManager", () => {
   //Path to primary database
@@ -25,8 +25,8 @@ describe("ArchiveManager", () => {
   });
 
   afterEach(async () => {
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
+    await clearDirectoryAsync(db1Path);
+    await clearDirectoryAsync(db2Path);
   });
 
   describe("constructor", () => {

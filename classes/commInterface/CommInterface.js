@@ -212,24 +212,6 @@ class CommInterface {
   }
 
   /**
-   * @description Checking if variable of id exists
-   * @param {string} variableId Variable id
-   */
-  _doesVariableExistis(variableId) {
-    let allVariables = this.getAllVariableIds();
-    return allVariables.includes(variableId);
-  }
-
-  /**
-   * @description Checking if calculation element of id exists
-   * @param {string} calculationElementId Calculation element id
-   */
-  _doesCalculationElementExistis(calculationElementId) {
-    let allCalcElements = this.getAllCalculationElementsIds();
-    return allCalcElements.includes(calculationElementId);
-  }
-
-  /**
    * @description Getting all variables from device
    * @param {string} deviceId Device Id
    */
@@ -374,7 +356,7 @@ class CommInterface {
    * @param {object} payload payload of variable
    */
   async createVariable(deviceId, payload) {
-    if (payload.id && this._doesVariableExistis(payload.id)) {
+    if (payload.id && this.doesVariableExist(deviceId, payload.id)) {
       throw new Error(
         `Variable of id: ${
           payload.id
@@ -385,12 +367,13 @@ class CommInterface {
     let device = this.getDevice(deviceId);
     return device.createVariable(payload);
   }
+
   /**
    * @description Method for checking if variable exists
    * @param {string} deviceId Id of device
    * @param {string} variableId Id of variable
    */
-  doesVariableExists(deviceId, variableId) {
+  doesVariableExist(deviceId, variableId) {
     //If commInterface was not initialized - Devices will be empty
     if (!this.Devices) return false;
 
@@ -470,7 +453,7 @@ class CommInterface {
    * @param {object} payload payload of calculation element
    */
   async createCalculationElement(deviceId, payload) {
-    if (payload.id && this._doesCalculationElementExistis(payload.id)) {
+    if (payload.id && this.doesCalculationElementExist(deviceId, payload.id)) {
       throw new Error(
         `Calculation element of id: ${
           payload.id
@@ -480,6 +463,21 @@ class CommInterface {
 
     let device = this.getDevice(deviceId);
     return device.createCalculationElement(payload);
+  }
+
+  /**
+   * @description Method for checking if calculationElement exists
+   * @param {string} deviceId Id of device
+   * @param {string} calcElementId Id of calculation element
+   */
+  doesCalculationElementExist(deviceId, calcElementId) {
+    //If commInterface was not initialized - Devices will be empty
+    if (!this.Devices) return false;
+
+    let device = this.Devices[deviceId];
+    if (!device) return false;
+    let calcElement = device.getCalculationElement(calcElementId);
+    return calcElement !== undefined;
   }
 
   /**
@@ -542,6 +540,22 @@ class CommInterface {
   }
 
   /**
+   * @description Method for checking if calculationElement or variable exists
+   * @param {string} deviceId Id of device
+   * @param {string} elementId Id of calculation element or variable
+   */
+  doesElementExist(deviceId, elementId) {
+    //If commInterface was not initialized - Devices will be empty
+    if (!this.Devices) return false;
+
+    let device = this.Devices[deviceId];
+    if (!device) return false;
+
+    let element = device.getElement(elementId);
+    return element !== undefined;
+  }
+
+  /**
    * @description Method for getting variable or calculation element - depending on given id
    * @param {object} deviceId Id of device
    * @param {string} elementId Id of variable or calculationElement
@@ -549,7 +563,13 @@ class CommInterface {
   async getElement(deviceId, elementId) {
     let device = await this.getDevice(deviceId);
 
-    return device.getElement(elementId);
+    let element = device.getElement(elementId);
+    if (!element)
+      throw new Error(
+        `There is no variable and calcElement of given id ${elementId}`
+      );
+
+    return element;
   }
 
   /**
@@ -558,8 +578,7 @@ class CommInterface {
    * @param {string} variableId Id of variable
    */
   async getValueOfElement(deviceId, elementId) {
-    let element = this.getElement(deviceId, elementId);
-    if (!element)
+    if (!this.doesElementExist(deviceId, elementId))
       throw new Error(
         `There is no variable or calcElement of given id ${elementId}`
       );
@@ -575,9 +594,8 @@ class CommInterface {
    * @param {string} variableId Id of variable
    * @param {number} date date of sample
    */
-  async getValueOfElementFromDB(deviceId, elementId, date) {
-    let element = this.getElement(deviceId, elementId);
-    if (!element)
+  async getValueOfElementFromDatabase(deviceId, elementId, date) {
+    if (!this.doesElementExist(deviceId, elementId))
       throw new Error(
         `There is no variable or calcElement of given id ${elementId}`
       );

@@ -1,6 +1,16 @@
 let MBDriver = require("../../../classes/driver/Modbus/MBDriver");
 
-let { snooze } = require("../../tools/tools.js");
+let {
+  clearDirectoryAsync,
+  checkIfTableExists,
+  checkIfColumnExists,
+  checkIfFileExists,
+  createDatabaseFile,
+  createDatabaseTable,
+  createDatabaseColumn,
+  readAllDataFromTable,
+  snooze
+} = require("../../../utilities/utilities");
 
 function MockModbusRTU() {
   this._id = 0;

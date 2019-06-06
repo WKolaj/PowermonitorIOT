@@ -12,10 +12,16 @@ const MBUInt32Variable = require("../../../classes/variable/Modbus/MBUInt32Varia
 const config = require("config");
 
 let {
-  clearDirectory,
+  clearDirectoryAsync,
+  checkIfTableExists,
   checkIfColumnExists,
+  checkIfFileExistsAsync,
+  createDatabaseFile,
+  createDatabaseTable,
+  createDatabaseColumn,
+  readAllDataFromTable,
   snooze
-} = require("../../tools/tools.js");
+} = require("../../../utilities/utilities");
 
 describe("MBDevice", () => {
   //Database directory should be cleared
@@ -27,8 +33,8 @@ describe("MBDevice", () => {
   });
 
   afterEach(async () => {
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
+    await clearDirectoryAsync(db1Path);
+    await clearDirectoryAsync(db2Path);
   });
 
   describe("constructor", () => {

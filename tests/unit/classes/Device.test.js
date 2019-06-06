@@ -3,12 +3,16 @@ const config = require("config");
 const path = require("path");
 
 let {
-  clearDirectory,
+  clearDirectoryAsync,
   checkIfTableExists,
-  checkIfFileExists,
   checkIfColumnExists,
+  checkIfFileExistsAsync,
+  createDatabaseFile,
+  createDatabaseTable,
+  createDatabaseColumn,
+  readAllDataFromTable,
   snooze
-} = require("../../tools/tools.js");
+} = require("../../../utilities/utilities");
 
 describe("Device", () => {
   let db1Path;
@@ -20,8 +24,8 @@ describe("Device", () => {
   });
 
   afterEach(async () => {
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
+    await clearDirectoryAsync(db1Path);
+    await clearDirectoryAsync(db2Path);
   });
 
   describe("constructor", () => {
@@ -143,7 +147,7 @@ describe("Device", () => {
       await exec();
 
       let filePath = path.join(db1Path, `archive_${device.Id}.db`);
-      let fileExists = checkIfFileExists(filePath);
+      let fileExists = await checkIfFileExistsAsync(filePath);
       expect(fileExists).toEqual(true);
     });
 

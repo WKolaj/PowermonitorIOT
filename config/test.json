@@ -1,4 +1,5 @@
 {
   "db1Path": "database/test/db1",
-  "db2Path": "database/test/db2"
+  "db2Path": "database/test/db2",
+  "projPath": "project/test"
 }

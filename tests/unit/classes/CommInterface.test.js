@@ -1,12 +1,12 @@
 const config = require("config");
 
 let {
-  checkIfFileExists,
+  clearDirectoryAsync,
   checkIfTableExists,
   checkIfColumnExists,
-  clearDirectory,
+  checkIfFileExistsAsync,
   snooze
-} = require("../../tools/tools.js");
+} = require("../../../utilities/utilities");
 
 let commInterface;
 
@@ -272,13 +272,30 @@ describe("CommInterface", () => {
     jest.resetModules();
     //waiting for all sampling actions to end being invoke;
     await snooze(100);
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
+    await clearDirectoryAsync(db1Path);
+    await clearDirectoryAsync(db2Path);
   });
 
   describe("constructor", () => {
     it("should set Initialized to false", () => {
       expect(commInterface.Initialized).toBeFalsy();
+    });
+  });
+
+  describe("assignToProject", () => {
+    let project;
+
+    beforeEach(() => {
+      project = "testProject";
+    });
+
+    let exec = () => {
+      return commInterface.assignToProject(project);
+    };
+
+    it("should set project to Project property", () => {
+      exec();
+      expect(commInterface.Project).toEqual(project);
     });
   });
 
@@ -297,8 +314,8 @@ describe("CommInterface", () => {
     });
 
     afterEach(async () => {
-      await clearDirectory(db1Path);
-      await clearDirectory(db2Path);
+      await clearDirectoryAsync(db1Path);
+      await clearDirectoryAsync(db2Path);
     });
 
     let exec = async () => {
@@ -556,7 +573,7 @@ describe("CommInterface", () => {
       for (let deviceId of allDevicesIds) {
         let device = commInterface.getDevice(deviceId);
 
-        let fileForDeviceExists = await checkIfFileExists(
+        let fileForDeviceExists = await checkIfFileExistsAsync(
           device.ArchiveManager.FilePath
         );
         expect(fileForDeviceExists).toEqual(true);
@@ -695,7 +712,7 @@ describe("CommInterface", () => {
       return commInterface.createNewDevice(payload);
     };
 
-    it("should create a new device based on given arguments", async () => {
+    it("should create a new MBDevice based on given arguments", async () => {
       await exec();
 
       let allDevices = commInterface.getAllDevices();
@@ -715,6 +732,45 @@ describe("CommInterface", () => {
       expect(device.IsActive).toEqual(isActive);
       expect(device.Variables).toMatchObject({});
       expect(device.CalculationElements).toMatchObject({});
+    });
+
+    it("should create a new PAC3200TCP based on given arguments", async () => {
+      deviceType = "PAC3200TCP";
+      variables = [];
+      calculationElements = [];
+
+      await exec();
+
+      let allDevices = commInterface.getAllDevices();
+
+      expect(allDevices).toBeDefined();
+      expect(allDevices.length).toEqual(1);
+
+      let device = commInterface.getDevice(id);
+
+      expect(device).toBeDefined();
+      expect(device.Id).toEqual(id);
+      expect(device.Name).toEqual(name);
+      expect(device.IPAdress).toEqual(ipAdress);
+      expect(device.PortNumber).toEqual(portNumber);
+      expect(device.Timeout).toEqual(timeout);
+      expect(device.UnitId).toEqual(unitId);
+      expect(device.IsActive).toEqual(isActive);
+    });
+
+    it("should throw if payload is undefined", async () => {
+      await commInterface.init();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await commInterface.createNewDevice();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
     it("should return created device", async () => {
@@ -2627,6 +2683,55 @@ describe("CommInterface", () => {
     });
   });
 
+  describe("getAllCalculationElements", () => {
+    let deviceId;
+    let initPayload;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1234";
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+      return commInterface.getAllCalculationElements(deviceId);
+    };
+
+    it("should return all calculation elements of device of given id", async () => {
+      let result = await exec();
+
+      let calcElement1 = commInterface.getCalculationElement("1234", "1001");
+      let calcElement2 = commInterface.getCalculationElement("1234", "1002");
+
+      expect(result.length).toEqual(2);
+      expect(result).toContain(calcElement1);
+      expect(result).toContain(calcElement2);
+    });
+
+    it("should throw if there is no device of given id", async () => {
+      deviceId = "4321";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should return empty array if device has no calcElements", async () => {
+      initPayload[deviceId].calculationElements = undefined;
+
+      let result = await exec();
+
+      expect(result).toEqual([]);
+    });
+  });
+
   describe("getAllCalculationElementsIds", () => {
     let deviceId;
     let initPayload;
@@ -2748,44 +2853,6 @@ describe("CommInterface", () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual([]);
-    });
-  });
-
-  describe("_doesVariableExistis", () => {
-    let initPayload;
-    let variableId;
-
-    beforeEach(() => {
-      initPayload = JSON.parse(testPayload);
-      variableId = "0005";
-    });
-
-    let exec = async () => {
-      await commInterface.init(initPayload);
-      return commInterface._doesVariableExistis(variableId);
-    };
-
-    it("should return true if variable already exists in commInterface", async () => {
-      let result = await exec();
-
-      expect(result).toBeTruthy();
-    });
-
-    it("should return false if variable does not exists in commInterface", async () => {
-      variableId = "8765";
-      let result = await exec();
-
-      expect(result).toBeFalsy();
-    });
-
-    it("should return false if variable does not exists in commInterface end there are no variables added", async () => {
-      initPayload["1234"].variables = undefined;
-      initPayload["1235"].variables = undefined;
-      initPayload["1236"].variables = undefined;
-
-      let result = await exec();
-
-      expect(result).toBeFalsy();
     });
   });
 
@@ -3089,6 +3156,44 @@ describe("CommInterface", () => {
     });
   });
 
+  describe("doesDeviceExists", () => {
+    let initPayload;
+    let deviceId;
+    let initCommInterface;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+      initCommInterface = true;
+    });
+
+    let exec = async () => {
+      if (initCommInterface) await commInterface.init(initPayload);
+
+      return commInterface.doesDeviceExist(deviceId);
+    };
+
+    it("should return true if device of given id exists", async () => {
+      let result = await exec();
+
+      expect(result).toBeTruthy();
+    });
+
+    it("should return false if device of given id does not exist", async () => {
+      deviceId = "4321";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if comm has not been initialized", async () => {
+      initCommInterface = false;
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+  });
+
   describe("removeDevice", () => {
     let initPayload;
     let deviceId;
@@ -3180,7 +3285,7 @@ describe("CommInterface", () => {
     it("should not delete database file associated with device", async () => {
       let result = await exec();
 
-      let fileExists = checkIfFileExists(result.ArchiveManager.FilePath);
+      let fileExists = checkIfFileExistsAsync(result.ArchiveManager.FilePath);
 
       expect(fileExists).toBeTruthy();
     });
@@ -3797,8 +3902,8 @@ describe("CommInterface", () => {
       ).toEqual(3);
     });
 
-    it("should throw and not add variable if variable of given id already exists", async () => {
-      variableId = "0002";
+    it("should throw and not add variable if variable of given id already exists in this device", async () => {
+      variableId = "0005";
 
       await expect(
         new Promise(async (resolve, reject) => {
@@ -4562,6 +4667,60 @@ describe("CommInterface", () => {
       );
 
       expect(columnExists).toBeFalsy();
+    });
+  });
+
+  describe("doesVariableExist", () => {
+    let initPayload;
+    let initCommInterface;
+    let deviceId;
+    let variableId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+      variableId = "0005";
+      initCommInterface = true;
+    });
+
+    let exec = async () => {
+      if (initCommInterface) await commInterface.init(initPayload);
+      return commInterface.doesVariableExist(deviceId, variableId);
+    };
+
+    it("should return true if device and variable exist", async () => {
+      let result = await exec();
+
+      expect(result).toBeTruthy();
+    });
+
+    it("should return false if device exists and variable does not", async () => {
+      variableId = "5432";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if device does not exist and variable exists", async () => {
+      deviceId = "5432";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if device and variable do not exist", async () => {
+      deviceId = "5432";
+      variableId = "4321";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if commInterface has not been initialized", async () => {
+      initCommInterface = false;
+      let result = await exec();
+
+      expect(result).toBeFalsy();
     });
   });
 
@@ -5428,6 +5587,383 @@ describe("CommInterface", () => {
 
     it("should throw if there is no variable of given id", async () => {
       calculationElementId = 987654321;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("doesCalculationElementExist", () => {
+    let initPayload;
+    let initCommInterface;
+    let deviceId;
+    let calcElementId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1234";
+      calcElementId = "1002";
+      initCommInterface = true;
+    });
+
+    let exec = async () => {
+      if (initCommInterface) await commInterface.init(initPayload);
+      return commInterface.doesCalculationElementExist(deviceId, calcElementId);
+    };
+
+    it("should return true if device and calcElement exist", async () => {
+      let result = await exec();
+
+      expect(result).toBeTruthy();
+    });
+
+    it("should return false if device exists and calcElement does not", async () => {
+      calcElementId = "5432";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if device does not exist and calcElement exists", async () => {
+      deviceId = "5432";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if device and calcElement do not exist", async () => {
+      deviceId = "5432";
+      calcElementId = "4321";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if commInterface has not been initialized", async () => {
+      initCommInterface = false;
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+  });
+
+  describe("doesElementExist", () => {
+    let initPayload;
+    let initCommInterface;
+    let deviceId;
+    let elementId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1234";
+      elementId = "0002";
+      initCommInterface = true;
+    });
+
+    let exec = async () => {
+      if (initCommInterface) await commInterface.init(initPayload);
+      return commInterface.doesElementExist(deviceId, elementId);
+    };
+
+    it("should return true if device and variable exist", async () => {
+      let result = await exec();
+
+      expect(result).toBeTruthy();
+    });
+
+    it("should return true if device and calcElement exist", async () => {
+      elementId = "1002";
+      let result = await exec();
+
+      expect(result).toBeTruthy();
+    });
+
+    it("should return false if device exists and calcElement and variable do not", async () => {
+      elementId = "5432";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if device does not exist and variable exists", async () => {
+      deviceId = "5432";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if device does not exist and calcElement exists", async () => {
+      deviceId = "5432";
+      elementId = "1002";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if device and calcElement and variable do not exist", async () => {
+      deviceId = "5432";
+      elementId = "4321";
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false if commInterface has not been initialized", async () => {
+      initCommInterface = false;
+      let result = await exec();
+
+      expect(result).toBeFalsy();
+    });
+  });
+
+  describe("getElement", () => {
+    let initPayload;
+    let deviceId;
+    let elementId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1234";
+      elementId = "0002";
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+      return commInterface.getElement(deviceId, elementId);
+    };
+
+    it("should return variable if it exists", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(
+        commInterface.getDevice(deviceId).Variables[elementId]
+      );
+    });
+
+    it("should return calculationElement if it exists", async () => {
+      elementId = "1002";
+      let result = await exec();
+
+      expect(result).toEqual(
+        commInterface.getDevice(deviceId).CalculationElements[elementId]
+      );
+    });
+
+    it("should throw if device does not exists", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calculationElement and variable do not exist", async () => {
+      elementId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getValueOfElement", () => {
+    let initPayload;
+    let deviceId;
+    let elementId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1234";
+      elementId = "0002";
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+      return commInterface.getValueOfElement(deviceId, elementId);
+    };
+
+    it("should return value of variable if it exists", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(
+        commInterface.getVariable(deviceId, elementId).Value
+      );
+    });
+
+    it("should return value of calculationElement if it exists", async () => {
+      elementId = "1002";
+      let result = await exec();
+
+      expect(result).toEqual(
+        commInterface.getCalculationElement(deviceId, elementId).Value
+      );
+    });
+
+    it("should throw if device does not exists", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calculationElement and variable do not exist", async () => {
+      elementId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getValueOfElementFromDatabase", () => {
+    let initPayload;
+    let deviceId;
+    let tickId1;
+    let tickId2;
+    let tickId3;
+    let varValue1;
+    let varValue2;
+    let varValue3;
+    let variableId;
+    let calculationElementId;
+    let elementId;
+
+    beforeEach(() => {
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1236";
+      variableId = "0008";
+      calculationElementId = "3001";
+      elementId = "0008";
+
+      tickId1 = 101;
+      tickId2 = 103;
+      tickId3 = 105;
+
+      varValue1 = 123.321;
+      varValue2 = 234.432;
+      varValue3 = 345.543;
+      calcElementValue1 = 321.123;
+      calcElementValue2 = 432.234;
+      calcElementValue3 = 543.345;
+
+      tickId = tickId2;
+    });
+
+    let exec = async () => {
+      await commInterface.init(initPayload);
+
+      if (tickId1 && varValue1 && calcElementValue1)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId1, {
+            [variableId]: varValue1,
+            [calculationElementId]: calcElementValue1
+          });
+
+      if (tickId2 && varValue2 && calcElementValue2)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId2, {
+            [variableId]: varValue2,
+            [calculationElementId]: calcElementValue2
+          });
+
+      if (tickId3 && varValue3 && calcElementValue3)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId3, {
+            [variableId]: varValue3,
+            [calculationElementId]: calcElementValue3
+          });
+
+      return commInterface.getValueOfElementFromDatabase(
+        deviceId,
+        elementId,
+        tickId
+      );
+    };
+
+    it("should get value of variable from database if it exists", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId]: varValue2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of variable of highest date if given date is greater than given in databse from database if variable exists", async () => {
+      tickId = 109;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId3]: varValue3
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of variable of highest date, lower than given in method if there is no date in database if variable exists", async () => {
+      tickId = 104;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId2]: varValue2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return {} if date is smaller than written in database", async () => {
+      tickId = 99;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should throw if there is no variable and calculationElement of given id", async () => {
+      elementId = 987654321;
 
       await expect(
         new Promise(async (resolve, reject) => {

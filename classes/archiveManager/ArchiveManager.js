@@ -1,7 +1,7 @@
 const path = require("path");
 const config = require("config");
 const sqlite3 = require("sqlite3");
-const { isObjectEmpty } = require("../../utility/utility");
+const { isObjectEmpty } = require("../../utilities/utilities");
 
 class ArchiveManager {
   /**

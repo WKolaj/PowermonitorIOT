@@ -3,14 +3,16 @@ const config = require("config");
 const MBDevice = require("../../../classes/device/Modbus/MBDevice");
 
 let {
-  clearDirectory,
+  clearDirectoryAsync,
   checkIfTableExists,
   checkIfColumnExists,
+  checkIfFileExistsAsync,
   createDatabaseFile,
   createDatabaseTable,
   createDatabaseColumn,
-  readAllDataFromTable
-} = require("../../tools/tools.js");
+  readAllDataFromTable,
+  snooze
+} = require("../../../utilities/utilities");
 
 describe("IncreaseElement", () => {
   //Path to primary database
@@ -24,8 +26,8 @@ describe("IncreaseElement", () => {
   });
 
   afterEach(async () => {
-    await clearDirectory(db1Path);
-    await clearDirectory(db2Path);
+    await clearDirectoryAsync(db1Path);
+    await clearDirectoryAsync(db2Path);
   });
 
   describe("constructor", () => {

@@ -8,14 +8,15 @@ const {
   readDirAsync,
   createDirAsync,
   checkIfDirectoryExistsAsync,
-  checkIfFileExistsAsync
-} = require("../../utility/utility");
+  checkIfFileExistsAsync,
+  unlinkAnsync
+} = require("../../utilities/utilities");
 
 class ProjectContentManager {
   /**
    * @description Class for managing content of project - including storing it inside project directory
-   * @param {*} project
-   * @param {*} projectDirectoryName
+   * @param {object} project
+   * @param {string} projectDirectoryName
    */
   constructor(project, projectDirectoryName) {
     this._projectRelativePath = projectDirectoryName;
@@ -53,6 +54,7 @@ class ProjectContentManager {
    * @param {string} deviceId id of device
    */
   static _getDeviceFileName(deviceId) {
+    if (!deviceId) throw new Error("deviceId cannot be empty");
     return `${deviceId}.json`;
   }
 
@@ -99,13 +101,6 @@ class ProjectContentManager {
   }
 
   /**
-   * @description Method for creating project directory
-   */
-  async _createProjectDir() {
-    return createDirAsync(this.ProjectAbsolutePath);
-  }
-
-  /**
    * @description Method for creating empty project directory - if it does not exists
    */
   async _createProjectDirIfNotExists() {
@@ -140,6 +135,9 @@ class ProjectContentManager {
   async _getAllDeviceIdsFromDir() {
     let ids = [];
 
+    let dirExists = await checkIfDirectoryExistsAsync(this.DeviceDirPath);
+    if (!dirExists) return ids;
+
     let files = await readDirAsync(this.DeviceDirPath);
     if (!files) return ids;
 
@@ -156,13 +154,6 @@ class ProjectContentManager {
    */
   async _checkIfDeviceDirExists() {
     return checkIfDirectoryExistsAsync(this.DeviceDirPath);
-  }
-
-  /**
-   * @description Method for creating device directory
-   */
-  async _createDeviceDir() {
-    return createDirAsync(this.DeviceDirPath);
   }
 
   /**
@@ -326,6 +317,17 @@ class ProjectContentManager {
   }
 
   /**
+   * @description Method for deleting device file
+   * @param {string} deviceId
+   */
+  async _deleteDeviceFile(deviceId) {
+    await this._createDeviceDirIfNotExists();
+
+    let deviceFilePath = this._getDeviceFilePath(deviceId);
+    return unlinkAnsync(deviceFilePath);
+  }
+
+  /**
    * @description Method for getting (creating) payload of whole commInterface based on device files content
    */
   async _getInitialPayloadFromFiles() {
@@ -352,6 +354,14 @@ class ProjectContentManager {
    */
   async saveDevice(deviceId) {
     return this._saveDeviceFile(deviceId);
+  }
+
+  /**
+   * @description Method for saving device content to file
+   * @param {string} deviceId
+   */
+  async deleteDevice(deviceId) {
+    return this._deleteDeviceFile(deviceId);
   }
 
   /**
