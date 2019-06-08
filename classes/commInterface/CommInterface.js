@@ -174,6 +174,29 @@ class CommInterface {
   }
 
   /**
+   * @description Method for getting all values from device
+   * @param {object} deviceId id of device
+   */
+  getAllValuesFromDevice(deviceId) {
+    let device = this.getDevice(deviceId);
+
+    let collectionToReturn = {};
+
+    //Inserting all variables values
+    let allVariables = Object.values(device.Variables);
+    for (let variable of allVariables) {
+      collectionToReturn[variable.Id] = variable.Value;
+    }
+
+    //Inserting all calculation elements values
+    let allCalculationElements = Object.values(device.CalculationElements);
+    for (let calculationElement of allCalculationElements) {
+      collectionToReturn[calculationElement.Id] = calculationElement.Value;
+    }
+    return collectionToReturn;
+  }
+
+  /**
    * @description Method for getting all variable ids
    */
   getAllVariableIds() {

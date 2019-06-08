@@ -462,7 +462,7 @@ class Device {
    * @description Generating random id
    */
   static generateRandId() {
-    return mongoose.Types.ObjectId();
+    return mongoose.Types.ObjectId().toHexString();
   }
 
   /**

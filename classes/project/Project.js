@@ -122,7 +122,7 @@ class Project {
    */
   async createDevice(payload) {
     let result = await this.CommInterface.createNewDevice(payload);
-    await this.ProjectContentManager.saveDevice(id);
+    await this.ProjectContentManager.saveDevice(payload.id);
     return result;
   }
 
@@ -224,6 +224,14 @@ class Project {
    */
   async getAllCalcElements(deviceId) {
     return this.CommInterface.getAllCalculationElements(deviceId);
+  }
+
+  /**
+   * @description Method for getting all values from device
+   * @param {string} deviceId device id
+   */
+  async getAllValues(deviceId) {
+    return this.CommInterface.getAllValuesFromDevice(deviceId);
   }
 
   /**

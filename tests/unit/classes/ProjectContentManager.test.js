@@ -2650,7 +2650,7 @@ describe("ProjectContentManager", () => {
     });
   });
 
-  describe("saveAllDevices", () => {
+  describe("saveProject", () => {
     let project;
     let projectDirName;
     let projectContentManager;
