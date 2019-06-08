@@ -6,17 +6,22 @@ class Variable {
   /**
    * @description Base class representing Variable
    * @param {object} device device associated with variable
-   * @param {object} payload variable payload
    */
-  constructor(device, payload) {
+  constructor(device) {
     if (!device) throw new Error("Variable device cannot be empty");
-    if (!payload) throw new Error("Payload cannot be empty");
-    if (!payload.name) throw new Error("Payload Name cannot be empty");
 
     this._device = device;
-    this._name = payload.name;
     this._events = new EventEmitter();
-    this._type = undefined;
+  }
+
+  /**
+   * @description Method for initializing variable by payload
+   * @param {object} payload variable payload
+   */
+  init(payload) {
+    if (!payload) throw new Error("Payload cannot be empty");
+    if (!payload.name) throw new Error("Payload Name cannot be empty");
+    this._name = payload.name;
 
     //If time sample not defined - defininf as 1
     if (!payload.timeSample) payload.timeSample = 1;
@@ -169,24 +174,23 @@ class Variable {
   }
 
   /**
-   * @description Method for generating new variable based on given payload - to be overriten in child classes
+   * @description Method for editing variable based on given payload
    */
   editWithPayload(payload) {
     //Coping all neccessary data to payload
-    payload.id = this.Id;
+    if (payload.id && payload.id !== this.Id)
+      throw new Error(
+        `Given id: ${payload.id} is different than variable id: ${this.Id}`
+      );
 
     //If payload has no varaibles define - define it on the basis of current values;
-    if (!payload.timeSample) payload.timeSample = this.TimeSample;
-    if (!payload.name) payload.name = this.Name;
-    if (payload.archived === undefined) payload.archived = this.Archived;
-    if (!payload.unit) payload.unit = this.Unit;
+    if (payload.timeSample) this.TimeSample = payload.timeSample;
+    if (payload.name) this._name = payload.name;
+    if (payload.archived !== undefined) this._archived = payload.archived;
+    if (payload.unit) this._unit = payload.unit;
 
-    let editedVariable = new Variable(this.Device, payload);
-
-    //Reassigining events;
-    editedVariable._events = this.Events;
-    //Creating new value from payload
-    return editedVariable;
+    //returning edited variable
+    return this;
   }
 }
 

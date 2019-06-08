@@ -14,15 +14,22 @@ class MBBooleanVariable extends MBVariable {
   /**
    * @description Modbus Boolean variable
    * @param {Object} device Device associated with variable
-   * @param {Object} payload Variable payload
    */
-  constructor(device, payload) {
+  constructor(device) {
+    super(device);
+  }
+
+  /**
+   * @description Method for initializing variable by payload
+   * @param {object} payload variable payload
+   */
+  init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 1;
     payload.getSingleFCode = 1;
     payload.setSingleFCode = 15;
 
-    super(device, payload);
+    super.init(payload);
 
     this._type = "boolean";
   }
@@ -51,19 +58,14 @@ class MBBooleanVariable extends MBVariable {
   }
 
   /**
-   * @description Method for generating new variable based on given payload
+   * @description Method for edditing variable
+   * @param {Object} payload Payload to edit
    */
   editWithPayload(payload) {
-    //Creating new value from payload
-    let editedVariable = new MBBooleanVariable(
-      this.Device,
-      this._generatePayloadToEdit(payload)
-    );
-
-    //Reassigining events;
-    editedVariable._events = this.Events;
-
-    return editedVariable;
+    payload.length = 1;
+    payload.getSingleFCode = 1;
+    payload.setSingleFCode = 15;
+    return super.editWithPayload(payload);
   }
 }
 

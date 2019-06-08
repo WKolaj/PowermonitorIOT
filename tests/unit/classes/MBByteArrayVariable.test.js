@@ -3,11 +3,34 @@ const MBByteArrayVariable = require("../../../classes/variable/Modbus/MBByteArra
 describe("MBByteArrayVariable", () => {
   describe("constructor", () => {
     let device;
+
+    beforeEach(() => {
+      device = "test device";
+    });
+
+    let exec = () => {
+      return new MBByteArrayVariable(device);
+    };
+
+    it("should throw if device is empty", () => {
+      expect(() => new MBByteArrayVariable()).toThrow();
+    });
+
+    it("should create new MBByteArrayVariable and assign its device", () => {
+      let result = exec();
+
+      expect(result.Device).toEqual(device);
+    });
+  });
+
+  describe("init", () => {
+    let device;
     let name;
     let fcode;
     let offset;
     let length;
     let payload;
+    let variable;
 
     beforeEach(() => {
       device = {
@@ -30,28 +53,30 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      return new MBByteArrayVariable(device, payload);
+      variable = new MBByteArrayVariable(device);
+      return variable.init(payload);
     };
 
     it("should create new MBByteArray based on given arguments", () => {
-      let result = exec();
+      exec();
 
-      expect(result).toBeDefined();
-      expect(result.Device).toEqual(device);
-      expect(result.Name).toEqual(name);
-      expect(result.FCode).toEqual(fcode);
-      expect(result.Offset).toEqual(offset);
-      expect(result.Length).toEqual(length);
+      expect(variable.Name).toEqual(name);
+      expect(variable.FCode).toEqual(fcode);
+      expect(variable.Offset).toEqual(offset);
+      expect(variable.Length).toEqual(length);
     });
 
     it("should throw if payload is empty", () => {
-      expect(() => new MBByteArrayVariable(device)).toThrow();
+      expect(() => {
+        variable = new MBByteArrayVariable(device);
+        variable.init();
+      }).toThrow();
     });
 
     it("should set default value if value is not given in payload", () => {
-      let result = exec();
+      exec();
 
-      expect(result.Value).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+      expect(variable.Value).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     });
 
     it("should throw if fcode is no associated with byte variable - fCode 1", () => {
@@ -60,21 +85,21 @@ describe("MBByteArrayVariable", () => {
     });
 
     it("should set GetSingleFCode = 3", () => {
-      let result = exec();
+      exec();
 
-      expect(result.GetSingleFCode).toEqual(3);
+      expect(variable.GetSingleFCode).toEqual(3);
     });
 
     it("should set SetSingleFCode = 16", () => {
-      let result = exec();
+      exec();
 
-      expect(result.SetSingleFCode).toEqual(16);
+      expect(variable.SetSingleFCode).toEqual(16);
     });
 
     it("should set Type to corresponding type", () => {
-      let result = exec();
+      exec();
 
-      expect(result.Type).toEqual("byteArray");
+      expect(variable.Type).toEqual("byteArray");
     });
   });
 
@@ -108,7 +133,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -154,7 +180,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -197,7 +224,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
@@ -238,7 +266,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
     });
 
     it("should get bit value of variable based on bit number", () => {
@@ -281,7 +310,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
     });
 
     it("should return value with given bit set", () => {
@@ -324,7 +354,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
     });
 
     it("should return value with given bit cleared", () => {
@@ -372,7 +403,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -444,7 +476,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -548,7 +581,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -656,7 +690,8 @@ describe("MBByteArrayVariable", () => {
         offset: offset,
         length: length
       };
-      mbVariable = new MBByteArrayVariable(device, payload);
+      mbVariable = new MBByteArrayVariable(device);
+      mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -705,6 +740,8 @@ describe("MBByteArrayVariable", () => {
   });
 
   describe("editWithPayload", () => {
+    let id;
+    let editId;
     let device;
     let name;
     let fcode;
@@ -737,6 +774,7 @@ describe("MBByteArrayVariable", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       };
+      id = "1234";
       offset = 2;
       length = 2;
       fcode = 3;
@@ -745,6 +783,7 @@ describe("MBByteArrayVariable", () => {
       value = [1, 2, 3, 4];
       timeSample = 3;
 
+      editId = undefined;
       editTimeSample = 5;
       editName = "Edited name";
       editOffset = 6;
@@ -757,6 +796,7 @@ describe("MBByteArrayVariable", () => {
 
     let exec = () => {
       payload = {
+        id: id,
         name: name,
         timeSample: timeSample,
         fCode: fcode,
@@ -770,9 +810,11 @@ describe("MBByteArrayVariable", () => {
       setValueMockFunction = jest.fn();
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
-      variable = new MBByteArrayVariable(device, payload);
+      variable = new MBByteArrayVariable(device);
+      variable.init(payload);
 
       editPayload = {
+        id: editId,
         timeSample: editTimeSample,
         name: editName,
         fCode: editFCode,
@@ -786,7 +828,48 @@ describe("MBByteArrayVariable", () => {
       return variable.editWithPayload(editPayload);
     };
 
-    it("should generate variable with payload with appropriate parameters if all parameters are passed", () => {
+    it("should return edited variable", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(variable);
+    });
+
+    it("should throw and not change anything if given id is different than id of variable", () => {
+      editId = "corruptId";
+
+      expect(() => exec()).toThrow();
+
+      expect(variable).toBeDefined();
+      expect(variable.Id).toEqual(payload.id);
+      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.Name).toEqual(payload.name);
+      expect(variable.FCode).toEqual(payload.fCode);
+      expect(variable.Offset).toEqual(payload.offset);
+      expect(variable.Length).toEqual(payload.length);
+      expect(variable.GetSingleFCode).toEqual(payload.getSingleFCode);
+      expect(variable.SetSingleFCode).toEqual(payload.setSingleFCode);
+      expect(variable.Value).toEqual(payload.value);
+    });
+
+    it("should throw and not change anything if fCode number is invalid", () => {
+      editFCode = 9999;
+
+      expect(() => exec()).toThrow();
+
+      expect(variable).toBeDefined();
+      expect(variable.Id).toEqual(payload.id);
+      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.Name).toEqual(payload.name);
+      expect(variable.FCode).toEqual(payload.fCode);
+      expect(variable.Offset).toEqual(payload.offset);
+      expect(variable.Length).toEqual(payload.length);
+      expect(variable.GetSingleFCode).toEqual(payload.getSingleFCode);
+      expect(variable.SetSingleFCode).toEqual(payload.setSingleFCode);
+      expect(variable.Value).toEqual(payload.value);
+    });
+
+    it("should edit variable with appropriate parameters if all parameters are passed", () => {
       let result = exec();
 
       expect(result).toBeDefined();

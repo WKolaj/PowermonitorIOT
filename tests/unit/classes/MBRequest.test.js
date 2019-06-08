@@ -152,34 +152,31 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      });
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      intVariable2 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
 
       //Setting intVariableValues in order to check DataToSend
       intVariable1.Value = intVariable1Value;
@@ -330,62 +327,57 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      });
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      intVariable2 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable3 = new MBInt32Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var3",
-          fCode: fcode,
-          offset: initialOffset + 2
+      });
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
+
+      intVariable3 = new MBInt32Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable4 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var4",
-          fCode: fcode,
-          offset: initialOffset + 4
+      });
+      intVariable3.init({
+        name: "Var3",
+        fCode: fcode,
+        offset: initialOffset + 2
+      });
+
+      intVariable4 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      intVariable4.init({
+        name: "Var4",
+        fCode: fcode,
+        offset: initialOffset + 4
+      });
 
       //Setting intVariableValues in order to check DataToSend
       intVariable1.Value = intVariable1Value;
@@ -497,53 +489,48 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      });
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      intVariable2 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
 
       //Adding varaibles in order to get offset and length
       mbRequest.addVariable(intVariable1);
       mbRequest.addVariable(intVariable2);
 
-      let variableToAdd = new MBInt16Variable(
-        {
-          UnitId: variableUnitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: variableToAddName,
-          fCode: variableToAddFcode,
-          offset: variableToAddInitialOffset
+      let variableToAdd = new MBInt16Variable({
+        UnitId: variableUnitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      variableToAdd.init({
+        name: variableToAddName,
+        fCode: variableToAddFcode,
+        offset: variableToAddInitialOffset
+      });
 
       return mbRequest.canVariableBeAddedToRequest(variableToAdd);
     };
@@ -552,21 +539,18 @@ describe("MBRequest", () => {
       //Whatever number
       variableToAddInitialOffset = 1532;
 
-      let variableToAdd = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: variableToAddName,
-          fCode: variableToAddFcode,
-          offset: variableToAddInitialOffset
+      let variableToAdd = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-
+      });
+      variableToAdd.init({
+        name: variableToAddName,
+        fCode: variableToAddFcode,
+        offset: variableToAddInitialOffset
+      });
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -618,53 +602,47 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
-        }
-      );
+      });
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
 
+      intVariable2 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
+        }
+      });
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
       //Adding varaibles in order to get offset and length
       mbRequest.addVariable(intVariable1);
       mbRequest.addVariable(intVariable2);
 
-      let variableToAdd = new MBInt16Variable(
-        {
-          UnitId: variableUnitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: variableToAddName,
-          fCode: variableToAddFcode,
-          offset: variableToAddInitialOffset
+      let variableToAdd = new MBInt16Variable({
+        UnitId: variableUnitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      variableToAdd.init({
+        name: variableToAddName,
+        fCode: variableToAddFcode,
+        offset: variableToAddInitialOffset
+      });
 
       //Setting id as id of variable that already exists in request
       variableToAdd._id = intVariable2.Id;
@@ -741,54 +719,52 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      });
+
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      intVariable2 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
 
       //Adding varaibles in order to get offset and length
       mbRequest.addVariable(intVariable1);
       mbRequest.addVariable(intVariable2);
       mbRequest.updateAction = mbRequestUpdateActionMock;
 
-      variableToAdd = new MBInt32Variable(
-        {
-          UnitId: variableUnitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: variableToAddName,
-          fCode: variableToAddFcode,
-          offset: variableToAddInitialOffset
+      variableToAdd = new MBInt32Variable({
+        UnitId: variableUnitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+
+      variableToAdd.init({
+        name: variableToAddName,
+        fCode: variableToAddFcode,
+        offset: variableToAddInitialOffset
+      });
 
       mbRequest.addVariable(variableToAdd);
     };
@@ -809,54 +785,51 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      });
+
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      intVariable2 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
 
       //Adding varaibles in order to get offset and length
       mbRequest.addVariable(intVariable1);
       mbRequest.addVariable(intVariable2);
       mbRequest.updateAction = mbRequestUpdateActionMock;
 
-      variableToAdd = new MBInt32Variable(
-        {
-          UnitId: variableUnitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: variableToAddName,
-          fCode: variableToAddFcode,
-          offset: variableToAddInitialOffset
+      variableToAdd = new MBInt32Variable({
+        UnitId: variableUnitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      variableToAdd.init({
+        name: variableToAddName,
+        fCode: variableToAddFcode,
+        offset: variableToAddInitialOffset
+      });
 
       //Setting the same Id to variable to Add
       variableToAdd.Id = intVariable2.Id;
@@ -971,76 +944,70 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt32Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      });
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      intVariable2 = new MBInt32Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable3 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var3",
-          fCode: fcode,
-          offset: initialOffset + 3
+      });
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
+
+      intVariable3 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable4 = new MBInt32Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var4",
-          fCode: fcode,
-          offset: initialOffset + 4
+      });
+      intVariable3.init({
+        name: "Var3",
+        fCode: fcode,
+        offset: initialOffset + 3
+      });
+
+      intVariable4 = new MBInt32Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable5 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var5",
-          fCode: fcode,
-          offset: initialOffset + 6
+      });
+      intVariable4.init({
+        name: "Var4",
+        fCode: fcode,
+        offset: initialOffset + 4
+      });
+
+      intVariable5 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      intVariable5.init({
+        name: "Var5",
+        fCode: fcode,
+        offset: initialOffset + 6
+      });
 
       intVariable1.Data = [1];
       intVariable2.Data = [2, 3];
@@ -1075,20 +1042,19 @@ describe("MBRequest", () => {
     it("should set DataToSend buffer on the basis of variables values - if there is one variable with value 1", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
 
       intVariable1.Data = [1];
 
@@ -1102,20 +1068,18 @@ describe("MBRequest", () => {
     it("should set DataToSend buffer on the basis of variables values - if there is one variable with value 0", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
 
       intVariable1.Data = [0];
 
@@ -1154,54 +1118,51 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      let variable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      let variable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
 
-      let variable2 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      variable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      let variable2 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+
+      variable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
 
       mbRequest.addVariable(variable1);
       mbRequest.addVariable(variable2);
 
       //Creating variables to Add
-      variable = new MBInt32Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var3",
-          fCode: fcode,
-          offset: initialOffset + 2
+      variable = new MBInt32Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+
+      variable.init({
+        name: "Var3",
+        fCode: fcode,
+        offset: initialOffset + 2
+      });
 
       return mbRequest._createVariableObject(variable);
     };
@@ -1261,76 +1222,70 @@ describe("MBRequest", () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       //Creating variables to Add
-      intVariable1 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var1",
-          fCode: fcode,
-          offset: initialOffset
+      intVariable1 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable2 = new MBInt32Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var2",
-          fCode: fcode,
-          offset: initialOffset + 1
+      });
+      intVariable1.init({
+        name: "Var1",
+        fCode: fcode,
+        offset: initialOffset
+      });
+
+      intVariable2 = new MBInt32Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable3 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var3",
-          fCode: fcode,
-          offset: initialOffset + 3
+      });
+      intVariable2.init({
+        name: "Var2",
+        fCode: fcode,
+        offset: initialOffset + 1
+      });
+
+      intVariable3 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable4 = new MBInt32Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var4",
-          fCode: fcode,
-          offset: initialOffset + 4
+      });
+      intVariable3.init({
+        name: "Var3",
+        fCode: fcode,
+        offset: initialOffset + 3
+      });
+
+      intVariable4 = new MBInt32Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
-      intVariable5 = new MBInt16Variable(
-        {
-          UnitId: unitId,
-          MBDriver: {
-            createGetDataAction: jest.fn().mockReturnValue(1),
-            createSetDataAction: jest.fn().mockReturnValue(2)
-          }
-        },
-        {
-          name: "Var5",
-          fCode: fcode,
-          offset: initialOffset + 6
+      });
+      intVariable4.init({
+        name: "Var4",
+        fCode: fcode,
+        offset: initialOffset + 4
+      });
+
+      intVariable5 = new MBInt16Variable({
+        UnitId: unitId,
+        MBDriver: {
+          createGetDataAction: jest.fn().mockReturnValue(1),
+          createSetDataAction: jest.fn().mockReturnValue(2)
         }
-      );
+      });
+      intVariable5.init({
+        name: "Var5",
+        fCode: fcode,
+        offset: initialOffset + 6
+      });
 
       intVariable1.Data = [1];
       intVariable2.Data = [2, 3];

@@ -5,10 +5,17 @@ class MBVariable extends Variable {
   /**
    * @description Base class representing Modbus variable
    * @param {object} device device associated with variable
-   * @param {object} payload varaible payload
    */
-  constructor(device, payload) {
-    super(device, payload);
+  constructor(device) {
+    super(device);
+  }
+
+  /**
+   * @description Method for initializing variable by payload
+   * @param {object} payload variable payload
+   */
+  init(payload) {
+    super.init(payload);
 
     if (!payload.fCode) throw new Error("FCode cannot be empty");
     if (!payload.offset) throw new Error("Offset cannot be empty");
@@ -42,15 +49,15 @@ class MBVariable extends Variable {
     this._getSingleFCode = payload.getSingleFCode;
 
     this._getSingleRequest = new MBRequest(
-      device.MBDriver,
+      this.Device.MBDriver,
       payload.getSingleFCode,
-      device.UnitId
+      this.Device.UnitId
     );
     this._getSingleRequest.addVariable(this);
     this._setSingleRequest = new MBRequest(
-      device.MBDriver,
+      this.Device.MBDriver,
       payload.setSingleFCode,
-      device.UnitId
+      this.Device.UnitId
     );
     this._setSingleRequest.addVariable(this);
 
@@ -67,6 +74,26 @@ class MBVariable extends Variable {
       //Setting data without invoking event
       this.Data = dataToSet;
     }
+  }
+
+  /**
+   * @description Method for reassigning driver to variable
+   */
+  reassignDriver() {
+    //After driver change - get and set single requests must also change
+    this._getSingleRequest = new MBRequest(
+      this.Device.MBDriver,
+      this.GetSingleFCode,
+      this.Device.UnitId
+    );
+    this._getSingleRequest.addVariable(this);
+
+    this._setSingleRequest = new MBRequest(
+      this.Device.MBDriver,
+      this.SetSingleFCode,
+      this.Device.UnitId
+    );
+    this._setSingleRequest.addVariable(this);
   }
 
   /**
@@ -231,43 +258,67 @@ class MBVariable extends Variable {
   }
 
   /**
-   * Generating payload for creating new variable based on this variable
-   * @param {object} payload Payload
-   */
-  _generatePayloadToEdit(payload) {
-    //Coping all neccessary data to payload
-    payload.id = this.Id;
-
-    //If payload has no varaibles define - define it on the basis of current values;
-    if (!payload.timeSample) payload.timeSample = this.TimeSample;
-    if (!payload.name) payload.name = this.Name;
-    if (!payload.unit) payload.unit = this.Unit;
-    if (payload.archived === undefined) payload.archived = this.Archived;
-
-    if (!payload.offset) payload.offset = this.Offset;
-    if (!payload.length) payload.length = this.Length;
-    if (!payload.fCode) payload.fCode = this.FCode;
-    if (payload.value === undefined) payload.value = this.Value;
-    if (!payload.getSingleFCode) payload.getSingleFCode = this.GetSingleFCode;
-    if (!payload.setSingleFCode) payload.setSingleFCode = this.SetSingleFCode;
-
-    return payload;
-  }
-
-  /**
-   * @description Method for generating new variable based on given payload
+   * @description Method for editting variable based on given payload
    */
   editWithPayload(payload) {
-    //Creating new value from payload
-    let editedVariable = new MBVariable(
-      this.Device,
-      this._generatePayloadToEdit(payload)
-    );
+    //Controlling if functions are possible
+    let allPossibleFCodes = this._getPossibleFCodes();
 
-    //Reassigining events;
-    editedVariable._events = this.Events;
+    if (payload.fCode && !allPossibleFCodes.includes(payload.fCode))
+      throw new Error(
+        `Fcode ${payload.fCode} cannot be applied to given variable`
+      );
 
-    return editedVariable;
+    if (
+      payload.setSingleFCode &&
+      !allPossibleFCodes.includes(payload.setSingleFCode)
+    )
+      throw new Error(
+        `Fcode ${payload.setSingleFCode} cannot be applied to given variable`
+      );
+
+    if (
+      payload.getSingleFCode &&
+      !allPossibleFCodes.includes(payload.getSingleFCode)
+    )
+      throw new Error(
+        `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
+      );
+
+    super.editWithPayload(payload);
+
+    if (payload.offset) {
+      this._offset = payload.offset;
+    }
+    if (payload.length) {
+      this._length = payload.length;
+    }
+    if (payload.fCode) {
+      this._fcode = payload.fCode;
+    }
+    if (payload.value !== undefined) {
+      this.Value = payload.value;
+    }
+    if (payload.getSingleFCode) {
+      this._getSingleFCode = payload.getSingleFCode;
+      this._getSingleRequest = new MBRequest(
+        this.Device.MBDriver,
+        payload.getSingleFCode,
+        this.Device.UnitId
+      );
+      this._getSingleRequest.addVariable(this);
+    }
+    if (payload.setSingleFCode) {
+      this._setSingleFCode = payload.setSingleFCode;
+      this._setSingleRequest = new MBRequest(
+        this.Device.MBDriver,
+        payload.setSingleFCode,
+        this.Device.UnitId
+      );
+      this._setSingleRequest.addVariable(this);
+    }
+
+    return this;
   }
 }
 

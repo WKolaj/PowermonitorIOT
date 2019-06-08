@@ -490,23 +490,6 @@ class Device {
     if (payload.name) this._name = payload.name;
   }
 
-  /**
-   * @description Method for reacreating all variables
-   */
-  async _recreateAllVariables() {
-    let oldVariables = Object.values(this.Variables);
-
-    //Removing old variables
-    for (let variable of oldVariables) {
-      await this.removeVariable(variable.Id);
-    }
-
-    //Adding new onces based on old payload
-    for (let variable of oldVariables) {
-      await this.createVariable(variable.Payload);
-    }
-  }
-
   async getVariableValueFromDB(variableId, date) {
     if (!variableId in this.Variables)
       throw new Error(`There is no variable of given id: ${variableId}`);

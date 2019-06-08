@@ -56,9 +56,16 @@ class MBUInt16Variable extends MBVariable {
   /**
    * @description Modbus UInt16 variable
    * @param {Object} device Device associated with variable
-   * @param {Object} payload Variable payload
    */
-  constructor(device, payload) {
+  constructor(device) {
+    super(device);
+  }
+
+  /**
+   * @description Method for initializing variable by payload
+   * @param {object} payload variable payload
+   */
+  init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 1;
     payload.setSingleFCode = 16;
@@ -66,7 +73,7 @@ class MBUInt16Variable extends MBVariable {
     payload.getSingleFCode =
       payload.fCode === 3 || payload.fCode == 4 ? payload.fCode : 3;
 
-    super(device, payload);
+    super.init(payload);
     this._type = "uInt16";
   }
 
@@ -94,18 +101,18 @@ class MBUInt16Variable extends MBVariable {
   }
 
   /**
-   * @description Method for generating new variable based on given payload
+   * @description Method for edditing variable
+   * @param {Object} payload Payload to edit
    */
   editWithPayload(payload) {
-    //Creating new value from payload
-    let editedVariable = new MBUInt16Variable(
-      this.Device,
-      this._generatePayloadToEdit(payload)
-    );
-    //Reassigining events;
-    editedVariable._events = this.Events;
+    payload.length = 1;
+    let fCode = this.FCode;
+    if (payload.fCode) fCode = payload.fCode;
 
-    return editedVariable;
+    payload.setSingleFCode = 16;
+    //Setting alwyas function 3 in case given fcode is write option - fcode 16
+    payload.getSingleFCode = fCode === 3 || fCode == 4 ? fCode : 3;
+    return super.editWithPayload(payload);
   }
 }
 

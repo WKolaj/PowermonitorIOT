@@ -5,9 +5,41 @@ const _ = require("lodash");
 describe("Variable", () => {
   describe("constructor", () => {
     let device;
+
+    beforeEach(() => {
+      device = "My test device";
+    });
+
+    let exec = () => {
+      return new Variable(device);
+    };
+
+    it("should create new variable with given arguments", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result.Device).toEqual(device);
+    });
+
+    it("should set event emitter", () => {
+      let result = exec();
+
+      expect(result.Events).toBeDefined();
+    });
+
+    it("should throw if device is empty", () => {
+      device = null;
+
+      expect(() => exec()).toThrow();
+    });
+  });
+
+  describe("init", () => {
+    let device;
     let name;
     let archived;
     let payload;
+    let variable;
 
     beforeEach(() => {
       device = "My test device";
@@ -17,44 +49,45 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name, archived: archived };
-      return new Variable(device, payload);
+      variable = new Variable(device);
+      return variable.init(payload);
     };
 
     it("should create new variable with given arguments", () => {
-      let result = exec();
+      exec();
 
-      expect(result).toBeDefined();
-      expect(result.Device).toEqual(device);
-      expect(result.Name).toEqual(name);
-      expect(result.Archived).toEqual(archived);
+      expect(variable).toBeDefined();
+      expect(variable.Device).toEqual(device);
+      expect(variable.Name).toEqual(name);
+      expect(variable.Archived).toEqual(archived);
     });
 
     it("should set Archived to false if it is not defined in payload", () => {
       archived = undefined;
 
-      let result = exec();
+      exec();
 
-      expect(result.Archived).toEqual(false);
+      expect(variable.Archived).toEqual(false);
     });
 
     it("should set Archived to false if it is set to false in payload", () => {
       archived = false;
 
-      let result = exec();
+      exec();
 
-      expect(result.Archived).toEqual(false);
+      expect(variable.Archived).toEqual(false);
     });
 
     it("should set default time sample to 1s", () => {
-      let result = exec();
+      exec();
 
-      expect(result.TimeSample).toEqual(1);
+      expect(variable.TimeSample).toEqual(1);
     });
 
     it("should set event emitter", () => {
-      let result = exec();
+      exec();
 
-      expect(result.Events).toBeDefined();
+      expect(variable.Events).toBeDefined();
     });
 
     it("should throw if name is empty", () => {
@@ -70,7 +103,10 @@ describe("Variable", () => {
     });
 
     it("should throw if payload is empty", () => {
-      expect(() => new Variable(device)).toThrow();
+      expect(() => {
+        variable = new Variable(device);
+        variable.init();
+      }).toThrow();
     });
   });
 
@@ -111,7 +147,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.Events;
     };
 
@@ -136,7 +173,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.TickId;
     };
 
@@ -161,7 +199,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.Id;
     };
 
@@ -186,7 +225,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.TimeSample;
     };
 
@@ -215,7 +255,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       variable.TimeSample = timeSample;
     };
 
@@ -242,7 +283,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.Device;
     };
 
@@ -267,7 +309,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.Name;
     };
 
@@ -294,7 +337,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name, archived: archived };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.Archived;
     };
 
@@ -323,7 +367,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       variable._getValue = _getValueMock;
 
       return variable.Value;
@@ -356,7 +401,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       variable._setValue = _setValueMock;
       variable._emitValueChange = _emitValueChangeMock;
 
@@ -399,7 +445,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       variable._events = eventMock;
       variable._emitValueChange(value);
     };
@@ -437,7 +484,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name, archived: archived };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable.Payload;
     };
 
@@ -469,7 +517,8 @@ describe("Variable", () => {
 
     let exec = () => {
       payload = { name: name, archived: archived };
-      variable = new Variable(device, payload);
+      variable = new Variable(device);
+      variable.init(payload);
       return variable._generatePayload();
     };
 
@@ -487,51 +536,70 @@ describe("Variable", () => {
   });
 
   describe("_editWithPayload", () => {
+    let id;
+    let editId;
     let device;
     let name;
     let archived;
+    let unit;
     let variable;
     let payload;
     let payloadToEdit;
     let timeSampleToEdit;
     let nameToEdit;
+    let unitToEdit;
 
     beforeEach(() => {
+      id = "1234";
       device = "My test device";
       name = "Name of variable";
+      unit = "A";
       nameToEdit = "Edited name of variable";
       archived = false;
+      editId = undefined;
       archivedToEdit = true;
+      unitToEdit = "B";
       timeSampleToEdit = 5;
     });
 
     let exec = () => {
-      payload = { name: name, archived: archived };
-      variable = new Variable(device, payload);
+      payload = { id: id, name: name, archived: archived, unit: unit };
+      variable = new Variable(device);
+      variable.init(payload);
 
       payloadToEdit = {
+        id: editId,
         name: nameToEdit,
         timeSample: timeSampleToEdit,
-        archived: archivedToEdit
+        archived: archivedToEdit,
+        unit: unitToEdit
       };
+
       return variable.editWithPayload(payloadToEdit);
     };
 
-    it("should return new value with edited values based on payload", () => {
+    it("should return edited variable", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(variable);
+    });
+
+    it("should return variable with edited values based on payload", () => {
       let result = exec();
 
       expect(result).toBeDefined();
       expect(result.TimeSample).toEqual(timeSampleToEdit);
       expect(result.Name).toEqual(nameToEdit);
       expect(result.Archived).toEqual(archivedToEdit);
+      expect(result.Unit).toEqual(unitToEdit);
     });
 
-    it("should return new value with event emitter being the same object as in original ", () => {
+    it("should return variable with event emitter being the same object as in original ", () => {
       let result = exec();
 
       expect(result.Events).toBeDefined();
       expect(result.Events).toEqual(variable.Events);
-      expect(result.Name).toEqual(nameToEdit);
     });
 
     it("should set id of payload based on variable id", () => {
@@ -541,7 +609,18 @@ describe("Variable", () => {
       expect(result.Id).toEqual(variable.Id);
     });
 
-    it("should set timeSample from based variable if timeSample is not given in edit payload", () => {
+    it("should throw and not edit anything if id in edit payload is different than variable id", () => {
+      editId = "corruptedId";
+
+      expect(() => exec()).toThrow();
+
+      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.Name).toEqual(payload.name);
+      expect(variable.Archived).toEqual(payload.archived);
+      expect(variable.Unit).toEqual(payload.unit);
+    });
+
+    it("should not set timeSample if it is not given in edit payload", () => {
       timeSampleToEdit = undefined;
       let result = exec();
 
@@ -549,7 +628,7 @@ describe("Variable", () => {
       expect(result.TimeSample).toEqual(variable.TimeSample);
     });
 
-    it("should set name from based variable if name is not given in edit payload", () => {
+    it("should not set name if it is not given in edit payload", () => {
       nameToEdit = undefined;
       let result = exec();
 
@@ -557,7 +636,7 @@ describe("Variable", () => {
       expect(result.Name).toEqual(variable.Name);
     });
 
-    it("should set archive from base variable if archive is true in original variable and archive is empty in payload", () => {
+    it("should not set archived if archive is true in variable and archive is empty in payload", () => {
       archivedToEdit = undefined;
       let result = exec();
 

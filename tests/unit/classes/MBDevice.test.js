@@ -4341,8 +4341,7 @@ describe("MBDevice", () => {
         ipAdress: ipAdress,
         portNumber: portNumber,
         timeout: timeout,
-        unitId: unitId,
-        archived: varArchived
+        unitId: unitId
       };
 
       device = new MBDevice();
@@ -4356,7 +4355,8 @@ describe("MBDevice", () => {
         name: varName,
         offset: varOffset,
         fCode: varFcode,
-        value: varValue
+        value: varValue,
+        archived: varArchived
       };
 
       variable = await device.createVariable(variablePayload);
@@ -4374,12 +4374,13 @@ describe("MBDevice", () => {
       return device.editVariable(varId, editVariablePayload);
     };
 
-    it("should create and return new variable based on payload and assing it in device - instead of previous one ", async () => {
+    it("should edit and return variable based on payload ", async () => {
       let result = await exec();
 
       let editedVariable = device.Variables[varId];
       expect(editedVariable).toBeDefined();
-      expect(editedVariable).not.toEqual(variable);
+      expect(result).toEqual(variable);
+      expect(result).toEqual(editedVariable);
 
       expect(editedVariable.TimeSample).toEqual(editVarTimeSample);
       expect(editedVariable.Name).toEqual(editVarName);
@@ -4388,45 +4389,56 @@ describe("MBDevice", () => {
       expect(editedVariable.Value).toEqual(editVarValue);
 
       expect(editedVariable.Events).toEqual(variable.Events);
-
-      expect(editedVariable instanceof MBInt16Variable).toBeTruthy();
-
-      expect(result).toEqual(editedVariable);
     });
 
-    it("should remove old variable from ArchiveManager and add new one - if varaible is archived", async () => {
-      varArchived = true;
+    it("should add variable to ArchiveManager - if varaible is archived after edditting", async () => {
+      varArchived = false;
+      editVarArchived = true;
       let result = await exec();
 
-      let editedVariable = device.Variables[varId];
       expect(device.ArchiveManager.doesVariableIdExists(varId)).toBeTruthy();
 
-      expect(Object.values(device.ArchiveManager.Variables)).toContain(
-        editedVariable
-      );
-      expect(Object.values(device.ArchiveManager.Variables)).not.toContain(
-        variable
-      );
+      expect(Object.values(device.ArchiveManager.Variables)).toContain(result);
     });
 
-    it("should remove old variable from ArchiveManager and add not add new one - if edited varaible is not archived", async () => {
+    it("should not remove variable from ArchiveManager - if varaible is archived", async () => {
+      varArchived = true;
+      editVarArchived = true;
+      let result = await exec();
+
+      expect(device.ArchiveManager.doesVariableIdExists(varId)).toBeTruthy();
+
+      expect(Object.values(device.ArchiveManager.Variables)).toContain(result);
+    });
+
+    it("should remove variable from ArchiveManager - if edited varaible is not archived", async () => {
       varArchived = true;
       editVarArchived = false;
 
       let result = await exec();
 
-      let editedVariable = device.Variables[varId];
       expect(device.ArchiveManager.doesVariableIdExists(varId)).toBeFalsy();
 
       expect(Object.values(device.ArchiveManager.Variables)).not.toContain(
-        editedVariable
-      );
-      expect(Object.values(device.ArchiveManager.Variables)).not.toContain(
-        variable
+        result
       );
     });
 
-    it("should create new column in database in case new variable archived is true", async () => {
+    it("should not add variable to ArchiveManager - if edited varaible is not archived and previosuly was also not present in ArchiveManager", async () => {
+      varArchived = false;
+      editVarArchived = false;
+
+      let result = await exec();
+
+      expect(device.ArchiveManager.doesVariableIdExists(varId)).toBeFalsy();
+
+      expect(Object.values(device.ArchiveManager.Variables)).not.toContain(
+        result
+      );
+    });
+
+    it("should create new column in database in case edited variable archived is true and previosly was not archived", async () => {
+      varArchived = false;
       editVarArchived = true;
 
       await exec();
@@ -4442,7 +4454,8 @@ describe("MBDevice", () => {
       expect(columnExists).toBeTruthy();
     });
 
-    it("should not create new column in database in case new variable archived is true", async () => {
+    it("should not create new column in database in case variable was not archived and is stil not archived after eddition", async () => {
+      varArchived = false;
       editVarArchived = false;
 
       await exec();
@@ -4456,6 +4469,23 @@ describe("MBDevice", () => {
       );
 
       expect(columnExists).toBeFalsy();
+    });
+
+    it("should not delete column from database if variable was archived and now it is not", async () => {
+      varArchived = true;
+      editVarArchived = false;
+
+      await exec();
+
+      let columnName = device.ArchiveManager.getColumnNameById(varId);
+      let columnExists = await checkIfColumnExists(
+        device.ArchiveManager.FilePath,
+        "data",
+        columnName,
+        "INTEGER"
+      );
+
+      expect(columnExists).toBeTruthy();
     });
 
     it("should throw if there is no variable of given id", async () => {
@@ -4473,22 +4503,26 @@ describe("MBDevice", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should not set id to new if it exists in payload", async () => {
+    it("should throw and if new id is different than previous one", async () => {
       editVarId = 8765;
 
-      await exec();
-
-      let editedVariable = device.Variables[varId];
-      expect(editedVariable).toBeDefined();
-      expect(editedVariable).not.toEqual(variable);
-      expect(editedVariable.Id).toEqual(varId);
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
     it("should call refresh groups", async () => {
       await exec();
 
-      //Three times - first time addding variable second removing while editing, thrid - adding new generated variable
-      expect(refreshGroupMock).toHaveBeenCalledTimes(3);
+      //Three times - first time addding variable second editing
+      expect(refreshGroupMock).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -4597,6 +4631,10 @@ describe("MBDevice", () => {
     let editedVariables;
     let editedPayload;
 
+    let var1ReassignDriverFuncMock;
+    let var2ReassignDriverFuncMock;
+    let var3ReassignDriverFuncMock;
+
     beforeEach(async () => {
       name = "test name";
       ipAdress = "192.168.0.10";
@@ -4604,10 +4642,28 @@ describe("MBDevice", () => {
       timeout = 2000;
       unitId = 1;
       isActive = false;
+      var1ReassignDriverFuncMock = jest.fn();
+      var2ReassignDriverFuncMock = jest.fn();
+      var3ReassignDriverFuncMock = jest.fn();
       variables = [
-        { Id: "var1", Name: "name1", Payload: { Id: "var1", Name: "name1" } },
-        { Id: "var2", Name: "name2", Payload: { Id: "var2", Name: "name2" } },
-        { Id: "var3", Name: "name3", Payload: { Id: "var3", Name: "name3" } }
+        {
+          Id: "var1",
+          Name: "name1",
+          Payload: { Id: "var1", Name: "name1" },
+          reassignDriver: var1ReassignDriverFuncMock
+        },
+        {
+          Id: "var2",
+          Name: "name2",
+          Payload: { Id: "var2", Name: "name2" },
+          reassignDriver: var2ReassignDriverFuncMock
+        },
+        {
+          Id: "var3",
+          Name: "name3",
+          Payload: { Id: "var3", Name: "name3" },
+          reassignDriver: var3ReassignDriverFuncMock
+        }
       ];
       type = "test type";
 
@@ -4772,8 +4828,19 @@ describe("MBDevice", () => {
       await exec();
       expect(disconnectMockFunc).toHaveBeenCalledBefore(connectMockFunc);
 
-      //For every removed variable and once after that
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
+      //Called once after reassigning variables
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+    });
+
+    it("should reassign driver of every variable (their getSingle and setSingle requests)", async () => {
+      isActive = true;
+      await exec();
+
+      let variables = Object.values(device.Variables);
+
+      for (let variable of variables) {
+        expect(variable.reassignDriver).toHaveBeenCalledTimes(1);
+      }
     });
 
     it("should not call connect or disconnect if device is active and ipAdress, portNumber, unitId and timeout are undefined - but change other attributes", async () => {
@@ -4788,8 +4855,15 @@ describe("MBDevice", () => {
       expect(disconnectMockFunc).not.toHaveBeenCalled();
       expect(device.Name).toEqual(editedName);
 
-      //For every removed variable and once after that
+      //Called once after reassigning variables
       expect(refreshGroupMockFunc).not.toHaveBeenCalled();
+
+      //Should not reassing driver of variables
+      let variables = Object.values(device.Variables);
+
+      for (let variable of variables) {
+        expect(variable.reassignDriver).not.toHaveBeenCalled();
+      }
     });
 
     it("should call connect and disconnect and refreshGroups and create new MBDriver if device is active and at least ipAdress is defined - and change other attributes", async () => {
@@ -4809,8 +4883,15 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      //For every removed variable and once after that
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
+      //Called once after reassigning variables
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+
+      //Should also reassign driver of variables
+      let variables = Object.values(device.Variables);
+
+      for (let variable of variables) {
+        expect(variable.reassignDriver).toHaveBeenCalledTimes(1);
+      }
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least ipAdress is defined - and change other attributes", async () => {
@@ -4830,8 +4911,15 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      //For every removed variable and once after that
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
+      //Called once after reassigning variables
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+
+      //Should also reassign driver of variables
+      let variables = Object.values(device.Variables);
+
+      for (let variable of variables) {
+        expect(variable.reassignDriver).toHaveBeenCalledTimes(1);
+      }
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least PortNumber is defined - and change other attributes", async () => {
@@ -4851,8 +4939,15 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      //For every removed variable and once after that
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
+      //Called once after reassigning variables
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+
+      //Should also reassign driver of variables
+      let variables = Object.values(device.Variables);
+
+      for (let variable of variables) {
+        expect(variable.reassignDriver).toHaveBeenCalledTimes(1);
+      }
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least Timeout is defined - and change other attributes", async () => {
@@ -4872,8 +4967,15 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      //For every removed variable and once after that
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
+      //Called once after reassigning variables
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+
+      //Should also reassign driver of variables
+      let variables = Object.values(device.Variables);
+
+      for (let variable of variables) {
+        expect(variable.reassignDriver).toHaveBeenCalledTimes(1);
+      }
     });
 
     it("should call connect and disconnect and refreshGroups create new MBDriver if device is active and at least unitId is defined - and change other attributes", async () => {
@@ -4893,8 +4995,15 @@ describe("MBDevice", () => {
       expect(device.MBDriver).toBeDefined();
       expect(device.MBDriver).not.toEqual(prevMBDriver);
 
-      //For every removed variable and once after that
-      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(4);
+      //Called once after reassigning variables
+      expect(refreshGroupMockFunc).toHaveBeenCalledTimes(1);
+
+      //Should also reassign driver of variables
+      let variables = Object.values(device.Variables);
+
+      for (let variable of variables) {
+        expect(variable.reassignDriver).toHaveBeenCalledTimes(1);
+      }
     });
 
     it("should return device after edditing", async () => {

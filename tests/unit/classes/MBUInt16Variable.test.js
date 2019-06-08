@@ -3,9 +3,32 @@ const MBUInt16Variable = require("../../../classes/variable/Modbus/MBUInt16Varia
 describe("MBUInt16Variable", () => {
   describe("constructor", () => {
     let device;
+
+    beforeEach(() => {
+      device = "test device";
+    });
+
+    let exec = () => {
+      return new MBUInt16Variable(device);
+    };
+
+    it("should throw if device is empty", () => {
+      expect(() => new MBUInt16Variable()).toThrow();
+    });
+
+    it("should create new MBBoleanVariable and assign its device", () => {
+      let result = exec();
+
+      expect(result.Device).toEqual(device);
+    });
+  });
+
+  describe("init", () => {
+    let device;
     let name;
     let fcode;
     let offset;
+    let variable;
     let payload;
 
     beforeEach(() => {
@@ -27,56 +50,56 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      return new MBUInt16Variable(device, payload);
+      variable = new MBUInt16Variable(device, payload);
+      return variable.init(payload);
     };
 
-    it("should create new MBUInt16Variable based on given arguments", () => {
-      let result = exec();
+    it("should throw if payload is empty", () => {
+      variable = new MBUInt16Variable(device, payload);
+      expect(() => variable.init()).toThrow();
+    });
 
-      expect(result).toBeDefined();
-      expect(result.Device).toEqual(device);
-      expect(result.Name).toEqual(name);
-      expect(result.FCode).toEqual(fcode);
-      expect(result.Offset).toEqual(offset);
+    it("should init new MBBoleanVariable based on given arguments", () => {
+      exec();
+
+      expect(variable.Name).toEqual(name);
+      expect(variable.FCode).toEqual(fcode);
+      expect(variable.Offset).toEqual(offset);
+    });
+
+    it("should set length to 1", () => {
+      exec();
+
+      expect(variable.Length).toEqual(1);
     });
 
     it("should set default value if value is not given in payload", () => {
       let result = exec();
 
-      expect(result.Value).toEqual(0);
+      expect(variable.Value).toEqual(0);
     });
 
-    it("should throw if payload is empty", () => {
-      expect(() => new MBUInt16Variable(device)).toThrow();
-    });
-
-    it("should set length to 1", () => {
-      let result = exec();
-
-      expect(result.Length).toEqual(1);
-    });
-
-    it("should throw if fcode is no associated with analog variable - fCode 1", () => {
+    it("should throw if fcode is no associated with boolean variable - fCode 3", () => {
       fcode = 1;
       expect(() => exec()).toThrow();
     });
 
     it("should set GetSingleFCode = 3", () => {
-      let result = exec();
+      exec();
 
-      expect(result.GetSingleFCode).toEqual(3);
+      expect(variable.GetSingleFCode).toEqual(3);
     });
 
     it("should set SetSingleFCode = 16", () => {
-      let result = exec();
+      exec();
 
-      expect(result.SetSingleFCode).toEqual(16);
+      expect(variable.SetSingleFCode).toEqual(16);
     });
 
     it("should set Type to corresponding type", () => {
-      let result = exec();
+      exec();
 
-      expect(result.Type).toEqual("uInt16");
+      expect(variable.Type).toEqual("uInt16");
     });
   });
 
@@ -107,7 +130,8 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt16Variable(device, payload);
+      mbVariable = new MBUInt16Variable(device);
+      mbVariable.init(payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -150,7 +174,8 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt16Variable(device, payload);
+      mbVariable = new MBUInt16Variable(device);
+      mbVariable.init(payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -198,7 +223,8 @@ describe("MBUInt16Variable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBUInt16Variable(device, payload);
+      mbVariable = new MBUInt16Variable(device);
+      mbVariable.init(payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
@@ -217,6 +243,8 @@ describe("MBUInt16Variable", () => {
   });
 
   describe("editWithPayload", () => {
+    let id;
+    let editId;
     let device;
     let name;
     let fcode;
@@ -240,6 +268,7 @@ describe("MBUInt16Variable", () => {
     let editSetSingleFCode;
 
     beforeEach(() => {
+      id = "1234";
       name = "Test variable name";
       unitId = 1;
       device = {
@@ -257,6 +286,7 @@ describe("MBUInt16Variable", () => {
       value = 1234;
       timeSample = 3;
 
+      editId = undefined;
       editTimeSample = 5;
       editName = "Edited name";
       editOffset = 6;
@@ -269,6 +299,7 @@ describe("MBUInt16Variable", () => {
 
     let exec = () => {
       payload = {
+        id: id,
         name: name,
         timeSample: timeSample,
         fCode: fcode,
@@ -283,8 +314,10 @@ describe("MBUInt16Variable", () => {
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
       variable = new MBUInt16Variable(device, payload);
+      variable.init(payload);
 
       editPayload = {
+        id: editId,
         timeSample: editTimeSample,
         name: editName,
         fCode: editFCode,
@@ -298,7 +331,14 @@ describe("MBUInt16Variable", () => {
       return variable.editWithPayload(editPayload);
     };
 
-    it("should generate variable with payload with appropriate parameters if all parameters are passed", () => {
+    it("should return edited variable", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(variable);
+    });
+
+    it("should edit variable with payload with appropriate parameters if all parameters are passed", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -315,7 +355,41 @@ describe("MBUInt16Variable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should generate identical variable with payload with appropriate parameters if no parameters are passed in payload", () => {
+    it("should throw and not change anything if given id is different than id of variable", () => {
+      editId = "corruptId";
+
+      expect(() => exec()).toThrow();
+
+      expect(variable).toBeDefined();
+      expect(variable.Id).toEqual(payload.id);
+      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.Name).toEqual(payload.name);
+      expect(variable.FCode).toEqual(payload.fCode);
+      expect(variable.Offset).toEqual(payload.offset);
+      expect(variable.Length).toEqual(payload.length);
+      expect(variable.GetSingleFCode).toEqual(payload.getSingleFCode);
+      expect(variable.SetSingleFCode).toEqual(payload.setSingleFCode);
+      expect(variable.Value).toEqual(payload.value);
+    });
+
+    it("should throw and not change anything if fCode number is invalid", () => {
+      editFCode = 9999;
+
+      expect(() => exec()).toThrow();
+
+      expect(variable).toBeDefined();
+      expect(variable.Id).toEqual(payload.id);
+      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.Name).toEqual(payload.name);
+      expect(variable.FCode).toEqual(payload.fCode);
+      expect(variable.Offset).toEqual(payload.offset);
+      expect(variable.Length).toEqual(payload.length);
+      expect(variable.GetSingleFCode).toEqual(payload.getSingleFCode);
+      expect(variable.SetSingleFCode).toEqual(payload.setSingleFCode);
+      expect(variable.Value).toEqual(payload.value);
+    });
+
+    it("should edit variable with payload with appropriate parameters if no parameters are passed in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -341,7 +415,7 @@ describe("MBUInt16Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with timeSample equal to timeSample given in payload", () => {
+    it("should edit variable with timeSample equal to timeSample given in payload", () => {
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -366,7 +440,7 @@ describe("MBUInt16Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Name equal to Name given in payload", () => {
+    it("should edit variable with Name equal to Name given in payload", () => {
       editTimeSample = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -391,7 +465,7 @@ describe("MBUInt16Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Offset equal to Offset given in payload", () => {
+    it("should edit variable with Offset equal to Offset given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editLength = undefined;
@@ -416,7 +490,7 @@ describe("MBUInt16Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Length equal to Length given in payload", () => {
+    it("should edit variable with Length equal to Length given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -449,7 +523,7 @@ describe("MBUInt16Variable", () => {
       expect(result.Length).toEqual(1);
     });
 
-    it("should generate variable with FCode equal to FCode given in payload", () => {
+    it("should edit variable with FCode equal to FCode given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -491,7 +565,7 @@ describe("MBUInt16Variable", () => {
       expect(result.GetSingleFCode).toEqual(3);
     });
 
-    it("should generate variable with Value equal to Value given in payload", () => {
+    it("should edit variable with Value equal to Value given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;

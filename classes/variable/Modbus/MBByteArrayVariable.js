@@ -42,14 +42,21 @@ class MBByteArrayVariable extends MBVariable {
   /**
    * @description Modbus Byte Array variable
    * @param {Object} device Device associated with variable
-   * @param {Object} payload Variable payload
    */
-  constructor(device, payload) {
+  constructor(device) {
+    super(device);
+  }
+
+  /**
+   * @description Method for initializing variable by payload
+   * @param {object} payload variable payload
+   */
+  init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.getSingleFCode = payload.fCode;
     payload.setSingleFCode = 16;
 
-    super(device, payload);
+    super.init(payload);
     this._type = "byteArray";
   }
 
@@ -159,10 +166,16 @@ class MBByteArrayVariable extends MBVariable {
   }
 
   /**
-   * Generating payload to edit variable
-   * @param {Object} payload
+   * @description Method for edditing variable
+   * @param {Object} payload Payload to edit
    */
-  _generatePayloadToEdit(payload) {
+  editWithPayload(payload) {
+    //Setting fCode of getSingleFCode according to new or old fCode
+    let fCode = this.FCode;
+    if (payload.fCode) {
+      fCode = payload.fCode;
+    }
+
     //Resetting value if length changes without value
     let resetValue = false;
     if (
@@ -170,37 +183,28 @@ class MBByteArrayVariable extends MBVariable {
       payload.length !== undefined &&
       payload.length !== this.Length
     ) {
-      console.log(
-        `value:${payload.value} length:${payload.length} this.length:${
-          this.Length
-        }`
-      );
       resetValue = true;
     }
 
-    let result = super._generatePayloadToEdit(payload);
-
+    //Reseting value if length is different than before
     if (resetValue) {
-      result.value = undefined;
+      let valueOfReset = [];
+
+      //new value should be:
+      //[0 0 0 ... 0] < with new length
+      for (let i = 0; i < payload.length * 2; i++) {
+        valueOfReset.push(0);
+      }
+
+      payload.value = valueOfReset;
     }
 
-    return result;
-  }
+    payload.getSingleFCode = fCode;
+    payload.setSingleFCode = 16;
 
-  /**
-   * @description Method for generating new variable based on given payload
-   */
-  editWithPayload(payload) {
-    //Creating new value from payload
-    let editedVariable = new MBByteArrayVariable(
-      this.Device,
-      this._generatePayloadToEdit(payload)
-    );
+    let varToReturn = super.editWithPayload(payload);
 
-    //Reassigining events;
-    editedVariable._events = this.Events;
-
-    return editedVariable;
+    return varToReturn;
   }
 }
 

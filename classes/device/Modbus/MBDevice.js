@@ -228,13 +228,24 @@ class MBDevice extends Device {
 
     let variableToEdit = this.Variables[id];
 
-    await this.removeVariable(id);
+    let variableArchivedBefore = variableToEdit.Archived;
 
-    let variableToAdd = variableToEdit.editWithPayload(payload);
+    variableToEdit.editWithPayload(payload);
 
-    await this.addVariable(variableToAdd);
+    let variableArchivedAfter = variableToEdit.Archived;
 
-    return variableToAdd;
+    //If variable was not archived before but now is archived - should be added to archive manager
+    if (!variableArchivedBefore && variableArchivedAfter) {
+      await this.ArchiveManager.addVariable(variableToEdit);
+    }
+    //If variable was archived before but not is not archived - should be removed from archive manager
+    else if (variableArchivedBefore && !variableArchivedAfter) {
+      await this.ArchiveManager.removeVariable(variableToEdit.Id);
+    }
+
+    this._refreshRequestGroups();
+
+    return variableToEdit;
   }
 
   /**
@@ -251,7 +262,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBBooleanVariable(this, payload);
+    let variableToAdd = new MBBooleanVariable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -272,7 +284,8 @@ class MBDevice extends Device {
     if (!payload.length)
       throw new Error("variable length in payload is not defined");
 
-    let variableToAdd = new MBByteArrayVariable(this, payload);
+    let variableToAdd = new MBByteArrayVariable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -291,7 +304,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBFloatVariable(this, payload);
+    let variableToAdd = new MBFloatVariable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -310,7 +324,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBSwappedFloatVariable(this, payload);
+    let variableToAdd = new MBSwappedFloatVariable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -329,7 +344,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBInt16Variable(this, payload);
+    let variableToAdd = new MBInt16Variable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -348,7 +364,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBInt32Variable(this, payload);
+    let variableToAdd = new MBInt32Variable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -367,7 +384,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBSwappedInt32Variable(this, payload);
+    let variableToAdd = new MBSwappedInt32Variable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -386,7 +404,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBUInt16Variable(this, payload);
+    let variableToAdd = new MBUInt16Variable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -405,7 +424,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBUInt32Variable(this, payload);
+    let variableToAdd = new MBUInt32Variable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -424,7 +444,8 @@ class MBDevice extends Device {
     if (!payload.fCode)
       throw new Error("variable fCode in payload is not defined");
 
-    let variableToAdd = new MBSwappedUInt32Variable(this, payload);
+    let variableToAdd = new MBSwappedUInt32Variable(this);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -543,7 +564,7 @@ class MBDevice extends Device {
         payload.timeout,
         payload.unitId
       );
-      await this._recreateAllVariables();
+      this._reassignVariablesDriver();
       this._refreshRequestGroups();
     }
 
@@ -552,6 +573,16 @@ class MBDevice extends Device {
     }
 
     return this;
+  }
+
+  /**
+   * @description Method for reassigning driver of all variables - after changing driver object
+   */
+  _reassignVariablesDriver() {
+    let variables = Object.values(this.Variables);
+    for (let variable of variables) {
+      variable.reassignDriver();
+    }
   }
 }
 

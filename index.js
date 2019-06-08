@@ -1,14 +1,27 @@
 const Project = require("./classes/project/Project");
-const heapdump = require("heapdump");
-const fs = require("fs");
 const snooze = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 let project = new Project("_projTest");
 
-let commInterface = project.CommInterface;
-
 let exec = async () => {
   await project.initFromFiles();
+
+  let allDevices = await project.getAllDevices();
+
+  for (let device of allDevices) {
+    device.Events.on("Refreshed", args => {
+      let device = args[0];
+      let finalResult = args[1];
+      let tickNumber = args[2];
+      let elements = Object.values(finalResult);
+      let formatedElements = elements.map(
+        element => `${element.Id} : ${element.Value} ${element.Unit}`
+      );
+      console.log(`${device.Id}: ${tickNumber}`);
+      console.log(formatedElements);
+    });
+  }
+
   //await commInterface.init();
 
   // for (let i = 0; i < 5; i++) {
@@ -36,22 +49,44 @@ let exec = async () => {
   //   JSON.stringify(project.CommInterface.Payload)
   // );
 
-  let value = await project.getValueBasedOnDate(
-    "5cf54e5359022b376a172bb9",
-    "5cf54e5359022b376a172bad",
-    1559580360
-  );
-
-  console.log(value);
+  // let value = await project.getValueBasedOnDate(
+  //   "5cf54e5359022b376a172bb9",
+  //   "5cf54e5359022b376a172bad",
+  //   1559580360
+  // );
 };
 
 exec();
 
-setInterval(async () => {
-  let value = await project.getValue(
-    "5cf54e5359022b376a172bb9",
-    "5cf54e5359022b376a172bb6"
-  );
+var stdin = process.stdin;
+stdin.resume();
+stdin.setEncoding("utf8");
+process.stdin.setRawMode(true);
 
-  console.log(value);
-}, 1000);
+stdin.on("data", async function(key) {
+  if (key === "q") {
+    process.exit();
+  }
+
+  if (key === "1") {
+    console.log("editing first variable - unit");
+    let variable = await project.getVariable("1234", "0001");
+    let newUnit = "c";
+    if (variable.Unit === "c") newUnit = "a";
+
+    project.updateVariable("1234", "0001", {
+      unit: newUnit
+    });
+  }
+
+  if (key === "2") {
+    console.log("editing second variable - offset");
+    let variable = await project.getVariable("1234", "0002");
+    let newOffset = 3;
+    if (variable.Offset === 3) newOffset = 2;
+
+    project.updateVariable("1234", "0002", {
+      offset: newOffset
+    });
+  }
+});

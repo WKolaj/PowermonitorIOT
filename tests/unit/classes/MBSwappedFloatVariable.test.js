@@ -1,11 +1,34 @@
-const MBFloatVariable = require("../../../classes/variable/Modbus/MBFloatVariable");
+const MBSwappedFloatVariable = require("../../../classes/variable/Modbus/MBSwappedFloatVariable");
 
-describe("MBFloatVariable", () => {
+describe("MBSwappedFloatVariable", () => {
   describe("constructor", () => {
+    let device;
+
+    beforeEach(() => {
+      device = "test device";
+    });
+
+    let exec = () => {
+      return new MBSwappedFloatVariable(device);
+    };
+
+    it("should throw if device is empty", () => {
+      expect(() => new MBSwappedFloatVariable()).toThrow();
+    });
+
+    it("should create new MBBoleanVariable and assign its device", () => {
+      let result = exec();
+
+      expect(result.Device).toEqual(device);
+    });
+  });
+
+  describe("init", () => {
     let device;
     let name;
     let fcode;
     let offset;
+    let variable;
     let payload;
 
     beforeEach(() => {
@@ -27,59 +50,58 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      return new MBFloatVariable(device, payload);
+      variable = new MBSwappedFloatVariable(device, payload);
+      return variable.init(payload);
     };
 
-    it("should create new MBFloatVariable based on given arguments", () => {
-      let result = exec();
+    it("should throw if payload is empty", () => {
+      variable = new MBSwappedFloatVariable(device, payload);
+      expect(() => variable.init()).toThrow();
+    });
 
-      expect(result).toBeDefined();
-      expect(result.Device).toEqual(device);
-      expect(result.Name).toEqual(name);
-      expect(result.FCode).toEqual(fcode);
-      expect(result.Offset).toEqual(offset);
+    it("should init new MBBoleanVariable based on given arguments", () => {
+      exec();
+
+      expect(variable.Name).toEqual(name);
+      expect(variable.FCode).toEqual(fcode);
+      expect(variable.Offset).toEqual(offset);
     });
 
     it("should set length to 2", () => {
-      let result = exec();
+      exec();
 
-      expect(result.Length).toEqual(2);
+      expect(variable.Length).toEqual(2);
     });
 
     it("should set default value if value is not given in payload", () => {
       let result = exec();
 
-      expect(result.Value).toEqual(0);
+      expect(variable.Value).toEqual(0);
     });
 
-    it("should throw if fcode is no associated with analog variable - fCode 1", () => {
+    it("should throw if fcode is no associated with boolean variable - fCode 3", () => {
       fcode = 1;
       expect(() => exec()).toThrow();
     });
 
     it("should set GetSingleFCode = 3", () => {
-      let result = exec();
+      exec();
 
-      expect(result.GetSingleFCode).toEqual(3);
+      expect(variable.GetSingleFCode).toEqual(3);
     });
 
     it("should set SetSingleFCode = 16", () => {
-      let result = exec();
+      exec();
 
-      expect(result.SetSingleFCode).toEqual(16);
-    });
-
-    it("should throw if payload is empty", () => {
-      expect(() => new MBFloatVariable(device)).toThrow();
+      expect(variable.SetSingleFCode).toEqual(16);
     });
 
     it("should set Type to corresponding type", () => {
-      let result = exec();
+      exec();
 
-      expect(result.Type).toEqual("float");
+      expect(variable.Type).toEqual("swappedFloat");
     });
   });
-
   describe("_getPossibeFCodes", () => {
     let device;
     let name;
@@ -107,7 +129,8 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBFloatVariable(device, payload);
+      mbVariable = new MBSwappedFloatVariable(device);
+      mbVariable.init(payload);
       return mbVariable._getPossibleFCodes();
     };
 
@@ -128,6 +151,7 @@ describe("MBFloatVariable", () => {
     let offset;
     let mbVariable;
     let dataToConvert;
+    let payload;
 
     beforeEach(() => {
       device = {
@@ -140,7 +164,7 @@ describe("MBFloatVariable", () => {
       name = "Test var name";
       fcode = 3;
       offset = 1;
-      dataToConvert = [59769, 17142];
+      dataToConvert = [17142, 59769];
     });
 
     let exec = () => {
@@ -149,7 +173,8 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBFloatVariable(device, payload);
+      mbVariable = new MBSwappedFloatVariable(device);
+      mbVariable.init(payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
@@ -189,18 +214,21 @@ describe("MBFloatVariable", () => {
         fCode: fcode,
         offset: offset
       };
-      mbVariable = new MBFloatVariable(device, payload);
+      mbVariable = new MBSwappedFloatVariable(device);
+      mbVariable.init(payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
     it("should convert value to data and return it", () => {
       let result = exec();
 
-      expect(result).toEqual([59769, 17142]);
+      expect(result).toEqual([17142, 59769]);
     });
   });
 
   describe("editWithPayload", () => {
+    let id;
+    let editId;
     let device;
     let name;
     let fcode;
@@ -224,6 +252,7 @@ describe("MBFloatVariable", () => {
     let editSetSingleFCode;
 
     beforeEach(() => {
+      id = "1234";
       name = "Test variable name";
       unitId = 1;
       device = {
@@ -241,6 +270,7 @@ describe("MBFloatVariable", () => {
       value = 1234.4321;
       timeSample = 3;
 
+      editId = undefined;
       editTimeSample = 5;
       editName = "Edited name";
       editOffset = 6;
@@ -253,6 +283,7 @@ describe("MBFloatVariable", () => {
 
     let exec = () => {
       payload = {
+        id: id,
         name: name,
         timeSample: timeSample,
         fCode: fcode,
@@ -266,9 +297,11 @@ describe("MBFloatVariable", () => {
       setValueMockFunction = jest.fn();
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
-      variable = new MBFloatVariable(device, payload);
+      variable = new MBSwappedFloatVariable(device, payload);
+      variable.init(payload);
 
       editPayload = {
+        id: editId,
         timeSample: editTimeSample,
         name: editName,
         fCode: editFCode,
@@ -282,7 +315,14 @@ describe("MBFloatVariable", () => {
       return variable.editWithPayload(editPayload);
     };
 
-    it("should generate variable with payload with appropriate parameters if all parameters are passed", () => {
+    it("should return edited variable", () => {
+      let result = exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(variable);
+    });
+
+    it("should edit variable with payload with appropriate parameters if all parameters are passed", () => {
       let result = exec();
 
       expect(result).toBeDefined();
@@ -299,7 +339,41 @@ describe("MBFloatVariable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should generate identical variable with payload with appropriate parameters if no parameters are passed in payload", () => {
+    it("should throw and not change anything if given id is different than id of variable", () => {
+      editId = "corruptId";
+
+      expect(() => exec()).toThrow();
+
+      expect(variable).toBeDefined();
+      expect(variable.Id).toEqual(payload.id);
+      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.Name).toEqual(payload.name);
+      expect(variable.FCode).toEqual(payload.fCode);
+      expect(variable.Offset).toEqual(payload.offset);
+      expect(variable.Length).toEqual(payload.length);
+      expect(variable.GetSingleFCode).toEqual(payload.getSingleFCode);
+      expect(variable.SetSingleFCode).toEqual(payload.setSingleFCode);
+      expect(variable.Value).toEqual(payload.value);
+    });
+
+    it("should throw and not change anything if fCode number is invalid", () => {
+      editFCode = 9999;
+
+      expect(() => exec()).toThrow();
+
+      expect(variable).toBeDefined();
+      expect(variable.Id).toEqual(payload.id);
+      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.Name).toEqual(payload.name);
+      expect(variable.FCode).toEqual(payload.fCode);
+      expect(variable.Offset).toEqual(payload.offset);
+      expect(variable.Length).toEqual(payload.length);
+      expect(variable.GetSingleFCode).toEqual(payload.getSingleFCode);
+      expect(variable.SetSingleFCode).toEqual(payload.setSingleFCode);
+      expect(variable.Value).toEqual(payload.value);
+    });
+
+    it("should edit variable with payload with appropriate parameters if no parameters are passed in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -325,7 +399,7 @@ describe("MBFloatVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with timeSample equal to timeSample given in payload", () => {
+    it("should edit variable with timeSample equal to timeSample given in payload", () => {
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -350,7 +424,7 @@ describe("MBFloatVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Name equal to Name given in payload", () => {
+    it("should edit variable with Name equal to Name given in payload", () => {
       editTimeSample = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -375,7 +449,7 @@ describe("MBFloatVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Offset equal to Offset given in payload", () => {
+    it("should edit variable with Offset equal to Offset given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editLength = undefined;
@@ -400,7 +474,7 @@ describe("MBFloatVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Length equal to Length given in payload", () => {
+    it("should edit variable with Length equal to Length given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -433,7 +507,7 @@ describe("MBFloatVariable", () => {
       expect(result.Length).toEqual(2);
     });
 
-    it("should generate variable with FCode equal to FCode given in payload", () => {
+    it("should edit variable with FCode equal to FCode given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -475,7 +549,7 @@ describe("MBFloatVariable", () => {
       expect(result.GetSingleFCode).toEqual(3);
     });
 
-    it("should generate variable with Value equal to Value given in payload", () => {
+    it("should edit variable with Value equal to Value given in payload", () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;

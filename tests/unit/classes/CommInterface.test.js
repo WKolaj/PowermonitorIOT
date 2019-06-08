@@ -3631,7 +3631,7 @@ describe("CommInterface", () => {
       );
     });
 
-    it("should recreate all variables when recreating driver", async () => {
+    it("should reassign all variables drivers when recreating it", async () => {
       initPayload[deviceId].isActive = true;
       editIsActive = true;
 
@@ -3653,7 +3653,8 @@ describe("CommInterface", () => {
           editedDevice.MBDriver
         );
 
-        expect(initVariables).not.toContain(variable);
+        //Variables should be edited but it shouldn't be different
+        expect(initVariables).toContain(variable);
       }
 
       //Variables payload should be equal
@@ -4260,38 +4261,52 @@ describe("CommInterface", () => {
       expect(editedVariable.Value).toEqual(editVariableValue);
     });
 
-    it("should not edit variable id if it is defined in payload", async () => {
+    it("should throw and not edit variable id if it is defined in payload", async () => {
       editVariableId = "87654321";
 
-      let result = await exec();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       let editedVariable = commInterface.getVariable(deviceId, variableId);
+
+      let originalPayload = initPayload[deviceId].variables.find(
+        variable => variable.id === variableId
+      );
 
       //Type should have not been edited
       expect(editedVariable.Id).not.toEqual(editVariableId);
       expect(editedVariable.Id).toEqual(variableId);
 
       //All other parameters should have been edited
-      expect(editedVariable.Id).toEqual(variableId);
-      expect(editedVariable.Name).toEqual(editVariableName);
-      expect(editedVariable.FCode).toEqual(editVariableFcode);
-      expect(editedVariable.Offset).toEqual(editVariableOffset);
-      expect(editedVariable.TimeSample).toEqual(editVariableTimeSample);
-      expect(editedVariable.Archived).toEqual(editVariableArchived);
-      expect(editedVariable.GetSingleFCode).toEqual(editVariableGetSingleFCode);
-      expect(editedVariable.SetSingleFCode).toEqual(editVariableSetSingleFCode);
-      expect(editedVariable.Value).toEqual(editVariableValue);
+      expect(editedVariable.Id).toEqual(originalPayload.id);
+      expect(editedVariable.Name).toEqual(originalPayload.name);
+      expect(editedVariable.FCode).toEqual(originalPayload.fCode);
+      expect(editedVariable.Offset).toEqual(originalPayload.offset);
+      expect(editedVariable.TimeSample).toEqual(originalPayload.timeSample);
+      expect(editedVariable.Archived).toEqual(originalPayload.archived);
+      expect(editedVariable.GetSingleFCode).toEqual(
+        originalPayload.getSingleFCode
+      );
+      expect(editedVariable.SetSingleFCode).toEqual(
+        originalPayload.setSingleFCode
+      );
+      expect(editedVariable.Value).toEqual(originalPayload.value);
     });
 
-    it("should create completly new variable but with the same event object", async () => {
+    it("should not create completly new variable but return the same one with different parametrs", async () => {
       let result = await exec();
 
       let editedVariable = commInterface.getVariable(deviceId, variableId);
 
-      expect(originalVariable).not.toEqual(editedVariable);
-
-      expect(originalVariable.Events).toBeDefined();
-      expect(originalVariable.Events).toEqual(editedVariable.Events);
+      expect(originalVariable).toEqual(editedVariable);
     });
 
     it("should not add new variable but replace old one", async () => {

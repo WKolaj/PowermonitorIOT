@@ -2741,8 +2741,7 @@ describe("ProjectContentManager", () => {
           sampleTime: 1,
           name: "sumElement1",
           unit: "C",
-          variables: [
-          ]
+          variables: []
         },
         {
           id: "3002",
@@ -2751,11 +2750,9 @@ describe("ProjectContentManager", () => {
           sampleTime: 2,
           name: "sumElement2",
           unit: "D",
-          variables: [
-          ]
+          variables: []
         }
       ];
-      
 
       let result = await exec();
 
@@ -2997,7 +2994,7 @@ describe("ProjectContentManager", () => {
       );
     });
 
-    it("should recreate all variables when recreating driver", async () => {
+    it("should not recreate all variables but reassing their driver when recreating driver", async () => {
       initPayload[deviceId].isActive = true;
       editIsActive = true;
 
@@ -3019,7 +3016,8 @@ describe("ProjectContentManager", () => {
           editedDevice.MBDriver
         );
 
-        expect(initVariables).not.toContain(variable);
+        //Variables should be the same - only their parameters changes
+        expect(initVariables).toContain(variable);
       }
 
       //Variables payload should be equal
