@@ -365,7 +365,11 @@ class Device {
 
     if (finalResult) {
       this.Events.emit("Refreshed", [this, finalResult, tickNumber]);
-      this.archiveData(tickNumber, finalResult);
+      try {
+        await this.archiveData(tickNumber, finalResult);
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 

@@ -26,7 +26,8 @@ class MBBooleanVariable extends MBVariable {
   init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 1;
-    payload.getSingleFCode = 1;
+    payload.getSingleFCode =
+      payload.fCode === 2 || payload.fCode == 1 ? payload.fCode : 1;
     payload.setSingleFCode = 15;
 
     super.init(payload);
@@ -63,7 +64,9 @@ class MBBooleanVariable extends MBVariable {
    */
   editWithPayload(payload) {
     payload.length = 1;
-    payload.getSingleFCode = 1;
+    let fCode = this.FCode;
+    if (payload.fCode) fCode = payload.fCode;
+    payload.getSingleFCode = fCode === 1 || fCode == 2 ? fCode : 1;
     payload.setSingleFCode = 15;
     return super.editWithPayload(payload);
   }

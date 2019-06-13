@@ -135,7 +135,7 @@ let testPayload = JSON.stringify({
         fCode: 4,
         value: 5,
         type: "swappedInt32",
-        archived: false,
+        archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit5"
@@ -4140,7 +4140,12 @@ describe("CommInterface", () => {
       );
       let columnType = variable.Device.ArchiveManager.getColumnType(variable);
 
-      let columnExists = checkIfColumnExists(filePath, columnName, columnType);
+      let columnExists = await checkIfColumnExists(
+        filePath,
+        "data",
+        columnName,
+        columnType
+      );
 
       expect(columnExists).toBeTruthy();
     });
@@ -4991,7 +4996,7 @@ describe("CommInterface", () => {
         result
       );
 
-      let columnExists = checkIfColumnExists(
+      let columnExists = await checkIfColumnExists(
         dbFilePath,
         "data",
         columnName,
@@ -5201,7 +5206,12 @@ describe("CommInterface", () => {
         element
       );
 
-      let columnExists = checkIfColumnExists(filePath, columnName, columnType);
+      let columnExists = await checkIfColumnExists(
+        filePath,
+        "data",
+        columnName,
+        columnType
+      );
 
       expect(columnExists).toBeTruthy();
     });

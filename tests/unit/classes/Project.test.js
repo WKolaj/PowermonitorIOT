@@ -1,5 +1,16 @@
 const config = require("config");
 const path = require("path");
+const fs = require("fs");
+const MBBooleanVariable = require("../../../classes/variable/Modbus/MBBooleanVariable");
+const MBByteArrayVariable = require("../../../classes/variable/Modbus/MBByteArrayVariable");
+const MBFloatVariable = require("../../../classes/variable/Modbus/MBFloatVariable");
+const MBInt16Variable = require("../../../classes/variable/Modbus/MBInt16Variable");
+const MBInt32Variable = require("../../../classes/variable/Modbus/MBInt32Variable");
+const MBSwappedFloatVariable = require("../../../classes/variable/Modbus/MBSwappedFloatVariable");
+const MBSwappedInt32Variable = require("../../../classes/variable/Modbus/MBSwappedInt32Variable");
+const MBSwappedUInt32Variable = require("../../../classes/variable/Modbus/MBSwappedUInt32Variable");
+const MBUInt16Variable = require("../../../classes/variable/Modbus/MBUInt16Variable");
+const MBUInt32Variable = require("../../../classes/variable/Modbus/MBUInt32Variable");
 
 let {
   clearDirectoryAsync,
@@ -146,7 +157,7 @@ let testPayload = JSON.stringify({
         fCode: 4,
         value: 5,
         type: "swappedInt32",
-        archived: false,
+        archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit5"
@@ -1476,6 +1487,517 @@ describe("ProjectContentManager", () => {
     });
   });
 
+  describe("updateDevice", () => {
+    let project;
+    let projectDirName;
+    let initProject;
+    let initPayload;
+    let deviceId;
+    let editPayload;
+    let editId;
+    let editName;
+    let editIsActive;
+    let editTimeout;
+    let editIpAdress;
+    let editUnitId;
+    let editPortNumber;
+    let editVariables;
+    let editCalcElements;
+    let initDriver;
+    let initVariables;
+    let initCalcElements;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      commInitPayload = JSON.parse(testPayload);
+      initProject = true;
+
+      editId = undefined;
+      editName = "Modified device";
+      editIsActive = false;
+      editTimeout = 4000;
+      editIpAdress = "192.168.0.17";
+      editUnitId = 5;
+      editPortNumber = 602;
+      editVariables = undefined;
+      editCalcElements = undefined;
+
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1235";
+    });
+
+    let exec = async () => {
+      //Creating initial files based on testPayload;
+      await createInitialFiles(initPayload);
+
+      project = new Project(projectDirName);
+
+      if (initProject) await project.initFromFiles();
+
+      editPayload = {
+        id: editId,
+        name: editName,
+        isActive: editIsActive,
+        timeout: editTimeout,
+        ipAdress: editIpAdress,
+        unitId: editUnitId,
+        portNumber: editPortNumber,
+        variables: editVariables,
+        calculationElements: editCalcElements
+      };
+
+      initDriver = (await project.getDevice(deviceId)).MBDriver;
+      initVariables = Object.values(
+        (await project.getDevice(deviceId)).Variables
+      );
+      initCalcElements = Object.values(
+        (await project.getDevice(deviceId)).CalculationElements
+      );
+
+      return project.updateDevice(deviceId, editPayload);
+    };
+
+    it("should edit device of given id according to given payload", async () => {
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+    });
+
+    it("should return edited device", async () => {
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(result).toEqual(editedDevice);
+    });
+
+    it("should not edit variables even if they are given in payload", async () => {
+      editVariables = [
+        {
+          id: "0010",
+          timeSample: 2,
+          name: "test variable 10",
+          offset: 5,
+          length: 1,
+          fCode: 3,
+          value: 1,
+          type: "int32",
+          archived: true,
+          getSingleFCode: 3,
+          setSingleFCode: 16
+        },
+        {
+          id: "0011",
+          timeSample: 3,
+          name: "test variable 11",
+          offset: 7,
+          length: 2,
+          fCode: 4,
+          value: 2,
+          type: "float",
+          archived: true,
+          getSingleFCode: 4,
+          setSingleFCode: 16
+        }
+      ];
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+      expect(editedDevice.Payload.variables).toBeDefined();
+      expect(editedDevice.Payload.variables).toMatchObject(
+        initPayload[deviceId].variables
+      );
+    });
+
+    it("should not edit variables even if they are given in payload as empty array", async () => {
+      editVariables = [];
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+      expect(editedDevice.Payload.variables).toBeDefined();
+      expect(editedDevice.Payload.variables).toMatchObject(
+        initPayload[deviceId].variables
+      );
+    });
+
+    it("should not edit calcElements even if they are given in payload", async () => {
+      editCalcElements = [
+        {
+          id: "3001",
+          type: "sumElement",
+          archived: true,
+          sampleTime: 1,
+          name: "sumElement1",
+          unit: "C",
+          variables: []
+        },
+        {
+          id: "3002",
+          type: "sumElement",
+          archived: true,
+          sampleTime: 2,
+          name: "sumElement2",
+          unit: "D",
+          variables: []
+        }
+      ];
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+      expect(editedDevice.Payload.calculationElements).toBeDefined();
+      expect(editedDevice.Payload.calculationElements).toMatchObject(
+        initPayload[deviceId].calculationElements
+      );
+    });
+
+    it("should not edit calcElements even if they are given in payload as empty array", async () => {
+      editCalcElements = [];
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.Name).toEqual(editName);
+      expect(editedDevice.IsActive).toEqual(editIsActive);
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+      expect(editedDevice.Payload.calculationElements).toBeDefined();
+      expect(editedDevice.Payload.calculationElements).toMatchObject(
+        initPayload[deviceId].calculationElements
+      );
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - Timeout", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = 4000;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = undefined;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+      //Only timeout should be edited
+      expect(editedDevice.Timeout).toEqual(editTimeout);
+
+      //Rest should stay the same
+      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
+      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
+      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - IPAdress", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = undefined;
+      editIpAdress = "192.168.0.1";
+      editUnitId = undefined;
+      editPortNumber = undefined;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+
+      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
+      expect(editedDevice.IPAdress).toEqual(editIpAdress);
+      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
+      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - UnitId", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = 123;
+      editPortNumber = undefined;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+
+      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
+      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
+      expect(editedDevice.UnitId).toEqual(editUnitId);
+      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
+    });
+
+    it("should create completly new MBDriver object if edited parameters are associated with driver - PortNumber", async () => {
+      editId = undefined;
+      editName = undefined;
+      editIsActive = undefined;
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = 123;
+      editVariables = undefined;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.MBDriver).toBeDefined();
+      expect(editedDevice.MBDriver).not.toEqual(initDriver);
+
+      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
+      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
+      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
+      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+    });
+
+    it("should start communication when isActive is set to true and previosly was false and change was not associated with driver ", async () => {
+      editIsActive = true;
+
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = undefined;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Can be called several times - if device is active and sampler invoke tick before connection was established
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+      for (
+        let i = 0;
+        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
+        i++
+      ) {
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
+        ).toEqual(initPayload[deviceId].ipAdress);
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
+        ).toMatchObject({ port: initPayload[deviceId].portNumber });
+      }
+    });
+
+    it("should start communication when isActive is set to true and previosly was false and change was associated with driver ", async () => {
+      editIsActive = true;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Can be called several times - if device is active and sampler invoke tick before connection was established
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+      for (
+        let i = 0;
+        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
+        i++
+      ) {
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
+        ).toEqual(editIpAdress);
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
+        ).toMatchObject({ port: editPortNumber });
+      }
+    });
+
+    it("should not start communication when isActive is set to true and previosly was true and change was not associated with driver ", async () => {
+      initPayload[deviceId].isActive = true;
+      editIsActive = true;
+
+      editTimeout = undefined;
+      editIpAdress = undefined;
+      editUnitId = undefined;
+      editPortNumber = undefined;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Shouldn't be called more than once
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalledTimes(1);
+    });
+
+    it("should restart communication when isActive is set to true and previosly was true but change was associated with driver ", async () => {
+      initPayload[deviceId].isActive = true;
+      editIsActive = true;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+
+      expect(editedDevice.IsActive).toBeTruthy();
+
+      //Should call disconnect of old driver
+      expect(initDriver._client.close).toHaveBeenCalledTimes(1);
+
+      //Should call connect to new driver
+      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
+
+      for (
+        let i = 0;
+        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
+        i++
+      ) {
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
+        ).toEqual(editIpAdress);
+        expect(
+          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
+        ).toMatchObject({ port: editPortNumber });
+      }
+
+      //Disconnect should be called before new connect
+      expect(initDriver._client.close).toHaveBeenCalledBefore(
+        editedDevice.MBDriver._client.connectTCP
+      );
+    });
+
+    it("should not recreate all variables but reassing their driver when recreating driver", async () => {
+      initPayload[deviceId].isActive = true;
+      editIsActive = true;
+
+      let result = await exec();
+
+      let editedDevice = await project.getDevice(deviceId);
+      let newVariables = Object.values(editedDevice.Variables);
+
+      expect(newVariables).toBeDefined();
+      expect(newVariables.length).toBeDefined();
+      expect(newVariables.length).toEqual(initVariables.length);
+
+      for (let variable of newVariables) {
+        //GetSingleRequest and SetSingleRequest drivers must equal to new driver
+        expect(variable.GetSingleRequest.MBDriver).toEqual(
+          editedDevice.MBDriver
+        );
+        expect(variable.SetSingleRequest.MBDriver).toEqual(
+          editedDevice.MBDriver
+        );
+
+        //Variables should be the same - only their parameters changes
+        expect(initVariables).toContain(variable);
+      }
+
+      //Variables payload should be equal
+
+      let oldVariablesPayload = initVariables.map(variable => variable.Payload);
+      let newVariablesPayload = newVariables.map(variable => variable.Payload);
+
+      expect(newVariablesPayload).toBeDefined();
+      expect(newVariablesPayload).toMatchObject(oldVariablesPayload);
+    });
+
+    it("should reassign all variables drivers when recreating it", async () => {
+      initPayload[deviceId].isActive = true;
+      editIsActive = true;
+
+      let result = await exec();
+
+      let editedDevice = commInterface.getDevice(deviceId);
+      let newVariables = Object.values(editedDevice.Variables);
+
+      expect(newVariables).toBeDefined();
+      expect(newVariables.length).toBeDefined();
+      expect(newVariables.length).toEqual(initVariables.length);
+
+      for (let variable of newVariables) {
+        //GetSingleRequest and SetSingleRequest drivers must equal to new driver
+        expect(variable.GetSingleRequest.MBDriver).toEqual(
+          editedDevice.MBDriver
+        );
+        expect(variable.SetSingleRequest.MBDriver).toEqual(
+          editedDevice.MBDriver
+        );
+
+        //Variables should be edited but it shouldn't be different
+        expect(initVariables).toContain(variable);
+      }
+
+      //Variables payload should be equal
+
+      let oldVariablesPayload = initVariables.map(variable => variable.Payload);
+      let newVariablesPayload = newVariables.map(variable => variable.Payload);
+
+      expect(newVariablesPayload).toBeDefined();
+      expect(newVariablesPayload).toMatchObject(oldVariablesPayload);
+    });
+
+    it("should throw if there is no device of given id", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should not change id if id is different in payload and in argument", async () => {
+      editId = "8765";
+
+      let result = await exec();
+
+      expect(result.Id).toBeDefined();
+      expect(result.Id).toEqual(deviceId);
+    });
+  });
+
   describe("createDevice", () => {
     let project;
     let projectDirName;
@@ -1686,13 +2208,17 @@ describe("ProjectContentManager", () => {
       await snooze(1000);
       expect(device.IsActive).toBeTruthy();
       expect(device.Connected).toBeTruthy();
-      expect(device.MBDriver._client.connectTCP).toHaveBeenCalledTimes(1);
-      expect(device.MBDriver._client.connectTCP.mock.calls[0][0]).toEqual(
-        mbDevicePayload.ipAdress
-      );
-      expect(device.MBDriver._client.connectTCP.mock.calls[0][1]).toEqual({
-        port: mbDevicePayload.portNumber
-      });
+      //Connect can be called several times - depending on the time when device is activated
+
+      expect(device.MBDriver._client.connectTCP).toHaveBeenCalled();
+      let allCalls = device.MBDriver._client.connectTCP.mock.calls;
+
+      for (let call of allCalls) {
+        expect(call[0]).toEqual(mbDevicePayload.ipAdress);
+        expect(call[1]).toEqual({
+          port: mbDevicePayload.portNumber
+        });
+      }
     });
 
     it("should not connect created mbDevice if isActive is false", async () => {
@@ -2282,13 +2808,16 @@ describe("ProjectContentManager", () => {
       expect(device.IsActive).toBeTruthy();
       expect(device.Connected).toBeTruthy();
       //can be called several times - depending on the time when connect was called - sampling variables before device is connected
-      expect(device.MBDriver._client.connectTCP).toHaveBeenCalledTimes(1);
-      expect(device.MBDriver._client.connectTCP.mock.calls[0][0]).toEqual(
-        pac3200TCPPayload.ipAdress
-      );
-      expect(device.MBDriver._client.connectTCP.mock.calls[0][1]).toEqual({
-        port: pac3200TCPPayload.portNumber
-      });
+
+      expect(device.MBDriver._client.connectTCP).toHaveBeenCalled();
+      let allCalls = device.MBDriver._client.connectTCP.mock.calls;
+
+      for (let call of allCalls) {
+        expect(call[0]).toEqual(pac3200TCPPayload.ipAdress);
+        expect(call[1]).toEqual({
+          port: pac3200TCPPayload.portNumber
+        });
+      }
     });
 
     it("should not connect created PAC3200TCP if isActive is false", async () => {
@@ -2577,465 +3106,43 @@ describe("ProjectContentManager", () => {
     });
   });
 
-  describe("updateDevice", () => {
+  describe("getVariable", () => {
     let project;
     let projectDirName;
-    let initProject;
-    let initPayload;
     let deviceId;
-    let editPayload;
-    let editId;
-    let editName;
-    let editIsActive;
-    let editTimeout;
-    let editIpAdress;
-    let editUnitId;
-    let editPortNumber;
-    let editVariables;
-    let editCalcElements;
-    let initDriver;
-    let initVariables;
-    let initCalcElements;
+    let variableId;
 
     beforeEach(async () => {
       projectDirName = projPath;
-      commInitPayload = JSON.parse(testPayload);
-      initProject = true;
-
-      editId = undefined;
-      editName = "Modified device";
-      editIsActive = false;
-      editTimeout = 4000;
-      editIpAdress = "192.168.0.17";
-      editUnitId = 5;
-      editPortNumber = 602;
-      editVariables = undefined;
-      editCalcElements = undefined;
-
-      initPayload = JSON.parse(testPayload);
       deviceId = "1235";
+      variableId = "0005";
+
+      //Creating initial files based on testPayload;
+      await createInitialFiles();
     });
 
     let exec = async () => {
-      //Creating initial files based on testPayload;
-      await createInitialFiles(initPayload);
-
       project = new Project(projectDirName);
-
-      if (initProject) await project.initFromFiles();
-
-      editPayload = {
-        id: editId,
-        name: editName,
-        isActive: editIsActive,
-        timeout: editTimeout,
-        ipAdress: editIpAdress,
-        unitId: editUnitId,
-        portNumber: editPortNumber,
-        variables: editVariables,
-        calculationElements: editCalcElements
-      };
-
-      initDriver = (await project.getDevice(deviceId)).MBDriver;
-      initVariables = Object.values(
-        (await project.getDevice(deviceId)).Variables
-      );
-      initCalcElements = Object.values(
-        (await project.getDevice(deviceId)).CalculationElements
-      );
-
-      return project.updateDevice(deviceId, editPayload);
+      await project.initFromFiles();
+      return project.getVariable(deviceId, variableId);
     };
 
-    it("should edit device of given id according to given payload", async () => {
+    it("should return variable if it exists", async () => {
       let result = await exec();
 
-      let editedDevice = await project.getDevice(deviceId);
-      expect(editedDevice.Name).toEqual(editName);
-      expect(editedDevice.IsActive).toEqual(editIsActive);
-      expect(editedDevice.Timeout).toEqual(editTimeout);
-      expect(editedDevice.IPAdress).toEqual(editIpAdress);
-      expect(editedDevice.UnitId).toEqual(editUnitId);
-      expect(editedDevice.PortNumber).toEqual(editPortNumber);
+      let device = await project.getDevice(deviceId);
+
+      expect(result).toEqual(device.Variables[variableId]);
     });
 
-    it("should return edited device", async () => {
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(result).toEqual(editedDevice);
-    });
-
-    it("should not edit variables even if they are given in payload", async () => {
-      editVariables = [
-        {
-          id: "0010",
-          timeSample: 2,
-          name: "test variable 10",
-          offset: 5,
-          length: 1,
-          fCode: 3,
-          value: 1,
-          type: "int32",
-          archived: true,
-          getSingleFCode: 3,
-          setSingleFCode: 16
-        },
-        {
-          id: "0011",
-          timeSample: 3,
-          name: "test variable 11",
-          offset: 7,
-          length: 2,
-          fCode: 4,
-          value: 2,
-          type: "float",
-          archived: true,
-          getSingleFCode: 4,
-          setSingleFCode: 16
-        }
-      ];
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.Name).toEqual(editName);
-      expect(editedDevice.IsActive).toEqual(editIsActive);
-      expect(editedDevice.Timeout).toEqual(editTimeout);
-      expect(editedDevice.IPAdress).toEqual(editIpAdress);
-      expect(editedDevice.UnitId).toEqual(editUnitId);
-      expect(editedDevice.PortNumber).toEqual(editPortNumber);
-      expect(editedDevice.Payload.variables).toBeDefined();
-      expect(editedDevice.Payload.variables).toMatchObject(
-        initPayload[deviceId].variables
-      );
-    });
-
-    it("should not edit variables even if they are given in payload as empty array", async () => {
-      editVariables = [];
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.Name).toEqual(editName);
-      expect(editedDevice.IsActive).toEqual(editIsActive);
-      expect(editedDevice.Timeout).toEqual(editTimeout);
-      expect(editedDevice.IPAdress).toEqual(editIpAdress);
-      expect(editedDevice.UnitId).toEqual(editUnitId);
-      expect(editedDevice.PortNumber).toEqual(editPortNumber);
-      expect(editedDevice.Payload.variables).toBeDefined();
-      expect(editedDevice.Payload.variables).toMatchObject(
-        initPayload[deviceId].variables
-      );
-    });
-
-    it("should not edit variables even if they are given in payload", async () => {
-      editCalcElements = [
-        {
-          id: "3001",
-          type: "sumElement",
-          archived: true,
-          sampleTime: 1,
-          name: "sumElement1",
-          unit: "C",
-          variables: []
-        },
-        {
-          id: "3002",
-          type: "sumElement",
-          archived: true,
-          sampleTime: 2,
-          name: "sumElement2",
-          unit: "D",
-          variables: []
-        }
-      ];
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.Name).toEqual(editName);
-      expect(editedDevice.IsActive).toEqual(editIsActive);
-      expect(editedDevice.Timeout).toEqual(editTimeout);
-      expect(editedDevice.IPAdress).toEqual(editIpAdress);
-      expect(editedDevice.UnitId).toEqual(editUnitId);
-      expect(editedDevice.PortNumber).toEqual(editPortNumber);
-      expect(editedDevice.Payload.calculationElements).toBeDefined();
-      expect(editedDevice.Payload.calculationElements).toMatchObject(
-        initPayload[deviceId].calculationElements
-      );
-    });
-
-    it("should not edit variables even if they are given in payload as empty array", async () => {
-      editVariables = [];
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.Name).toEqual(editName);
-      expect(editedDevice.IsActive).toEqual(editIsActive);
-      expect(editedDevice.Timeout).toEqual(editTimeout);
-      expect(editedDevice.IPAdress).toEqual(editIpAdress);
-      expect(editedDevice.UnitId).toEqual(editUnitId);
-      expect(editedDevice.PortNumber).toEqual(editPortNumber);
-      expect(editedDevice.Payload.calculationElements).toBeDefined();
-      expect(editedDevice.Payload.calculationElements).toMatchObject(
-        initPayload[deviceId].calculationElements
-      );
-    });
-
-    it("should create completly new MBDriver object if edited parameters are associated with driver - Timeout", async () => {
-      editId = undefined;
-      editName = undefined;
-      editIsActive = undefined;
-      editTimeout = 4000;
-      editIpAdress = undefined;
-      editUnitId = undefined;
-      editPortNumber = undefined;
-      editVariables = undefined;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.MBDriver).toBeDefined();
-      expect(editedDevice.MBDriver).not.toEqual(initDriver);
-      //Only timeout should be edited
-      expect(editedDevice.Timeout).toEqual(editTimeout);
-
-      //Rest should stay the same
-      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
-      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
-      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
-    });
-
-    it("should create completly new MBDriver object if edited parameters are associated with driver - IPAdress", async () => {
-      editId = undefined;
-      editName = undefined;
-      editIsActive = undefined;
-      editTimeout = undefined;
-      editIpAdress = "192.168.0.1";
-      editUnitId = undefined;
-      editPortNumber = undefined;
-      editVariables = undefined;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.MBDriver).toBeDefined();
-      expect(editedDevice.MBDriver).not.toEqual(initDriver);
-
-      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
-      expect(editedDevice.IPAdress).toEqual(editIpAdress);
-      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
-      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
-    });
-
-    it("should create completly new MBDriver object if edited parameters are associated with driver - UnitId", async () => {
-      editId = undefined;
-      editName = undefined;
-      editIsActive = undefined;
-      editTimeout = undefined;
-      editIpAdress = undefined;
-      editUnitId = 123;
-      editPortNumber = undefined;
-      editVariables = undefined;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.MBDriver).toBeDefined();
-      expect(editedDevice.MBDriver).not.toEqual(initDriver);
-
-      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
-      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
-      expect(editedDevice.UnitId).toEqual(editUnitId);
-      expect(editedDevice.PortNumber).toEqual(initPayload[deviceId].portNumber);
-    });
-
-    it("should create completly new MBDriver object if edited parameters are associated with driver - PortNumber", async () => {
-      editId = undefined;
-      editName = undefined;
-      editIsActive = undefined;
-      editTimeout = undefined;
-      editIpAdress = undefined;
-      editUnitId = undefined;
-      editPortNumber = 123;
-      editVariables = undefined;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.MBDriver).toBeDefined();
-      expect(editedDevice.MBDriver).not.toEqual(initDriver);
-
-      expect(editedDevice.Timeout).toEqual(initPayload[deviceId].timeout);
-      expect(editedDevice.IPAdress).toEqual(initPayload[deviceId].ipAdress);
-      expect(editedDevice.UnitId).toEqual(initPayload[deviceId].unitId);
-      expect(editedDevice.PortNumber).toEqual(editPortNumber);
-    });
-
-    it("should start communication when isActive is set to true and previosly was false and change was not associated with driver ", async () => {
-      editIsActive = true;
-
-      editTimeout = undefined;
-      editIpAdress = undefined;
-      editUnitId = undefined;
-      editPortNumber = undefined;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.IsActive).toBeTruthy();
-
-      //Can be called several times - if device is active and sampler invoke tick before connection was established
-      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
-
-      for (
-        let i = 0;
-        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
-        i++
-      ) {
-        expect(
-          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
-        ).toEqual(initPayload[deviceId].ipAdress);
-        expect(
-          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
-        ).toMatchObject({ port: initPayload[deviceId].portNumber });
-      }
-    });
-
-    it("should start communication when isActive is set to true and previosly was false and change was associated with driver ", async () => {
-      editIsActive = true;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.IsActive).toBeTruthy();
-
-      //Can be called several times - if device is active and sampler invoke tick before connection was established
-      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
-
-      for (
-        let i = 0;
-        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
-        i++
-      ) {
-        expect(
-          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
-        ).toEqual(editIpAdress);
-        expect(
-          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
-        ).toMatchObject({ port: editPortNumber });
-      }
-    });
-
-    it("should not start communication when isActive is set to true and previosly was true and change was not associated with driver ", async () => {
-      initPayload[deviceId].isActive = true;
-      editIsActive = true;
-
-      editTimeout = undefined;
-      editIpAdress = undefined;
-      editUnitId = undefined;
-      editPortNumber = undefined;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.IsActive).toBeTruthy();
-
-      //Shouldn't be called more than once
-      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalledTimes(1);
-    });
-
-    it("should restart communication when isActive is set to true and previosly was true but change was associated with driver ", async () => {
-      initPayload[deviceId].isActive = true;
-      editIsActive = true;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-
-      expect(editedDevice.IsActive).toBeTruthy();
-
-      //Should call disconnect of old driver
-      expect(initDriver._client.close).toHaveBeenCalledTimes(1);
-
-      //Should call connect to new driver
-      expect(editedDevice.MBDriver._client.connectTCP).toHaveBeenCalled();
-
-      for (
-        let i = 0;
-        i < editedDevice.MBDriver._client.connectTCP.mock.calls.length;
-        i++
-      ) {
-        expect(
-          editedDevice.MBDriver._client.connectTCP.mock.calls[i][0]
-        ).toEqual(editIpAdress);
-        expect(
-          editedDevice.MBDriver._client.connectTCP.mock.calls[i][1]
-        ).toMatchObject({ port: editPortNumber });
-      }
-
-      //Disconnect should be called before new connect
-      expect(initDriver._client.close).toHaveBeenCalledBefore(
-        editedDevice.MBDriver._client.connectTCP
-      );
-    });
-
-    it("should not recreate all variables but reassing their driver when recreating driver", async () => {
-      initPayload[deviceId].isActive = true;
-      editIsActive = true;
-
-      let result = await exec();
-
-      let editedDevice = await project.getDevice(deviceId);
-      let newVariables = Object.values(editedDevice.Variables);
-
-      expect(newVariables).toBeDefined();
-      expect(newVariables.length).toBeDefined();
-      expect(newVariables.length).toEqual(initVariables.length);
-
-      for (let variable of newVariables) {
-        //GetSingleRequest and SetSingleRequest drivers must equal to new driver
-        expect(variable.GetSingleRequest.MBDriver).toEqual(
-          editedDevice.MBDriver
-        );
-        expect(variable.SetSingleRequest.MBDriver).toEqual(
-          editedDevice.MBDriver
-        );
-
-        //Variables should be the same - only their parameters changes
-        expect(initVariables).toContain(variable);
-      }
-
-      //Variables payload should be equal
-
-      let oldVariablesPayload = initVariables.map(variable => variable.Payload);
-      let newVariablesPayload = newVariables.map(variable => variable.Payload);
-
-      expect(newVariablesPayload).toBeDefined();
-      expect(newVariablesPayload).toMatchObject(oldVariablesPayload);
-    });
-
-    it("should throw if there is no device of given id", async () => {
+    it("should throw if device does not exists", async () => {
       deviceId = "8765";
 
       await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
+            return resolve(true);
           } catch (err) {
             return reject(err);
           }
@@ -3043,13 +3150,3850 @@ describe("ProjectContentManager", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should not change id if id is different in payload and in argument", async () => {
-      editId = "8765";
+    it("should throw if variable does not exists", async () => {
+      variableId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("deleteVariable", () => {
+    let project;
+    let projectDirName;
+    let deviceId;
+    let variableId;
+    let variableToRemove;
+    let initialVariablesCount;
+    let projectPayload;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1235";
+      variableId = "0005";
+      projectPayload = JSON.parse(testPayload);
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      initialVariablesCount = Object.keys(
+        project.CommInterface.Devices[deviceId].Variables
+      ).length;
+      variableToRemove =
+        project.CommInterface.Devices[deviceId].Variables[variableId];
+
+      return project.deleteVariable(deviceId, variableId);
+    };
+
+    it("should remove variable of given id", async () => {
+      let result = await exec();
+
+      let deviceVariableIds = Object.keys(
+        project.CommInterface.Devices[deviceId].Variables
+      );
+
+      expect(deviceVariableIds).not.toContain(variableId);
+    });
+
+    it("should return removed variable", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(variableToRemove);
+    });
+
+    it("should throw and not delete variable if device does not exist", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if variable does not exists", async () => {
+      variableId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect((await project.getAllVariables(deviceId)).length).toEqual(
+        initialVariablesCount
+      );
+    });
+
+    it("should remove variable from archive manager", async () => {
+      let variable = await exec();
+
+      let device = await project.getDevice(deviceId);
+
+      let doesArchiveManagerContaintsValue = device.ArchiveManager.doesVariableIdExists(
+        variable.Id
+      );
+
+      expect(doesArchiveManagerContaintsValue).toBeFalsy();
+    });
+
+    it("should not remove column of variable", async () => {
+      let variable = await exec();
+
+      let filePath = variable.Device.ArchiveManager.FilePath;
+      let columnName = variable.Device.ArchiveManager.getColumnName(variable);
+      let columnType = variable.Device.ArchiveManager.getColumnType(variable);
+
+      let columnExists = await checkIfColumnExists(
+        filePath,
+        "data",
+        columnName,
+        columnType
+      );
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should remove variable from device file", async () => {
+      let variable = await exec();
+
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      let allVariableIds = deviceFileContent.variables.map(
+        variable => variable.id
+      );
+
+      let allPayloadVariableIds = projectPayload[deviceId].variables.map(
+        variable => variable.id
+      );
+
+      //There should be one variable less than before
+      expect(allVariableIds.length).toEqual(allPayloadVariableIds.length - 1);
+
+      for (let id of allPayloadVariableIds) {
+        if (id === variableId) {
+          expect(allVariableIds).not.toContain(id);
+        } else {
+          expect(allVariableIds).toContain(id);
+        }
+      }
+    });
+  });
+
+  describe("getAllVariables", () => {
+    let project;
+    let projectDirName;
+    let deviceId;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1235";
+
+      //Creating initial files based on testPayload;
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      return project.getAllVariables(deviceId);
+    };
+
+    it("should return all variables", async () => {
+      let result = await exec();
+
+      let resultIds = result.map(variable => variable.Id);
+
+      let device = await project.getDevice(deviceId);
+
+      let allVariableIds = Object.keys(device.Variables);
+
+      expect(resultIds.length).toEqual(allVariableIds.length);
+
+      for (let variableId of allVariableIds) {
+        expect(resultIds).toContain(variableId);
+      }
+    });
+
+    it("should return empty array if there are no variables in device", async () => {
+      //Removing variables from device file
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      delete deviceFileContent.variables;
+
+      await createFileAsync(deviceFilePath, JSON.stringify(deviceFileContent));
 
       let result = await exec();
 
+      expect(result).toEqual([]);
+    });
+
+    it("should throw if device does not exist", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getCalcElement", () => {
+    let project;
+    let projectDirName;
+    let deviceId;
+    let calcElementId;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1236";
+      calcElementId = "3001";
+
+      //Creating initial files based on testPayload;
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      return project.getCalcElement(deviceId, calcElementId);
+    };
+
+    it("should return calcElement if it exists", async () => {
+      let result = await exec();
+
+      let device = await project.getDevice(deviceId);
+
+      expect(result).toEqual(device.CalculationElements[calcElementId]);
+    });
+
+    it("should throw if device does not exists", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calcElement does not exists", async () => {
+      calcElementId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("deleteCalcElement", () => {
+    let project;
+    let projectDirName;
+    let deviceId;
+    let calcElementId;
+    let calcElementToRemove;
+    let initialCalcElementCount;
+    let projectPayload;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1236";
+      calcElementId = "3001";
+      projectPayload = JSON.parse(testPayload);
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      initialCalcElementCount = Object.keys(
+        project.CommInterface.Devices[deviceId].CalculationElements
+      ).length;
+      calcElementToRemove =
+        project.CommInterface.Devices[deviceId].CalculationElements[
+          calcElementId
+        ];
+
+      return project.deleteCalcElement(deviceId, calcElementId);
+    };
+
+    it("should remove caclElement of given id", async () => {
+      let result = await exec();
+
+      let deviceCalcElementIds = Object.keys(
+        project.CommInterface.Devices[deviceId].CalculationElements
+      );
+
+      expect(deviceCalcElementIds).not.toContain(calcElementId);
+    });
+
+    it("should return removed calculationElement", async () => {
+      let result = await exec();
+
+      expect(result).toEqual(calcElementToRemove);
+    });
+
+    it("should throw and not delete calcElement if device does not exist", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calcElement does not exists", async () => {
+      calcElementId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect((await project.getAllCalcElements(deviceId)).length).toEqual(
+        initialCalcElementCount
+      );
+    });
+
+    it("should remove calcElement from archive manager", async () => {
+      let calcElement = await exec();
+
+      let device = await project.getDevice(deviceId);
+
+      let doesArchiveManagerContaintsValue = device.ArchiveManager.doesVariableIdExists(
+        calcElement.Id
+      );
+
+      expect(doesArchiveManagerContaintsValue).toBeFalsy();
+    });
+
+    it("should not remove column of caclElement", async () => {
+      let calcElement = await exec();
+
+      let filePath = calcElement.Device.ArchiveManager.FilePath;
+      let columnName = calcElement.Device.ArchiveManager.getColumnNameOfCalculationElement(
+        calcElement
+      );
+      let columnType = calcElement.Device.ArchiveManager.getColumnTypeCalculationElement(
+        calcElement
+      );
+
+      let columnExists = await checkIfColumnExists(
+        filePath,
+        "data",
+        columnName,
+        columnType
+      );
+      expect(columnExists).toBeTruthy();
+    });
+
+    it("should remove calcElement from device file", async () => {
+      await exec();
+
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      let allCalcElementsIds = deviceFileContent.calculationElements.map(
+        caclElement => caclElement.id
+      );
+
+      let allPayloadCalcElementsIds = projectPayload[
+        deviceId
+      ].calculationElements.map(caclElement => caclElement.id);
+
+      //There should be one variable less than before
+      expect(allCalcElementsIds.length).toEqual(
+        allPayloadCalcElementsIds.length - 1
+      );
+
+      for (let id of allPayloadCalcElementsIds) {
+        if (id === calcElementId) {
+          expect(allCalcElementsIds).not.toContain(id);
+        } else {
+          expect(allCalcElementsIds).toContain(id);
+        }
+      }
+    });
+  });
+
+  describe("getAllCalcElements", () => {
+    let project;
+    let projectDirName;
+    let deviceId;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1236";
+
+      //Creating initial files based on testPayload;
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      return project.getAllCalcElements(deviceId);
+    };
+
+    it("should return all calculationElements", async () => {
+      let result = await exec();
+
+      let resultIds = result.map(calcElement => calcElement.Id);
+
+      let device = await project.getDevice(deviceId);
+
+      let allCalcElementIds = Object.keys(device.CalculationElements);
+
+      expect(resultIds.length).toEqual(allCalcElementIds.length);
+
+      for (let variableId of allCalcElementIds) {
+        expect(resultIds).toContain(variableId);
+      }
+    });
+
+    it("should return empty array if there are no calculationElements in device", async () => {
+      //Removing calculationElements from device file
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      delete deviceFileContent.calculationElements;
+
+      await createFileAsync(deviceFilePath, JSON.stringify(deviceFileContent));
+
+      let result = await exec();
+
+      expect(result).toEqual([]);
+    });
+
+    it("should throw if device does not exist", async () => {
+      deviceId = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getAllValues", () => {
+    let project;
+    let projectDirName;
+
+    let deviceId;
+    let device1Id;
+    let device1Name;
+    let deviceType;
+    let device1Adress;
+    let device1PortNumber;
+    let device1Timeout;
+    let device1UnitId;
+    let device1IsActive;
+    let device1Payload;
+
+    let device1Variables;
+
+    let variable1Payload;
+    let variable1Id;
+    let variable1TimeSample;
+    let variable1Name;
+    let variable1Type;
+    let variable1Offset;
+    let variable1FCode;
+    let variable1Value;
+
+    let variable2Payload;
+    let variable2Id;
+    let variable2TimeSample;
+    let variable2Name;
+    let variable2Type;
+    let variable2Offset;
+    let variable2FCode;
+    let variable2Value;
+
+    let variable3Payload;
+    let variable3Id;
+    let variable3TimeSample;
+    let variable3Name;
+    let variable3Type;
+    let variable3Offset;
+    let variable3FCode;
+    let variable3Value;
+
+    let sumElement1Payload;
+    let sumElement1Id;
+    let sumElement1SampleTime;
+    let sumElement1Name;
+    let sumElement1Type;
+    let sumElement1Archived;
+    let sumElement1Value;
+
+    let sumElement2Payload;
+    let sumElement2Id;
+    let sumElement2SampleTime;
+    let sumElement2Name;
+    let sumElement2Type;
+    let sumElement2Archived;
+    let sumElement2Value;
+
+    let addVariable1;
+    let addVariable2;
+    let addVariable3;
+    let addSumElement1;
+    let addSumElement2;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+
+      device1Id = "1234";
+      device1Name = "test device 1";
+      deviceType = "mbDevice";
+      device1Adress = "192.168.0.1";
+      device1PortNumber = 502;
+      device1Timeout = 2000;
+      device1UnitId = 1;
+      device1IsActive = false;
+
+      deviceId = device1Id;
+
+      variable1Id = "0001";
+      variable1TimeSample = 2;
+      variable1Name = "test variable 1";
+      variable1Type = "int16";
+      variable1Offset = 5;
+      variable1FCode = 3;
+      variable1Value = 1;
+
+      variable2Id = "0002";
+      variable2TimeSample = 3;
+      variable2Name = "test variable 2";
+      variable2Type = "int32";
+      variable2Offset = 6;
+      variable2FCode = 4;
+      variable2Value = 2;
+
+      variable3Id = "0003";
+      variable3TimeSample = 4;
+      variable3Name = "test variable 3";
+      variable3Type = "float";
+      variable3Offset = 7;
+      variable3FCode = 16;
+      variable3Value = 3;
+
+      sumElement1Id = "1001";
+      sumElement1SampleTime = 1;
+      sumElement1Name = "sumElement1";
+      sumElement1Type = "sumElement";
+      sumElement1Archived = false;
+      sumElement1Value = 123;
+
+      sumElement2Id = "1002";
+      sumElement2SampleTime = 2;
+      sumElement2Name = "sumElement2";
+      sumElement2Type = "sumElement";
+      sumElement2Archived = false;
+      sumElement2Value = 321;
+
+      addVariable1 = true;
+      addVariable2 = true;
+      addVariable3 = true;
+      addSumElement1 = true;
+      addSumElement2 = true;
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+
+      variable1Payload = {
+        id: variable1Id,
+        timeSample: variable1TimeSample,
+        name: variable1Name,
+        type: variable1Type,
+        offset: variable1Offset,
+        fCode: variable1FCode,
+        value: variable1Value
+      };
+
+      variable2Payload = {
+        id: variable2Id,
+        timeSample: variable2TimeSample,
+        name: variable2Name,
+        type: variable2Type,
+        offset: variable2Offset,
+        fCode: variable2FCode,
+        value: variable2Value
+      };
+
+      variable3Payload = {
+        id: variable3Id,
+        timeSample: variable3TimeSample,
+        name: variable3Name,
+        type: variable3Type,
+        offset: variable3Offset,
+        fCode: variable3FCode,
+        value: variable3Value
+      };
+
+      sumElement1Payload = {
+        id: sumElement1Id,
+        name: sumElement1Name,
+        type: sumElement1Type,
+        archived: sumElement1Archived,
+        sampleTime: sumElement1SampleTime
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: sumElement2Name,
+        type: sumElement2Type,
+        archived: sumElement2Archived,
+        sampleTime: sumElement2SampleTime
+      };
+
+      device1Variables = [];
+
+      if (addVariable1) device1Variables.push(variable1Payload);
+      if (addVariable2) device1Variables.push(variable2Payload);
+      if (addVariable3) device1Variables.push(variable3Payload);
+
+      device1CalculationElements = [];
+
+      if (addSumElement1) device1CalculationElements.push(sumElement1Payload);
+      if (addSumElement2) device1CalculationElements.push(sumElement2Payload);
+
+      device1Payload = {
+        id: device1Id,
+        name: device1Name,
+        type: deviceType,
+        ipAdress: device1Adress,
+        portNumber: device1PortNumber,
+        timeout: device1Timeout,
+        unitId: device1UnitId,
+        isActive: device1IsActive,
+        variables: device1Variables,
+        calculationElements: device1CalculationElements
+      };
+
+      device1 = await project.createDevice(device1Payload);
+
+      if (addSumElement1 && sumElement1Value)
+        device1.CalculationElements[sumElement1Id].Value = sumElement1Value;
+
+      if (addSumElement2 && sumElement2Value)
+        device1.CalculationElements[sumElement2Id].Value = sumElement2Value;
+
+      return project.getAllValues(deviceId);
+    };
+
+    it("should return all variableIds and calculationElement ids and their values", async () => {
+      let result = await exec();
+
+      let validResult = {
+        "0001": 1,
+
+        "0002": 2,
+
+        "0003": 3,
+
+        "1001": 123,
+
+        "1002": 321
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(validResult);
+    });
+
+    it("should throw if there is no device of given id", async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await project.getAllValues("8765");
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should return empty object if device does not have any variables and calcElements", async () => {
+      addVariable1 = false;
+      addVariable2 = false;
+      addVariable3 = false;
+      addSumElement1 = false;
+      addSumElement2 = false;
+
+      let result = await exec();
+
+      let validResult = {};
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(validResult);
+    });
+
+    it("should return valid object if device has only calcElements", async () => {
+      addVariable1 = false;
+      addVariable2 = false;
+      addVariable3 = false;
+
+      let result = await exec();
+
+      let validResult = {
+        "1001": 123,
+
+        "1002": 321
+      };
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(validResult);
+    });
+
+    it("should return valid object if device has only variables", async () => {
+      addSumElement1 = false;
+      addSumElement2 = false;
+
+      let result = await exec();
+
+      let validResult = {
+        "0001": 1,
+
+        "0002": 2,
+
+        "0003": 3
+      };
+      expect(result).toBeDefined();
+      expect(result).toEqual(validResult);
+    });
+  });
+
+  describe("getValue", () => {
+    let project;
+    let projectDirName;
+
+    let deviceId;
+    let elementId;
+
+    let device1Id;
+    let device1Name;
+    let deviceType;
+    let device1Adress;
+    let device1PortNumber;
+    let device1Timeout;
+    let device1UnitId;
+    let device1IsActive;
+    let device1Payload;
+
+    let device1Variables;
+
+    let variable1Payload;
+    let variable1Id;
+    let variable1TimeSample;
+    let variable1Name;
+    let variable1Type;
+    let variable1Offset;
+    let variable1FCode;
+    let variable1Value;
+
+    let variable2Payload;
+    let variable2Id;
+    let variable2TimeSample;
+    let variable2Name;
+    let variable2Type;
+    let variable2Offset;
+    let variable2FCode;
+    let variable2Value;
+
+    let variable3Payload;
+    let variable3Id;
+    let variable3TimeSample;
+    let variable3Name;
+    let variable3Type;
+    let variable3Offset;
+    let variable3FCode;
+    let variable3Value;
+
+    let sumElement1Payload;
+    let sumElement1Id;
+    let sumElement1SampleTime;
+    let sumElement1Name;
+    let sumElement1Type;
+    let sumElement1Archived;
+    let sumElement1Value;
+
+    let sumElement2Payload;
+    let sumElement2Id;
+    let sumElement2SampleTime;
+    let sumElement2Name;
+    let sumElement2Type;
+    let sumElement2Archived;
+    let sumElement2Value;
+
+    let addVariable1;
+    let addVariable2;
+    let addVariable3;
+    let addSumElement1;
+    let addSumElement2;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+
+      device1Id = "1234";
+      device1Name = "test device 1";
+      deviceType = "mbDevice";
+      device1Adress = "192.168.0.1";
+      device1PortNumber = 502;
+      device1Timeout = 2000;
+      device1UnitId = 1;
+      device1IsActive = false;
+
+      deviceId = device1Id;
+
+      variable1Id = "0001";
+      variable1TimeSample = 2;
+      variable1Name = "test variable 1";
+      variable1Type = "int16";
+      variable1Offset = 5;
+      variable1FCode = 3;
+      variable1Value = 1;
+
+      variable2Id = "0002";
+      variable2TimeSample = 3;
+      variable2Name = "test variable 2";
+      variable2Type = "int32";
+      variable2Offset = 6;
+      variable2FCode = 4;
+      variable2Value = 2;
+
+      variable3Id = "0003";
+      variable3TimeSample = 4;
+      variable3Name = "test variable 3";
+      variable3Type = "float";
+      variable3Offset = 7;
+      variable3FCode = 16;
+      variable3Value = 3;
+
+      sumElement1Id = "1001";
+      sumElement1SampleTime = 1;
+      sumElement1Name = "sumElement1";
+      sumElement1Type = "sumElement";
+      sumElement1Archived = false;
+      sumElement1Value = 123;
+
+      sumElement2Id = "1002";
+      sumElement2SampleTime = 2;
+      sumElement2Name = "sumElement2";
+      sumElement2Type = "sumElement";
+      sumElement2Archived = false;
+      sumElement2Value = 321;
+
+      addVariable1 = true;
+      addVariable2 = true;
+      addVariable3 = true;
+      addSumElement1 = true;
+      addSumElement2 = true;
+
+      elementId = variable2Id;
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+
+      variable1Payload = {
+        id: variable1Id,
+        timeSample: variable1TimeSample,
+        name: variable1Name,
+        type: variable1Type,
+        offset: variable1Offset,
+        fCode: variable1FCode,
+        value: variable1Value
+      };
+
+      variable2Payload = {
+        id: variable2Id,
+        timeSample: variable2TimeSample,
+        name: variable2Name,
+        type: variable2Type,
+        offset: variable2Offset,
+        fCode: variable2FCode,
+        value: variable2Value
+      };
+
+      variable3Payload = {
+        id: variable3Id,
+        timeSample: variable3TimeSample,
+        name: variable3Name,
+        type: variable3Type,
+        offset: variable3Offset,
+        fCode: variable3FCode,
+        value: variable3Value
+      };
+
+      sumElement1Payload = {
+        id: sumElement1Id,
+        name: sumElement1Name,
+        type: sumElement1Type,
+        archived: sumElement1Archived,
+        sampleTime: sumElement1SampleTime
+      };
+
+      sumElement2Payload = {
+        id: sumElement2Id,
+        name: sumElement2Name,
+        type: sumElement2Type,
+        archived: sumElement2Archived,
+        sampleTime: sumElement2SampleTime
+      };
+
+      device1Variables = [];
+
+      if (addVariable1) device1Variables.push(variable1Payload);
+      if (addVariable2) device1Variables.push(variable2Payload);
+      if (addVariable3) device1Variables.push(variable3Payload);
+
+      device1CalculationElements = [];
+
+      if (addSumElement1) device1CalculationElements.push(sumElement1Payload);
+      if (addSumElement2) device1CalculationElements.push(sumElement2Payload);
+
+      device1Payload = {
+        id: device1Id,
+        name: device1Name,
+        type: deviceType,
+        ipAdress: device1Adress,
+        portNumber: device1PortNumber,
+        timeout: device1Timeout,
+        unitId: device1UnitId,
+        isActive: device1IsActive,
+        variables: device1Variables,
+        calculationElements: device1CalculationElements
+      };
+
+      device1 = await project.createDevice(device1Payload);
+
+      if (addSumElement1 && sumElement1Value)
+        device1.CalculationElements[sumElement1Id].Value = sumElement1Value;
+
+      if (addSumElement2 && sumElement2Value)
+        device1.CalculationElements[sumElement2Id].Value = sumElement2Value;
+
+      return project.getValue(deviceId, elementId);
+    };
+
+    it("should return actual value of variable of device - if element id is variable id", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      //Variable "0002" has value 2
+      expect(result).toEqual(2);
+    });
+
+    it("should return actual value of calcElement of device - if element id is calcElement id", async () => {
+      elementId = "1002";
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      //Variable "1002" has value 321
+      expect(result).toEqual(321);
+    });
+
+    it("should throw if there is no device of given id", async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await project.getAllValues("8765");
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no variable and calc element of given id", async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+
+      expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await project.getValue(deviceId, "8765");
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("getValueOfElementFromDatabase", () => {
+    let projectDirName;
+    let project;
+    let initPayload;
+    let deviceId;
+    let tickId1;
+    let tickId2;
+    let tickId3;
+    let varValue1;
+    let varValue2;
+    let varValue3;
+    let variableId;
+    let calculationElementId;
+    let elementId;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      initPayload = JSON.parse(testPayload);
+      deviceId = "1236";
+      variableId = "0008";
+      calculationElementId = "3001";
+      elementId = "0008";
+
+      tickId1 = 101;
+      tickId2 = 103;
+      tickId3 = 105;
+
+      varValue1 = 123.321;
+      varValue2 = 234.432;
+      varValue3 = 345.543;
+      calcElementValue1 = 321.123;
+      calcElementValue2 = 432.234;
+      calcElementValue3 = 543.345;
+
+      tickId = tickId2;
+
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+
+      if (tickId1 && varValue1 && calcElementValue1)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId1, {
+            [variableId]: varValue1,
+            [calculationElementId]: calcElementValue1
+          });
+
+      if (tickId2 && varValue2 && calcElementValue2)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId2, {
+            [variableId]: varValue2,
+            [calculationElementId]: calcElementValue2
+          });
+
+      if (tickId3 && varValue3 && calcElementValue3)
+        await commInterface
+          .getDevice(deviceId)
+          .ArchiveManager.insertValues(tickId3, {
+            [variableId]: varValue3,
+            [calculationElementId]: calcElementValue3
+          });
+
+      return commInterface.getValueOfElementFromDatabase(
+        deviceId,
+        elementId,
+        tickId
+      );
+    };
+
+    it("should get value of variable from database if it exists", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId]: varValue2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of variable of highest date if given date is greater than given in databse from database if variable exists", async () => {
+      tickId = 109;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId3]: varValue3
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of vairable of highest date, lower than given in method if there is no date in database if variable exists", async () => {
+      tickId = 104;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId2]: varValue2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of calcElement from database if it exists", async () => {
+      elementId = calculationElementId;
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId]: calcElementValue2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of calcElement of highest date if given date is greater than given in databse from database if variable exists", async () => {
+      tickId = 109;
+      elementId = calculationElementId;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId3]: calcElementValue3
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should get value of calcElement of highest date, lower than given in method if there is no date in database if variable exists", async () => {
+      tickId = 104;
+      elementId = calculationElementId;
+
+      let result = await exec();
+
+      let expectedResult = {
+        [tickId2]: calcElementValue2
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return {} if date is smaller than written in database", async () => {
+      tickId = 99;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should throw if there is no variable and calculationElement of given id", async () => {
+      elementId = 987654321;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("createVariable", () => {
+    let variablePayload;
+    let deviceId;
+    let projectDirName;
+    let project;
+
+    beforeEach(async () => {
+      deviceId = "1234";
+      variablePayload = {};
+      variablePayload.id = "000x";
+      variablePayload.name = "testVariable";
+      variablePayload.timeSample = 5;
+      variablePayload.unit = "A";
+      variablePayload.archived = false;
+      variablePayload.length = 4;
+      variablePayload.offset = 1;
+      variablePayload.fCode = 3;
+      variablePayload.getSingleFCode = 3;
+      variablePayload.setSingleFCode = 16;
+      variablePayload.type = "byteArray";
+      variablePayload.value = [0, 0, 0, 0, 0, 0, 0, 0];
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      projectDirName = projPath;
+      project = new Project(projPath);
+      await project.initFromFiles();
+
+      return project.createVariable(deviceId, variablePayload);
+    };
+
+    //Common method for testing all mechanisms associated with creating MBVariable
+    let createVariableTestMBVariableChildClass = function(
+      VariableClass,
+      expectedDefaultValue,
+      expectedFCode,
+      notExpectedFCode,
+      expectedGetSingleFCodes,
+      expectedSetSingleFCode,
+      expectedLength,
+      expectedTypeName
+    ) {
+      //Getting name of class
+      let className = VariableClass.name;
+      let variablePayload;
+      let deviceId;
+      let projectDirName;
+      let project;
+      let expectedGetSingleFCode;
+
+      beforeEach(async () => {
+        deviceId = "1234";
+        expectedGetSingleFCode = expectedGetSingleFCodes[0];
+        variablePayload = {};
+        variablePayload.id = "000x";
+        variablePayload.name = "testVariable";
+        variablePayload.timeSample = 5;
+        variablePayload.unit = "A";
+        variablePayload.archived = true;
+        variablePayload.length = expectedLength;
+        variablePayload.offset = 1;
+        variablePayload.fCode = expectedFCode;
+        variablePayload.getSingleFCode = expectedGetSingleFCode;
+        variablePayload.setSingleFCode = expectedSetSingleFCode;
+        variablePayload.type = expectedTypeName;
+        variablePayload.value = expectedDefaultValue;
+        await createInitialFiles();
+      });
+
+      let exec = async () => {
+        projectDirName = projPath;
+        project = new Project(projPath);
+        await project.initFromFiles();
+
+        return project.createVariable(deviceId, variablePayload);
+      };
+
+      it(`${className} - should throw if deviceId is undefined`, async () => {
+        deviceId = undefined;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should throw if there is no device of given id`, async () => {
+        deviceId = "9876";
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should throw if there is already a variable with given id`, async () => {
+        variablePayload.id = "0001";
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should generate and return new variable`, async () => {
+        let result = await exec();
+        let variable = await project.getVariable(deviceId, variablePayload.id);
+        expect(result).toEqual(variable);
+      });
+
+      it(`${className} - should generate variable based on given payload`, async () => {
+        let result = await exec();
+        expect(result.Payload).toEqual(variablePayload);
+      });
+
+      it(`${className} - should generate requests for getSingleFCode and setSingleFCode`, async () => {
+        let result = await exec();
+        expect(result.GetSingleRequest).toBeDefined();
+        expect(result.GetSingleRequest).toBeDefined();
+      });
+
+      it(`${className} - should set default value of variable if it is not defined in payload`, async () => {
+        delete variablePayload.value;
+        let result = await exec();
+        expect(result.Value).toEqual(expectedDefaultValue);
+      });
+
+      it(`${className} - should set new id based on payload`, async () => {
+        let result = await exec();
+        expect(result.Id).toEqual(variablePayload.id);
+      });
+
+      it(`${className} - should not throw but generate new id if variable id is not defined in payload`, async () => {
+        delete variablePayload.id;
+        let result = await exec();
+        expect(result.Id).toBeDefined();
+      });
+
+      it(`${className} - should throw if payload is not defined`, async () => {
+        variablePayload = undefined;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should throw if name is not defined`, async () => {
+        delete variablePayload.name;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should throw if timeSample is not defined`, async () => {
+        delete variablePayload.timeSample;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should throw if fCode is not defined`, async () => {
+        delete variablePayload.fCode;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should throw if fCode is not inside possible dCodes`, async () => {
+        variablePayload.fCode = notExpectedFCode;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should not throw but set unit to "" if unit is not defined`, async () => {
+        delete variablePayload.unit;
+
+        let result;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              result = await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).resolves.toBeDefined();
+
+        expect(result.Unit).toEqual("");
+      });
+
+      it(`${className} - should not throw but set archive to false if it is not defined`, async () => {
+        delete variablePayload.archived;
+
+        let result;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              result = await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).resolves.toBeDefined();
+
+        expect(result.Archived).toBeFalsy();
+      });
+
+      it(`${className} - should add variable to ArchiveManager if archive is set to true`, async () => {
+        variablePayload.archived = true;
+        let result = await exec();
+        let device = result.Device;
+        let amVariablesIds = Object.keys(device.ArchiveManager.Variables);
+        expect(amVariablesIds).toContain(result.Id);
+      });
+
+      it(`${className} - should create new column in database if archive is set to true`, async () => {
+        variablePayload.archived = true;
+        let result = await exec();
+        let device = result.Device;
+        let dbFileName = device.ArchiveManager.FilePath;
+        let columnName = device.ArchiveManager.getColumnName(result);
+        let columnType = device.ArchiveManager.getColumnType(result);
+
+        let columnExists = await checkIfColumnExists(
+          dbFileName,
+          "data",
+          columnName,
+          columnType
+        );
+
+        expect(columnExists).toBeTruthy();
+      });
+
+      it(`${className} - should not add variable to ArchiveManager if archive is set to false`, async () => {
+        variablePayload.archived = false;
+        let result = await exec();
+        let device = result.Device;
+        let amVariablesIds = Object.keys(device.ArchiveManager.Variables);
+        expect(amVariablesIds).not.toContain(result.Id);
+      });
+
+      it(`${className} - should not create new column in database if archive is set to false`, async () => {
+        variablePayload.archived = false;
+        let result = await exec();
+        let device = result.Device;
+        let dbFileName = device.ArchiveManager.FilePath;
+        let columnName = device.ArchiveManager.getColumnName(result);
+        let columnType = device.ArchiveManager.getColumnType(result);
+
+        let columnExists = await checkIfColumnExists(
+          dbFileName,
+          "data",
+          columnName,
+          columnType
+        );
+
+        expect(columnExists).toBeFalsy();
+      });
+
+      it(`${className} - should add variable to device file content`, async () => {
+        let result = await exec();
+        let filePath = path.resolve(
+          path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+        );
+        let fileContent = JSON.parse(await readFileAsync(filePath));
+        expect(fileContent.variables).toBeDefined();
+
+        let variablePayloadFromContent = fileContent.variables.find(
+          x => x.id === variablePayload.id
+        );
+        expect(variablePayload).toEqual(variablePayloadFromContent);
+      });
+
+      it(`${className} - should set type to ${expectedTypeName}`, async () => {
+        let result = await exec();
+        expect(result.Type).toEqual(expectedTypeName);
+      });
+
+      it(`${className} - should set length to ${expectedLength} if it is defined inside payload`, async () => {
+        let result = await exec();
+        expect(result.Length).toEqual(expectedLength);
+      });
+
+      it(`${className} - should set length to ${expectedLength} if it is not defined inside payload`, async () => {
+        let result = await exec();
+        expect(result.Length).toEqual(expectedLength);
+      });
+
+      it(`${className} - should set setSingleFCode to ${expectedSetSingleFCode} if it is defined in payload as other value`, async () => {
+        variablePayload.setSingleFCode = 20;
+        let result = await exec();
+        expect(result.SetSingleFCode).toEqual(expectedSetSingleFCode);
+      });
+
+      it(`${className} - should set setSingleFCode to ${expectedSetSingleFCode} if is not defined in payload`, async () => {
+        delete variablePayload.setSingleFCode;
+        let result = await exec();
+        expect(result.SetSingleFCode).toEqual(expectedSetSingleFCode);
+      });
+
+      for (let expectedValue of expectedGetSingleFCodes) {
+        it(`${className} - should set getSingleFCode to ${expectedValue} if fCode is set to ${expectedValue} and getSingleFCode is not defined in payload`, async () => {
+          delete variablePayload.getSingleFCode;
+          variablePayload.fCode = expectedValue;
+          let result = await exec();
+          expect(result.GetSingleFCode).toEqual(expectedValue);
+        });
+
+        it(`${className} - should set getSingleFCode to ${expectedValue} if fCode is set to ${expectedValue} and getSingleFCode is defined in payload to a different value`, async () => {
+          variablePayload.getSingleFCode = 4321;
+          variablePayload.fCode = expectedValue;
+          let result = await exec();
+          expect(result.GetSingleFCode).toEqual(expectedValue);
+        });
+      }
+    };
+
+    it("should throw if there is no device of given id", async () => {
+      deviceId = "9876";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+    //#region MBBooleanVariable
+
+    createVariableTestMBVariableChildClass(
+      MBBooleanVariable,
+      false,
+      1,
+      3,
+      [1, 2],
+      15,
+      1,
+      "boolean"
+    );
+
+    //#endregion MBBooleanVariable
+
+    //#region MBFloatVariable
+
+    createVariableTestMBVariableChildClass(
+      MBFloatVariable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      2,
+      "float"
+    );
+
+    //#endregion MBFloatVariable
+
+    //#region MBInt16Variable
+
+    createVariableTestMBVariableChildClass(
+      MBInt16Variable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      1,
+      "int16"
+    );
+
+    //#endregion MBInt16Variable
+
+    //#region MBInt32Variable
+
+    createVariableTestMBVariableChildClass(
+      MBInt32Variable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      2,
+      "int32"
+    );
+
+    //#endregion MBInt32Variable
+
+    //#region MBSwappedFloatVariable
+
+    createVariableTestMBVariableChildClass(
+      MBSwappedFloatVariable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      2,
+      "swappedFloat"
+    );
+
+    //#endregion MBSwappedFloatVariable
+
+    //#region MBSwappedInt32Variable
+
+    createVariableTestMBVariableChildClass(
+      MBSwappedInt32Variable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      2,
+      "swappedInt32"
+    );
+
+    //#endregion MBSwappedInt32Variable
+
+    //#region MBSwappedUInt32Variable
+
+    createVariableTestMBVariableChildClass(
+      MBSwappedUInt32Variable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      2,
+      "swappedUInt32"
+    );
+
+    //#endregion MBSwappedUInt32Variable
+
+    //#region MBUInt16Variable
+
+    createVariableTestMBVariableChildClass(
+      MBUInt16Variable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      1,
+      "uInt16"
+    );
+
+    //#endregion MBUInt16Variable
+
+    //#region MBUInt32Variable
+
+    createVariableTestMBVariableChildClass(
+      MBUInt32Variable,
+      0,
+      3,
+      1,
+      [3, 4],
+      16,
+      2,
+      "uInt32"
+    );
+
+    //#endregion MBUInt32Variable
+
+    //#region MBByteArrayVariable
+
+    it(`MBByteArrayVariable - should throw if deviceId is undefined`, async () => {
+      deviceId = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should throw if there is no device of given id`, async () => {
+      deviceId = "9876";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should throw if there is already a variable with given id`, async () => {
+      variablePayload.id = "0001";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should generate and return new variable`, async () => {
+      let result = await exec();
+      let variable = await project.getVariable(deviceId, variablePayload.id);
+      expect(result).toEqual(variable);
+    });
+
+    it(`MBByteArrayVariable - should generate variable based on given payload`, async () => {
+      let result = await exec();
+      expect(result.Payload).toEqual(variablePayload);
+    });
+
+    it(`MBByteArrayVariable - should generate requests for getSingleFCode and setSingleFCode`, async () => {
+      let result = await exec();
+      expect(result.GetSingleRequest).toBeDefined();
+      expect(result.GetSingleRequest).toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should set default value of variable if it is not defined in payload`, async () => {
+      delete variablePayload.value;
+      let result = await exec();
+      // array byte with all bytes set as 0 - length is equal to payload.length*2
+      expect(result.Value).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    });
+
+    it(`MBByteArrayVariable - should set new id based on payload`, async () => {
+      let result = await exec();
+      expect(result.Id).toEqual(variablePayload.id);
+    });
+
+    it(`MBByteArrayVariable - should not throw but generate new id if variable id is not defined in payload`, async () => {
+      delete variablePayload.id;
+      let result = await exec();
       expect(result.Id).toBeDefined();
-      expect(result.Id).toEqual(deviceId);
+    });
+
+    it(`MBByteArrayVariable - should throw if payload is not defined`, async () => {
+      variablePayload = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should throw if name is not defined`, async () => {
+      delete variablePayload.name;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should throw if timeSample is not defined`, async () => {
+      delete variablePayload.timeSample;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should throw if fCode is not defined`, async () => {
+      delete variablePayload.fCode;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should throw if fCode is not inside possible dCodes`, async () => {
+      variablePayload.fCode = 999;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should not throw but set unit to "" if unit is not defined`, async () => {
+      delete variablePayload.unit;
+
+      let result;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(result.Unit).toEqual("");
+    });
+
+    it(`MBByteArrayVariable - should throw if length is not defined`, async () => {
+      delete variablePayload.length;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should not throw but set archive to false if it is not defined`, async () => {
+      delete variablePayload.archived;
+
+      let result;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(result.Archived).toBeFalsy();
+    });
+
+    it(`MBByteArrayVariable - should not throw but set archive to false even if it is set to true`, async () => {
+      variablePayload.archived = true;
+
+      let result;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(result.Archived).toBeFalsy();
+    });
+
+    it(`MBByteArrayVariable - should not add variable to ArchiveManager even if archive is set to true`, async () => {
+      variablePayload.archived = true;
+      let result = await exec();
+      let device = result.Device;
+      let amVariablesIds = Object.keys(device.ArchiveManager.Variables);
+      expect(amVariablesIds).not.toContain(result.Id);
+    });
+
+    it(`MBByteArrayVariable - should not add variable to ArchiveManager if archive is set to false`, async () => {
+      variablePayload.archived = false;
+      let result = await exec();
+      let device = result.Device;
+      let amVariablesIds = Object.keys(device.ArchiveManager.Variables);
+      expect(amVariablesIds).not.toContain(result.Id);
+    });
+
+    it(`MBByteArrayVariable - should add variable to device file content`, async () => {
+      let result = await exec();
+      let filePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+      let fileContent = JSON.parse(await readFileAsync(filePath));
+      expect(fileContent.variables).toBeDefined();
+
+      let variablePayloadFromContent = fileContent.variables.find(
+        x => x.id === variablePayload.id
+      );
+      expect(variablePayload).toEqual(variablePayloadFromContent);
+    });
+
+    it(`MBByteArrayVariable - should set type to byteArray`, async () => {
+      let result = await exec();
+      expect(result.Type).toEqual("byteArray");
+    });
+
+    it(`MBByteArrayVariable - should set setSingleFCode to fCode value if it is defined in payload as other value`, async () => {
+      variablePayload.setSingleFCode = 20;
+      let result = await exec();
+      expect(result.SetSingleFCode).toEqual(16);
+    });
+
+    it(`MBByteArrayVariable - should set setSingleFCode to 16 if is not defined in payload`, async () => {
+      delete variablePayload.setSingleFCode;
+      let result = await exec();
+      expect(result.SetSingleFCode).toEqual(16);
+    });
+
+    it(`MBByteArrayVariable - should set getSingleFCode to fCode value if getSingleFCode is not defined in payload`, async () => {
+      delete variablePayload.getSingleFCode;
+      let result = await exec();
+      expect(result.GetSingleFCode).toEqual(variablePayload.fCode);
+    });
+
+    it(`MBByteArrayVariable - should set getSingleFCode to and even if getSingleFCode is defined in payload to a different value`, async () => {
+      variablePayload.getSingleFCode = 4321;
+      let result = await exec();
+      expect(result.GetSingleFCode).toEqual(variablePayload.fCode);
+    });
+
+    //#endregion MBByteArray
+  });
+
+  describe("editVariable", () => {
+    let createPayload;
+    let editPayload;
+    let variable;
+    let deviceId;
+    let variableId;
+    let projectDirName;
+    let project;
+    let previousGetRequest;
+    let previousSetRequest;
+    let previousRequestGroups;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1234";
+      variableId = "000x";
+
+      createPayload = {};
+      createPayload.id = "000x";
+      createPayload.name = "testVariable";
+      createPayload.timeSample = 5;
+      createPayload.unit = "A";
+      createPayload.archived = false;
+      createPayload.length = 2;
+      createPayload.offset = 1;
+      createPayload.fCode = 3;
+      createPayload.getSingleFCode = 3;
+      createPayload.setSingleFCode = 16;
+      createPayload.type = "byteArray";
+      createPayload.value = [0, 0, 0, 0];
+
+      editPayload = {};
+      editPayload.id = "000x";
+      editPayload.name = "editedVariable";
+      editPayload.timeSample = 10;
+      editPayload.unit = "B";
+      editPayload.archived = false;
+      editPayload.length = 4;
+      editPayload.offset = 2;
+      editPayload.fCode = 4;
+      editPayload.getSingleFCode = 4;
+      editPayload.setSingleFCode = 16;
+      editPayload.type = "byteArray";
+      editPayload.value = [0, 1, 0, 1, 0, 1, 0, 1];
+
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      variable = await project.createVariable(deviceId, createPayload);
+      previousGetRequest = variable.GetSingleRequest;
+      previousSetRequest = variable.SetSingleRequest;
+      previousRequestGroups = variable.Device.Requests;
+      return project.updateVariable(deviceId, variableId, editPayload);
+    };
+
+    it("should throw if device does not exist", async () => {
+      deviceId = "9876";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if variable does not exist", async () => {
+      variableId = "9876";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if payload is empty", async () => {
+      editPayload = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    let editVariableTestMBVariableChildClass = function(
+      VariableClass,
+      expectedFCodes,
+      notExpectedFCode,
+      expectedGetSingleFCodes,
+      expectedSetSingleFCode,
+      expectedLength,
+      expectedTypeName,
+      defaultValue,
+      editValue
+    ) {
+      let createPayload;
+      let editPayload;
+      let variable;
+      let deviceId;
+      let variableId;
+      let projectDirName;
+      let project;
+      let className = VariableClass.name;
+      let expectedGetSingleFCode = expectedGetSingleFCodes[0];
+      let expectedFCode1 = expectedFCodes[0];
+      let expectedFCode2 = expectedFCodes[1];
+      let previousGetRequest;
+      let previousSetRequest;
+      let previousRequestGroups;
+
+      beforeEach(async () => {
+        projectDirName = projPath;
+        deviceId = "1234";
+        variableId = "000x";
+
+        createPayload = {};
+        createPayload.id = "000x";
+        createPayload.name = "testVariable";
+        createPayload.timeSample = 5;
+        createPayload.unit = "A";
+        createPayload.archived = false;
+        createPayload.length = expectedLength;
+        createPayload.offset = 1;
+        createPayload.fCode = expectedFCode1;
+        createPayload.getSingleFCode = expectedGetSingleFCode;
+        createPayload.setSingleFCode = expectedSetSingleFCode;
+        createPayload.type = expectedTypeName;
+        createPayload.value = defaultValue;
+
+        editPayload = {};
+        editPayload.id = "000x";
+        editPayload.name = "editedVariable";
+        editPayload.timeSample = 10;
+        editPayload.unit = "B";
+        editPayload.archived = true;
+        editPayload.length = expectedLength;
+        editPayload.offset = 2;
+        editPayload.fCode = expectedFCode2;
+        editPayload.getSingleFCode = expectedGetSingleFCode;
+        editPayload.setSingleFCode = expectedSetSingleFCode;
+        editPayload.type = expectedTypeName;
+        editPayload.value = editValue;
+
+        await createInitialFiles();
+      });
+
+      let exec = async () => {
+        project = new Project(projectDirName);
+        await project.initFromFiles();
+        variable = await project.createVariable(deviceId, createPayload);
+        previousGetRequest = variable.GetSingleRequest;
+        previousSetRequest = variable.SetSingleRequest;
+        previousRequestGroups = variable.Device.Requests;
+        return project.updateVariable(deviceId, variableId, editPayload);
+      };
+
+      it(`${className} - return edited variable`, async () => {
+        let result = await exec();
+
+        expect(result).toEqual(variable);
+      });
+
+      it(`${className} - edit variable based on given payload`, async () => {
+        let result = await exec();
+
+        expect(result.Payload).toEqual(editPayload);
+      });
+
+      it(`${className} - should throw if id in payload is different than id in method`, async () => {
+        variableId = "000y";
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should edit only time sample if only time sample is defined`, async () => {
+        let editedTimeSampleValue = 100;
+
+        editPayload = {
+          timeSample: editedTimeSampleValue
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should edit only name if only name is defined`, async () => {
+        let editName = "new test name 2";
+
+        editPayload = {
+          name: editName
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should edit only archive if only archive is defined`, async () => {
+        let editArchive = true;
+
+        editPayload = {
+          archived: editArchive
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should edit only Unit if only Unit is defined`, async () => {
+        let editUnit = "B";
+
+        editPayload = {
+          unit: editUnit
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should edit only FCode if only FCode is defined`, async () => {
+        let editFCode = expectedFCode2;
+
+        //both should be edited together with getSingleFCode
+        editPayload = {
+          fCode: editFCode,
+          getSingleFCode: editFCode
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should edit only Offset if only Offset is defined`, async () => {
+        let editOffset = 4;
+
+        editPayload = {
+          offset: editOffset
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should edit only Value if only Value is defined`, async () => {
+        let newValue = editValue;
+
+        editPayload = {
+          value: newValue
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should add variable to archive manager if archive is set to true and previously was set to false`, async () => {
+        createPayload.archived = false;
+        editPayload.archived = true;
+
+        let result = await exec();
+
+        let allIds = Object.keys(result.Device.ArchiveManager.Variables);
+
+        expect(allIds).toContain(variableId);
+      });
+
+      it(`${className} - should create column in database for added variable if archive is set to true and previously was set to false`, async () => {
+        createPayload.archived = false;
+        editPayload.archived = true;
+
+        let result = await exec();
+
+        let filePath = result.Device.ArchiveManager.FilePath;
+        let columnName = result.Device.ArchiveManager.getColumnName(result);
+        let columnType = result.Device.ArchiveManager.getColumnType(result);
+
+        let columnExists = await checkIfColumnExists(
+          filePath,
+          "data",
+          columnName,
+          columnType
+        );
+
+        expect(columnExists).toBeTruthy();
+      });
+
+      it(`${className} - should delete variable from archive manager if variable archive was set to true and now is set to false`, async () => {
+        createPayload.archived = true;
+        editPayload.archived = false;
+
+        let result = await exec();
+
+        let allIds = Object.keys(result.Device.ArchiveManager.Variables);
+
+        expect(allIds).not.toContain(variableId);
+      });
+
+      it(`${className} - should not delete column if variable archive was set to true and now is set to false`, async () => {
+        createPayload.archived = true;
+        editPayload.archived = false;
+
+        let result = await exec();
+
+        let filePath = result.Device.ArchiveManager.FilePath;
+        let columnName = result.Device.ArchiveManager.getColumnName(result);
+        let columnType = result.Device.ArchiveManager.getColumnType(result);
+
+        let columnExists = await checkIfColumnExists(
+          filePath,
+          "data",
+          columnName,
+          columnType
+        );
+
+        expect(columnExists).toBeTruthy();
+      });
+
+      it(`${className} - should throw if given fCode is not included in possibleFCodes`, async () => {
+        editPayload.fCode = notExpectedFCode;
+
+        await expect(
+          new Promise(async (resolve, reject) => {
+            try {
+              await exec();
+              return resolve(true);
+            } catch (err) {
+              return reject(err);
+            }
+          })
+        ).rejects.toBeDefined();
+      });
+
+      it(`${className} - should set length to ${expectedLength} even if length is defined in payload as a different value`, async () => {
+        editPayload.length = 1234;
+
+        let result = await exec();
+
+        expect(result.Length).toEqual(expectedLength);
+      });
+
+      it(`${className} - recreate getSingleRequest after edition`, async () => {
+        let result = await exec();
+
+        let getSingleRequest = result.GetSingleRequest;
+
+        expect(getSingleRequest).toBeDefined();
+        expect(getSingleRequest).not.toEqual(previousGetRequest);
+      });
+
+      it(`${className} - recreate setSingleRequest after edition`, async () => {
+        let result = await exec();
+
+        let setSingleRequest = result.SetSingleRequest;
+
+        expect(setSingleRequest).toBeDefined();
+        expect(setSingleRequest).not.toEqual(previousSetRequest);
+      });
+
+      for (let expectedValue of expectedGetSingleFCodes) {
+        it(`${className} - should set getSingleFCode to ${expectedValue} if fCode is set to ${expectedValue} and getSingleFCode is not defined in payload`, async () => {
+          delete editPayload.getSingleFCode;
+          editPayload.fCode = expectedValue;
+          let result = await exec();
+          expect(result.GetSingleFCode).toEqual(expectedValue);
+        });
+
+        it(`${className} - should set getSingleFCode to ${expectedValue} if fCode is set to ${expectedValue} and getSingleFCode is defined in payload to a different value`, async () => {
+          editPayload.getSingleFCode = 4321;
+          editPayload.fCode = expectedValue;
+          let result = await exec();
+          expect(result.GetSingleFCode).toEqual(expectedValue);
+        });
+      }
+
+      it(`${className} - should set setSingleFCode to ${expectedSetSingleFCode} if it is defined in payload as other value`, async () => {
+        editPayload.setSingleFCode = 20;
+        let result = await exec();
+        expect(result.SetSingleFCode).toEqual(expectedSetSingleFCode);
+      });
+
+      it(`${className} - should set setSingleFCode to ${expectedSetSingleFCode} if is not defined in payload`, async () => {
+        delete editPayload.setSingleFCode;
+        let result = await exec();
+        expect(result.SetSingleFCode).toEqual(expectedSetSingleFCode);
+      });
+
+      it(`${className} - should refresh device request groups after edition`, async () => {
+        let result = await exec();
+        let requestGroups = result.Device.Requests;
+
+        expect(requestGroups).toBeDefined();
+        expect(requestGroups).not.toEqual(previousRequestGroups);
+
+        //Checking if device request contain edited variable
+        let device = await project.getDevice(deviceId);
+        let unitId = device.UnitId;
+        let fCode = editPayload.fCode;
+        let tickId = editPayload.timeSample;
+
+        let reqExists = device.Requests[tickId].find(x => {
+          let allConnectionIds = Object.keys(x.VariableConnections);
+          return allConnectionIds.find(y => y === variableId);
+        });
+
+        expect(reqExists).toBeTruthy();
+      });
+
+      it(`${className} - should edit variable in device file content`, async () => {
+        let result = await exec();
+        let filePath = path.resolve(
+          path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+        );
+        let fileContent = JSON.parse(await readFileAsync(filePath));
+        expect(fileContent.variables).toBeDefined();
+
+        let variablePayloadFromContent = fileContent.variables.find(
+          x => x.id === editPayload.id
+        );
+        expect(editPayload).toEqual(variablePayloadFromContent);
+      });
+    };
+
+    //#region MBBooleanVariable
+
+    editVariableTestMBVariableChildClass(
+      MBBooleanVariable,
+      [1, 2],
+      3,
+      [1],
+      15,
+      1,
+      "boolean",
+      false,
+      true
+    );
+
+    //#endregion MBBoleanVariable
+
+    //#region MBFloatVariable
+
+    editVariableTestMBVariableChildClass(
+      MBFloatVariable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      2,
+      "float",
+      0,
+      123
+    );
+
+    //#endregion MBFloatVariable
+
+    //#region MBInt16Variable
+
+    editVariableTestMBVariableChildClass(
+      MBInt16Variable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      1,
+      "int16",
+      0,
+      123
+    );
+
+    //#endregion MBInt16Variable
+
+    //#region MBUInt16Variable
+
+    editVariableTestMBVariableChildClass(
+      MBUInt16Variable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      1,
+      "uInt16",
+      0,
+      123
+    );
+
+    //#endregion MBUInt16Variable
+
+    //#region MBInt32Variable
+
+    editVariableTestMBVariableChildClass(
+      MBInt32Variable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      2,
+      "int32",
+      0,
+      123
+    );
+
+    //#endregion MBInt32Variable
+
+    //#region MBUInt32Variable
+
+    editVariableTestMBVariableChildClass(
+      MBUInt32Variable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      2,
+      "uInt32",
+      0,
+      123
+    );
+
+    //#endregion MBUInt32Variable
+
+    //#region MBSwappedFloatVariable
+
+    editVariableTestMBVariableChildClass(
+      MBSwappedFloatVariable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      2,
+      "swappedFloat",
+      0,
+      123
+    );
+
+    //#endregion MBSwappedFloatVariable
+
+    //#region MBSwappedInt32Variable
+
+    editVariableTestMBVariableChildClass(
+      MBSwappedInt32Variable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      2,
+      "swappedInt32",
+      0,
+      123
+    );
+
+    //#endregion MBSwappedInt32Variable
+
+    //#region MBSwappedUInt32Variable
+
+    editVariableTestMBVariableChildClass(
+      MBSwappedUInt32Variable,
+      [3, 4],
+      1,
+      [3, 4],
+      16,
+      2,
+      "swappedInt32",
+      0,
+      123
+    );
+
+    //#endregion MBSwappedUInt32Variable
+
+    //#region MBByteArrayVariable
+
+    it(`MBByteArrayVariable - return edited variable`, async () => {
+      let result = await exec();
+
+      expect(result).toEqual(variable);
+    });
+
+    it(`MBByteArrayVariable - edit variable based on given payload`, async () => {
+      let result = await exec();
+
+      expect(result.Payload).toEqual(editPayload);
+    });
+
+    it(`MBByteArrayVariable - should throw if id in payload is different than id in method`, async () => {
+      variableId = "000y";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - should edit only time sample if only time sample is defined`, async () => {
+      let editedTimeSampleValue = 100;
+
+      editPayload = {
+        timeSample: editedTimeSampleValue
+      };
+
+      let expectedPayload = { ...createPayload, ...editPayload };
+
+      let result = await exec();
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it(`MBByteArrayVariable - should edit only name if only name is defined`, async () => {
+      let editName = "new test name 2";
+
+      editPayload = {
+        name: editName
+      };
+
+      let expectedPayload = { ...createPayload, ...editPayload };
+
+      let result = await exec();
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it(`MBByteArrayVariable - should set archive to false even if in payload is set as true`, async () => {
+      let editArchive = true;
+
+      editPayload = {
+        archived: editArchive
+      };
+
+      let result = await exec();
+
+      expect(result.Archived).toBeFalsy();
+    });
+
+    it(`MBByteArrayVariable - should edit only Unit if only Unit is defined`, async () => {
+      let editUnit = "B";
+
+      editPayload = {
+        unit: editUnit
+      };
+
+      let expectedPayload = { ...createPayload, ...editPayload };
+
+      let result = await exec();
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it(`MBByteArrayVariable - should edit only FCode if only FCode is defined`, async () => {
+      let editFCode = 16;
+
+      //both should be edited together with getSingleFCode
+      editPayload = {
+        fCode: editFCode,
+        getSingleFCode: editFCode
+      };
+
+      let expectedPayload = { ...createPayload, ...editPayload };
+
+      let result = await exec();
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it(`MBByteArrayVariable - should edit only Offset if only Offset is defined`, async () => {
+      let editOffset = 4;
+
+      editPayload = {
+        offset: editOffset
+      };
+
+      let expectedPayload = { ...createPayload, ...editPayload };
+
+      let result = await exec();
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it(`MBByteArrayVariable - should edit only Value if only Value is defined`, async () => {
+      let newValue = [0, 1, 0, 1];
+
+      editPayload = {
+        value: newValue
+      };
+
+      let expectedPayload = { ...createPayload, ...editPayload };
+
+      let result = await exec();
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it(`MBByteArrayVariable - should edit only Length if only Length is defined`, async () => {
+      let editLength = 4;
+
+      editPayload = {
+        length: editLength
+      };
+
+      //also value changes due to change of length to default value
+      let expectedPayload = {
+        ...createPayload,
+        ...editPayload,
+        value: [0, 0, 0, 0, 0, 0, 0, 0]
+      };
+
+      let result = await exec();
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it(`MBByteArrayVariable - should set value to default value if length is edited`, async () => {
+      let editLength = 4;
+
+      editPayload = {
+        length: editLength
+      };
+
+      let result = await exec();
+
+      expect(result.Value).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+    });
+
+    it(`MBByteArrayVariable - should set value to new value if length is edited but value is given in edit payload`, async () => {
+      let editLength = 4;
+      let newValue = [1, 0, 1, 0, 1, 0, 1, 0];
+      editPayload = {
+        length: editLength,
+        value: newValue
+      };
+
+      let result = await exec();
+
+      expect(result.Value).toEqual(newValue);
+    });
+
+    it(`MBByteArrayVariable - should throw and not edit value if new value has different length than length in payload`, async () => {
+      let editLength = 4;
+      let newValue = [1, 0, 1, 0];
+      editPayload = {
+        length: editLength,
+        value: newValue
+      };
+
+      let result = null;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            result = await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      let variable = await project.getVariable(deviceId, variableId);
+
+      expect(variable.Length).toEqual(editLength);
+      expect(variable.Value).not.toEqual(newValue);
+      expect(variable.Value).toEqual(createPayload.value);
+    });
+
+    it(`MBByteArrayVariable - should not add variable to archive manager if archive is set to true and previously was set to false`, async () => {
+      createPayload.archived = false;
+      editPayload.archived = true;
+
+      let result = await exec();
+
+      let allIds = Object.keys(result.Device.ArchiveManager.Variables);
+
+      expect(allIds).not.toContain(variableId);
+    });
+
+    it(`MBByteArrayVariable - should throw if given fCode is not included in possibleFCodes`, async () => {
+      editPayload.fCode = 100;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it(`MBByteArrayVariable - recreate getSingleRequest after edition`, async () => {
+      let result = await exec();
+
+      let getSingleRequest = result.GetSingleRequest;
+
+      expect(getSingleRequest).toBeDefined();
+      expect(getSingleRequest).not.toEqual(previousGetRequest);
+    });
+
+    it(`MBByteArrayVariable - recreate setSingleRequest after edition`, async () => {
+      let result = await exec();
+
+      let setSingleRequest = result.SetSingleRequest;
+
+      expect(setSingleRequest).toBeDefined();
+      expect(setSingleRequest).not.toEqual(previousSetRequest);
+    });
+
+    it(`MBByteArrayVariable - should set getSingleFCode to fCode even is defined in payload as other value`, async () => {
+      editPayload.getSingleFCode = 3;
+      editPayload.fCode = 4;
+      let result = await exec();
+      expect(result.GetSingleFCode).toEqual(4);
+    });
+
+    it(`MBByteArrayVariable - should set getSingleFCode to fCode if is not defined in payload`, async () => {
+      delete editPayload.getSingleFCode;
+      editPayload.fCode = 4;
+      let result = await exec();
+      expect(result.GetSingleFCode).toEqual(4);
+    });
+
+    it(`MBByteArrayVariable - should set setSingleFCode to 16 if it is defined in payload as other value`, async () => {
+      editPayload.setSingleFCode = 20;
+      let result = await exec();
+      expect(result.SetSingleFCode).toEqual(16);
+    });
+
+    it(`MBByteArrayVariable - should set setSingleFCode to 16 if is not defined in payload`, async () => {
+      delete editPayload.setSingleFCode;
+      let result = await exec();
+      expect(result.SetSingleFCode).toEqual(16);
+    });
+
+    it(`MBByteArrayVariable - should refresh device request groups after edition`, async () => {
+      let result = await exec();
+      let requestGroups = result.Device.Requests;
+
+      expect(requestGroups).toBeDefined();
+      expect(requestGroups).not.toEqual(previousRequestGroups);
+
+      //Checking if device request contain edited variable
+      let device = await project.getDevice(deviceId);
+      let unitId = device.UnitId;
+      let fCode = editPayload.fCode;
+      let tickId = editPayload.timeSample;
+
+      let reqExists = device.Requests[tickId].find(x => {
+        let allConnectionIds = Object.keys(x.VariableConnections);
+        return allConnectionIds.find(y => y === variableId);
+      });
+
+      expect(reqExists).toBeTruthy();
+    });
+
+    it(`MBByteArrayVariable - should edit variable in device file content`, async () => {
+      let result = await exec();
+      let filePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+      let fileContent = JSON.parse(await readFileAsync(filePath));
+      expect(fileContent.variables).toBeDefined();
+
+      let variablePayloadFromContent = fileContent.variables.find(
+        x => x.id === editPayload.id
+      );
+      expect(editPayload).toEqual(variablePayloadFromContent);
+    });
+
+    //#endregion MBByteArrayVariable
+  });
+
+  describe("createCalcElement", () => {
+    let variablePayload;
+    let elementPayload;
+    let deviceId;
+    let projectDirName;
+    let project;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1234";
+
+      variablePayload = {
+        id: "000y",
+        name: "testVariable",
+        timeSample: 5,
+        unit: "A",
+        archived: false,
+        offset: 1,
+        fCode: 3,
+        getSingleFCode: 3,
+        setSingleFCode: 16,
+        type: "float",
+        value: 3
+      };
+
+      elementPayload = {
+        id: "000x",
+        archived: true,
+        name: "testCalcElement",
+        sampleTime: 5,
+        unit: "A",
+        variableId: "000y",
+        factor: 2,
+        calculationInterval: 5,
+        type: "averageElement"
+      };
+
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      await project.createVariable(deviceId, variablePayload);
+      return project.createCalcElement(deviceId, elementPayload);
+    };
+
+    it("should throw if there is no device of given id", async () => {
+      deviceId = "9876";
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("createCalcElement - AverageElement", () => {
+    let variablePayload;
+    let elementPayload;
+    let deviceId;
+    let projectDirName;
+    let project;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1234";
+
+      variablePayload = {
+        id: "000y",
+        name: "testVariable",
+        timeSample: 5,
+        unit: "A",
+        archived: false,
+        offset: 1,
+        fCode: 3,
+        getSingleFCode: 3,
+        setSingleFCode: 16,
+        type: "float",
+        value: 3
+      };
+
+      elementPayload = {
+        id: "000x",
+        archived: true,
+        name: "testCalcElement",
+        sampleTime: 5,
+        unit: "A",
+        variableId: "000y",
+        factor: 2,
+        calculationInterval: 5,
+        type: "averageElement"
+      };
+
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      await project.createVariable(deviceId, variablePayload);
+      return project.createCalcElement(deviceId, elementPayload);
+    };
+
+    it("should generate and return new calculation element", async () => {
+      let result = await exec();
+
+      let element = await project.getCalcElement(deviceId, elementPayload.id);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(element);
+    });
+
+    it("should generate calcElement based on given parameters", async () => {
+      let result = await exec();
+
+      expect(result.Payload).toEqual(elementPayload);
+    });
+
+    it("should throw if there is already a calcElement with given id", async () => {
+      await exec();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await project.createCalcElement(deviceId, elementPayload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if name is not defined", async () => {
+      delete elementPayload.name;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if sampleTime is not defined", async () => {
+      delete elementPayload.sampleTime;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if variableId is not defined", async () => {
+      delete elementPayload.variableId;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if factor is not defined", async () => {
+      delete elementPayload.factor;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calculationInterval is not defined", async () => {
+      delete elementPayload.calculationInterval;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no variable of given id", async () => {
+      delete elementPayload.calculationInterval;
+      elementPayload.variableId = "8765";
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should set unit to empty string if it is not defined in payload", async () => {
+      delete elementPayload.unit;
+
+      let result = await exec();
+
+      await expect(result.Unit).toEqual("");
+    });
+
+    it("should generate new id if id is not defined inside payload", async () => {
+      delete elementPayload.id;
+
+      let result = await exec();
+
+      await expect(result.Id).toBeDefined();
+    });
+
+    it("should add element to archive manager if archive is set to true", async () => {
+      elementPayload.archived = true;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeTruthy();
+    });
+
+    it("should not add element to archive manager if archive is set to false", async () => {
+      elementPayload.archived = false;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeFalsy();
+    });
+
+    it("should save new element in device file content", async () => {
+      let result = await exec();
+
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      let calcElementContent = deviceFileContent.calculationElements.find(
+        x => x.id === elementPayload.id
+      );
+
+      await expect(calcElementContent).toEqual(elementPayload);
+    });
+  });
+
+  describe("createCalcElement - FactorElement", () => {
+    let variablePayload;
+    let elementPayload;
+    let deviceId;
+    let projectDirName;
+    let project;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1234";
+
+      variablePayload = {
+        id: "000y",
+        name: "testVariable",
+        timeSample: 5,
+        unit: "A",
+        archived: false,
+        offset: 1,
+        fCode: 3,
+        getSingleFCode: 3,
+        setSingleFCode: 16,
+        type: "float",
+        value: 3
+      };
+
+      elementPayload = {
+        id: "000x",
+        archived: true,
+        name: "testCalcElement",
+        sampleTime: 5,
+        unit: "A",
+        variableId: "000y",
+        factor: 2,
+        type: "factorElement"
+      };
+
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      await project.createVariable(deviceId, variablePayload);
+      return project.createCalcElement(deviceId, elementPayload);
+    };
+
+    it("should generate and return new calculation element", async () => {
+      let result = await exec();
+
+      let element = await project.getCalcElement(deviceId, elementPayload.id);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(element);
+    });
+
+    it("should generate calcElement based on given parameters", async () => {
+      let result = await exec();
+
+      expect(result.Payload).toEqual(elementPayload);
+    });
+
+    it("should throw if there is already a calcElement with given id", async () => {
+      await exec();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await project.createCalcElement(deviceId, elementPayload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if name is not defined", async () => {
+      delete elementPayload.name;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if sampleTime is not defined", async () => {
+      delete elementPayload.sampleTime;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if variableId is not defined", async () => {
+      delete elementPayload.variableId;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if factor is not defined", async () => {
+      delete elementPayload.factor;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no variable of given id", async () => {
+      delete elementPayload.calculationInterval;
+      elementPayload.variableId = "8765";
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should set unit to empty string if it is not defined in payload", async () => {
+      delete elementPayload.unit;
+
+      let result = await exec();
+
+      await expect(result.Unit).toEqual("");
+    });
+
+    it("should generate new id if id is not defined inside payload", async () => {
+      delete elementPayload.id;
+
+      let result = await exec();
+
+      await expect(result.Id).toBeDefined();
+    });
+
+    it("should add element to archive manager if archive is set to true", async () => {
+      elementPayload.archived = true;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeTruthy();
+    });
+
+    it("should not add element to archive manager if archive is set to false", async () => {
+      elementPayload.archived = false;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeFalsy();
+    });
+
+    it("should save new element in device file content", async () => {
+      let result = await exec();
+
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      let calcElementContent = deviceFileContent.calculationElements.find(
+        x => x.id === elementPayload.id
+      );
+
+      await expect(calcElementContent).toEqual(elementPayload);
+    });
+  });
+
+  describe("createCalcElement - IncreaseElement", () => {
+    let variablePayload;
+    let elementPayload;
+    let deviceId;
+    let projectDirName;
+    let project;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1234";
+
+      variablePayload = {
+        id: "000y",
+        name: "testVariable",
+        timeSample: 5,
+        unit: "A",
+        archived: false,
+        offset: 1,
+        fCode: 3,
+        getSingleFCode: 3,
+        setSingleFCode: 16,
+        type: "float",
+        value: 3
+      };
+
+      elementPayload = {
+        id: "000x",
+        archived: true,
+        name: "testCalcElement",
+        sampleTime: 5,
+        unit: "A",
+        variableId: "000y",
+        factor: 2,
+        calculationInterval: 5,
+        type: "increaseElement",
+        overflow: 1000
+      };
+
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      await project.createVariable(deviceId, variablePayload);
+      return project.createCalcElement(deviceId, elementPayload);
+    };
+
+    it("should generate and return new calculation element", async () => {
+      let result = await exec();
+
+      let element = await project.getCalcElement(deviceId, elementPayload.id);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(element);
+    });
+
+    it("should generate calcElement based on given parameters", async () => {
+      let result = await exec();
+
+      expect(result.Payload).toEqual(elementPayload);
+    });
+
+    it("should throw if there is already a calcElement with given id", async () => {
+      await exec();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await project.createCalcElement(deviceId, elementPayload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if name is not defined", async () => {
+      delete elementPayload.name;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if sampleTime is not defined", async () => {
+      delete elementPayload.sampleTime;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if overflow is not defined", async () => {
+      delete elementPayload.overflow;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if variableId is not defined", async () => {
+      delete elementPayload.variableId;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if factor is not defined", async () => {
+      delete elementPayload.factor;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if calculationInterval is not defined", async () => {
+      delete elementPayload.calculationInterval;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no variable of given id", async () => {
+      delete elementPayload.calculationInterval;
+      elementPayload.variableId = "8765";
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should set unit to empty string if it is not defined in payload", async () => {
+      delete elementPayload.unit;
+
+      let result = await exec();
+
+      await expect(result.Unit).toEqual("");
+    });
+
+    it("should generate new id if id is not defined inside payload", async () => {
+      delete elementPayload.id;
+
+      let result = await exec();
+
+      await expect(result.Id).toBeDefined();
+    });
+
+    it("should add element to archive manager if archive is set to true", async () => {
+      elementPayload.archived = true;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeTruthy();
+    });
+
+    it("should not add element to archive manager if archive is set to false", async () => {
+      elementPayload.archived = false;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeFalsy();
+    });
+
+    it("should save new element in device file content", async () => {
+      let result = await exec();
+
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      let calcElementContent = deviceFileContent.calculationElements.find(
+        x => x.id === elementPayload.id
+      );
+
+      await expect(calcElementContent).toEqual(elementPayload);
+    });
+  });
+
+  describe("createCalcElement - SumElement", () => {
+    let variable1Payload;
+    let elementPayload;
+    let deviceId;
+    let projectDirName;
+    let project;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      deviceId = "1234";
+
+      variable1Payload = {
+        id: "000y",
+        name: "testVariable1",
+        timeSample: 5,
+        unit: "A",
+        archived: false,
+        offset: 1,
+        fCode: 3,
+        getSingleFCode: 3,
+        setSingleFCode: 16,
+        type: "float",
+        value: 3
+      };
+
+      variable2Payload = {
+        id: "000z",
+        name: "testVariable2",
+        timeSample: 5,
+        unit: "A",
+        archived: false,
+        offset: 1,
+        fCode: 3,
+        getSingleFCode: 3,
+        setSingleFCode: 16,
+        type: "float",
+        value: 4
+      };
+
+      elementPayload = {
+        id: "000x",
+        archived: true,
+        name: "testCalcElement",
+        sampleTime: 5,
+        unit: "A",
+        variables: [{ id: "000y", factor: 2 }, { id: "000z", factor: 3 }],
+        type: "sumElement"
+      };
+
+      await createInitialFiles();
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      await project.createVariable(deviceId, variable1Payload);
+      await project.createVariable(deviceId, variable2Payload);
+      return project.createCalcElement(deviceId, elementPayload);
+    };
+
+    it("should generate and return new calculation element", async () => {
+      let result = await exec();
+
+      let element = await project.getCalcElement(deviceId, elementPayload.id);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(element);
+    });
+
+    it("should generate calcElement based on given parameters", async () => {
+      let result = await exec();
+
+      expect(result.Payload).toEqual(elementPayload);
+    });
+
+    it("should throw if there is already a calcElement with given id", async () => {
+      await exec();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await project.createCalcElement(deviceId, elementPayload);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if name is not defined", async () => {
+      delete elementPayload.name;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if sampleTime is not defined", async () => {
+      delete elementPayload.sampleTime;
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should not throw there are no variables", async () => {
+      elementPayload.variables = [];
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+    });
+
+    it("should set unit to empty string if it is not defined in payload", async () => {
+      delete elementPayload.unit;
+
+      let result = await exec();
+
+      await expect(result.Unit).toEqual("");
+    });
+
+    it("should generate new id if id is not defined inside payload", async () => {
+      delete elementPayload.id;
+
+      let result = await exec();
+
+      await expect(result.Id).toBeDefined();
+    });
+
+    it("should add element to archive manager if archive is set to true", async () => {
+      elementPayload.archived = true;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeTruthy();
+    });
+
+    it("should not add element to archive manager if archive is set to false", async () => {
+      elementPayload.archived = false;
+      let result = await exec();
+
+      await expect(
+        result.Device.ArchiveManager.doesCalculationElementIdExists(result.Id)
+      ).toBeFalsy();
+    });
+
+    it("should save new element in device file content", async () => {
+      let result = await exec();
+
+      let deviceFilePath = path.resolve(
+        path.join(projectDirName, expectedDeviceDirName, `${deviceId}.json`)
+      );
+
+      let deviceFileContent = JSON.parse(await readFileAsync(deviceFilePath));
+
+      let calcElementContent = deviceFileContent.calculationElements.find(
+        x => x.id === elementPayload.id
+      );
+
+      await expect(calcElementContent).toEqual(elementPayload);
     });
   });
 });
