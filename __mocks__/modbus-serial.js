@@ -5,7 +5,7 @@ class FakeModbusRTU {
   constructor() {
     let self = this;
     //delay of answering in ms
-    this.timeDelay = 10;
+    this.timeDelay = 5;
 
     //Data to be returned - key is unitId
     this.coilsData = {
