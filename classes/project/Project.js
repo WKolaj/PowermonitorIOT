@@ -1,7 +1,8 @@
 const path = require("path");
 const commInterface = require("../commInterface/CommInterface");
 const ProjectContentManager = require("./ProjectContentManager");
-
+const User = require("../../classes/user/User");
+const { hashString, hashedStringMatch } = require("../../utilities/utilities");
 class Project {
   /**
    * @description Class representing project
@@ -13,6 +14,7 @@ class Project {
       projectDirectoryName
     );
     this.CommInterface.assignToProject(this);
+    this._users = {};
   }
 
   /**
@@ -34,6 +36,21 @@ class Project {
    */
   set SWVersion(value) {
     this._swVersion = value;
+  }
+
+  /**
+   * @description Application users
+   */
+  get Users() {
+    return this._users;
+  }
+
+  get PrivateKey() {
+    return this._privateKey;
+  }
+
+  set PrivateKey(value) {
+    this._privateKey = value;
   }
 
   /**
@@ -255,6 +272,56 @@ class Project {
       elementId,
       date
     );
+  }
+
+  /**
+   * @description Method for getting user
+   * @param {Object} login
+   */
+  async getUser(login) {
+    if (!login) throw new Error(`Login cannot be empty`);
+    let user = this._users[login];
+    if (!user) throw new Error(`User of login ${login} does not exist`);
+    return user;
+  }
+
+  /**
+   * @description Method for creating user
+   * @param {Object} payload
+   */
+  async createUser(payload) {
+    if (this._users[payload.login])
+      throw new Error(`User of login ${payload.Login} already exists!`);
+    let user = new User();
+    await user.init(payload, false);
+    this._users[user.Login] = user;
+    await this.ProjectContentManager.saveConfigFile();
+    return user;
+  }
+
+  /**
+   * @description Method for deleting user
+   * @param {string} login
+   */
+  async deleteUser(login) {
+    let user = this._users[login];
+    if (!user) throw new Error(`There is no user of login ${login}`);
+    delete this._users[login];
+    await this.ProjectContentManager.saveConfigFile();
+    return user;
+  }
+
+  /**
+   * @description Method for editing user
+   * @param {string} login
+   * @param {Object} payload
+   */
+  async editUser(login, payload) {
+    let user = this._users[login];
+    if (!user) throw new Error(`There is no user of login ${login}`);
+    await user.edit(payload, false);
+    await this.ProjectContentManager.saveConfigFile();
+    return user;
   }
 }
 

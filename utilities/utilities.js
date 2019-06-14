@@ -2,6 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const sqlite3 = require("sqlite3");
 const { promisify } = require("util");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 //Method for checking if object is empty
 module.exports.isObjectEmpty = function(obj) {
@@ -287,4 +289,21 @@ module.exports.readAllDataFromTable = function(dbFile, tableName) {
  */
 module.exports.snooze = function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+};
+
+/**
+ * @description Method for hashing password
+ * @param {String} stringToHash string to hash
+ */
+module.exports.hashString = async function(stringToHash) {
+  return bcrypt.hash(stringToHash, saltRounds);
+};
+
+/**
+ * @description Method for checking string
+ * @param {String} normalString normal string
+ * @param {String} hashedString hashed string
+ */
+module.exports.hashedStringMatch = async function(normalString, hashedString) {
+  return bcrypt.compare(normalString, hashedString);
 };

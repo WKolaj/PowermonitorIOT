@@ -6,41 +6,68 @@ let project = new Project("_projTest");
 let exec = async () => {
   await project.initFromFiles();
 
-  let allDevices = await project.getAllDevices();
-
-  for (let device of allDevices) {
-    device.Events.on("Refreshed", args => {
-      let device = args[0];
-      let finalResult = args[1];
-      let tickNumber = args[2];
-      let elements = Object.values(finalResult);
-      let formatedElements = elements.map(
-        element => `${element.Id} : ${element.Value} ${element.Unit}`
-      );
-      console.log(`${device.Id}: ${tickNumber}`);
-      console.log(formatedElements);
-    });
-  }
-
   //await commInterface.init();
 
-  // for (let i = 0; i < 5; i++) {
-  //   let deviceName = `PAC3200_${i}`;
-  //   let portNumber = 10500 + i;
+  for (let i = 0; i < 5; i++) {
+    let deviceName = `PAC3200_${i}`;
+    let portNumber = 10500 + i;
 
-  //   let payload = {
-  //     isActive: false,
-  //     timeout: 500,
-  //     ipAdress: "192.168.10.2",
-  //     unitId: 1,
-  //     type: "PAC3200TCP",
-  //     name: deviceName,
-  //     portNumber: portNumber
-  //   };
-  //   await commInterface.createNewDevice(payload);
+    let payload = {
+      isActive: false,
+      timeout: 500,
+      ipAdress: "192.168.10.2",
+      unitId: 1,
+      type: "PAC3200TCP",
+      name: deviceName,
+      portNumber: portNumber
+    };
+    let device = await project.createDevice(payload);
+  }
+
+  for (let i = 0; i < 3; i++) {
+    let login = `user_${i}`;
+    let password = `pssw_${i}`;
+    let permissions = i;
+
+    let payload = {
+      login: login,
+      password: password,
+      permissions: permissions
+    };
+
+    try {
+      await project.createUser(payload);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  console.log(project.Users);
+
+  for (let i = 0; i < 3; i++) {
+    let login = `user_${i}`;
+    let password = `pssw_${i}`;
+    let passwordMatch = await project.Users[login].passwordMatches(password);
+    console.log(passwordMatch);
+  }
+
+  console.log(project.PrivateKey);
+
+  //let allDevices = await project.getAllDevices();
+
+  // for (let device of allDevices) {
+  //   device.Events.on("Refreshed", args => {
+  //     let device = args[0];
+  //     let finalResult = args[1];
+  //     let tickNumber = args[2];
+  //     let elements = Object.values(finalResult);
+  //     let formatedElements = elements.map(
+  //       element => `${element.Id} : ${element.Value} ${element.Unit}`
+  //     );
+  //     console.log(`${device.Id}: ${tickNumber}`);
+  //     console.log(formatedElements);
+  //   });
   // }
-
-  // await commInterface.startCommunicationWithAllDevices();
 
   //await project.save();
 

@@ -1,5 +1,7 @@
 const path = require("path");
 const fs = require("fs");
+const User = require("../user/User");
+const mongoose = require("mongoose");
 const {
   getCurrentAppVersion,
   clearDirectoryAsync,
@@ -192,6 +194,8 @@ class ProjectContentManager {
     if (!content) throw new Error("Content of config file cannot be empty!");
     if (!content.swVersion)
       throw new Error("Software version in config file cannot be empty!");
+    if (!content.users) throw new Error("Users cannot be empty!");
+    if (!content.privateKey) throw new Error("Private key cannot be empty!");
 
     //Checking if app version is equal to project version
     if (content.swVersion !== getCurrentAppVersion())
@@ -202,13 +206,54 @@ class ProjectContentManager {
       );
   }
 
+  _generateAndAssignNewPrivateKey() {
+    this.Project.PrivateKey = mongoose.Types.ObjectId().toHexString();
+  }
+
   /**
    * @description Method for getting content of config file based on current project
    */
   _getConfigFileContentFromProject() {
     return {
-      swVersion: getCurrentAppVersion()
+      swVersion: getCurrentAppVersion(),
+      users: this._generateUsersObjectFromProject(),
+      privateKey: this.Project.PrivateKey
     };
+  }
+
+  /**
+   * @description Method for generating array containg payloads of all users
+   */
+  _generateUsersObjectFromProject() {
+    let objectToReturn = [];
+    let allUsers = Object.values(this.Project.Users);
+
+    for (let user of allUsers) {
+      objectToReturn.push(user.Payload);
+    }
+
+    return objectToReturn;
+  }
+
+  /**
+   * @description Method for generating users from config file users object
+   */
+  async _generateUsersFromFileContent(usersObject) {
+    if (!usersObject) throw new Error("Users in device cannot be undefined!");
+
+    let objectToReturn = [];
+
+    for (let userObject of usersObject) {
+      try {
+        let user = new User();
+        await user.init(userObject, true);
+        objectToReturn.push(user);
+      } catch (err) {
+        console.log(err);
+      }
+    }
+
+    return objectToReturn;
   }
 
   /**
@@ -236,6 +281,14 @@ class ProjectContentManager {
     this._checkConfigFileContent(jsonFileContent);
 
     this.Project.SWVersion = jsonFileContent.swVersion;
+
+    let users = await this._generateUsersFromFileContent(jsonFileContent.users);
+
+    for (let user of users) {
+      this.Project.Users[user.Login] = user;
+    }
+
+    this.Project.PrivateKey = jsonFileContent.privateKey;
   }
 
   /**
@@ -422,6 +475,7 @@ class ProjectContentManager {
    * @description Method for creating empty project
    */
   async createEmptyProject() {
+    this._generateAndAssignNewPrivateKey();
     await this._createProjectDirIfNotExists();
     await this.saveConfigFile();
     await this._createDeviceDirIfNotExists();

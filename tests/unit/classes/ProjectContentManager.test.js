@@ -1,6 +1,7 @@
 const config = require("config");
 const path = require("path");
 const ProjectContentManager = require("../../../classes/project/ProjectContentManager");
+const { hashString } = require("../../../utilities/utilities");
 
 let {
   clearDirectoryAsync,
@@ -871,16 +872,45 @@ describe("ProjectContentManager", () => {
     let projectContentManager;
     let configFileContent;
     let swVersion;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let usersArray;
+    let privateKey;
 
     beforeEach(async () => {
       project = "test project";
       projectDirName = projPath;
       swVersion = getCurrentAppVersion();
+
+      user1Payload = {
+        login: "testUser1",
+        password: "123456",
+        permissions: 1
+      };
+
+      user2Payload = {
+        login: "testUser2",
+        password: "234567",
+        permissions: 2
+      };
+
+      user3Payload = {
+        login: "testUser3",
+        password: "345678",
+        permissions: 3
+      };
+
+      usersArray = [user1Payload, user2Payload, user3Payload];
+
+      privateKey = "testPrivateKey";
     });
 
     let exec = async () => {
       configFileContent = {
-        swVersion: swVersion
+        swVersion: swVersion,
+        users: usersArray,
+        privateKey: privateKey
       };
 
       projectContentManager = new ProjectContentManager(
@@ -933,6 +963,21 @@ describe("ProjectContentManager", () => {
         })
       ).rejects.toBeDefined();
     });
+
+    it("should throw if config file content does not have users", async () => {
+      usersArray = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
   });
 
   describe("_getConfigFileContentFromProject", () => {
@@ -940,10 +985,33 @@ describe("ProjectContentManager", () => {
     let projectDirName;
     let projectContentManager;
     let commInitPayload;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
+    let user1;
+    let user2;
+    let user3;
 
     beforeEach(async () => {
       projectDirName = projPath;
       commInitPayload = JSON.parse(testPayload);
+      user1Payload = {
+        login: "user1",
+        password: "1234",
+        permissions: 1
+      };
+      user2Payload = {
+        login: "user2",
+        password: "12345",
+        permissions: 2
+      };
+      user3Payload = {
+        login: "user3",
+        password: "123456",
+        permissions: 3
+      };
+      privateKey = "1234";
     });
 
     let exec = async () => {
@@ -953,17 +1021,34 @@ describe("ProjectContentManager", () => {
 
       await project.CommInterface.init(commInitPayload);
 
+      project.PrivateKey = privateKey;
+
+      if (user1Payload) user1 = await project.createUser(user1Payload);
+      if (user2Payload) user2 = await project.createUser(user2Payload);
+      if (user3Payload) user3 = await project.createUser(user3Payload);
+
       return projectContentManager._getConfigFileContentFromProject();
     };
 
     it("should return valid config content from project", async () => {
       let result = await exec();
 
+      //Password stored inside user is hashed !!
+      let validUser1Password = user1.Password;
+      let validUser2Password = user2.Password;
+      let validUser3Password = user3.Password;
+
+      user1Payload.password = validUser1Password;
+      user2Payload.password = validUser2Password;
+      user3Payload.password = validUser3Password;
+
       let validContent = {
-        swVersion: await getCurrentAppVersion()
+        swVersion: await getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
       };
 
-      expect(result).toMatchObject(validContent);
+      expect(result).toEqual(validContent);
     });
   });
 
@@ -973,13 +1058,39 @@ describe("ProjectContentManager", () => {
     let createConfigFile;
     let configFileContent;
     let projectContentManager;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
+    let user1;
+    let user2;
+    let user3;
 
     beforeEach(async () => {
       project = "test project";
       projectDirName = projPath;
       createConfigFile = true;
+      user1Payload = {
+        login: "user1",
+        password: "1234",
+        permissions: 1
+      };
+      user2Payload = {
+        login: "user2",
+        password: "12345",
+        permissions: 2
+      };
+      user3Payload = {
+        login: "user3",
+        password: "123456",
+        permissions: 3
+      };
+      privateKey = "1234";
+
       configFileContent = {
-        swVersion: await getCurrentAppVersion()
+        swVersion: await getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
       };
     });
 
@@ -1001,7 +1112,7 @@ describe("ProjectContentManager", () => {
     it("should return config file content from file", async () => {
       let result = await exec();
 
-      expect(result).toMatchObject(configFileContent);
+      expect(result).toEqual(configFileContent);
     });
 
     it("should throw if there is no config file", async () => {
@@ -1045,9 +1156,29 @@ describe("ProjectContentManager", () => {
 
       projectContentManager = project.ProjectContentManager;
 
+      project.ProjectContentManager._generateAndAssignNewPrivateKey();
+
       await project.CommInterface.init(commInitPayload);
 
       configFileContent = await projectContentManager._getConfigFileContentFromProject();
+
+      await project.createUser({
+        login: "testUser1",
+        password: "1234",
+        permissions: 1
+      });
+
+      await project.createUser({
+        login: "testUser2",
+        password: "2345",
+        permissions: 2
+      });
+
+      await project.createUser({
+        login: "testUser3",
+        password: "3456",
+        permissions: 3
+      });
 
       return projectContentManager._saveConfigFileContentToFile(
         JSON.stringify(configFileContent)
@@ -1097,12 +1228,38 @@ describe("ProjectContentManager", () => {
     let projectContentManager;
     let createConfigFile;
     let configFileContent;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
 
     beforeEach(async () => {
       projectDirName = projPath;
       createConfigFile = true;
+      user1Payload = {
+        login: "testUser1",
+        password: "123",
+        permissions: 1
+      };
+
+      user2Payload = {
+        login: "testUser2",
+        password: "234",
+        permissions: 2
+      };
+
+      user3Payload = {
+        login: "testUser3",
+        password: "345",
+        permissions: 3
+      };
+
+      privateKey = "1234567";
+
       configFileContent = {
-        swVersion: await getCurrentAppVersion()
+        swVersion: await getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
       };
     });
 
@@ -1165,6 +1322,81 @@ describe("ProjectContentManager", () => {
     });
   });
 
+  describe("_generateUsersObjectFromProject", () => {
+    let project;
+    let projectDirName;
+    let projectContentManager;
+    let createConfigFile;
+    let configFileContent;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
+    let user1;
+    let user2;
+    let user3;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      createConfigFile = true;
+      user1Payload = {
+        login: "testUser1",
+        password: await hashString("123"),
+        permissions: 1
+      };
+
+      user2Payload = {
+        login: "testUser2",
+        password: await hashString("234"),
+        permissions: 2
+      };
+
+      user3Payload = {
+        login: "testUser3",
+        password: await hashString("345"),
+        permissions: 3
+      };
+
+      privateKey = "1234567";
+
+      configFileContent = {
+        swVersion: await getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
+      };
+    });
+
+    let exec = async () => {
+      await createFileAsync(
+        path.resolve(path.join(projPath, expectedConfigFileName)),
+        JSON.stringify(configFileContent)
+      );
+
+      project = new Project(projectDirName);
+
+      projectContentManager = project.ProjectContentManager;
+
+      await project.initFromFiles();
+
+      user1 = await project.getUser(user1Payload.login);
+      user2 = await project.getUser(user2Payload.login);
+      user3 = await project.getUser(user3Payload.login);
+
+      return projectContentManager._generateUsersObjectFromProject();
+    };
+
+    it("should return object contatinig all users and their payloads", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+
+      expect(result.length).toEqual(3);
+      expect(result[0]).toEqual(user1.Payload);
+      expect(result[1]).toEqual(user2.Payload);
+      expect(result[2]).toEqual(user3.Payload);
+    });
+  });
+
   describe("saveConfigFile", () => {
     let project;
     let projectDirName;
@@ -1192,6 +1424,26 @@ describe("ProjectContentManager", () => {
       projectContentManager = project.ProjectContentManager;
 
       await project.CommInterface.init(commInitPayload);
+
+      project.PrivateKey = "12345678";
+
+      await project.createUser({
+        login: "user1",
+        password: await hashString("87654321"),
+        permissions: 1
+      });
+
+      await project.createUser({
+        login: "user2",
+        password: await hashString("987654321"),
+        permissions: 2
+      });
+
+      await project.createUser({
+        login: "user3",
+        password: await hashString("654321"),
+        permissions: 3
+      });
 
       configFileContent = await projectContentManager._getConfigFileContentFromProject();
 
@@ -2406,12 +2658,39 @@ describe("ProjectContentManager", () => {
     let corruptFile2;
     let createConfigFile;
     let configFileContent;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
 
     beforeEach(async () => {
       projectDirName = projPath;
       createConfigFile = true;
+
+      user1Payload = {
+        login: "testUser1",
+        password: await hashString("123456"),
+        permissions: 1
+      };
+
+      user2Payload = {
+        login: "testUser2",
+        password: await hashString("23456"),
+        permissions: 2
+      };
+
+      user3Payload = {
+        login: "testUser3",
+        password: await hashString("34567"),
+        permissions: 3
+      };
+
+      privateKey = "testPrivateKey";
+
       configFileContent = {
-        swVersion: await getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
       };
 
       commInitPayload = JSON.parse(testPayload);
@@ -2524,6 +2803,19 @@ describe("ProjectContentManager", () => {
       expect(device1Payload).toEqual(file1Content);
       expect(device2Payload).toEqual(file2Content);
       expect(device3Payload).toEqual(file3Content);
+    });
+
+    it("should create new users based on file content", async () => {
+      await exec();
+
+      let users = Object.values(project.Users);
+
+      let payloads = users.map(u => u.Payload);
+
+      expect(payloads.length).toEqual(3);
+      expect(payloads[0]).toEqual(user1Payload);
+      expect(payloads[1]).toEqual(user2Payload);
+      expect(payloads[2]).toEqual(user3Payload);
     });
 
     it("should not throw but not add this device if device of such Id already exists in commInterface", async () => {
@@ -2684,6 +2976,30 @@ describe("ProjectContentManager", () => {
       projectContentManager = project.ProjectContentManager;
 
       await project.CommInterface.init(commInitPayload);
+
+      project.PrivateKey = "12345678";
+
+      let user1Payload = {
+        login: "testUser1",
+        password: await hashString("123456"),
+        permissions: 1
+      };
+
+      let user2Payload = {
+        login: "testUser2",
+        password: await hashString("345678"),
+        permissions: 2
+      };
+
+      let user3Payload = {
+        login: "testUser3",
+        password: await hashString("456789"),
+        permissions: 3
+      };
+
+      await project.createUser(user1Payload);
+      await project.createUser(user2Payload);
+      await project.createUser(user3Payload);
 
       configFileContent = await projectContentManager._getConfigFileContentFromProject();
 
@@ -2870,7 +3186,9 @@ describe("ProjectContentManager", () => {
       let configFileContent = JSON.parse(await readFileAsync(configFilePath));
 
       let expectedConfigFile = {
-        swVersion: getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [],
+        privateKey: project.PrivateKey
       };
 
       expect(configFileContent).toEqual(expectedConfigFile);
@@ -2889,7 +3207,9 @@ describe("ProjectContentManager", () => {
       let configFileContent = JSON.parse(await readFileAsync(configFilePath));
 
       let expectedConfigFile = {
-        swVersion: getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [],
+        privateKey: project.PrivateKey
       };
 
       expect(configFileContent).toEqual(expectedConfigFile);
@@ -2913,7 +3233,9 @@ describe("ProjectContentManager", () => {
       let configFileContent = JSON.parse(await readFileAsync(configFilePath));
 
       let expectedConfigFile = {
-        swVersion: getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [],
+        privateKey: project.PrivateKey
       };
 
       expect(configFileContent).toEqual(expectedConfigFile);
@@ -2948,13 +3270,18 @@ describe("ProjectContentManager", () => {
 
     let configFileContent;
 
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
+
     let device1FilePayload;
     let device2FilePayload;
     let device3FilePayload;
 
     let corruptDevice2File;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       commInterfacePayload = JSON.parse(testPayload);
       device1FilePayload = commInterfacePayload["1234"];
       device2FilePayload = commInterfacePayload["1235"];
@@ -2983,8 +3310,30 @@ describe("ProjectContentManager", () => {
       createDevice3File = true;
       corruptDevice2File = false;
 
+      user1Payload = {
+        login: "testUser1",
+        password: await hashString("123456"),
+        permissions: 1
+      };
+
+      user2Payload = {
+        login: "testUser2",
+        password: await hashString("23456"),
+        permissions: 2
+      };
+
+      user3Payload = {
+        login: "testUser3",
+        password: await hashString("34567"),
+        permissions: 3
+      };
+
+      privateKey = "testPrivateKey";
+
       configFileContent = {
-        swVersion: getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
       };
     });
 
@@ -3156,7 +3505,9 @@ describe("ProjectContentManager", () => {
       let configFileContent = JSON.parse(await readFileAsync(configFilePath));
 
       let expectedConfigFile = {
-        swVersion: getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [],
+        privateKey: project.PrivateKey
       };
 
       expect(configFileContent).toEqual(expectedConfigFile);

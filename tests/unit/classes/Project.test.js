@@ -11,6 +11,10 @@ const MBSwappedInt32Variable = require("../../../classes/variable/Modbus/MBSwapp
 const MBSwappedUInt32Variable = require("../../../classes/variable/Modbus/MBSwappedUInt32Variable");
 const MBUInt16Variable = require("../../../classes/variable/Modbus/MBUInt16Variable");
 const MBUInt32Variable = require("../../../classes/variable/Modbus/MBUInt32Variable");
+const {
+  hashString,
+  hashedStringMatch
+} = require("../../../utilities/utilities");
 
 let {
   clearDirectoryAsync,
@@ -276,7 +280,7 @@ let testPayload = JSON.stringify({
 //CommInterface is common for all project objects!
 let commInterface;
 
-describe("ProjectContentManager", () => {
+describe("Project", () => {
   //Database directory should be cleared
   let db1Path;
   let db2Path;
@@ -309,7 +313,25 @@ describe("ProjectContentManager", () => {
     );
 
     let configFileContent = {
-      swVersion: getCurrentAppVersion()
+      swVersion: getCurrentAppVersion(),
+      users: [
+        {
+          login: "user1",
+          password: await hashString("12345"),
+          permissions: 1
+        },
+        {
+          login: "user2",
+          password: await hashString("123456"),
+          permissions: 2
+        },
+        {
+          login: "user3",
+          password: await hashString("1234567"),
+          permissions: 3
+        }
+      ],
+      privateKey: "987654321"
     };
 
     if (!(await checkIfDirectoryExistsAsync(projectDirPath))) {
@@ -422,12 +444,39 @@ describe("ProjectContentManager", () => {
     let corruptFile2;
     let createConfigFile;
     let configFileContent;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
 
     beforeEach(async () => {
       projectDirName = projPath;
       createConfigFile = true;
+
+      user1Payload = {
+        login: "testUser1",
+        password: await hashString("123456"),
+        permissions: 1
+      };
+
+      user2Payload = {
+        login: "testUser2",
+        password: await hashString("23456"),
+        permissions: 2
+      };
+
+      user3Payload = {
+        login: "testUser3",
+        password: await hashString("34567"),
+        permissions: 3
+      };
+
+      privateKey = "testPrivateKey";
+
       configFileContent = {
-        swVersion: await getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
       };
 
       commInitPayload = JSON.parse(testPayload);
@@ -538,6 +587,19 @@ describe("ProjectContentManager", () => {
       expect(device1Payload).toEqual(file1Content);
       expect(device2Payload).toEqual(file2Content);
       expect(device3Payload).toEqual(file3Content);
+    });
+
+    it("should create new users based on file content", async () => {
+      await exec();
+
+      let users = Object.values(project.Users);
+
+      let payloads = users.map(u => u.Payload);
+
+      expect(payloads.length).toEqual(3);
+      expect(payloads[0]).toEqual(user1Payload);
+      expect(payloads[1]).toEqual(user2Payload);
+      expect(payloads[2]).toEqual(user3Payload);
     });
 
     it("should not throw but not add this device if device of such Id already exists in commInterface", async () => {
@@ -696,6 +758,26 @@ describe("ProjectContentManager", () => {
 
       await project.CommInterface.init(commInitPayload);
 
+      project.PrivateKey = "1234567";
+
+      await project.createUser({
+        login: "user1",
+        password: await hashString("123"),
+        permissions: 1
+      });
+
+      await project.createUser({
+        login: "user2",
+        password: await hashString("234"),
+        permissions: 2
+      });
+
+      await project.createUser({
+        login: "user3",
+        password: await hashString("345"),
+        permissions: 3
+      });
+
       configFileContent = await project.ProjectContentManager._getConfigFileContentFromProject();
 
       return project.save();
@@ -815,8 +897,12 @@ describe("ProjectContentManager", () => {
     let device3FilePayload;
 
     let corruptDevice2File;
+    let user1Payload;
+    let user2Payload;
+    let user3Payload;
+    let privateKey;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       commInterfacePayload = JSON.parse(testPayload);
       device1FilePayload = commInterfacePayload["1234"];
       device2FilePayload = commInterfacePayload["1235"];
@@ -845,8 +931,30 @@ describe("ProjectContentManager", () => {
       createDevice3File = true;
       corruptDevice2File = false;
 
+      user1Payload = {
+        login: "testUser1",
+        password: await hashString("123456"),
+        permissions: 1
+      };
+
+      user2Payload = {
+        login: "testUser2",
+        password: await hashString("23456"),
+        permissions: 2
+      };
+
+      user3Payload = {
+        login: "testUser3",
+        password: await hashString("34567"),
+        permissions: 3
+      };
+
+      privateKey = "testPrivateKey";
+
       configFileContent = {
-        swVersion: getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [user1Payload, user2Payload, user3Payload],
+        privateKey: privateKey
       };
     });
 
@@ -902,6 +1010,16 @@ describe("ProjectContentManager", () => {
       let expectPayload = commInterfacePayload;
 
       expect(project.CommInterface.Payload).toEqual(expectPayload);
+
+      //Checking other properties
+      expect(project.Users).toBeDefined();
+
+      for (let userFromFile of configFileContent.users) {
+        let userFromProject = await project.getUser(userFromFile.login);
+        expect(userFromProject.Payload).toEqual(userFromFile);
+      }
+
+      expect(project.PrivateKey).toEqual(configFileContent.privateKey);
     });
 
     it("should initialize project content according to files content - even if one file is corrupted", async () => {
@@ -915,6 +1033,16 @@ describe("ProjectContentManager", () => {
       };
 
       expect(project.CommInterface.Payload).toEqual(expectPayload);
+
+      //Checking other properties
+      expect(project.Users).toBeDefined();
+
+      for (let userFromFile of configFileContent.users) {
+        let userFromProject = await project.getUser(userFromFile.login);
+        expect(userFromProject.Payload).toEqual(userFromFile);
+      }
+
+      expect(project.PrivateKey).toEqual(configFileContent.privateKey);
     });
 
     it("should initialize project content even if there are no device files", async () => {
@@ -927,6 +1055,16 @@ describe("ProjectContentManager", () => {
       let expectPayload = {};
 
       expect(project.CommInterface.Payload).toEqual(expectPayload);
+
+      //Checking other properties
+      expect(project.Users).toBeDefined();
+
+      for (let userFromFile of configFileContent.users) {
+        let userFromProject = await project.getUser(userFromFile.login);
+        expect(userFromProject.Payload).toEqual(userFromFile);
+      }
+
+      expect(project.PrivateKey).toEqual(configFileContent.privateKey);
     });
 
     it("should throw if config file is corrupted", async () => {
@@ -1017,7 +1155,9 @@ describe("ProjectContentManager", () => {
       let configFileContent = JSON.parse(await readFileAsync(configFilePath));
 
       let expectedConfigFile = {
-        swVersion: getCurrentAppVersion()
+        swVersion: getCurrentAppVersion(),
+        users: [],
+        privateKey: project.PrivateKey
       };
 
       expect(configFileContent).toEqual(expectedConfigFile);
@@ -6994,6 +7134,411 @@ describe("ProjectContentManager", () => {
       );
 
       await expect(calcElementContent).toEqual(elementPayload);
+    });
+  });
+
+  describe("getUser", () => {
+    let projectDirName;
+    let project;
+    let userLogin;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      userLogin = "user2";
+      await createInitialFiles(testPayload);
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      return project.getUser(userLogin);
+    };
+
+    it("should return user if it exists", async () => {
+      let result = await exec();
+
+      let user = project.Users[userLogin];
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(user);
+    });
+
+    it("should throw if login is not given as a parameter", async () => {
+      userLogin = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no user of given login", async () => {
+      userLogin = "8765";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("createUser", () => {
+    let projectDirName;
+    let project;
+    let userPayload;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      await createInitialFiles(testPayload);
+      userPayload = {
+        login: "user4",
+        password: "12345",
+        permissions: 1
+      };
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      return project.createUser(userPayload);
+    };
+
+    it("should create user according to payload", async () => {
+      await exec();
+
+      let user = await project.getUser(userPayload.login);
+
+      expect(user).toBeDefined();
+      expect(user.Login).toEqual(userPayload.login);
+      expect(user.Permissions).toEqual(userPayload.permissions);
+      let passwordMatches = await hashedStringMatch(
+        userPayload.password,
+        user.Password
+      );
+      expect(passwordMatches).toBeTruthy();
+    });
+
+    it("should return created user", async () => {
+      let result = await exec();
+
+      let user = await project.getUser(userPayload.login);
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(user);
+    });
+
+    it("should throw if login is not defined in payload", async () => {
+      delete userPayload.login;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if permissions is not defined in payload", async () => {
+      delete userPayload.permissions;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if password is not defined in payload", async () => {
+      delete userPayload.password;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if payload is undefined", async () => {
+      userPayload = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is already a user with given id", async () => {
+      userPayload.login = "user1";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should add user to config file", async () => {
+      let result = await exec();
+
+      let configFilePath = path.resolve(projectDirName, expectedConfigFileName);
+
+      let fileContent = JSON.parse(await readFileAsync(configFilePath));
+
+      let usersObject = fileContent.users;
+
+      expect(usersObject.length).toEqual(4);
+      expect(usersObject[3]).toEqual(result.Payload);
+    });
+  });
+
+  describe("deleteUser", () => {
+    let projectDirName;
+    let project;
+    let login;
+    let userToDelete;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      login = "user1";
+      await createInitialFiles(testPayload);
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      userToDelete = await project.getUser(login);
+      return project.deleteUser(login);
+    };
+
+    it("should delete user of given id", async () => {
+      await exec();
+
+      let user = project.Users[login];
+
+      expect(user).not.toBeDefined();
+    });
+
+    it("should return deleted user", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(userToDelete);
+    });
+
+    it("should throw if login is not defined", async () => {
+      login = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no user of given login", async () => {
+      login = "87654";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("editUser", () => {
+    let projectDirName;
+    let project;
+    let createPayload;
+    let editPayload;
+    let user;
+    let login;
+
+    beforeEach(async () => {
+      projectDirName = projPath;
+      await createInitialFiles(testPayload);
+      createPayload = {
+        login: "user4",
+        password: "12345",
+        permissions: 1
+      };
+      editPayload = {
+        login: "user4",
+        password: "23456",
+        permissions: 2
+      };
+      login = createPayload.login;
+    });
+
+    let exec = async () => {
+      project = new Project(projectDirName);
+      await project.initFromFiles();
+      user = await project.createUser(createPayload);
+      return project.editUser(login, editPayload);
+    };
+
+    it("should edit user according to payload", async () => {
+      await exec();
+
+      expect(user).toBeDefined();
+      expect(user.Permissions).toEqual(editPayload.permissions);
+      let passwordMatches = await hashedStringMatch(
+        editPayload.password,
+        user.Password
+      );
+      expect(passwordMatches).toBeTruthy();
+    });
+
+    it("should edit only password if only password is given in payload", async () => {
+      editPayload = { password: "123456789" };
+      await exec();
+
+      expect(user).toBeDefined();
+      expect(user.Login).toEqual(createPayload.login);
+      expect(user.Permissions).toEqual(createPayload.permissions);
+
+      let passwordMatches = await hashedStringMatch(
+        editPayload.password,
+        user.Password
+      );
+      expect(passwordMatches).toBeTruthy();
+    });
+
+    it("should edit only permissions if only permissions is given in payload", async () => {
+      editPayload = { permissions: 99 };
+      await exec();
+
+      expect(user).toBeDefined();
+      expect(user.Login).toEqual(createPayload.login);
+      let passwordMatches = await hashedStringMatch(
+        createPayload.password,
+        user.Password
+      );
+      expect(passwordMatches).toBeTruthy();
+
+      expect(user.Permissions).toEqual(editPayload.permissions);
+    });
+
+    it("should throw and not edit login of login in payload is different than login of user", async () => {
+      editPayload.login = "new test login";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(user).toBeDefined();
+      expect(user.Login).toEqual(createPayload.login);
+      let passwordMatches = await hashedStringMatch(
+        createPayload.password,
+        user.Password
+      );
+      expect(passwordMatches).toBeTruthy();
+
+      expect(user.Permissions).toEqual(createPayload.permissions);
+    });
+
+    it("should return edited user", async () => {
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(user);
+    });
+
+    it("should throw if login is not defined in payload", async () => {
+      login = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if payload is undefined", async () => {
+      createPayload = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should edit user in config file", async () => {
+      let result = await exec();
+
+      let configFilePath = path.resolve(projectDirName, expectedConfigFileName);
+
+      let fileContent = JSON.parse(await readFileAsync(configFilePath));
+
+      let usersObject = fileContent.users;
+
+      expect(usersObject.length).toEqual(4);
+      expect(usersObject[3]).toEqual(result.Payload);
     });
   });
 });
