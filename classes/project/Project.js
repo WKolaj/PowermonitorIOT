@@ -3,6 +3,9 @@ const commInterface = require("../commInterface/CommInterface");
 const ProjectContentManager = require("./ProjectContentManager");
 const User = require("../../classes/user/User");
 const { hashString, hashedStringMatch } = require("../../utilities/utilities");
+
+let currentProject = undefined;
+
 class Project {
   /**
    * @description Class representing project
@@ -15,6 +18,14 @@ class Project {
     );
     this.CommInterface.assignToProject(this);
     this._users = {};
+    Project._currentProject = this;
+  }
+
+  /**
+   * @description Method for getting current project
+   */
+  static get CurrentProject() {
+    return Project._currentProject;
   }
 
   /**
@@ -292,7 +303,7 @@ class Project {
   async createUser(payload) {
     if (this._users[payload.login])
       throw new Error(`User of login ${payload.Login} already exists!`);
-    let user = new User();
+    let user = new User(this);
     await user.init(payload, false);
     this._users[user.Login] = user;
     await this.ProjectContentManager.saveConfigFile();

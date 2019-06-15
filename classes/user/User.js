@@ -1,10 +1,15 @@
+const jwt = require("jsonwebtoken");
 const { hashString, hashedStringMatch } = require("../../utilities/utilities");
 
 class User {
   /**
    * @description Application user
+   * @param {Object} project project associated with user
    */
-  constructor() {}
+  constructor(project) {
+    if (!project) throw new Error("project object in user cannot be empty!");
+    this._project = project;
+  }
 
   /**
    * @description Method for initializing user
@@ -66,12 +71,22 @@ class User {
   }
 
   /**
+   * @description project associated with user
+   */
+  get Project() {
+    return this._project;
+  }
+
+  /**
    * @description permissions of user
    */
   get Permissions() {
     return this._permissions;
   }
 
+  /**
+   * @description payload of user
+   */
   get Payload() {
     return {
       login: this.Login,
@@ -80,12 +95,24 @@ class User {
     };
   }
 
+  /**
+   * Mehtod for hashing users password
+   * @param {string} password password to hash
+   */
   async _hashPassword(password) {
     return hashString(password);
   }
 
+  /**
+   * @description Method to check whether given password matches user password
+   * @param {string} password Given password to check
+   */
   async passwordMatches(password) {
     return hashedStringMatch(password, this.Password);
+  }
+
+  async generateToken() {
+    return jwt.sign(this.Payload, this.Project.PrivateKey);
   }
 }
 

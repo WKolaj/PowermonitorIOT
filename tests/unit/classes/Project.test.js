@@ -427,6 +427,12 @@ describe("Project", () => {
 
       expect(result.CommInterface.Project).toEqual(result);
     });
+
+    it("should assing project to Project.CurrentProject", async () => {
+      let result = exec();
+
+      expect(Project.CurrentProject).toEqual(result);
+    });
   });
 
   describe("load", () => {

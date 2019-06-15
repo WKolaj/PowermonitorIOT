@@ -245,7 +245,7 @@ class ProjectContentManager {
 
     for (let userObject of usersObject) {
       try {
-        let user = new User();
+        let user = new User(this.Project);
         await user.init(userObject, true);
         objectToReturn.push(user);
       } catch (err) {
