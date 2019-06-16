@@ -3155,6 +3155,18 @@ describe("ProjectContentManager", () => {
       expect(deviceDirExists).toBeTruthy();
     });
 
+    it("should create new admin user with admin admin credentials", async () => {
+      await exec();
+
+      let user = project.Users["admin"];
+
+      expect(user).toBeDefined();
+
+      expect(user.Login).toEqual("admin");
+      expect(user.Permissions).toEqual(15);
+      expect(await user.passwordMatches("admin")).toBeTruthy();
+    });
+
     it("should not throw and create config file and deviceDir even if projectDir already exists", async () => {
       createProjectDir = true;
       await exec();
@@ -3187,7 +3199,7 @@ describe("ProjectContentManager", () => {
 
       let expectedConfigFile = {
         swVersion: getCurrentAppVersion(),
-        users: [],
+        users: [project.Users["admin"].Payload],
         privateKey: project.PrivateKey
       };
 
@@ -3208,7 +3220,7 @@ describe("ProjectContentManager", () => {
 
       let expectedConfigFile = {
         swVersion: getCurrentAppVersion(),
-        users: [],
+        users: [project.Users["admin"].Payload],
         privateKey: project.PrivateKey
       };
 
@@ -3234,7 +3246,7 @@ describe("ProjectContentManager", () => {
 
       let expectedConfigFile = {
         swVersion: getCurrentAppVersion(),
-        users: [],
+        users: [project.Users["admin"].Payload],
         privateKey: project.PrivateKey
       };
 
@@ -3506,7 +3518,7 @@ describe("ProjectContentManager", () => {
 
       let expectedConfigFile = {
         swVersion: getCurrentAppVersion(),
-        users: [],
+        users: [project.Users["admin"].Payload],
         privateKey: project.PrivateKey
       };
 

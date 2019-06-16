@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { hashString, hashedStringMatch } = require("../../utilities/utilities");
+const _ = require("lodash");
 
 class User {
   /**
@@ -112,7 +113,90 @@ class User {
   }
 
   async generateToken() {
-    return jwt.sign(this.Payload, this.Project.PrivateKey);
+    //Do not pick password in jwt!
+    return jwt.sign(
+      _.pick(this.Payload, ["login", "permissions"]),
+      this.Project.PrivateKey
+    );
+  }
+
+  get canVisualizeData() {
+    return User.canVisualizeData(this.Permissions);
+  }
+
+  get canOperateData() {
+    return User.canOperateData(this.Permissions);
+  }
+
+  get isDataAdmin() {
+    return User.isDataAdmin(this.Permissions);
+  }
+
+  get isSuperAdmin() {
+    return User.isSuperAdmin(this.Permissions);
+  }
+
+  static canVisualizeData(permissions) {
+    if (permissions === undefined || permissions === null) return false;
+    return User._getBit(permissions, 0);
+  }
+
+  static canOperateData(permissions) {
+    if (permissions === undefined || permissions === null) return false;
+    return User._getBit(permissions, 1);
+  }
+
+  static isDataAdmin(permissions) {
+    if (permissions === undefined || permissions === null) return false;
+    return User._getBit(permissions, 2);
+  }
+
+  static isSuperAdmin(permissions) {
+    if (permissions === undefined || permissions === null) return false;
+    return User._getBit(permissions, 3);
+  }
+
+  static getPermissionsArray(permissions) {
+    // bit 0 - vizualize data
+    // bit 1 - operate data
+    // bit 2 - data admin
+    // bit 3 - super admin
+
+    let arrayToReturn = [];
+
+    for (let i = 0; i < 3; i++) {
+      arrayToReturn[i] = this._getBit(permissions, i);
+    }
+
+    return arrayToReturn;
+  }
+
+  /**
+   * @description method for getting bit in given variable
+   * @param {number} number variable
+   * @param {number} bitPosition bit position
+   */
+  static _getBit(number, bitPosition) {
+    return (number & (1 << bitPosition)) === 0 ? false : true;
+  }
+
+  /**
+   * @description method for setting bit in given variable
+   * @param {number} number variable
+   * @param {number} bitPosition bit position
+   */
+  static _setBit(number, bitPosition) {
+    return number | (1 << bitPosition);
+  }
+
+  /**
+   * @description method for clearing bit in given variable
+   * @param {number} number variable
+   * @param {number} bitPosition bit position
+   */
+  static _clearBit(number, bitPosition) {
+    const mask = ~(1 << bitPosition);
+    return number & mask;
   }
 }
 

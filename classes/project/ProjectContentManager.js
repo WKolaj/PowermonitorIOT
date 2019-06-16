@@ -479,6 +479,7 @@ class ProjectContentManager {
     await this._createProjectDirIfNotExists();
     await this.saveConfigFile();
     await this._createDeviceDirIfNotExists();
+    await this._createDefaultUser();
   }
 
   /**
@@ -497,6 +498,24 @@ class ProjectContentManager {
       await this.createEmptyProject();
       return this.Project.CommInterface.init();
     }
+  }
+
+  /**
+   * @description Method for creating default user
+   */
+  async _createDefaultUser() {
+    return this.Project.createUser(this._getDefaultUserPayload());
+  }
+
+  /**
+   * @description Method for generating payload of default user
+   */
+  _getDefaultUserPayload() {
+    return {
+      login: "admin",
+      password: "admin",
+      permissions: 15
+    };
   }
 }
 

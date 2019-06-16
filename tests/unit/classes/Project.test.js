@@ -1162,7 +1162,7 @@ describe("Project", () => {
 
       let expectedConfigFile = {
         swVersion: getCurrentAppVersion(),
-        users: [],
+        users: [project.Users["admin"].Payload],
         privateKey: project.PrivateKey
       };
 
