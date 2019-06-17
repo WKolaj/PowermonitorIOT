@@ -12,6 +12,7 @@ class Variable {
 
     this._device = device;
     this._events = new EventEmitter();
+    this._valueTickId = 0;
   }
 
   /**
@@ -111,6 +112,20 @@ class Variable {
    */
   get Name() {
     return this._name;
+  }
+
+  /**
+   * @description TickId of last variable refresh
+   */
+  get ValueTickId() {
+    return this._valueTickId;
+  }
+
+  /**
+   * @description TickId of last variable refresh
+   */
+  set ValueTickId(value) {
+    this._valueTickId = value;
   }
 
   /**

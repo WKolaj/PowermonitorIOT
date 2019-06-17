@@ -364,6 +364,9 @@ class Device {
     );
 
     if (finalResult) {
+      //Assigning tickIds to all CalcElements and Variables
+      this._assignTickElements(tickNumber, finalResult);
+
       this.Events.emit("Refreshed", [this, finalResult, tickNumber]);
       try {
         await this.archiveData(tickNumber, finalResult);
@@ -412,6 +415,19 @@ class Device {
     }
 
     return payloadToAppend;
+  }
+
+  /**
+   * @description Method for assigning last tick id to all calculationElement and variables that were refreshed
+   * @param {number} tickId Tick id of refresh operation
+   * @param {object} refreshPayload Payload containg all calculationElement which value has been changed
+   */
+  _assignTickElements(tickId, refreshPayload) {
+    let allElements = Object.values(refreshPayload);
+
+    for (let element of allElements) {
+      element.ValueTickId = tickId;
+    }
   }
 
   /**

@@ -10,6 +10,7 @@ class CalculationElement {
     this._device = device;
     this._events = new EventEmitter();
     this._unit = "";
+    this._valueTickId = 0;
   }
 
   /**
@@ -96,6 +97,20 @@ class CalculationElement {
   set Value(newValue) {
     this._setValue(newValue);
     this._emitValueChange(newValue);
+  }
+
+  /**
+   * @description TickId of last variable refresh
+   */
+  get ValueTickId() {
+    return this._valueTickId;
+  }
+
+  /**
+   * @description TickId of last variable refresh
+   */
+  set ValueTickId(value) {
+    this._valueTickId = value;
   }
 
   /**

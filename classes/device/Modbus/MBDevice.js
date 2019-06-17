@@ -544,9 +544,11 @@ class MBDevice extends Device {
       payload.portNumber ||
       payload.unitId;
 
-    let shouldBeReconnected = this.IsActive && changeAssociatedWithMBDriver;
     //Reconnecting only if device is Active and change is associated with modbus driver
-    if (shouldBeReconnected) {
+    let shouldBeReconnected = this.IsActive && changeAssociatedWithMBDriver;
+
+    //If there should be a reconnection or device is active but should not be - disconnect it
+    if (shouldBeReconnected || (!payload.isActive && this.IsActive)) {
       await this.disconnect();
     }
 

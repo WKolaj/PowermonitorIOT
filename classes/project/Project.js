@@ -334,6 +334,44 @@ class Project {
     await this.ProjectContentManager.saveConfigFile();
     return user;
   }
+
+  /**
+   * @description Method for checking if variable exists
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   */
+  async doesVariableExist(deviceId, variableId) {
+    return this.CommInterface.doesVariableExist(deviceId, variableId);
+  }
+
+  /**
+   * @description Method for checking if calculationElement exists
+   * @param {string} deviceId Id of device
+   * @param {string} calcElementId Id of calculation element
+   */
+  async doesCalculationElementExist(deviceId, calcElementId) {
+    return this.CommInterface.doesCalculationElementExist(
+      deviceId,
+      calcElementId
+    );
+  }
+
+  /**
+   * @description Method for checking if calculationElement or variable exists
+   * @param {string} deviceId Id of device
+   * @param {string} elementId Id of calculation element or variable
+   */
+  async doesElementExist(deviceId, elementId) {
+    return this.CommInterface.doesElementExist(deviceId, elementId);
+  }
+
+  /**
+   * @description Method for checking if device of given id exists
+   * @param {string} deviceId Id of device
+   */
+  async doesDeviceExist(deviceId) {
+    return this.CommInterface.doesDeviceExist(deviceId);
+  }
 }
 
 module.exports = Project;

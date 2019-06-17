@@ -343,14 +343,23 @@ class MBDriver {
 
   /**@description Connecting to modbus device */
   connect() {
-    //Activating driver
-    this._active = true;
+    return new Promise(async (resolve, reject) => {
+      try {
+        //Activating driver
+        this._active = true;
 
-    //Reseting busy state
-    this._busy = false;
+        //Reseting busy state
+        this._busy = false;
 
-    //Connecting to device
-    return this._connectWithoutActivating();
+        //Connecting to device
+        await this._connectWithoutActivating();
+
+        return resolve(true);
+      } catch (err) {
+        console.log(err);
+        return resolve(false);
+      }
+    });
   }
 
   /**@description Disconnecting from modbus device without deactivating driver */
@@ -360,14 +369,23 @@ class MBDriver {
 
   /**@description Disconnecting from modbus device */
   disconnect() {
-    //Deactivating driver
-    this._active = false;
+    return new Promise(async (resolve, reject) => {
+      try {
+        //Deactivating driver
+        this._active = false;
 
-    //Reseting busy state
-    this._busy = false;
+        //Reseting busy state
+        this._busy = false;
 
-    //Disconnecting from device
-    return this._disconnectWithoutDeactive();
+        //Disconnecting from device
+        await this._disconnectWithoutDeactive();
+
+        return resolve(true);
+      } catch (err) {
+        console.log(err);
+        return resolve(false);
+      }
+    });
   }
 }
 
