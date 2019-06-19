@@ -40,15 +40,24 @@ describe("Variable", () => {
     let archived;
     let payload;
     let variable;
+    let timeSample;
+    let archiveTimeSample;
 
     beforeEach(() => {
       device = "My test device";
       name = "Name of variable";
+      timeSample = 2;
+      archiveTimeSample = 3;
       archived = true;
     });
 
     let exec = () => {
-      payload = { name: name, archived: archived };
+      payload = {
+        name: name,
+        archived: archived,
+        archiveTimeSample: archiveTimeSample,
+        timeSample: timeSample
+      };
       variable = new Variable(device);
       return variable.init(payload);
     };
@@ -60,6 +69,11 @@ describe("Variable", () => {
       expect(variable.Device).toEqual(device);
       expect(variable.Name).toEqual(name);
       expect(variable.Archived).toEqual(archived);
+      expect(variable.TimeSample).toEqual(timeSample);
+      expect(variable.ArchiveTimeSample).toEqual(archiveTimeSample);
+      expect(variable.ArchiveTickId).toEqual(
+        Sampler.convertTimeSampleToTickId(archiveTimeSample)
+      );
     });
 
     it("should set Archived to false if it is not defined in payload", () => {
@@ -78,10 +92,29 @@ describe("Variable", () => {
       expect(variable.Archived).toEqual(false);
     });
 
-    it("should set default time sample to 1s", () => {
+    it("should set default time sample to 1s if timeSample is not defined", () => {
+      timeSample = undefined;
+
       exec();
 
       expect(variable.TimeSample).toEqual(1);
+    });
+
+    it("should set archiveTimeSample to timeSample if archiveTimeSample is not defined", () => {
+      archiveTimeSample = undefined;
+
+      exec();
+
+      expect(variable.ArchiveTimeSample).toEqual(timeSample);
+    });
+
+    it("should set archiveTimeSample to 1 if archiveTimeSample and timeSample is not defined", () => {
+      archiveTimeSample = undefined;
+      timeSample = undefined;
+
+      exec();
+
+      expect(variable.ArchiveTimeSample).toEqual(1);
     });
 
     it("should set event emitter", () => {
@@ -495,10 +528,12 @@ describe("Variable", () => {
         name: variable.Name,
         id: variable.Id,
         timeSample: variable.TimeSample,
-        archived: archived
+        archived: variable.Archived,
+        archiveTimeSample: variable.ArchiveTimeSample,
+        unit: variable.Unit
       };
       expect(result).toBeDefined();
-      expect(result).toMatchObject(validPayload);
+      expect(result).toEqual(validPayload);
     });
   });
 
@@ -528,7 +563,9 @@ describe("Variable", () => {
         name: variable.Name,
         id: variable.Id,
         timeSample: variable.TimeSample,
-        archived: variable.Archived
+        archived: variable.Archived,
+        archiveTimeSample: variable.ArchiveTimeSample,
+        unit: variable.Unit
       };
       expect(result).toBeDefined();
       expect(result).toMatchObject(validPayload);
@@ -548,6 +585,7 @@ describe("Variable", () => {
     let timeSampleToEdit;
     let nameToEdit;
     let unitToEdit;
+    let archiveTimeSampleToEdit;
 
     beforeEach(() => {
       id = "1234";
@@ -560,6 +598,7 @@ describe("Variable", () => {
       archivedToEdit = true;
       unitToEdit = "B";
       timeSampleToEdit = 5;
+      archiveTimeSampleToEdit = 10;
     });
 
     let exec = () => {
@@ -572,7 +611,8 @@ describe("Variable", () => {
         name: nameToEdit,
         timeSample: timeSampleToEdit,
         archived: archivedToEdit,
-        unit: unitToEdit
+        unit: unitToEdit,
+        archiveTimeSample: archiveTimeSampleToEdit
       };
 
       return variable.editWithPayload(payloadToEdit);
@@ -593,6 +633,7 @@ describe("Variable", () => {
       expect(result.Name).toEqual(nameToEdit);
       expect(result.Archived).toEqual(archivedToEdit);
       expect(result.Unit).toEqual(unitToEdit);
+      expect(result.ArchiveTimeSample).toEqual(archiveTimeSampleToEdit);
     });
 
     it("should return variable with event emitter being the same object as in original ", () => {

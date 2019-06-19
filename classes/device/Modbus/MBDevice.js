@@ -548,7 +548,8 @@ class MBDevice extends Device {
     let shouldBeReconnected = this.IsActive && changeAssociatedWithMBDriver;
 
     //If there should be a reconnection or device is active but should not be - disconnect it
-    if (shouldBeReconnected || (!payload.isActive && this.IsActive)) {
+    //Has to be compared with === - if not - lack of isActive stops device
+    if (shouldBeReconnected || (payload.isActive === false && this.IsActive)) {
       await this.disconnect();
     }
 

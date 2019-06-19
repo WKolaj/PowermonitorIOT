@@ -7,7 +7,7 @@ let AverageElementVariableCreateSchema = Joi.object().keys({
     .required(),
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(100)
     .required(),
   sampleTime: Joi.number()
     .integer()
@@ -24,7 +24,12 @@ let AverageElementVariableCreateSchema = Joi.object().keys({
   factor: Joi.number().required(),
   calculationInterval: Joi.number()
     .integer()
-    .min(0)
+    .min(1)
+    .max(10000)
+    .required(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
     .max(10000)
     .required()
 });
@@ -32,7 +37,7 @@ let AverageElementVariableCreateSchema = Joi.object().keys({
 let AverageElementVariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
-    .max(20),
+    .max(100),
   sampleTime: Joi.number()
     .integer()
     .min(1)
@@ -47,11 +52,16 @@ let AverageElementVariableEditSchema = Joi.object().keys({
   calculationInterval: Joi.number()
     .integer()
     .min(0)
+    .max(10000),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
     .max(10000)
 });
 
 let setDefaultValues = function(req) {
   if (req.body.sampleTime === undefined) req.body.sampleTime = 1;
+  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;
 };

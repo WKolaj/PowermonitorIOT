@@ -7,7 +7,7 @@ let FactorElementVariableCreateSchema = Joi.object().keys({
     .required(),
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(100)
     .required(),
   sampleTime: Joi.number()
     .integer()
@@ -21,13 +21,18 @@ let FactorElementVariableCreateSchema = Joi.object().keys({
     .required(),
   archived: Joi.boolean().required(),
   variableId: Joi.objectId().required(),
-  factor: Joi.number().required()
+  factor: Joi.number().required(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
+    .required()
 });
 
 let FactorElementVariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
-    .max(20),
+    .max(100),
   sampleTime: Joi.number()
     .integer()
     .min(1)
@@ -38,11 +43,16 @@ let FactorElementVariableEditSchema = Joi.object().keys({
     .allow(""),
   archived: Joi.boolean(),
   variableId: Joi.objectId(),
-  factor: Joi.number()
+  factor: Joi.number(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
 });
 
 let setDefaultValues = function(req) {
   if (req.body.sampleTime === undefined) req.body.sampleTime = 1;
+  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;
 };

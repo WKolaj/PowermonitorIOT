@@ -7,7 +7,7 @@ let SumElementVariableCreateSchema = Joi.object().keys({
     .required(),
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(100)
     .required(),
   sampleTime: Joi.number()
     .integer()
@@ -20,13 +20,18 @@ let SumElementVariableCreateSchema = Joi.object().keys({
     .allow("")
     .required(),
   archived: Joi.boolean().required(),
-  variables: Joi.array().required()
+  variables: Joi.array().required(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
+    .required()
 });
 
 let SumElementVariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
-    .max(20),
+    .max(100),
   sampleTime: Joi.number()
     .integer()
     .min(1)
@@ -36,7 +41,11 @@ let SumElementVariableEditSchema = Joi.object().keys({
     .max(10)
     .allow(""),
   archived: Joi.boolean(),
-  variables: Joi.array()
+  variables: Joi.array(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
 });
 
 let checkVariableArray = async function(deviceId, variableArray) {
@@ -61,6 +70,7 @@ let checkVariableArray = async function(deviceId, variableArray) {
 
 let setDefaultValues = function(req) {
   if (req.body.sampleTime === undefined) req.body.sampleTime = 1;
+  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;
 };

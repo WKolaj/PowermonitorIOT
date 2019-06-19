@@ -44,7 +44,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit1"
+        unit: "unit1",
+        archiveTimeSample: 2
       },
       {
         id: "0002",
@@ -58,7 +59,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
-        unit: "unit2"
+        unit: "unit2",
+        archiveTimeSample: 2
       },
       {
         id: "0003",
@@ -72,7 +74,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit3"
+        unit: "unit3",
+        archiveTimeSample: 2
       }
     ],
     calculationElements: [
@@ -92,7 +95,8 @@ let testPayload = JSON.stringify({
             id: "0002",
             factor: 2
           }
-        ]
+        ],
+        archiveTimeSample: 2
       },
       {
         id: "1002",
@@ -110,7 +114,8 @@ let testPayload = JSON.stringify({
             id: "0003",
             factor: 3
           }
-        ]
+        ],
+        archiveTimeSample: 2
       }
     ],
     type: "mbDevice"
@@ -137,7 +142,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 1,
         setSingleFCode: 15,
-        unit: "unit4"
+        unit: "unit4",
+        archiveTimeSample: 2
       },
       {
         id: "0005",
@@ -151,7 +157,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 4,
         setSingleFCode: 16,
-        unit: "unit5"
+        unit: "unit5",
+        archiveTimeSample: 2
       },
       {
         id: "0006",
@@ -165,7 +172,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit6"
+        unit: "unit6",
+        archiveTimeSample: 2
       }
     ],
     type: "mbDevice"
@@ -191,7 +199,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit7"
+        unit: "unit7",
+        archiveTimeSample: 2
       },
       {
         id: "0008",
@@ -205,7 +214,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
-        unit: "unit8"
+        unit: "unit8",
+        archiveTimeSample: 2
       },
       {
         id: "0009",
@@ -219,7 +229,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit9"
+        unit: "unit9",
+        archiveTimeSample: 2
       }
     ],
     calculationElements: [
@@ -239,7 +250,8 @@ let testPayload = JSON.stringify({
             id: "0008",
             factor: 2
           }
-        ]
+        ],
+        archiveTimeSample: 2
       },
       {
         id: "3002",
@@ -257,7 +269,8 @@ let testPayload = JSON.stringify({
             id: "0009",
             factor: 3
           }
-        ]
+        ],
+        archiveTimeSample: 2
       }
     ],
     type: "mbDevice"

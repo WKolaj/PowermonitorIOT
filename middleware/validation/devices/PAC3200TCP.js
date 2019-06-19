@@ -7,7 +7,7 @@ let PAC3200TCPCreateSchema = Joi.object().keys({
     .required(),
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(100)
     .required(),
   timeout: Joi.number()
     .integer()
@@ -34,7 +34,7 @@ let PAC3200TCPCreateSchema = Joi.object().keys({
 let PAC3200TCPEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
-    .max(20),
+    .max(100),
   timeout: Joi.number()
     .integer()
     .min(1)

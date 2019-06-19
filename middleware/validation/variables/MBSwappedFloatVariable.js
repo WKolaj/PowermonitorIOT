@@ -7,7 +7,7 @@ let MBSwappedFloatVariableCreateSchema = Joi.object().keys({
     .required(),
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(100)
     .required(),
   timeSample: Joi.number()
     .integer()
@@ -28,13 +28,18 @@ let MBSwappedFloatVariableCreateSchema = Joi.object().keys({
     .required(),
   fCode: Joi.valid(3, 4, 16).required(),
   getSingleFCode: Joi.valid(3, 4).required(),
-  setSingleFCode: Joi.valid(16).required()
+  setSingleFCode: Joi.valid(16).required(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
+    .required()
 });
 
 let MBSwappedFloatVariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
-    .max(20),
+    .max(100),
   timeSample: Joi.number()
     .integer()
     .min(1)
@@ -51,11 +56,16 @@ let MBSwappedFloatVariableEditSchema = Joi.object().keys({
     .max(10000),
   fCode: Joi.valid(3, 4, 16),
   getSingleFCode: Joi.valid(3, 4),
-  setSingleFCode: Joi.valid(16)
+  setSingleFCode: Joi.valid(16),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
 });
 
 let setDefaultValues = function(req) {
   if (req.body.timeSample === undefined) req.body.timeSample = 1;
+  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
   if (req.body.value === undefined) req.body.value = 0;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;

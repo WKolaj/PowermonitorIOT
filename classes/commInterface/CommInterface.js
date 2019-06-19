@@ -300,7 +300,7 @@ class CommInterface {
         //Initializing new devices archive manager
         return resolve(newDevice);
       } catch (err) {
-        console.log(err);
+        return reject(err);
       }
     });
   }
@@ -319,7 +319,7 @@ class CommInterface {
         //Initializing new devices archive manager
         return resolve(newDevice);
       } catch (err) {
-        console.log(err);
+        return reject(err);
       }
     });
   }

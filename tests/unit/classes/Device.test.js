@@ -932,10 +932,18 @@ describe("Device", () => {
     let sumElement3RefreshMockFuncResult;
     let addSumElement3;
 
+    let fakeRefreshVariable;
+
     beforeEach(() => {
       name = "test name";
       tickNumber = 15;
-      _refreshMockResolvedValue = { "1234": 4321 };
+      fakeRefreshVariable = {
+        ArchiveTickId: 1,
+        Value: 4321
+      };
+      _refreshMockResolvedValue = {
+        "1234": fakeRefreshVariable
+      };
       eventEmitterMockEmitMethod = jest.fn();
       eventEmitterMock = { emit: eventEmitterMockEmitMethod };
 
@@ -1039,7 +1047,7 @@ describe("Device", () => {
 
       expect(refreshObjectResult).toBeDefined();
       expect(Object.keys(refreshObjectResult).length).toEqual(3);
-      expect(refreshObjectResult["1234"]).toEqual(4321);
+      expect(refreshObjectResult["1234"]).toEqual(fakeRefreshVariable);
       expect(refreshObjectResult[sumElement1Id]).toEqual(sumElement1);
       expect(refreshObjectResult[sumElement3Id]).toEqual(sumElement3);
 
@@ -1148,6 +1156,7 @@ describe("Device", () => {
     let tickNumber;
     let archiveValue;
     let archivePayload;
+    let archiveTimeSample;
 
     let insertSecondTime;
     let archiveSecondPayload;
@@ -1166,6 +1175,7 @@ describe("Device", () => {
 
       tickNumberSecond = 1235;
       archiveSecondValue = 9877;
+      archiveTimeSample = 1;
     });
 
     let exec = async () => {
@@ -1173,7 +1183,8 @@ describe("Device", () => {
         Id: variableId,
         Type: variableType,
         Archived: variableArchived,
-        Value: archiveValue
+        Value: archiveValue,
+        ArchiveTickId: archiveTimeSample
       };
 
       payload = { name: name };
@@ -1192,7 +1203,8 @@ describe("Device", () => {
           Id: variableId,
           Type: variableType,
           Archived: variableArchived,
-          Value: archiveSecondValue
+          Value: archiveSecondValue,
+          ArchiveTickId: 1
         };
 
         archiveSecondPayload = {
@@ -1209,7 +1221,7 @@ describe("Device", () => {
       }
     };
 
-    it("should not insert value into database if Archive manager is not initialized", async () => {
+    it("should insert value into database of all variables where archiveTickId suits tickNumber", async () => {
       await exec();
 
       let valueFromDB = await device.getVariableValueFromDB(
@@ -1219,10 +1231,11 @@ describe("Device", () => {
       let columnName = device.ArchiveManager.getColumnNameById(variableId);
 
       let expectedPayload = { [tickNumber]: archiveValue };
-      expect(valueFromDB).toMatchObject(expectedPayload);
+      expect(valueFromDB).toEqual(expectedPayload);
     });
 
-    it("should insert value into database", async () => {
+    it("should not insert value into database of all variables where archiveTickId don't suits tickNumber", async () => {
+      archiveTimeSample = 99;
       await exec();
 
       let valueFromDB = await device.getVariableValueFromDB(
@@ -1231,8 +1244,8 @@ describe("Device", () => {
       );
       let columnName = device.ArchiveManager.getColumnNameById(variableId);
 
-      let expectedPayload = { [tickNumber]: archiveValue };
-      expect(valueFromDB).toMatchObject(expectedPayload);
+      let expectedPayload = {};
+      expect(valueFromDB).toEqual(expectedPayload);
     });
 
     it("should insert two values if invoked almost at one time", async () => {

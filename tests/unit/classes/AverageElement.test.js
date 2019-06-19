@@ -72,6 +72,7 @@ describe("AverageElement", () => {
     let averageElementType;
     let averageElementSampleTime;
     let averageElementCalculationInterval;
+    let averageElementArchiveTimeSample;
 
     beforeEach(() => {
       deviceId = "0001";
@@ -86,6 +87,7 @@ describe("AverageElement", () => {
       averageElementSampleTime = 1;
       averageElementType = "averageElement";
       averageElementCalculationInterval = 10;
+      averageElementArchiveTimeSample = 20;
     });
 
     let exec = async () => {
@@ -130,7 +132,8 @@ describe("AverageElement", () => {
         sampleTime: averageElementSampleTime,
         variableId: averageElementVariableId,
         type: averageElementType,
-        calculationInterval: averageElementCalculationInterval
+        calculationInterval: averageElementCalculationInterval,
+        archiveTimeSample: averageElementArchiveTimeSample
       };
 
       averageElement = new AverageElement(device);
@@ -1942,6 +1945,7 @@ describe("AverageElement", () => {
     let averageElementArchived;
     let averageElementSampleTime;
     let averageElementCalculationInterval;
+    let averageElementAchiveSampleTime;
 
     let tickId;
     let value;
@@ -1958,6 +1962,7 @@ describe("AverageElement", () => {
       averageElementArchived = true;
       averageElementSampleTime = 1;
       averageElementCalculationInterval = 10;
+      averageElementAchiveSampleTime = 20;
 
       //random values
       tickId = 15;
@@ -2006,7 +2011,8 @@ describe("AverageElement", () => {
         sampleTime: averageElementSampleTime,
         variableId: averageElementVariableId,
         calculationInterval: averageElementCalculationInterval,
-        type: "averageElement"
+        type: "averageElement",
+        archiveTimeSample: averageElementAchiveSampleTime
       };
 
       averageElement = new AverageElement(device);

@@ -7,7 +7,7 @@ let MBBoleanVariableCreateSchema = Joi.object().keys({
     .required(),
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(100)
     .required(),
   timeSample: Joi.number()
     .integer()
@@ -28,13 +28,18 @@ let MBBoleanVariableCreateSchema = Joi.object().keys({
     .required(),
   fCode: Joi.valid(1, 2, 15).required(),
   getSingleFCode: Joi.valid(1, 2).required(),
-  setSingleFCode: Joi.valid(15).required()
+  setSingleFCode: Joi.valid(15).required(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
+    .required()
 });
 
 let MBBoleanVariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
-    .max(20),
+    .max(100),
   timeSample: Joi.number()
     .integer()
     .min(1)
@@ -51,11 +56,16 @@ let MBBoleanVariableEditSchema = Joi.object().keys({
     .max(10000),
   fCode: Joi.valid(1, 2, 15),
   getSingleFCode: Joi.valid(1, 2),
-  setSingleFCode: Joi.valid(15)
+  setSingleFCode: Joi.valid(15),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
 });
 
 let setDefaultValues = function(req) {
   if (req.body.timeSample === undefined) req.body.timeSample = 1;
+  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
   if (req.body.value === undefined) req.body.value = false;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;

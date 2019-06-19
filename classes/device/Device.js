@@ -398,10 +398,7 @@ class Device {
     for (let calculationElement of allCalculationElements) {
       try {
         if (
-          Sampler.doesTickIdMatchesTick(
-            tickNumber,
-            calculationElement.SampleTime
-          )
+          Sampler.doesTickIdMatchesTick(tickNumber, calculationElement.TickId)
         ) {
           let result = await calculationElement.refresh(tickNumber);
 
@@ -443,7 +440,8 @@ class Device {
 
       try {
         let archivePayload = this.generateArchivePayloadFromVariables(
-          variables
+          variables,
+          tickNumber
         );
 
         if (archivePayload != {}) {
@@ -460,7 +458,7 @@ class Device {
   /**
    * @description Generating archive payload from variables
    */
-  generateArchivePayloadFromVariables(variables) {
+  generateArchivePayloadFromVariables(variables, tickNumber) {
     //Returning empty object if varaibles are not defined
     if (!variables) return {};
 
@@ -470,7 +468,10 @@ class Device {
 
     //Creating payload only from archived variables
     for (let variable of allVariables) {
-      if (variable.Archived) {
+      if (
+        variable.Archived &&
+        Sampler.doesTickIdMatchesTick(tickNumber, variable.ArchiveTickId)
+      ) {
         archivedPayload[variable.Id] = variable.Value;
       }
     }

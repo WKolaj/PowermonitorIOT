@@ -57,7 +57,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit1"
+        unit: "unit1",
+        archiveTimeSample: 2
       },
       {
         id: "0002",
@@ -71,7 +72,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
-        unit: "unit2"
+        unit: "unit2",
+        archiveTimeSample: 2
       },
       {
         id: "0003",
@@ -85,7 +87,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit3"
+        unit: "unit3",
+        archiveTimeSample: 2
       }
     ],
     calculationElements: [
@@ -105,7 +108,8 @@ let testPayload = JSON.stringify({
             id: "0002",
             factor: 2
           }
-        ]
+        ],
+        archiveTimeSample: 2
       },
       {
         id: "1002",
@@ -123,7 +127,8 @@ let testPayload = JSON.stringify({
             id: "0003",
             factor: 3
           }
-        ]
+        ],
+        archiveTimeSample: 2
       }
     ],
     type: "mbDevice"
@@ -150,7 +155,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 1,
         setSingleFCode: 15,
-        unit: "unit4"
+        unit: "unit4",
+        archiveTimeSample: 2
       },
       {
         id: "0005",
@@ -164,7 +170,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
-        unit: "unit5"
+        unit: "unit5",
+        archiveTimeSample: 2
       },
       {
         id: "0006",
@@ -178,7 +185,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit6"
+        unit: "unit6",
+        archiveTimeSample: 2
       }
     ],
     type: "mbDevice"
@@ -204,7 +212,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit7"
+        unit: "unit7",
+        archiveTimeSample: 2
       },
       {
         id: "0008",
@@ -218,7 +227,8 @@ let testPayload = JSON.stringify({
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
-        unit: "unit8"
+        unit: "unit8",
+        archiveTimeSample: 2
       },
       {
         id: "0009",
@@ -232,7 +242,8 @@ let testPayload = JSON.stringify({
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit9"
+        unit: "unit9",
+        archiveTimeSample: 2
       }
     ],
     calculationElements: [
@@ -252,7 +263,8 @@ let testPayload = JSON.stringify({
             id: "0008",
             factor: 2
           }
-        ]
+        ],
+        archiveTimeSample: 2
       },
       {
         id: "3002",
@@ -270,7 +282,8 @@ let testPayload = JSON.stringify({
             id: "0009",
             factor: 3
           }
-        ]
+        ],
+        archiveTimeSample: 2
       }
     ],
     type: "mbDevice"
@@ -2179,7 +2192,8 @@ describe("Project", () => {
             archived: false,
             getSingleFCode: 3,
             setSingleFCode: 16,
-            unit: "unit7"
+            unit: "unit7",
+            archiveTimeSample: 5
           },
           {
             id: "0102",
@@ -2193,7 +2207,8 @@ describe("Project", () => {
             archived: true,
             getSingleFCode: 4,
             setSingleFCode: 16,
-            unit: "unit8"
+            unit: "unit8",
+            archiveTimeSample: 5
           },
           {
             id: "0103",
@@ -2207,7 +2222,8 @@ describe("Project", () => {
             archived: false,
             getSingleFCode: 3,
             setSingleFCode: 16,
-            unit: "unit9"
+            unit: "unit9",
+            archiveTimeSample: 5
           }
         ],
         calculationElements: [
@@ -2227,7 +2243,8 @@ describe("Project", () => {
                 id: "0103",
                 factor: 2
               }
-            ]
+            ],
+            archiveTimeSample: 5
           },
           {
             id: "4002",
@@ -2245,7 +2262,8 @@ describe("Project", () => {
                 id: "0102",
                 factor: 3
               }
-            ]
+            ],
+            archiveTimeSample: 5
           }
         ],
         type: "mbDevice"
@@ -2694,7 +2712,8 @@ describe("Project", () => {
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        unit: "unit9"
+        unit: "unit9",
+        archiveTimeSample : 5
       };
 
       mbDevicePayload.variables.push(corruptedPayload);
@@ -3035,7 +3054,8 @@ describe("Project", () => {
           archived: false,
           getSingleFCode: 3,
           setSingleFCode: 16,
-          unit: "unit1"
+          unit: "unit1",
+          archiveTimeSample : 5
         },
         {
           id: "5002",
@@ -3049,7 +3069,8 @@ describe("Project", () => {
           archived: true,
           getSingleFCode: 4,
           setSingleFCode: 16,
-          unit: "unit2"
+          unit: "unit2",
+          archiveTimeSample : 5
         },
         {
           id: "5003",
@@ -3063,7 +3084,8 @@ describe("Project", () => {
           archived: false,
           getSingleFCode: 3,
           setSingleFCode: 16,
-          unit: "unit3"
+          unit: "unit3",
+          archiveTimeSample : 5
         }
       ];
 
@@ -3103,7 +3125,8 @@ describe("Project", () => {
           sampleTime: 1,
           name: "sumElement1",
           unit: "C",
-          variables: []
+          variables: [],
+          archiveTimeSample: 5
         },
         {
           id: "3002",
@@ -3112,7 +3135,8 @@ describe("Project", () => {
           sampleTime: 2,
           name: "sumElement2",
           unit: "D",
-          variables: []
+          variables: [],
+          archiveTimeSample: 5
         }
       ];
 
@@ -3156,7 +3180,6 @@ describe("Project", () => {
         })
       ).rejects.toBeDefined();
 
-      //New device should not have been added
       let doesDeviceExist = await project.CommInterface.doesDeviceExist(
         pac3200TCPPayload.id
       );
@@ -4539,6 +4562,7 @@ describe("Project", () => {
       variablePayload.setSingleFCode = 16;
       variablePayload.type = "byteArray";
       variablePayload.value = [0, 0, 0, 0, 0, 0, 0, 0];
+      variablePayload.archiveTimeSample = 10;
       await createInitialFiles();
     });
 
@@ -4585,6 +4609,7 @@ describe("Project", () => {
         variablePayload.setSingleFCode = expectedSetSingleFCode;
         variablePayload.type = expectedTypeName;
         variablePayload.value = expectedDefaultValue;
+        variablePayload.archiveTimeSample = 10;
         await createInitialFiles();
       });
 
@@ -5368,6 +5393,7 @@ describe("Project", () => {
       createPayload.setSingleFCode = 16;
       createPayload.type = "byteArray";
       createPayload.value = [0, 0, 0, 0];
+      createPayload.archiveTimeSample = 5;
 
       editPayload = {};
       editPayload.id = "000x";
@@ -5382,6 +5408,7 @@ describe("Project", () => {
       editPayload.setSingleFCode = 16;
       editPayload.type = "byteArray";
       editPayload.value = [0, 1, 0, 1, 0, 1, 0, 1];
+      editPayload.archiveTimeSample = 10;
 
       await createInitialFiles();
     });
@@ -5485,6 +5512,7 @@ describe("Project", () => {
         createPayload.setSingleFCode = expectedSetSingleFCode;
         createPayload.type = expectedTypeName;
         createPayload.value = defaultValue;
+        createPayload.archiveTimeSample = 1;
 
         editPayload = {};
         editPayload.id = "000x";
@@ -5499,6 +5527,7 @@ describe("Project", () => {
         editPayload.setSingleFCode = expectedSetSingleFCode;
         editPayload.type = expectedTypeName;
         editPayload.value = editValue;
+        editPayload.archiveTimeSample = 10;
 
         await createInitialFiles();
       });
@@ -5617,6 +5646,20 @@ describe("Project", () => {
 
         editPayload = {
           offset: editOffset
+        };
+
+        let expectedPayload = { ...createPayload, ...editPayload };
+
+        let result = await exec();
+
+        expect(result.Payload).toEqual(expectedPayload);
+      });
+
+      it(`${className} - should edit only archiveTimeSample if only archiveTimeSample is defined`, async () => {
+        let editArchiveTimeSample = 15;
+
+        editPayload = {
+          archiveTimeSample: editArchiveTimeSample
         };
 
         let expectedPayload = { ...createPayload, ...editPayload };
@@ -6280,7 +6323,8 @@ describe("Project", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         type: "float",
-        value: 3
+        value: 3,
+        archiveTimeSample: 5
       };
 
       elementPayload = {
@@ -6292,7 +6336,8 @@ describe("Project", () => {
         variableId: "000y",
         factor: 2,
         calculationInterval: 5,
-        type: "averageElement"
+        type: "averageElement",
+        archiveTimeSample: 5
       };
 
       await createInitialFiles();
@@ -6343,7 +6388,8 @@ describe("Project", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         type: "float",
-        value: 3
+        value: 3,
+        archiveTimeSample: 5
       };
 
       elementPayload = {
@@ -6355,7 +6401,8 @@ describe("Project", () => {
         variableId: "000y",
         factor: 2,
         calculationInterval: 5,
-        type: "averageElement"
+        type: "averageElement",
+        archiveTimeSample: 5
       };
 
       await createInitialFiles();
@@ -6556,7 +6603,8 @@ describe("Project", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         type: "float",
-        value: 3
+        value: 3,
+        archiveTimeSample: 5
       };
 
       elementPayload = {
@@ -6567,7 +6615,8 @@ describe("Project", () => {
         unit: "A",
         variableId: "000y",
         factor: 2,
-        type: "factorElement"
+        type: "factorElement",
+        archiveTimeSample: 5
       };
 
       await createInitialFiles();
@@ -6754,7 +6803,8 @@ describe("Project", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         type: "float",
-        value: 3
+        value: 3,
+        archiveTimeSample: 5
       };
 
       elementPayload = {
@@ -6767,7 +6817,8 @@ describe("Project", () => {
         factor: 2,
         calculationInterval: 5,
         type: "increaseElement",
-        overflow: 1000
+        overflow: 1000,
+        archiveTimeSample: 5
       };
 
       await createInitialFiles();
@@ -6982,7 +7033,8 @@ describe("Project", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         type: "float",
-        value: 3
+        value: 3,
+        archiveTimeSample: 5
       };
 
       variable2Payload = {
@@ -6996,7 +7048,8 @@ describe("Project", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         type: "float",
-        value: 4
+        value: 4,
+        archiveTimeSample: 5
       };
 
       elementPayload = {
@@ -7006,7 +7059,8 @@ describe("Project", () => {
         sampleTime: 5,
         unit: "A",
         variables: [{ id: "000y", factor: 2 }, { id: "000z", factor: 3 }],
-        type: "sumElement"
+        type: "sumElement",
+        archiveTimeSample: 5
       };
 
       await createInitialFiles();

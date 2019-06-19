@@ -28,6 +28,16 @@ class Variable {
     if (!payload.timeSample) payload.timeSample = 1;
     this._tickId = Sampler.convertTimeSampleToTickId(payload.timeSample);
 
+    //Setting archive tick id to the same value as tick id - if archiveTickId is not defined
+    if (!payload.archiveTimeSample)
+      this._archiveTickId = Sampler.convertTimeSampleToTickId(
+        payload.timeSample
+      );
+    else
+      this._archiveTickId = Sampler.convertTimeSampleToTickId(
+        payload.archiveTimeSample
+      );
+
     //Generating random id in case it was not provided
     if (!payload.id) payload.id = Variable.generateRandId();
     this._id = payload.id;
@@ -70,6 +80,21 @@ class Variable {
    */
   get TickId() {
     return this._tickId;
+  }
+
+  /**@description TickId for archiving */
+  get ArchiveTickId() {
+    return this._archiveTickId;
+  }
+
+  /**@description TimeSample for archiving */
+  get ArchiveTimeSample() {
+    return Sampler.convertTickIdToTimeSample(this._archiveTickId);
+  }
+
+  /**@description TimeSample for archiving */
+  set ArchiveTimeSample(value) {
+    this._archiveTickId = Sampler.convertTimeSampleToTickId(value);
   }
 
   /**
@@ -184,7 +209,8 @@ class Variable {
       timeSample: this.TimeSample,
       name: this.Name,
       archived: this.Archived,
-      unit: this.Unit
+      unit: this.Unit,
+      archiveTimeSample: this.ArchiveTimeSample
     };
   }
 
@@ -203,6 +229,8 @@ class Variable {
     if (payload.name) this._name = payload.name;
     if (payload.archived !== undefined) this._archived = payload.archived;
     if (payload.unit) this._unit = payload.unit;
+    if (payload.archiveTimeSample)
+      this.ArchiveTimeSample = payload.archiveTimeSample;
 
     //returning edited variable
     return this;

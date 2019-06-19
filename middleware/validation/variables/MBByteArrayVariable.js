@@ -7,7 +7,7 @@ let MBByteArrayVariableCreateSchema = Joi.object().keys({
     .required(),
   name: Joi.string()
     .min(3)
-    .max(20)
+    .max(100)
     .required(),
   timeSample: Joi.number()
     .integer()
@@ -33,13 +33,18 @@ let MBByteArrayVariableCreateSchema = Joi.object().keys({
     .required(),
   fCode: Joi.valid(3, 4, 16).required(),
   getSingleFCode: Joi.valid(3, 4).required(),
-  setSingleFCode: Joi.valid(16).required()
+  setSingleFCode: Joi.valid(16).required(),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
+    .required()
 });
 
 let MBByteArrayVariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
-    .max(20),
+    .max(100),
   timeSample: Joi.number()
     .integer()
     .min(1)
@@ -60,7 +65,11 @@ let MBByteArrayVariableEditSchema = Joi.object().keys({
     .max(10000),
   fCode: Joi.valid(3, 4, 16),
   getSingleFCode: Joi.valid(3, 4),
-  setSingleFCode: Joi.valid(16)
+  setSingleFCode: Joi.valid(16),
+  archiveTimeSample: Joi.number()
+    .integer()
+    .min(1)
+    .max(10000)
 });
 
 let generateDefaultValue = function(length) {
@@ -79,6 +88,7 @@ let generateDefaultValue = function(length) {
 
 let setDefaultValues = function(req) {
   if (req.body.timeSample === undefined) req.body.timeSample = 1;
+  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
   if (req.body.value === undefined)
     req.body.value = generateDefaultValue(req.body.length);
   if (req.body.unit === undefined) req.body.unit = "";
@@ -90,7 +100,7 @@ let setDefaultValues = function(req) {
 let validateValue = function(value, length) {
   if (!value || !length) return "value cannot be empty";
   if (!Array.isArray(value)) return "value has to be an array";
-  if (value.length * 2 !== length)
+  if (value.length !== length * 2)
     return "value (array) length has to be two times longer than length of variable";
 
   //Returning undefined if value is ok
@@ -155,7 +165,7 @@ let validateEdit = function(req) {
                 return resolve();
 
               //Getting length from variable
-              let variableLength = (await Project.CurrentProject.getVariable(
+              variableLength = (await Project.CurrentProject.getVariable(
                 req.params.deviceId,
                 req.params.variableId
               )).Length;

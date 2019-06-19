@@ -1,5 +1,6 @@
 const EventEmitter = require("events");
 const mongoose = require("mongoose");
+const Sampler = require("../sampler/Sampler");
 
 class CalculationElement {
   /**
@@ -28,7 +29,11 @@ class CalculationElement {
 
     this._id = payload.id;
     this._name = payload.name;
-    this._sampleTime = payload.sampleTime;
+    this.SampleTime = payload.sampleTime;
+
+    //If archiveTimeSample was not defined - set it as a sampleTime
+    if (!payload.archiveTimeSample) this.ArchiveTimeSample = payload.sampleTime;
+    else this.ArchiveTimeSample = payload.archiveTimeSample;
 
     payload.archived ? (this._archived = true) : (this._archived = false);
 
@@ -36,10 +41,34 @@ class CalculationElement {
   }
 
   /**
-   * @description Sample time of calculation element
+   * @description Sample time of variable
    */
   get SampleTime() {
-    return this._sampleTime;
+    return Sampler.convertTickIdToTimeSample(this._tickId);
+  }
+
+  /**
+   * @description Sample time of variable
+   */
+  set SampleTime(value) {
+    this._tickId = Sampler.convertTimeSampleToTickId(value);
+  }
+
+  /**
+   * @description TickId of variable
+   */
+  get TickId() {
+    return this._tickId;
+  }
+
+  /**@description TimeSample for archiving */
+  get ArchiveTimeSample() {
+    return Sampler.convertTickIdToTimeSample(this._archiveTickId);
+  }
+
+  /**@description TimeSample for archiving */
+  set ArchiveTimeSample(value) {
+    this._archiveTickId = Sampler.convertTimeSampleToTickId(value);
   }
 
   /**
@@ -113,6 +142,21 @@ class CalculationElement {
     this._valueTickId = value;
   }
 
+  /**@description TickId for archiving */
+  get ArchiveTickId() {
+    return this._archiveTickId;
+  }
+
+  /**@description TimeSample for archiving */
+  get ArchiveTimeSample() {
+    return Sampler.convertTickIdToTimeSample(this._archiveTickId);
+  }
+
+  /**@description TimeSample for archiving */
+  set ArchiveTimeSample(value) {
+    this._archiveTickId = Sampler.convertTimeSampleToTickId(value);
+  }
+
   /**
    *  @description Name of calculationElement
    */
@@ -145,7 +189,7 @@ class CalculationElement {
    * @description Generating random id
    */
   static generateRandId() {
-    return mongoose.Types.ObjectId();
+    return mongoose.Types.ObjectId().toHexString();
   }
 
   /**
@@ -228,6 +272,7 @@ class CalculationElement {
     payloadToReturn.archived = this.Archived;
     payloadToReturn.unit = this.Unit;
     payloadToReturn.sampleTime = this.SampleTime;
+    payloadToReturn.archiveTimeSample = this.ArchiveTimeSample;
 
     return payloadToReturn;
   }

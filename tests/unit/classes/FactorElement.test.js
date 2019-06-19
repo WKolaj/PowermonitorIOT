@@ -1,6 +1,7 @@
 const FactorElement = require("../../../classes/calculationElement/FactorElement");
 const config = require("config");
 const MBDevice = require("../../../classes/device/Modbus/MBDevice");
+const Sampler = require("../../../classes/sampler/Sampler");
 
 let {
   clearDirectoryAsync,
@@ -83,6 +84,7 @@ describe("FactorElement", () => {
     let factorElementArchived;
     let factorElementType;
     let factorElementSampleTime;
+    let factorElementArchiveTimeSample;
 
     beforeEach(() => {
       deviceId = "0001";
@@ -96,6 +98,7 @@ describe("FactorElement", () => {
       factorElementArchived = true;
       factorElementSampleTime = 5;
       factorElementType = "factorElement";
+      factorElementArchiveTimeSample = 10;
     });
 
     let exec = async () => {
@@ -139,7 +142,8 @@ describe("FactorElement", () => {
         archived: factorElementArchived,
         sampleTime: factorElementSampleTime,
         variableId: factorElementVariableId,
-        type: factorElementType
+        type: factorElementType,
+        archiveTimeSample: factorElementArchiveTimeSample
       };
 
       factorElement = new FactorElement(device);
@@ -151,6 +155,12 @@ describe("FactorElement", () => {
 
       expect(factorElement.Payload).toEqual(factorElementPayload);
       expect(factorElement.Variable).toEqual(variable);
+      expect(factorElement.ArchiveTickId).toEqual(
+        Sampler.convertTimeSampleToTickId(factorElementArchiveTimeSample)
+      );
+      expect(factorElement.TickId).toEqual(
+        Sampler.convertTimeSampleToTickId(factorElementSampleTime)
+      );
     });
 
     it("should set own id if id is not defined in payload", async () => {
@@ -158,6 +168,13 @@ describe("FactorElement", () => {
       await exec();
 
       expect(factorElement.Id).toBeDefined();
+    });
+
+    it("should set archive sample time to sample if it is not defined", async () => {
+      factorElementArchiveTimeSample = undefined;
+      await exec();
+
+      expect(factorElement.ArchiveTimeSample).toEqual(factorElementSampleTime);
     });
 
     it("should throw if there is no variable of given id in device", async () => {

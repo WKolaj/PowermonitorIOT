@@ -93,6 +93,15 @@ let validateEdit = function(req) {
     if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
       return resolve();
 
+    //If there is no variable - resolving undefined in order to return 404 later
+    if (
+      !(await Project.CurrentProject.doesVariableExist(
+        req.params.deviceId,
+        req.params.variableId
+      ))
+    )
+      return resolve();
+
     let variableType = (await Project.CurrentProject.getVariable(
       req.params.deviceId,
       req.params.variableId
