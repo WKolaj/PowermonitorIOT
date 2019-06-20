@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const si = require("systeminformation");
 const config = require("config");
+const logger = require("../logger/logger");
 
 const getFullPath = pathName => {
   return path.resolve(pathName);
@@ -331,7 +332,7 @@ module.exports.getCPUInfo = async function() {
       }
     };
   } catch (err) {
-    console.log(err);
+    logger.error(err.message, err);
     return;
   }
 };
@@ -348,7 +349,7 @@ module.exports.getRAMInfo = async function() {
       used: ram.used
     };
   } catch (err) {
-    console.log(err);
+    logger.error(err.message, err);
     return;
   }
 };
@@ -389,7 +390,7 @@ module.exports.getMemoryInfo = async function() {
 
     return payloadToReturn;
   } catch (err) {
-    console.log(err);
+    logger.error(err.message, err);
     return;
   }
 };

@@ -1,4 +1,5 @@
 const EventEmitter = require("events");
+const logger = require("../../logger/logger");
 
 class Sampler {
   /**
@@ -88,7 +89,7 @@ class Sampler {
       //emiting tick event
       this.Events.emit("OnTick", [tickNumber]);
     } catch (err) {
-      console.log(err);
+      logger.error(err.message, err);
     }
   }
 

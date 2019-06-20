@@ -2,6 +2,7 @@ const path = require("path");
 const fs = require("fs");
 const User = require("../user/User");
 const mongoose = require("mongoose");
+const logger = require("../../logger/logger");
 const {
   getCurrentAppVersion,
   clearDirectoryAsync,
@@ -249,7 +250,7 @@ class ProjectContentManager {
         await user.init(userObject, true);
         objectToReturn.push(user);
       } catch (err) {
-        console.log(err);
+        logger.error(err.message, err);
       }
     }
 
@@ -394,7 +395,7 @@ class ProjectContentManager {
         this._checkDeviceFileContent(jsonFileContent);
         initialPayload[id] = jsonFileContent;
       } catch (err) {
-        console.log(err);
+        logger.error(err.message, err);
       }
     }
 
@@ -436,7 +437,7 @@ class ProjectContentManager {
       try {
         await this.saveDevice(id);
       } catch (err) {
-        console.log(err);
+        logger.error(err.message, err);
       }
     }
   }
@@ -450,7 +451,7 @@ class ProjectContentManager {
       try {
         await this.loadDevice(id);
       } catch (err) {
-        console.log(err);
+        logger.error(err.message, err);
       }
     }
   }

@@ -12,6 +12,7 @@ const MBSwappedInt32Variable = require("../../variable/Modbus/MBSwappedInt32Vari
 const MBSwappedUInt32Variable = require("../../variable/Modbus/MBSwappedUInt32Variable");
 const MBUInt16Variable = require("../../variable/Modbus/MBUInt16Variable");
 const MBUInt32Variable = require("../../variable/Modbus/MBUInt32Variable");
+const logger = require("../../../logger/logger");
 
 class MBDevice extends Device {
   /**
@@ -490,7 +491,7 @@ class MBDevice extends Device {
       //Returing all refreshed variable Ids and values;
       return this.RequestGrouper.ConvertRequestsToIDValuePair(requestsToInvoke);
     } catch (err) {
-      console.log(err);
+      logger.error(err.message, err);
       return null;
     }
   }

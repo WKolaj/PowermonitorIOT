@@ -1,4 +1,5 @@
 const ModbusRTU = require("modbus-serial");
+const logger = require("../../../logger/logger");
 
 class MBDriver {
   /**
@@ -356,7 +357,7 @@ class MBDriver {
 
         return resolve(true);
       } catch (err) {
-        console.log(err);
+        logger.error(err.message, err);
         return resolve(false);
       }
     });
@@ -382,7 +383,7 @@ class MBDriver {
 
         return resolve(true);
       } catch (err) {
-        console.log(err);
+        logger.error(err.message, err);
         return resolve(false);
       }
     });

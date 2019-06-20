@@ -6,6 +6,7 @@ const FactorElement = require("../calculationElement/FactorElement");
 const AverageElement = require("../calculationElement/AverageElement");
 const IncreaseElement = require("../calculationElement/IncreaseElement");
 const Sampler = require("../../classes/sampler/Sampler");
+const logger = require("../../logger/logger");
 
 class Device {
   /**
@@ -371,7 +372,7 @@ class Device {
       try {
         await this.archiveData(tickNumber, finalResult);
       } catch (err) {
-        console.log(err);
+        logger.error(err);
       }
     }
   }
@@ -407,7 +408,7 @@ class Device {
             payloadToAppend[calculationElement.Id] = calculationElement;
         }
       } catch (err) {
-        console.log(err);
+        logger.error(err);
       }
     }
 
