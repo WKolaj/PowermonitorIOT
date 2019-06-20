@@ -36,6 +36,8 @@
     "lodash": "^4.17.11",
     "modbus-serial": "^7.6.0",
     "mongoose": "^5.5.15",
+    "netmask": "^1.0.6",
+    "network": "^0.4.1",
     "sqlite3": "^4.0.9",
     "systeminformation": "^4.11.6",
     "winston": "^3.2.1"

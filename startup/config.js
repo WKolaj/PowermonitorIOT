@@ -8,10 +8,10 @@ let throwIfConfigDoesNotExist = configName => {
 
 module.exports = async function() {
   logger.info("initializing app configuration files...");
-
   throwIfConfigDoesNotExist("db1Path");
   throwIfConfigDoesNotExist("db2Path");
   throwIfConfigDoesNotExist("tokenHeader");
+  throwIfConfigDoesNotExist("networkInterfaceName");
   throwIfConfigDoesNotExist("projPath");
   throwIfConfigDoesNotExist("logging");
   throwIfConfigDoesNotExist("logging.info");

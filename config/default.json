@@ -3,6 +3,7 @@
   "db2Path": "database/db2",
   "projPath": "project",
   "tokenHeader": "x-auth-token",
+  "networkInterfaceName": "wlp2s0",
   "port": 5000,
   "logging": {
     "info": {

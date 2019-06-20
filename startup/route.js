@@ -7,6 +7,7 @@ const variables = require("../routes/variables");
 const calcElements = require("../routes/calcElements");
 const values = require("../routes/values");
 const info = require("../routes/info");
+const ipConfig = require("../routes/ipConfig");
 const error = require("../middleware/error");
 
 module.exports = async function(app) {
@@ -32,6 +33,9 @@ module.exports = async function(app) {
 
   app.use("/api/info", info);
   logger.info("Info route initialized");
+
+  app.use("/api/ip", ipConfig);
+  logger.info("IPConfig route initialized");
 
   app.use(error);
   logger.info("Route error handler initialized");

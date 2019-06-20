@@ -7,6 +7,10 @@ const saltRounds = 10;
 const si = require("systeminformation");
 const config = require("config");
 const logger = require("../logger/logger");
+const Netmask = require("netmask").Netmask;
+const os = require("os");
+const dns = require("dns");
+const network = require("network");
 
 const getFullPath = pathName => {
   return path.resolve(pathName);
@@ -393,4 +397,113 @@ module.exports.getMemoryInfo = async function() {
     logger.error(err.message, err);
     return;
   }
+};
+
+/**
+ * @description Method for converting Subnet to CIDR
+ * @param {*} subnet
+ */
+let convertSubnetToCIDR = function(subnet) {
+  let block = new Netmask(`192.168.0.1`, subnet);
+
+  return block.bitmask;
+};
+
+/**
+ * @description Method for generating file content that should be written to dhcpcd.conf - raspi changes interface config this way
+ * @param {boolean} ipStatic
+ * @param {string} ipAdress
+ * @param {string} subnetMask
+ * @param {string} gateway
+ * @param {string} DNS
+ */
+let generateDHCPCDfileContent = function(
+  ipStatic,
+  ipAdress,
+  subnetMask,
+  gateway,
+  DNS
+) {
+  //If ip has to be defined - there should not be any command in dhcpd file
+  if (!ipStatic)
+    return `#dynamic
+    #file was edited by PowermonitorIOT in order to set dynamic ip1`;
+
+  let cidr = convertSubnetToCIDR(subnetMask);
+
+  return `#static
+  interface eth0
+  static ip_address=${ipAdress}/${cidr}
+  static routers=${gateway}
+  static domain_name_servers=${DNS}`;
+};
+
+/**
+ * @description Method for checking if ip is set to dynamic or static
+ * !!!! Purly based on content of dhcpcd.conf file content - first string dynamic/static
+ */
+let getIfIpIsDynamic = async function() {
+  let fileContent = (await module.exports.readFileAsync(
+    "/etc/dhcpcd.conf"
+  )).toString();
+  return fileContent.startsWith("#static");
+};
+
+/**
+ * @description Method for changing ipAdress of raspberry pi - by generating dhcpcd.conf file
+ */
+module.exports.changeIpAdress = async function(
+  static,
+  ipAdress,
+  subnet,
+  gateway,
+  dns
+) {
+  try {
+    let fileContent = generateDHCPCDfileContent(
+      static,
+      ipAdress,
+      subnet,
+      gateway,
+      dns
+    );
+    await module.exports.createFileAsync("/etc/dhcpcd.conf", fileContent);
+    return;
+  } catch (err) {
+    logger.error(err.message, err);
+    return;
+  }
+};
+
+/**
+ * @description Method for getting ip address info from device - also based on dhcpcd.conf file
+ */
+module.exports.getIpAdress = async function() {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let interfaceName = config.get("networkInterfaceName");
+      let currentDNS = dns.getServers()[0];
+      let ipDynamic = await getIfIpIsDynamic();
+
+      network.get_interfaces_list(async function(err, allInterfaces) {
+        if (err) return reject(err);
+
+        for (let interface of allInterfaces) {
+          if (interface.name === interfaceName) {
+            return resolve({
+              static: ipDynamic,
+              ipAdress: interface.ip_address,
+              gateway: interface.gateway_ip,
+              subnet: interface.netmask,
+              dns: currentDNS
+            });
+          }
+        }
+
+        return reject(`There is no network interface of name ${interfaceName}`);
+      });
+    } catch (err) {
+      return reject(err);
+    }
+  });
 };
