@@ -451,6 +451,7 @@ let getIfIpIsDynamic = async function() {
 
 /**
  * @description Method for changing ipAdress of raspberry pi - by generating dhcpcd.conf file
+ * !! MEthod reboots raspi
  */
 module.exports.changeIpAdress = async function(
   static,
@@ -468,6 +469,12 @@ module.exports.changeIpAdress = async function(
       dns
     );
     await module.exports.createFileAsync("/etc/dhcpcd.conf", fileContent);
+
+    //Rebooting rapsi after changes
+    require("child_process").exec("sudo shutdown -r now", function(msg) {
+      logger.info(msg);
+    });
+
     return;
   } catch (err) {
     logger.error(err.message, err);
