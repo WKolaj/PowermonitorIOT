@@ -1,9 +1,9 @@
 {
-  "db1Path": "database/db1",
-  "db2Path": "database/db2",
+  "db1Path": "/home/powermonitor/data1/db",
+  "db2Path": "/home/powermonitor/data2/db",
   "projPath": "project",
   "tokenHeader": "x-auth-token",
-  "networkInterfaceName": "wlp2s0",
+  "networkInterfaceName": "eth0",
   "port": 5000,
   "logging": {
     "info": {
