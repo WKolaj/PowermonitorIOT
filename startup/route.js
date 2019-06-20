@@ -5,6 +5,7 @@ const auth = require("../routes/auth");
 const devices = require("../routes/devices");
 const variables = require("../routes/variables");
 const calcElements = require("../routes/calcElements");
+const values = require("../routes/values");
 const error = require("../middleware/error");
 
 module.exports = async function(app) {
@@ -24,6 +25,9 @@ module.exports = async function(app) {
 
   app.use("/api/calcElements", calcElements);
   logger.info("CalcElements route initialized");
+
+  app.use("/api/values", values);
+  logger.info("Values route initialized");
 
   app.use(error);
   logger.info("Route error handler initialized");

@@ -519,6 +519,14 @@ class Device {
       : Promise.resolve(undefined);
   }
 
+  async getVariableValuesFromDB(variableId, fromDate, endDate) {
+    if (!variableId in this.Variables)
+      throw new Error(`There is no variable of given id: ${variableId}`);
+    return this.ArchiveManager.doesVariableIdExists(variableId)
+      ? this.ArchiveManager.getValues(variableId, fromDate, endDate)
+      : Promise.resolve(undefined);
+  }
+
   async getCalculationElementValueFromDB(calculationElementId, date) {
     if (!calculationElementId in this.CalculationElements)
       throw new Error(
@@ -528,6 +536,22 @@ class Device {
       calculationElementId
     )
       ? this.ArchiveManager.getValue(date, calculationElementId)
+      : Promise.resolve(undefined);
+  }
+
+  async getCalculationElementValuesFromDB(
+    calculationElementId,
+    fromDate,
+    endDate
+  ) {
+    if (!calculationElementId in this.CalculationElements)
+      throw new Error(
+        `There is no calculation element of given id: ${calculationElementId}`
+      );
+    return this.ArchiveManager.doesCalculationElementIdExists(
+      calculationElementId
+    )
+      ? this.ArchiveManager.getValues(calculationElementId, fromDate, endDate)
       : Promise.resolve(undefined);
   }
 
@@ -553,8 +577,8 @@ class Device {
     let variable = this.Variables[elementId];
     let element = this.CalculationElements[elementId];
 
-    if (variable) return variable.Value;
-    if (element) return element.Value;
+    if (variable) return { [variable.ValueTickId]: variable.Value };
+    if (element) return { [element.ValueTickId]: element.Value };
   }
 
   /**
@@ -572,6 +596,29 @@ class Device {
     }
     if (element) {
       return this.getCalculationElementValueFromDB(elementId, date);
+    }
+  }
+
+  /**
+   * @description Method for getting value of Variable or CalculationElement depending on id from DB
+   * @param {string} elementId id of variable or calculation element
+   * @param {number} fromDate
+   * @param {number} toDate
+   */
+  getValuesOfElementFromDB(elementId, fromDate, toDate) {
+    //Checking if there is a variable of given id or element of given id
+    let variable = this.Variables[elementId];
+    let element = this.CalculationElements[elementId];
+
+    if (variable) {
+      return this.getVariableValuesFromDB(elementId, fromDate, toDate);
+    }
+    if (element) {
+      return this.getCalculationElementValuesFromDB(
+        elementId,
+        fromDate,
+        toDate
+      );
     }
   }
 }

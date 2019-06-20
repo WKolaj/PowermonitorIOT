@@ -284,6 +284,22 @@ class Project {
       date
     );
   }
+  /**
+   * @description Method for getting values from varaible or calculation element from database
+   * @param {string} deviceId device id
+   * @param {string} elementId element id of varaible or calculation element
+   * @param {number} startDate start date of value
+   * @param {number} endDate end date of value
+   * @param {number} interval time interval
+   */
+  async getValuesBasedOnDate(deviceId, elementId, startDate, endDate) {
+    return this.CommInterface.getValuesOfElementFromDatabase(
+      deviceId,
+      elementId,
+      startDate,
+      endDate
+    );
+  }
 
   /**
    * @description Method for getting user
@@ -371,6 +387,15 @@ class Project {
    */
   async doesDeviceExist(deviceId) {
     return this.CommInterface.doesDeviceExist(deviceId);
+  }
+
+  /**
+   * @description Method for getting variable or calculation element - depending on given id
+   * @param {object} deviceId Id of device
+   * @param {string} elementId Id of variable or calculationElement
+   */
+  async getElement(deviceId, elementId) {
+    return this.CommInterface.getElement(deviceId, elementId);
   }
 }
 

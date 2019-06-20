@@ -577,6 +577,59 @@ class ArchiveManager {
       }
     });
   }
+
+  /**
+   * @description Method for getting values from database
+   * @param {*} variableId id of variable/calculation element to get
+   * @param {number} fromDate Begin date
+   * @param {number} toDate End date
+   */
+  async getValues(variableId, fromDate, toDate) {
+    return new Promise((resolve, reject) => {
+      try {
+        let noVariableOfGivenId = !this.doesVariableIdExists(variableId);
+        let noCalculationElementOfGivenId = !this.doesCalculationElementIdExists(
+          variableId
+        );
+        if (noVariableOfGivenId && noCalculationElementOfGivenId)
+          throw new Error(
+            `There is no variable and calculation element of id ${variableId}`
+          );
+        this.checkIfInitialzed();
+        //in case of getting value - there is no need to check if device is busy
+        //this.checkIfBusy();
+        //this._busy = true;
+
+        let columnName = this.getColumnNameById(variableId);
+
+        this.DB.all(
+          `SELECT date, ${columnName} FROM data WHERE date <= ${toDate} AND date >= ${fromDate} ORDER BY date DESC`,
+          (err, rows) => {
+            //this._busy = false;
+
+            if (err) {
+              return reject(err);
+            }
+            if (rows) {
+              return resolve(
+                rows
+                  .filter(row => row[columnName] !== null)
+                  .map(row => {
+                    return { [row.date]: row[columnName] };
+                  })
+              );
+            } else {
+              return resolve({});
+            }
+          }
+        );
+      } catch (err) {
+        //this._busy = false;
+
+        return reject(err);
+      }
+    });
+  }
 }
 
 module.exports = ArchiveManager;

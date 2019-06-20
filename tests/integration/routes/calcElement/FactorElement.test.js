@@ -7,7 +7,7 @@ const {
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
 
-describe("calcElements route", () => {
+describe("factorElements route", () => {
   //Database directory should be cleared'
   let Project;
   let db1Path;

@@ -627,6 +627,23 @@ class CommInterface {
 
     return device.getValueOfElementFromDB(elementId, date);
   }
+
+  /**
+   * @description Method for getting variable from device
+   * @param {string} deviceId Id of device
+   * @param {string} variableId Id of variable
+   * @param {number} fromDate begin date
+   * @param {number} toDate end date
+   */
+  async getValuesOfElementFromDatabase(deviceId, elementId, fromDate, toDate) {
+    if (!this.doesElementExist(deviceId, elementId))
+      throw new Error(
+        `There is no variable or calcElement of given id ${elementId}`
+      );
+
+    let device = await this.getDevice(deviceId);
+    return device.getValuesOfElementFromDB(elementId, fromDate, toDate);
+  }
 }
 
 const commInterfaceObject = new CommInterface();
