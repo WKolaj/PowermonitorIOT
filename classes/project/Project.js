@@ -1,9 +1,8 @@
 const path = require("path");
 const commInterface = require("../commInterface/CommInterface");
-const ProjectContentManager = require("./ProjectContentManager");
 const User = require("../../classes/user/User");
 const { hashString, hashedStringMatch } = require("../../utilities/utilities");
-
+const ProjectContentManager = require("./ProjectContentManager");
 let currentProject = undefined;
 
 class Project {

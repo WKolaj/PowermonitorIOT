@@ -36,6 +36,7 @@
     "modbus-serial": "^7.6.0",
     "mongoose": "^5.5.15",
     "sqlite3": "^4.0.9",
+    "systeminformation": "^4.11.6",
     "winston": "^3.2.1"
   },
   "devDependencies": {

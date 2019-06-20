@@ -4,6 +4,12 @@ const sqlite3 = require("sqlite3");
 const { promisify } = require("util");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const si = require("systeminformation");
+const config = require("config");
+
+const getFullPath = pathName => {
+  return path.resolve(pathName);
+};
 
 //Method for checking if object is empty
 module.exports.isObjectEmpty = function(obj) {
@@ -306,4 +312,84 @@ module.exports.hashString = async function(stringToHash) {
  */
 module.exports.hashedStringMatch = async function(normalString, hashedString) {
   return bcrypt.compare(normalString, hashedString);
+};
+
+/**
+ * @description Method for getting cpu information
+ */
+module.exports.getCPUInfo = async function() {
+  try {
+    let cpuTemp = await si.cpuTemperature();
+    let cpuSpeed = await si.currentLoad();
+
+    return {
+      temperature: {
+        value: cpuTemp.main
+      },
+      load: {
+        value: cpuSpeed.currentload
+      }
+    };
+  } catch (err) {
+    console.log(err);
+    return;
+  }
+};
+
+/**
+ * @description Method for getting RAM information
+ */
+module.exports.getRAMInfo = async function() {
+  try {
+    let ram = await si.mem();
+    return {
+      free: ram.free,
+      total: ram.total,
+      used: ram.used
+    };
+  } catch (err) {
+    console.log(err);
+    return;
+  }
+};
+
+/**
+ * @description Method for getting Memory information
+ */
+module.exports.getMemoryInfo = async function() {
+  try {
+    let projectPath = getFullPath(config.get("projPath"));
+    let db1Path = getFullPath(config.get("db1Path"));
+    let db2Path = getFullPath(config.get("db2Path"));
+
+    let fsLayout = await si.fsSize();
+
+    let payloadToReturn = {};
+
+    for (let fileSystem of fsLayout) {
+      if (projectPath.startsWith(fileSystem.mount)) {
+        payloadToReturn["projSpace"] = {
+          total: fileSystem.size,
+          used: fileSystem.used
+        };
+      }
+      if (db1Path.startsWith(fileSystem.mount)) {
+        payloadToReturn["db1Space"] = {
+          total: fileSystem.size,
+          used: fileSystem.used
+        };
+      }
+      if (db2Path.startsWith(fileSystem.mount)) {
+        payloadToReturn["db2Space"] = {
+          total: fileSystem.size,
+          used: fileSystem.used
+        };
+      }
+    }
+
+    return payloadToReturn;
+  } catch (err) {
+    console.log(err);
+    return;
+  }
 };
