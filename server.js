@@ -1,3 +1,3 @@
 const appStart = require("./startup/app");
 
-module.exports = appStart();
+module.exports = appStart(__dirname);

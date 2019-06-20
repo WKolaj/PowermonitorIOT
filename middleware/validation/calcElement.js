@@ -20,7 +20,12 @@ let validateCreate = function(req) {
       req.params.deviceId
     )).Type;
 
-    if (deviceType === "mbDevice" || deviceType === "PAC3200TCP") {
+    if (
+      deviceType === "mbDevice" ||
+      deviceType === "PAC3200TCP" ||
+      deviceType === "PAC4200TCP" ||
+      deviceType === "PAC2200TCP"
+    ) {
       switch (req.body.type) {
         case "factorElement": {
           return resolve(await FactorElementValidator.create(req));
@@ -80,7 +85,12 @@ let validateEdit = function(req) {
       req.params.calcElementId
     )).Type;
 
-    if (deviceType === "mbDevice" || deviceType === "PAC3200TCP") {
+    if (
+      deviceType === "mbDevice" ||
+      deviceType === "PAC3200TCP" ||
+      deviceType === "PAC4200TCP" ||
+      deviceType === "PAC2200TCP"
+    ) {
       switch (calcElementType) {
         case "factorElement": {
           return resolve(await FactorElementValidator.edit(req));

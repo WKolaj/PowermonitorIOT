@@ -3,6 +3,8 @@ const Sampler = require("../sampler/Sampler");
 const MBDevice = require("../device/Modbus/MBDevice");
 
 const PAC3200TCP = require("../device/Modbus/Meters/PAC3200TCP");
+const PAC2200TCP = require("../device/Modbus/Meters/PAC2200TCP");
+const PAC4200TCP = require("../device/Modbus/Meters/PAC4200TCP");
 
 class CommInterface {
   /**
@@ -275,8 +277,14 @@ class CommInterface {
       case "mbDevice": {
         return this._createMBDevice(payload);
       }
+      case "PAC2200TCP": {
+        return this._createPAC2200TCPDevice(payload);
+      }
       case "PAC3200TCP": {
         return this._createPAC3200TCPDevice(payload);
+      }
+      case "PAC4200TCP": {
+        return this._createPAC4200TCPDevice(payload);
       }
       default: {
         return Promise.reject(
@@ -313,6 +321,44 @@ class CommInterface {
     return new Promise(async (resolve, reject) => {
       try {
         let newDevice = new PAC3200TCP();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for creating PAC3200TCP based on payload
+   * @param {object} payload
+   */
+  async _createPAC2200TCPDevice(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new PAC2200TCP();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for creating PAC3200TCP based on payload
+   * @param {object} payload
+   */
+  async _createPAC4200TCPDevice(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new PAC4200TCP();
         await newDevice.init(payload);
         this.Devices[newDevice.Id] = newDevice;
         this.Sampler.addDevice(newDevice);

@@ -26,7 +26,12 @@ let validateCreate = function(req) {
       req.params.deviceId
     )).Type;
 
-    if (deviceType === "mbDevice" || deviceType === "PAC3200TCP") {
+    if (
+      deviceType === "mbDevice" ||
+      deviceType === "PAC3200TCP" ||
+      deviceType === "PAC2200TCP" ||
+      deviceType === "PAC4200TCP"
+    ) {
       switch (req.body.type) {
         case "boolean": {
           return resolve(await MBBooleanVariableValidator.create(req));
@@ -107,7 +112,12 @@ let validateEdit = function(req) {
       req.params.variableId
     )).Type;
 
-    if (deviceType === "mbDevice" || deviceType === "PAC3200TCP") {
+    if (
+      deviceType === "mbDevice" ||
+      deviceType === "PAC3200TCP" ||
+      deviceType === "PAC4200TCP" ||
+      deviceType === "PAC2200TCP"
+    ) {
       switch (variableType) {
         case "boolean": {
           return resolve(await MBBooleanVariableValidator.edit(req));
