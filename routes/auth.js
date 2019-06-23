@@ -21,11 +21,13 @@ router.post("/", async (req, res) => {
 
   let jwt = await user.generateToken();
 
+  //!! Access Control Allow Headers has to be set - in order for react to be able to read x-auth-token header
   return res
     .status(200)
     .header({
       [config.get("tokenHeader")]: jwt
     })
+    .header("Access-Control-Allow-Headers", "x-auth-token")
     .send(_.pick(user.Payload, ["login", "permissions"]));
 });
 
