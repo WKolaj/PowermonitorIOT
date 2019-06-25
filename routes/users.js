@@ -14,7 +14,7 @@ router.use(express.json());
 
 router.get("/", [auth, isSuperAdmin], async (req, res) => {
   let allUsers = Object.values(Project.CurrentProject.Users).map(user =>
-    _.pick(user.Payload, ["login", "permissions"])
+    _.pick(user.Payload, ["login", "permissions", "lang"])
   );
 
   return res.status(200).send(allUsers);
@@ -24,14 +24,18 @@ router.post("/", [auth, isSuperAdmin, validate.create], async (req, res) => {
   //Editing user and returning it
   let result = await Project.CurrentProject.createUser(req.body);
 
-  return res.status(200).send(_.pick(result.Payload, ["login", "permissions"]));
+  return res
+    .status(200)
+    .send(_.pick(result.Payload, ["login", "permissions", "lang"]));
 });
 
 router.get("/me", [auth], async (req, res) => {
   let user = Project.CurrentProject.Users[req.user.login];
   if (!user) return res.status("400").send("There is no user of given login");
 
-  return res.status(200).send(_.pick(user.Payload, ["login", "permissions"]));
+  return res
+    .status(200)
+    .send(_.pick(user.Payload, ["login", "permissions", "lang"]));
 });
 
 router.put("/me", [auth, validate.edit], async (req, res) => {
@@ -51,7 +55,9 @@ router.put("/me", [auth, validate.edit], async (req, res) => {
   //Editing user and returning it
   let result = await Project.CurrentProject.editUser(user.Login, req.body);
 
-  return res.status(200).send(_.pick(result.Payload, ["login", "permissions"]));
+  return res
+    .status(200)
+    .send(_.pick(result.Payload, ["login", "permissions", "lang"]));
 });
 
 router.delete("/:login", [auth, isSuperAdmin], async (req, res) => {
@@ -63,7 +69,9 @@ router.delete("/:login", [auth, isSuperAdmin], async (req, res) => {
   //Editing user and returning it
   let result = await Project.CurrentProject.deleteUser(userLogin);
 
-  return res.status(200).send(_.pick(result.Payload, ["login", "permissions"]));
+  return res
+    .status(200)
+    .send(_.pick(result.Payload, ["login", "permissions", "lang"]));
 });
 
 router.get("/:login", [auth, isSuperAdmin], async (req, res) => {
@@ -75,7 +83,9 @@ router.get("/:login", [auth, isSuperAdmin], async (req, res) => {
   //Editing user and returning it
   let result = await Project.CurrentProject.getUser(userLogin);
 
-  return res.status(200).send(_.pick(result.Payload, ["login", "permissions"]));
+  return res
+    .status(200)
+    .send(_.pick(result.Payload, ["login", "permissions", "lang"]));
 });
 
 router.put("/:login", [auth, isSuperAdmin, validate.edit], async (req, res) => {
@@ -98,7 +108,9 @@ router.put("/:login", [auth, isSuperAdmin, validate.edit], async (req, res) => {
   //Editing user and returning it
   let result = await Project.CurrentProject.editUser(userLogin, req.body);
 
-  return res.status(200).send(_.pick(result.Payload, ["login", "permissions"]));
+  return res
+    .status(200)
+    .send(_.pick(result.Payload, ["login", "permissions", "lang"]));
 });
 
 module.exports = router;

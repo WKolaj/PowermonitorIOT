@@ -17,7 +17,8 @@ let userCreateSchema = Joi.object().keys({
   permissions: Joi.number()
     .min(1)
     .max(15)
-    .required()
+    .required(),
+  lang: Joi.valid("pl", "us").required()
 });
 
 let userEditSchema = Joi.object().keys({
@@ -29,7 +30,8 @@ let userEditSchema = Joi.object().keys({
     .max(20),
   permissions: Joi.number()
     .min(1)
-    .max(15)
+    .max(15),
+  lang: Joi.valid("pl", "us")
 });
 
 /**

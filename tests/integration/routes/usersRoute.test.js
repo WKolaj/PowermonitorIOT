@@ -52,17 +52,20 @@ describe("users route", () => {
       user1Body = {
         login: "testUser1",
         password: "newTestPassword",
-        permissions: 1
+        permissions: 1,
+        lang: "pl"
       };
       user2Body = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 2
+        permissions: 2,
+        lang: "us"
       };
       user3Body = {
         login: "testUser3",
         password: "newTestPassword",
-        permissions: 4
+        permissions: 4,
+        lang: "pl"
       };
 
       await request(server)
@@ -100,7 +103,9 @@ describe("users route", () => {
       let expectedResult = [];
 
       for (let user of Object.values(Project.CurrentProject.Users)) {
-        expectedResult.push(_.pick(user.Payload, ["login", "permissions"]));
+        expectedResult.push(
+          _.pick(user.Payload, ["login", "permissions", "lang"])
+        );
       }
 
       expect(result).toBeDefined();
@@ -121,10 +126,11 @@ describe("users route", () => {
       let userBody = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 7
+        permissions: 7,
+        lang: "pl"
       };
 
-      await request(server)
+      let res = await request(server)
         .post(endpoint)
         .set(tokenHeader, token)
         .send(userBody);
@@ -156,17 +162,20 @@ describe("users route", () => {
       user1Body = {
         login: "testUser1",
         password: "newTestPassword",
-        permissions: 1
+        permissions: 1,
+        lang: "pl"
       };
       user2Body = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 2
+        permissions: 2,
+        lang: "pl"
       };
       user3Body = {
         login: "testUser3",
         password: "newTestPassword",
-        permissions: 4
+        permissions: 4,
+        lang: "pl"
       };
 
       await request(server)
@@ -205,7 +214,8 @@ describe("users route", () => {
 
       let expectedResult = _.pick(defaultUser.Payload, [
         "login",
-        "permissions"
+        "permissions",
+        "lang"
       ]);
 
       expect(result).toBeDefined();
@@ -221,7 +231,11 @@ describe("users route", () => {
 
       expect(result.status).toEqual(200);
 
-      let expectedResult = _.pick(user1.Payload, ["login", "permissions"]);
+      let expectedResult = _.pick(user1.Payload, [
+        "login",
+        "permissions",
+        "lang"
+      ]);
 
       expect(result).toBeDefined();
       expect(result.body).toEqual(expectedResult);
@@ -247,7 +261,8 @@ describe("users route", () => {
       body = {
         login: "testUser",
         password: "newTestPassword",
-        permissions: 15
+        permissions: 15,
+        lang: "pl"
       };
     });
 
@@ -279,7 +294,7 @@ describe("users route", () => {
 
       expect(result.status).toEqual(200);
 
-      let expectedResult = _.pick(body, ["login", "permissions"]);
+      let expectedResult = _.pick(body, ["login", "permissions", "lang"]);
 
       expect(result).toBeDefined();
       expect(result.body).toEqual(expectedResult);
@@ -303,7 +318,8 @@ describe("users route", () => {
       let userBody = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 7
+        permissions: 7,
+        lang: "us"
       };
 
       await request(server)
@@ -366,6 +382,30 @@ describe("users route", () => {
 
     it("should not create new User and return 400 if there is no login defined", async () => {
       body.login = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let user = await Project.CurrentProject.Users[body.login];
+
+      expect(user).not.toBeDefined();
+    });
+
+    it("should not create new User and return 400 if there is no lang defined", async () => {
+      body.lang = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let user = await Project.CurrentProject.Users[body.login];
+
+      expect(user).not.toBeDefined();
+    });
+
+    it("should not create new User and return 400 if there if lang is different than pl or us", async () => {
+      body.lang = "fakeLanguage";
 
       let result = await exec();
 
@@ -466,17 +506,20 @@ describe("users route", () => {
       user1Body = {
         login: "testUser1",
         password: "newTestPassword",
-        permissions: 1
+        permissions: 1,
+        lang: "pl"
       };
       user2Body = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 2
+        permissions: 2,
+        lang: "pl"
       };
       user3Body = {
         login: "testUser3",
         password: "newTestPassword",
-        permissions: 4
+        permissions: 4,
+        lang: "pl"
       };
 
       await request(server)
@@ -493,8 +536,9 @@ describe("users route", () => {
         .send(user3Body);
 
       body = {
-        password: "newTestPassword",
-        oldPassword: "admin"
+        password: "newTestPassword12",
+        oldPassword: "admin",
+        lang: "us"
       };
     });
 
@@ -517,18 +561,52 @@ describe("users route", () => {
       let user = await Project.CurrentProject.getUser("admin");
 
       expect(await user.passwordMatches(body.password)).toBeTruthy();
+      expect(user.Lang).toEqual(body.lang);
     });
 
     it("should edit new user based on given paramters - if user has no superAdminRights", async () => {
       let user1 = Project.CurrentProject.Users[user1Body.login];
 
       token = await user1.generateToken();
+      body.oldPassword = user1Body.password;
 
-      await exec();
+      let passwordMatches1 = await user1.passwordMatches(body.password);
+      let result = await exec();
 
       let user = await Project.CurrentProject.getUser(user1.Login);
 
-      expect(await user.passwordMatches(body.password)).toBeTruthy();
+      let passwordMatches = await user.passwordMatches(body.password);
+
+      expect(passwordMatches).toEqual(true);
+      expect(user.Lang).toEqual(body.lang);
+    });
+
+    it("should edit new user based on given paramters - even if there is no old and new password given", async () => {
+      body.oldPassword = undefined;
+      body.password = undefined;
+
+      await exec();
+
+      let user = await Project.CurrentProject.getUser("admin");
+
+      expect(user.Lang).toEqual(body.lang);
+    });
+
+    it("should edit user password and return 400 if old password is undefined", async () => {
+      body.oldPassword = undefined;
+
+      let userPayloadBefore = (await Project.CurrentProject.getUser("admin"))
+        .Payload;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/Old password/);
+
+      let userPayloadAfter = (await Project.CurrentProject.getUser("admin"))
+        .Payload;
+
+      expect(userPayloadBefore).toEqual(userPayloadAfter);
     });
 
     it("should respond with code 200 and edited user", async () => {
@@ -538,7 +616,11 @@ describe("users route", () => {
 
       expect(result.status).toEqual(200);
 
-      let expectedResult = _.pick(user.Payload, ["login", "permissions"]);
+      let expectedResult = _.pick(user.Payload, [
+        "login",
+        "permissions",
+        "lang"
+      ]);
 
       expect(result).toBeDefined();
       expect(result.body).toEqual(expectedResult);
@@ -633,12 +715,12 @@ describe("users route", () => {
       body.password = undefined;
 
       let userPayloadBefore = (await Project.CurrentProject.getUser("admin"))
-        .Payload;
+        .Payload.password;
 
       let result = await exec();
 
       let userPayloadAfter = (await Project.CurrentProject.getUser("admin"))
-        .Payload;
+        .Payload.password;
 
       expect(userPayloadBefore).toEqual(userPayloadAfter);
     });
@@ -692,17 +774,20 @@ describe("users route", () => {
       user1Body = {
         login: "testUser1",
         password: "newTestPassword",
-        permissions: 1
+        permissions: 1,
+        lang: "pl"
       };
       user2Body = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 2
+        permissions: 2,
+        lang: "pl"
       };
       user3Body = {
         login: "testUser3",
         password: "newTestPassword",
-        permissions: 4
+        permissions: 4,
+        lang: "pl"
       };
 
       await request(server)
@@ -751,7 +836,11 @@ describe("users route", () => {
 
       expect(result.status).toEqual(200);
 
-      let expectedResult = _.pick(user.Payload, ["login", "permissions"]);
+      let expectedResult = _.pick(user.Payload, [
+        "login",
+        "permissions",
+        "lang"
+      ]);
 
       expect(result).toBeDefined();
       expect(result.body).toEqual(expectedResult);
@@ -837,17 +926,20 @@ describe("users route", () => {
       user1Body = {
         login: "testUser1",
         password: "newTestPassword",
-        permissions: 1
+        permissions: 1,
+        lang: "pl"
       };
       user2Body = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 2
+        permissions: 2,
+        lang: "pl"
       };
       user3Body = {
         login: "testUser3",
         password: "newTestPassword",
-        permissions: 4
+        permissions: 4,
+        lang: "pl"
       };
 
       await request(server)
@@ -884,7 +976,11 @@ describe("users route", () => {
 
       let user = await Project.CurrentProject.getUser(login);
 
-      let expectedResult = _.pick(user.Payload, ["login", "permissions"]);
+      let expectedResult = _.pick(user.Payload, [
+        "login",
+        "permissions",
+        "lang"
+      ]);
 
       expect(result).toBeDefined();
       expect(result.status).toEqual(200);
@@ -944,17 +1040,20 @@ describe("users route", () => {
       user1Body = {
         login: "testUser1",
         password: "newTestPassword",
-        permissions: 1
+        permissions: 1,
+        lang: "pl"
       };
       user2Body = {
         login: "testUser2",
         password: "newTestPassword",
-        permissions: 2
+        permissions: 2,
+        lang: "pl"
       };
       user3Body = {
         login: "testUser3",
         password: "newTestPassword",
-        permissions: 4
+        permissions: 4,
+        lang: "pl"
       };
 
       await request(server)
@@ -1005,7 +1104,11 @@ describe("users route", () => {
 
       let user = await Project.CurrentProject.getUser(login);
 
-      let expectedResult = _.pick(user.Payload, ["login", "permissions"]);
+      let expectedResult = _.pick(user.Payload, [
+        "login",
+        "permissions",
+        "lang"
+      ]);
 
       expect(result).toBeDefined();
       expect(result.status).toEqual(200);

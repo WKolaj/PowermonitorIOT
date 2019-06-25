@@ -454,7 +454,7 @@ let getIfIpIsDynamic = async function() {
  * !! MEthod reboots raspi
  */
 module.exports.changeIpAdress = async function(
-  static,
+  isStatic,
   ipAdress,
   subnet,
   gateway,
@@ -462,7 +462,7 @@ module.exports.changeIpAdress = async function(
 ) {
   try {
     let fileContent = generateDHCPCDfileContent(
-      static,
+      isStatic,
       ipAdress,
       subnet,
       gateway,
@@ -495,13 +495,13 @@ module.exports.getIpAdress = async function() {
       network.get_interfaces_list(async function(err, allInterfaces) {
         if (err) return reject(err);
 
-        for (let interface of allInterfaces) {
-          if (interface.name === interfaceName) {
+        for (let interFace of allInterfaces) {
+          if (interFace.name === interfaceName) {
             return resolve({
               static: ipDynamic,
-              ipAdress: interface.ip_address,
-              gateway: interface.gateway_ip,
-              subnet: interface.netmask,
+              ipAdress: interFace.ip_address,
+              gateway: interFace.gateway_ip,
+              subnet: interFace.netmask,
               dns: currentDNS
             });
           }

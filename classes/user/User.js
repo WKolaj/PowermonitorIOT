@@ -23,6 +23,9 @@ class User {
       throw new Error("password in payload cannot be empty");
     if (payload.permissions === undefined || payload.permissions === null)
       throw new Error("permissions in payload cannot be empty");
+    //Setting default polish language if it is not defined in payload
+    if (payload.lang === undefined || payload.lang === null)
+      payload.lang = "pl";
 
     this._login = payload.login;
     //Checking id payload uses normal version of password (when creating new user)
@@ -31,6 +34,7 @@ class User {
     else this._password = await this._hashPassword(payload.password);
 
     this._permissions = payload.permissions;
+    this._lang = payload.lang;
   }
 
   /**
@@ -55,6 +59,9 @@ class User {
 
     if (payload.permissions !== undefined && payload.permissions !== null)
       this._permissions = payload.permissions;
+
+    if (payload.lang !== undefined && payload.lang !== null)
+      this._lang = payload.lang;
   }
 
   /**
@@ -69,6 +76,13 @@ class User {
    */
   get Password() {
     return this._password;
+  }
+
+  /**
+   * @description user default language
+   */
+  get Lang() {
+    return this._lang;
   }
 
   /**
@@ -92,7 +106,8 @@ class User {
     return {
       login: this.Login,
       password: this.Password,
-      permissions: this.Permissions
+      permissions: this.Permissions,
+      lang: this.Lang
     };
   }
 

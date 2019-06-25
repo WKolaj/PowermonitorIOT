@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
       [config.get("tokenHeader")]: jwt
     })
     .header("Access-Control-Allow-Headers", "x-auth-token")
-    .send(_.pick(user.Payload, ["login", "permissions"]));
+    .send(_.pick(user.Payload, ["login", "permissions", "lang"]));
 });
 
 module.exports = router;

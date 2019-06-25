@@ -515,7 +515,8 @@ class ProjectContentManager {
     return {
       login: "admin",
       password: "admin",
-      permissions: 15
+      permissions: 15,
+      lang: "pl"
     };
   }
 }

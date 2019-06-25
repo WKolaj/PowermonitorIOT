@@ -5,8 +5,11 @@ const config = require("config");
 const log = require("../logger/logger");
 const app = express();
 const path = require("path");
+const logger = require("../logger/logger");
 
 module.exports = async function(workingDirName) {
+  if (!workingDirName) workingDirName = __dirname;
+
   //Setting all event emitters limit to 100
   require("events").EventEmitter.defaultMaxListeners = 100;
 
