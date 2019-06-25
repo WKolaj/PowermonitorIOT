@@ -11,8 +11,6 @@ const _ = require("lodash");
 const { getIpAdress, changeIpAdress } = require("../utilities/utilities");
 const validate = require("../middleware/validation/ipConfig");
 
-router.use(express.json());
-
 router.get("/", [auth, isSuperAdmin], async (req, res) => {
   let ipAdressObject = await getIpAdress();
   return res.status(200).send(ipAdressObject);

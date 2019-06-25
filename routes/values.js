@@ -39,8 +39,6 @@ let validateTick = tick => {
   return;
 };
 
-router.use(express.json());
-
 router.get("/:deviceId", [auth, canVisualizeData], async (req, res) => {
   if (!req.params.deviceId)
     return res.status(400).send("Invalid request - deviceId cannot be empty");

@@ -10,8 +10,6 @@ const User = require("../classes/user/User");
 const _ = require("lodash");
 const validate = require("../middleware/validation/user");
 
-router.use(express.json());
-
 router.get("/", [auth, isSuperAdmin], async (req, res) => {
   let allUsers = Object.values(Project.CurrentProject.Users).map(user =>
     _.pick(user.Payload, ["login", "permissions", "lang"])

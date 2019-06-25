@@ -6,6 +6,7 @@ const log = require("../logger/logger");
 const app = express();
 const path = require("path");
 const logger = require("../logger/logger");
+const cors = require("cors");
 
 module.exports = async function(workingDirName) {
   if (!workingDirName) workingDirName = __dirname;
@@ -19,17 +20,34 @@ module.exports = async function(workingDirName) {
   await require("./db")();
   await require("./validation")();
   await require("./project")();
-  await require("./route")(app);
 
   const port = process.env.PORT || config.get("port");
 
   //Static front-end files are stored under client/build dir
   app.use(express.static(path.join(workingDirName, "client/build")));
+  app.use(express.json());
+
+  //Enabling use of cors - and also sending x-auth-token via auth response
+  app.use(
+    cors({
+      allowedHeaders: [
+        "x-auth-token",
+        "Origin",
+        "X-Requested-With",
+        "Content-Type",
+        "Accept"
+      ],
+      exposedHeaders: ["x-auth-token"]
+    })
+  );
 
   //In order for react routing to work - implementing sending always for any not-recognized endpoints
   app.get("*", (req, res) => {
     res.sendFile(path.join(workingDirName + "/client/build/index.html"));
   });
+
+  //Routes have to be initialized after initializing main middleware
+  await require("./route")(app);
 
   return app.listen(port, () => {
     log.info(`Listening on port ${port}...`);

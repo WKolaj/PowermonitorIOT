@@ -14,8 +14,6 @@ const {
   getMemoryInfo
 } = require("../utilities/utilities");
 
-router.use(express.json());
-
 router.get("/", [auth, canVisualizeData], async (req, res) => {
   let payloadToReturn = {};
 

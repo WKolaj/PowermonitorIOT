@@ -37,8 +37,6 @@ let generateDevicePayloadDetailed = device => {
   return payloadToReturn;
 };
 
-router.use(express.json());
-
 router.get("/", [auth, canVisualizeData], async (req, res) => {
   let payloadToReturn = (await Project.CurrentProject.getAllDevices()).map(
     device => generateDevicePayloadGeneral(device)

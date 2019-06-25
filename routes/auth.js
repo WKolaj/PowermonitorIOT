@@ -4,8 +4,6 @@ const config = require("config");
 const Project = require("../classes/project/Project");
 const _ = require("lodash");
 
-router.use(express.json());
-
 router.post("/", async (req, res) => {
   if (!req.body) return res.status(400).send("Invalid request");
   if (!req.body.login)
@@ -20,14 +18,9 @@ router.post("/", async (req, res) => {
     return res.status(400).send("Invalid login or password");
 
   let jwt = await user.generateToken();
-
-  //!! Access Control Allow Headers has to be set - in order for react to be able to read x-auth-token header
   return res
     .status(200)
-    .header({
-      [config.get("tokenHeader")]: jwt
-    })
-    .header("Access-Control-Allow-Headers", "x-auth-token")
+    .set(config.get("tokenHeader"), jwt)
     .send(_.pick(user.Payload, ["login", "permissions", "lang"]));
 });
 
