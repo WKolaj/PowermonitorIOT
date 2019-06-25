@@ -130,7 +130,7 @@ class User {
   async generateToken() {
     //Do not pick password in jwt!
     return jwt.sign(
-      _.pick(this.Payload, ["login", "permissions"]),
+      _.pick(this.Payload, ["login", "permissions", "lang"]),
       this.Project.PrivateKey
     );
   }
