@@ -41,13 +41,13 @@ module.exports = async function(workingDirName) {
     })
   );
 
+  //Routes have to be initialized after initializing main middleware
+  await require("./route")(app);
+
   //In order for react routing to work - implementing sending always for any not-recognized endpoints
   app.get("*", (req, res) => {
     res.sendFile(path.join(workingDirName + "/client/build/index.html"));
   });
-
-  //Routes have to be initialized after initializing main middleware
-  await require("./route")(app);
 
   return app.listen(port, () => {
     log.info(`Listening on port ${port}...`);
