@@ -348,9 +348,9 @@ module.exports.getRAMInfo = async function() {
   try {
     let ram = await si.mem();
     return {
-      free: ram.free,
+      free: ram.available,
       total: ram.total,
-      used: ram.used
+      used: ram.active
     };
   } catch (err) {
     logger.error(err.message, err);
