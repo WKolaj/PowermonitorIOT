@@ -55,17 +55,20 @@ describe("auth route", () => {
       user1Body = {
         login: "testUser1",
         password: "newTestPassword1",
-        permissions: 1
+        permissions: 1,
+        lang: "pl"
       };
       user2Body = {
         login: "testUser2",
         password: "newTestPassword2",
-        permissions: 2
+        permissions: 2,
+        lang: "us"
       };
       user3Body = {
         login: "testUser3",
         password: "newTestPassword3",
-        permissions: 4
+        permissions: 4,
+        lang: "pl"
       };
 
       await request(server)

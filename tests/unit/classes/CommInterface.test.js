@@ -5829,21 +5829,26 @@ describe("CommInterface", () => {
       return commInterface.getValueOfElement(deviceId, elementId);
     };
 
-    it("should return value of variable if it exists", async () => {
+    it("should return value with last tick id of variable if it exists", async () => {
       let result = await exec();
 
-      expect(result).toEqual(
-        commInterface.getVariable(deviceId, elementId).Value
-      );
+      expect(result).toEqual({
+        [commInterface.getVariable(deviceId, elementId)
+          .ValueTickId]: commInterface.getVariable(deviceId, elementId).Value
+      });
     });
 
     it("should return value of calculationElement if it exists", async () => {
       elementId = "1002";
       let result = await exec();
 
-      expect(result).toEqual(
-        commInterface.getCalculationElement(deviceId, elementId).Value
-      );
+      expect(result).toEqual({
+        [commInterface.getCalculationElement(deviceId, elementId)
+          .ValueTickId]: commInterface.getCalculationElement(
+          deviceId,
+          elementId
+        ).Value
+      });
     });
 
     it("should throw if device does not exists", async () => {

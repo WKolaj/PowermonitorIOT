@@ -7,14 +7,14 @@ const {
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
 
-describe("calcElements route", () => {
+describe("auth route", () => {
   //Database directory should be cleared'
   let Project;
   let db1Path;
   let db2Path;
   let projPath;
   let server;
-  let endpoint = "/api/calcElements/";
+  let endpoint = "/api/devices/";
   let tokenHeader;
 
   let visuUserBody;
@@ -52,16 +52,6 @@ describe("calcElements route", () => {
   let mbSwappedFloatVariable;
   let mbSwappedInt32Variable;
   let mbSwappedUInt32Variable;
-
-  let averageElementBody;
-  let factorElementBody;
-  let increaseElementBody;
-  let sumElementBody;
-
-  let averageElement;
-  let factorElement;
-  let increaseElement;
-  let sumElement;
 
   let init = async () => {
     //Creating additional users
@@ -315,101 +305,6 @@ describe("calcElements route", () => {
       mbDevice.Id,
       swappedUInt32Result.body.id
     );
-
-    averageElementBody = {
-      type: "averageElement",
-      name: "averageElementTest",
-      sampleTime: 2,
-      unit: "A",
-      archived: false,
-      variableId: mbFloatVariable.Id,
-      factor: 3,
-      calculationInterval: 15
-    };
-
-    factorElementBody = {
-      type: "factorElement",
-      name: "factorElementTest",
-      sampleTime: 3,
-      unit: "A",
-      archived: false,
-      variableId: mbFloatVariable.Id,
-      factor: 3
-    };
-
-    increaseElementBody = {
-      type: "increaseElement",
-      name: "increaseElementTest",
-      sampleTime: 2,
-      unit: "A",
-      archived: false,
-      variableId: mbFloatVariable.Id,
-      factor: 3,
-      calculationInterval: 15,
-      overflow: 100
-    };
-
-    sumElementBody = {
-      type: "sumElement",
-      name: "sumElementTest",
-      sampleTime: 3,
-      unit: "A",
-      archived: false,
-      variables: [
-        {
-          id: mbFloatVariable.Id,
-          factor: 2
-        },
-        {
-          id: mbInt16Variable.Id,
-          factor: 3
-        },
-        {
-          id: mbInt32Variable.Id,
-          factor: 4
-        }
-      ]
-    };
-
-    let averageElementResult = await request(server)
-      .post(`/api/calcElements/${mbDevice.Id}`)
-      .set(tokenHeader, adminToken)
-      .send(averageElementBody);
-
-    let factorElementResult = await request(server)
-      .post(`/api/calcElements/${mbDevice.Id}`)
-      .set(tokenHeader, adminToken)
-      .send(factorElementBody);
-
-    let increaseElementResult = await request(server)
-      .post(`/api/calcElements/${mbDevice.Id}`)
-      .set(tokenHeader, adminToken)
-      .send(increaseElementBody);
-
-    let sumElementResult = await request(server)
-      .post(`/api/calcElements/${mbDevice.Id}`)
-      .set(tokenHeader, adminToken)
-      .send(sumElementBody);
-
-    averageElement = await Project.CurrentProject.getCalcElement(
-      mbDevice.Id,
-      averageElementResult.body.id
-    );
-
-    factorElement = await Project.CurrentProject.getCalcElement(
-      mbDevice.Id,
-      factorElementResult.body.id
-    );
-
-    increaseElement = await Project.CurrentProject.getCalcElement(
-      mbDevice.Id,
-      increaseElementResult.body.id
-    );
-
-    sumElement = await Project.CurrentProject.getCalcElement(
-      mbDevice.Id,
-      sumElementResult.body.id
-    );
   };
 
   beforeEach(async () => {
@@ -438,6 +333,76 @@ describe("calcElements route", () => {
     await server.close();
   });
 
+  describe("GET /", () => {
+    let token;
+
+    beforeEach(async () => {
+      await init();
+      token = await visuUser.generateToken();
+    });
+
+    let exec = async () => {
+      if (token) {
+        return request(server)
+          .get(`${endpoint}`)
+          .set(tokenHeader, token)
+          .send();
+      } else {
+        return request(server)
+          .get(`${endpoint}`)
+          .send();
+      }
+    };
+
+    let prepareDevicePayload = device => {
+      let expectedPayload = device.Payload;
+      expectedPayload.calculationElements = Object.values(
+        device.CalculationElements
+      ).map(calcElement => calcElement.Id);
+
+      expectedPayload.variables = Object.values(device.Variables).map(
+        variable => variable.Id
+      );
+      expectedPayload.connected = device.Connected;
+
+      return expectedPayload;
+    };
+
+    it("should return code 200 and device payloads of all device", async () => {
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let devices = await Project.CurrentProject.getAllDevices();
+
+      let expectedPayload = [];
+
+      for (let device of devices) {
+        expectedPayload.push(prepareDevicePayload(device));
+      }
+
+      expect(result.body).toEqual(expectedPayload);
+    });
+
+    it("should return code 401 if there is no user logged in", async () => {
+      token = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(401);
+      expect(result.text).toMatch(`Access denied. No token provided`);
+    });
+
+    it("should return code 403 if user does not have visualize rights", async () => {
+      token = await operateUser.generateToken();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(403);
+      expect(result.text).toMatch(`Access forbidden`);
+    });
+  });
+
   describe("GET /:deviceId", () => {
     let token;
     let deviceId;
@@ -461,40 +426,43 @@ describe("calcElements route", () => {
       }
     };
 
-    let prepareCalcElementPayload = calcElement => {
-      let expectedPayload = calcElement.Payload;
-
-      expectedPayload.valueTickId = calcElement.ValueTickId;
-      expectedPayload.value = calcElement.Value;
-
-      return expectedPayload;
-    };
-
-    it("should return code 200 and all calcElements of device", async () => {
+    it("should return code 200 and device payload based on given id", async () => {
       let result = await exec();
 
       expect(result.status).toEqual(200);
 
-      let calcElements = await Project.CurrentProject.getAllCalcElements(
+      let device = await Project.CurrentProject.getDevice(deviceId);
+
+      let expectedPayload = device.Payload;
+      expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(
         deviceId
-      );
+      )).map(calcElement => {
+        return {
+          id: calcElement.Id,
+          name: calcElement.Name
+        };
+      });
 
-      let expectedPayload = [];
-
-      for (let calcElement of calcElements) {
-        expectedPayload.push(prepareCalcElementPayload(calcElement));
-      }
+      expectedPayload.variables = (await Project.CurrentProject.getAllVariables(
+        deviceId
+      )).map(variable => {
+        return {
+          id: variable.Id,
+          name: variable.Name
+        };
+      });
+      expectedPayload.connected = device.Connected;
 
       expect(result.body).toEqual(expectedPayload);
     });
 
-    it("should return code 404 if there is no device of given id", async () => {
+    it("should return code 404 and if there is no device of given id", async () => {
       deviceId = "4321";
 
       let result = await exec();
 
       expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no device`);
+      expect(result.text).toMatch(`Device of given id does not exist`);
     });
 
     it("should return code 401 if there is no user logged in", async () => {
@@ -513,250 +481,6 @@ describe("calcElements route", () => {
 
       expect(result.status).toEqual(403);
       expect(result.text).toMatch(`Access forbidden`);
-    });
-  });
-
-  describe("GET /:deviceId/:calcElementId", () => {
-    let token;
-    let deviceId;
-    let calcElementId;
-
-    beforeEach(async () => {
-      await init();
-      token = await visuUser.generateToken();
-      deviceId = mbDevice.Id;
-      calcElementId = factorElement.Id;
-    });
-
-    let exec = async () => {
-      if (token) {
-        return request(server)
-          .get(`${endpoint}/${deviceId}/${calcElementId}`)
-          .set(tokenHeader, token)
-          .send();
-      } else {
-        return request(server)
-          .get(`${endpoint}/${deviceId}/${calcElementId}`)
-          .send();
-      }
-    };
-
-    let prepareCalcElementPayload = calcElement => {
-      let expectedPayload = calcElement.Payload;
-
-      expectedPayload.valueTickId = calcElement.ValueTickId;
-      expectedPayload.value = calcElement.Value;
-
-      return expectedPayload;
-    };
-
-    it("should return code 200 and variable of given id", async () => {
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let calcElement = await Project.CurrentProject.getCalcElement(
-        deviceId,
-        calcElementId
-      );
-
-      let expectedPayload = prepareCalcElementPayload(calcElement);
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 404 if there is no device of given id", async () => {
-      deviceId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no device`);
-    });
-
-    it("should return code 404 if there is no variable of given id", async () => {
-      calcElementId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no calcElement`);
-    });
-
-    it("should return code 401 if there is no user logged in", async () => {
-      token = undefined;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(401);
-      expect(result.text).toMatch(`Access denied. No token provided`);
-    });
-
-    it("should return code 403 if user does not have visualize rights", async () => {
-      token = await operateUser.generateToken();
-
-      let result = await exec();
-
-      expect(result.status).toEqual(403);
-      expect(result.text).toMatch(`Access forbidden`);
-    });
-  });
-
-  describe("DELETE /:deviceId/:calcElementId", () => {
-    let token;
-    let deviceId;
-    let calcElementId;
-
-    beforeEach(async () => {
-      await init();
-      token = await dataAdmin.generateToken();
-      deviceId = mbDevice.Id;
-      calcElementId = factorElement.Id;
-    });
-
-    let exec = async () => {
-      if (token) {
-        return request(server)
-          .delete(`${endpoint}/${deviceId}/${calcElementId}`)
-          .set(tokenHeader, token)
-          .send();
-      } else {
-        return request(server)
-          .delete(`${endpoint}/${deviceId}/${calcElementId}`)
-          .send();
-      }
-    };
-
-    let prepareCalcElementPayload = calcElement => {
-      let expectedPayload = calcElement.Payload;
-
-      expectedPayload.valueTickId = calcElement.ValueTickId;
-      expectedPayload.value = calcElement.Value;
-
-      return expectedPayload;
-    };
-
-    it("should delete calcElement from project and return code 200", async () => {
-      let calcElementExistsBefore = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        calcElementId
-      );
-
-      let result = await exec();
-
-      let calcElementExistsAfter = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        calcElementId
-      );
-
-      expect(calcElementExistsBefore).toBeTruthy();
-      expect(calcElementExistsAfter).toBeFalsy();
-    });
-
-    it("should return code 200 and deleted calcElement", async () => {
-      let calcElement = await Project.CurrentProject.getCalcElement(
-        deviceId,
-        calcElementId
-      );
-
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let expectedPayload = prepareCalcElementPayload(calcElement);
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 404 and do not delete variable if there is no device of given id", async () => {
-      let oldDeviceId = deviceId;
-      deviceId = "4321";
-
-      let variableExistsBefore = await Project.CurrentProject.doesCalculationElementExist(
-        oldDeviceId,
-        calcElementId
-      );
-
-      let result = await exec();
-
-      let variableExistsAfter = await Project.CurrentProject.doesCalculationElementExist(
-        oldDeviceId,
-        calcElementId
-      );
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no device`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
-    });
-
-    it("should return code 404 and do not delete variable if there is no variable of given id", async () => {
-      let oldVariableId = calcElementId;
-      calcElementId = "4321";
-
-      let variableExistsBefore = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        oldVariableId
-      );
-      calcElementId = "4321";
-
-      let result = await exec();
-
-      let variableExistsAfter = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        oldVariableId
-      );
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no calcElement`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
-    });
-
-    it("should return code 401 and do not delete variable if there is no user logged in", async () => {
-      token = undefined;
-
-      let variableExistsBefore = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        calcElementId
-      );
-
-      let result = await exec();
-
-      let variableExistsAfter = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        calcElementId
-      );
-
-      expect(result.status).toEqual(401);
-      expect(result.text).toMatch(`Access denied. No token provided`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
-    });
-
-    it("should return code 403 and do not delete variable if user does not have dataAdmin rights", async () => {
-      token = await visuUser.generateToken();
-
-      let variableExistsBefore = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        calcElementId
-      );
-
-      let result = await exec();
-
-      let variableExistsAfter = await Project.CurrentProject.doesCalculationElementExist(
-        deviceId,
-        calcElementId
-      );
-
-      expect(result.status).toEqual(403);
-      expect(result.text).toMatch(`Access forbidden`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
     });
   });
 });

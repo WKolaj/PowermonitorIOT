@@ -2683,19 +2683,22 @@ describe("ProjectContentManager", () => {
       user1Payload = {
         login: "testUser1",
         password: await hashString("123456"),
-        permissions: 1
+        permissions: 1,
+        lang: "en"
       };
 
       user2Payload = {
         login: "testUser2",
         password: await hashString("23456"),
-        permissions: 2
+        permissions: 2,
+        lang: "pl"
       };
 
       user3Payload = {
         login: "testUser3",
         password: await hashString("34567"),
-        permissions: 3
+        permissions: 3,
+        lang: "en"
       };
 
       privateKey = "testPrivateKey";

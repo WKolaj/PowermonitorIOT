@@ -14,7 +14,7 @@ describe("auth route", () => {
   let db2Path;
   let projPath;
   let server;
-  let endpoint = "/api/variables/";
+  let endpoint = "/api/devices/";
   let tokenHeader;
 
   let visuUserBody;
@@ -333,320 +333,114 @@ describe("auth route", () => {
     await server.close();
   });
 
-  describe("GET /:deviceId", () => {
+  describe("DELETE /:deviceId", () => {
     let token;
     let deviceId;
-
-    beforeEach(async () => {
-      await init();
-      token = await visuUser.generateToken();
-      deviceId = mbDevice.Id;
-    });
-
-    let exec = async () => {
-      if (token) {
-        return request(server)
-          .get(`${endpoint}/${deviceId}`)
-          .set(tokenHeader, token)
-          .send();
-      } else {
-        return request(server)
-          .get(`${endpoint}/${deviceId}`)
-          .send();
-      }
-    };
-
-    let prepareVariablePayload = variable => {
-      let expectedPayload = variable.Payload;
-
-      expectedPayload.valueTickId = variable.ValueTickId;
-
-      return expectedPayload;
-    };
-
-    it("should return code 200 and all varaibles of device", async () => {
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let variables = await Project.CurrentProject.getAllVariables(deviceId);
-
-      let expectedPayload = [];
-
-      for (let variable of variables) {
-        expectedPayload.push(prepareVariablePayload(variable));
-      }
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 404 if there is no device of given id", async () => {
-      deviceId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no device`);
-    });
-
-    it("should return code 401 if there is no user logged in", async () => {
-      token = undefined;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(401);
-      expect(result.text).toMatch(`Access denied. No token provided`);
-    });
-
-    it("should return code 403 if user does not have visualize rights", async () => {
-      token = await operateUser.generateToken();
-
-      let result = await exec();
-
-      expect(result.status).toEqual(403);
-      expect(result.text).toMatch(`Access forbidden`);
-    });
-  });
-
-  describe("GET /:deviceId/:variableId", () => {
-    let token;
-    let deviceId;
-    let variableId;
-
-    beforeEach(async () => {
-      await init();
-      token = await visuUser.generateToken();
-      deviceId = mbDevice.Id;
-      variableId = mbFloatVariable.Id;
-    });
-
-    let exec = async () => {
-      if (token) {
-        return request(server)
-          .get(`${endpoint}/${deviceId}/${variableId}`)
-          .set(tokenHeader, token)
-          .send();
-      } else {
-        return request(server)
-          .get(`${endpoint}/${deviceId}/${variableId}`)
-          .send();
-      }
-    };
-
-    let prepareVariablePayload = variable => {
-      let expectedPayload = variable.Payload;
-
-      expectedPayload.valueTickId = variable.ValueTickId;
-
-      return expectedPayload;
-    };
-
-    it("should return code 200 and variable of given id", async () => {
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let variable = await Project.CurrentProject.getVariable(
-        deviceId,
-        variableId
-      );
-
-      let expectedPayload = prepareVariablePayload(variable);
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 404 if there is no device of given id", async () => {
-      deviceId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no device`);
-    });
-
-    it("should return code 404 if there is no variable of given id", async () => {
-      variableId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no variable`);
-    });
-
-    it("should return code 401 if there is no user logged in", async () => {
-      token = undefined;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(401);
-      expect(result.text).toMatch(`Access denied. No token provided`);
-    });
-
-    it("should return code 403 if user does not have visualize rights", async () => {
-      token = await operateUser.generateToken();
-
-      let result = await exec();
-
-      expect(result.status).toEqual(403);
-      expect(result.text).toMatch(`Access forbidden`);
-    });
-  });
-
-  describe("DELETE /:deviceId/:variableId", () => {
-    let token;
-    let deviceId;
-    let variableId;
 
     beforeEach(async () => {
       await init();
       token = await dataAdmin.generateToken();
       deviceId = mbDevice.Id;
-      variableId = mbFloatVariable.Id;
     });
 
     let exec = async () => {
       if (token) {
         return request(server)
-          .delete(`${endpoint}/${deviceId}/${variableId}`)
+          .delete(`${endpoint}/${deviceId}`)
           .set(tokenHeader, token)
           .send();
       } else {
         return request(server)
-          .delete(`${endpoint}/${deviceId}/${variableId}`)
+          .delete(`${endpoint}/${deviceId}`)
           .send();
       }
     };
 
-    let prepareVariablePayload = variable => {
-      let expectedPayload = variable.Payload;
-
-      expectedPayload.valueTickId = variable.ValueTickId;
-
-      return expectedPayload;
-    };
-
-    it("should delete variable from project and return code 200", async () => {
-      let variableExistsBefore = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        variableId
-      );
-
-      let result = await exec();
-
-      let variableExistsAfter = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        variableId
-      );
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeFalsy();
-    });
-
-    it("should return code 200 and deleted variable", async () => {
-      let variable = await Project.CurrentProject.getVariable(
-        deviceId,
-        variableId
-      );
+    it("should return code 200 and delete device of given id", async () => {
+      let deviceToDelete = await Project.CurrentProject.getDevice(deviceId);
 
       let result = await exec();
 
       expect(result.status).toEqual(200);
 
-      let expectedPayload = prepareVariablePayload(variable);
+      let deviceExists = await Project.CurrentProject.doesDeviceExist(
+        deviceToDelete.Id
+      );
+
+      expect(deviceExists).toBeFalsy();
+    });
+
+    it("should return code 200 and return deleted device Payload", async () => {
+      let device = await Project.CurrentProject.getDevice(deviceId);
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let expectedPayload = device.Payload;
+
+      expectedPayload.calculationElements = Object.values(
+        device.CalculationElements
+      ).map(calcElement => {
+        return {
+          id: calcElement.Id,
+          name: calcElement.Name
+        };
+      });
+
+      expectedPayload.variables = Object.values(device.Variables).map(
+        variable => {
+          return {
+            id: variable.Id,
+            name: variable.Name
+          };
+        }
+      );
+      expectedPayload.connected = device.Connected;
 
       expect(result.body).toEqual(expectedPayload);
     });
 
-    it("should return code 404 and do not delete variable if there is no device of given id", async () => {
-      let oldDeviceId = deviceId;
+    it("should return code 404 and don't delete device if there is no device of given id", async () => {
       deviceId = "4321";
 
-      let variableExistsBefore = await Project.CurrentProject.doesVariableExist(
-        oldDeviceId,
-        variableId
-      );
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
 
       let result = await exec();
 
-      let variableExistsAfter = await Project.CurrentProject.doesVariableExist(
-        oldDeviceId,
-        variableId
-      );
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
 
       expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no device`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
+      expect(result.text).toMatch(`Device of given id does not exist`);
+      expect(devicesBefore).toEqual(devicesAfter);
     });
 
-    it("should return code 404 and do not delete variable if there is no variable of given id", async () => {
-      let oldVariableId = variableId;
-      variableId = "4321";
-
-      let variableExistsBefore = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        oldVariableId
-      );
-      variableId = "4321";
-
-      let result = await exec();
-
-      let variableExistsAfter = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        oldVariableId
-      );
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no variable`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
-    });
-
-    it("should return code 401 and do not delete variable if there is no user logged in", async () => {
+    it("should return code 401 and don't delete device if there is no user logged in", async () => {
       token = undefined;
 
-      let variableExistsBefore = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        variableId
-      );
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
 
       let result = await exec();
 
-      let variableExistsAfter = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        variableId
-      );
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
 
       expect(result.status).toEqual(401);
       expect(result.text).toMatch(`Access denied. No token provided`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
+      expect(devicesBefore).toEqual(devicesAfter);
     });
 
-    it("should return code 403 and do not delete variable if user does not have dataAdmin rights", async () => {
+    it("should return code 403 and don't delete device if user does not have dataAdmin rights", async () => {
       token = await visuUser.generateToken();
 
-      let variableExistsBefore = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        variableId
-      );
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
 
       let result = await exec();
 
-      let variableExistsAfter = await Project.CurrentProject.doesVariableExist(
-        deviceId,
-        variableId
-      );
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
 
       expect(result.status).toEqual(403);
       expect(result.text).toMatch(`Access forbidden`);
-
-      expect(variableExistsBefore).toBeTruthy();
-      expect(variableExistsAfter).toBeTruthy();
+      expect(devicesBefore).toEqual(devicesAfter);
     });
   });
 });

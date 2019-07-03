@@ -54,22 +54,26 @@ module.exports.testMBVariableCreation = function(
     visuUserBody = {
       login: "visuUser",
       password: "newTestPassword1",
-      permissions: 1
+      permissions: 1,
+      lang: "pl"
     };
     operateUserBody = {
       login: "opeateUser",
       password: "newTestPassword2",
-      permissions: 2
+      permissions: 2,
+      lang: "pl"
     };
     dataAdminBody = {
       login: "dataAdminUser",
       password: "newTestPassword3",
-      permissions: 4
+      permissions: 4,
+      lang: "pl"
     };
     superAdminBody = {
       login: "superAdminUser",
       password: "newTestPassword4",
-      permissions: 8
+      permissions: 8,
+      lang: "pl"
     };
 
     let adminToken = await (await Project.CurrentProject.getUser(
@@ -789,22 +793,26 @@ module.exports.testMBVariableEdition = function(
     visuUserBody = {
       login: "visuUser",
       password: "newTestPassword1",
-      permissions: 1
+      permissions: 1,
+      lang: "pl"
     };
     operateUserBody = {
       login: "opeateUser",
       password: "newTestPassword2",
-      permissions: 2
+      permissions: 2,
+      lang: "pl"
     };
     dataAdminBody = {
       login: "dataAdminUser",
       password: "newTestPassword3",
-      permissions: 4
+      permissions: 4,
+      lang: "pl"
     };
     superAdminBody = {
       login: "superAdminUser",
       password: "newTestPassword4",
-      permissions: 8
+      permissions: 8,
+      lang: "pl"
     };
 
     let adminToken = await (await Project.CurrentProject.getUser(
