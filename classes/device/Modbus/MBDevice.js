@@ -13,6 +13,7 @@ const MBSwappedUInt32Variable = require("../../variable/Modbus/MBSwappedUInt32Va
 const MBUInt16Variable = require("../../variable/Modbus/MBUInt16Variable");
 const MBUInt32Variable = require("../../variable/Modbus/MBUInt32Variable");
 const logger = require("../../../logger/logger");
+const { exists } = require("../../../utilities/utilities");
 
 class MBDevice extends Device {
   /**
@@ -254,13 +255,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createBooleanVariable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBBooleanVariable(this);
@@ -274,15 +275,15 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createByteArrayVariable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
-    if (!payload.length)
+    if (!exists(payload.length))
       throw new Error("variable length in payload is not defined");
 
     let variableToAdd = new MBByteArrayVariable(this);
@@ -296,13 +297,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createFloatVariable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBFloatVariable(this);
@@ -316,13 +317,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createSwappedFloatVariable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedFloatVariable(this);
@@ -336,13 +337,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createInt16Variable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBInt16Variable(this);
@@ -356,13 +357,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createInt32Variable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBInt32Variable(this);
@@ -376,13 +377,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createSwappedInt32Variable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedInt32Variable(this);
@@ -396,13 +397,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createUInt16Variable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBUInt16Variable(this);
@@ -416,13 +417,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createUInt32Variable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBUInt32Variable(this);
@@ -436,13 +437,13 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createSwappedUInt32Variable(payload) {
-    if (!payload.timeSample)
+    if (!exists(payload.timeSample))
       throw new Error("time sample in payload is not defined");
-    if (!payload.name)
+    if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
-    if (!payload.offset)
+    if (!exists(payload.offset))
       throw new Error("variable offset in payload is not defined");
-    if (!payload.fCode)
+    if (!exists(payload.fCode))
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedUInt32Variable(this);
@@ -587,6 +588,14 @@ class MBDevice extends Device {
     for (let variable of variables) {
       variable.reassignDriver();
     }
+  }
+
+  /**
+   * @description Method for getting sampler group for given variable - based on theses groups sampler controls paralel data exchange
+   * For MBDevice - it is ipAdress
+   */
+  getRefreshGroupId() {
+    return this.IPAdress;
   }
 }
 

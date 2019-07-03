@@ -93,27 +93,53 @@ class Sampler {
     }
   }
 
+  getRefreshGroupsFromDevices() {
+    let groupsToReturn = {};
+    let allDevices = Object.values(this.AllDevices);
+
+    for (let device of allDevices) {
+      let refreshGroupId = device.getRefreshGroupId();
+
+      //Creating new empty group if not exist
+      if (!(refreshGroupId in groupsToReturn))
+        groupsToReturn[refreshGroupId] = [];
+
+      //Assigning device to group
+      groupsToReturn[refreshGroupId].push(device);
+    }
+
+    return groupsToReturn;
+  }
+
   /**
    * @description Refreshing all devices
    * @param {number} tickNumber Actual tick number
    */
   async _refreshAllDevices(tickNumber) {
+    let refreshGroups = this.getRefreshGroupsFromDevices();
     let refreshPromises = [];
+    let groupIds = Object.keys(refreshGroups);
 
-    let allDeviceNames = Object.keys(this.AllDevices);
-
-    for (let deviceName of allDeviceNames) {
+    for (let groupId of groupIds) {
       let newPromise = new Promise(async (resolve, reject) => {
-        try {
-          await this.AllDevices[deviceName].refresh(tickNumber);
-          resolve(true);
-        } catch (err) {
-          resolve(err);
+        let refreshResult = {};
+
+        for (let device of refreshGroups[groupId]) {
+          try {
+            await device.refresh(tickNumber);
+            refreshResult[device.Id] = true;
+          } catch (err) {
+            refreshResult[device.Id] = err;
+          }
         }
+
+        return resolve(refreshResult);
       });
+
       refreshPromises.push(newPromise);
     }
-    await Promise.all(refreshPromises);
+
+    return Promise.all(refreshPromises);
   }
 
   /**

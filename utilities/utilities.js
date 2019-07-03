@@ -514,3 +514,7 @@ module.exports.getIpAdress = async function() {
     }
   });
 };
+
+module.exports.exists = function(object) {
+  return object !== null && object !== undefined;
+};

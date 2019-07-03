@@ -622,6 +622,14 @@ class Device {
       );
     }
   }
+
+  /**
+   * @description Method for getting sampler group for given variable - based on theses groups sampler controls paralel data exchange
+   * SHOULD BE OVERWRITTEN IN child classes
+   */
+  getRefreshGroupId() {
+    throw new Error("Method not implemented");
+  }
 }
 
 module.exports = Device;

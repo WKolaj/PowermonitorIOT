@@ -1,5 +1,6 @@
 const Variable = require("../Variable");
 const MBRequest = require("../../driver/Modbus/MBRequest");
+const { exists } = require("../../../utilities/utilities");
 
 class MBVariable extends Variable {
   /**
@@ -17,12 +18,12 @@ class MBVariable extends Variable {
   init(payload) {
     super.init(payload);
 
-    if (!payload.fCode) throw new Error("FCode cannot be empty");
-    if (!payload.offset) throw new Error("Offset cannot be empty");
-    if (!payload.length) throw new Error("Length cannot be empty");
-    if (!payload.setSingleFCode)
+    if (!exists(payload.fCode)) throw new Error("FCode cannot be empty");
+    if (!exists(payload.offset)) throw new Error("Offset cannot be empty");
+    if (!exists(payload.length)) throw new Error("Length cannot be empty");
+    if (!exists(payload.setSingleFCode))
       throw new Error("SetSingleFCode cannot be empty");
-    if (!payload.getSingleFCode)
+    if (!exists(payload.getSingleFCode))
       throw new Error("GetSingleFCode cannot be empty");
 
     //Controlling if functions are possible
