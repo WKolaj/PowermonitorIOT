@@ -11,36 +11,13 @@ const {
   testMBVariableEdition
 } = require("./utilities");
 
-describe("auth route", () => {
-  describe("CREATE /:deviceId/", () => {
-    //#region MBUInt32Variable
-
-    testMBVariableCreation(
-      "MBUInt32Variable",
-      "uInt32",
-      123,
-      3,
-      3,
-      16,
-      0,
-      3,
-      16,
-      "fakeType",
-      -1,
-      1,
-      2,
-      15
-    );
-
-    //#endregion MBUInt32Variable
-  });
-
+describe("variables route", () => {
   describe("UPDATE /:deviceId/:variableId", () => {
     //#region MBFloatVariable
 
     testMBVariableEdition(
-      "MBUInt32Variable",
-      "uInt32",
+      "MBUInt16Variable",
+      "uInt16",
       123,
       3,
       3,

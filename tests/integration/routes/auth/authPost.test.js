@@ -1,6 +1,9 @@
 const config = require("config");
 const request = require("supertest");
-const { clearDirectoryAsync, snooze } = require("../../../utilities/utilities");
+const {
+  clearDirectoryAsync,
+  snooze
+} = require("../../../../utilities/utilities");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
 
@@ -17,12 +20,12 @@ describe("auth route", () => {
     jest.resetModules();
 
     //Project class has to be reloaded
-    Project = require("../../../classes/project/Project");
+    Project = require("../../../../classes/project/Project");
     db1Path = config.get("db1Path");
     db2Path = config.get("db2Path");
     projPath = config.get("projPath");
     tokenHeader = config.get("tokenHeader");
-    server = await require("../../../startup/app")();
+    server = await require("../../../../startup/app")();
   });
 
   afterEach(async () => {
