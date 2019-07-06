@@ -134,7 +134,7 @@ describe("variables route", () => {
     );
 
     mbBooleanVariableBody = {
-      type: "boolean",
+      type: "mbBoolean",
       name: "mbBooleanVariable",
       archived: false,
       offset: 1,
@@ -142,7 +142,7 @@ describe("variables route", () => {
     };
 
     mbByteArrayVariableBody = {
-      type: "byteArray",
+      type: "mbByteArray",
       name: "mbByteArrayVariable",
       archived: false,
       offset: 3,
@@ -151,7 +151,7 @@ describe("variables route", () => {
     };
 
     mbInt16VariableBody = {
-      type: "int16",
+      type: "mbInt16",
       name: "mbInt16Variable",
       archived: false,
       offset: 10,
@@ -159,7 +159,7 @@ describe("variables route", () => {
     };
 
     mbUInt16VariableBody = {
-      type: "uInt16",
+      type: "mbUInt16",
       name: "mbUInt16Variable",
       archived: false,
       offset: 20,
@@ -167,7 +167,7 @@ describe("variables route", () => {
     };
 
     mbInt32VariableBody = {
-      type: "int32",
+      type: "mbInt32",
       name: "mbInt32Variable",
       archived: false,
       offset: 30,
@@ -175,7 +175,7 @@ describe("variables route", () => {
     };
 
     mbUInt32VariableBody = {
-      type: "uInt32",
+      type: "mbUInt32",
       name: "mbUInt32Variable",
       archived: false,
       offset: 40,
@@ -183,7 +183,7 @@ describe("variables route", () => {
     };
 
     mbFloatVariableBody = {
-      type: "uInt32",
+      type: "mbFloat",
       name: "mbFloatVariable",
       archived: false,
       offset: 50,
@@ -191,7 +191,7 @@ describe("variables route", () => {
     };
 
     mbSwappedInt32VariableBody = {
-      type: "swappedInt32",
+      type: "mbSwappedInt32",
       name: "mbSwappedInt32Variable",
       archived: false,
       offset: 60,
@@ -199,7 +199,7 @@ describe("variables route", () => {
     };
 
     mbSwappedUInt32VariableBody = {
-      type: "swappedUInt32",
+      type: "mbSwappedUInt32",
       name: "mbSwappedUInt32Variable",
       archived: false,
       offset: 70,
@@ -207,7 +207,7 @@ describe("variables route", () => {
     };
 
     mbSwappedFloatVariableBody = {
-      type: "swappedFloat",
+      type: "mbSwappedFloat",
       name: "mbSwappedFloatVar",
       archived: false,
       offset: 80,

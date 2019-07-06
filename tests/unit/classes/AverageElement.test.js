@@ -99,7 +99,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -345,7 +345,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -383,7 +383,7 @@ describe("AverageElement", () => {
       averageElement = new AverageElement(device);
       await averageElement.init(averageElementPayload);
 
-      return averageElement.TypeName;
+      return averageElement.Type;
     };
 
     it("should return averageElement name", async () => {
@@ -435,7 +435,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -539,7 +539,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -639,7 +639,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -800,7 +800,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -994,7 +994,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -1161,7 +1161,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -1330,7 +1330,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -1503,7 +1503,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -1618,7 +1618,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -1783,7 +1783,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -1978,7 +1978,7 @@ describe("AverageElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1

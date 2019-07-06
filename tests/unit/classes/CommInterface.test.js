@@ -28,7 +28,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 3,
         value: 1,
-        type: "int16",
+        type: "mbUInt16",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -42,7 +42,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 2,
-        type: "int32",
+        type: "mbInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -56,7 +56,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 3.3,
-        type: "float",
+        type: "mbFloat",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -120,7 +120,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 1,
         value: true,
-        type: "boolean",
+        type: "mbBoolean",
         archived: true,
         getSingleFCode: 1,
         setSingleFCode: 15,
@@ -134,7 +134,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 5,
-        type: "swappedInt32",
+        type: "mbSwappedInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -148,7 +148,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 6.6,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -174,7 +174,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 3,
         value: 7,
-        type: "uInt16",
+        type: "mbUInt16",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -188,7 +188,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 8,
-        type: "swappedUInt32",
+        type: "mbSwappedUInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -202,7 +202,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 3,
         value: 9,
-        type: "uInt32",
+        type: "mbUInt32",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -815,7 +815,7 @@ describe("CommInterface", () => {
         id: "1234",
         timeSample: 2,
         name: "test variable 1",
-        type: "int16",
+        type: "mbInt16",
         offset: 2,
         fCode: 3,
         value: 1234,
@@ -825,7 +825,7 @@ describe("CommInterface", () => {
         id: "1235",
         timeSample: 3,
         name: "test variable 2",
-        type: "boolean",
+        type: "mbBoolean",
         offset: 1,
         fCode: 1,
         value: true,
@@ -835,7 +835,7 @@ describe("CommInterface", () => {
         id: "1236",
         timeSample: 4,
         name: "test variable 3",
-        type: "int32",
+        type: "mbInt32",
         offset: 5,
         fCode: 4,
         value: 4321,
@@ -925,9 +925,7 @@ describe("CommInterface", () => {
         calculationElement1Payload.timeSample
       );
       expect(allCalcElements[0].Name).toEqual(calculationElement1Payload.name);
-      expect(allCalcElements[0].TypeName).toEqual(
-        calculationElement1Payload.type
-      );
+      expect(allCalcElements[0].Type).toEqual(calculationElement1Payload.type);
       expect(allCalcElements[0].Unit).toEqual(calculationElement1Payload.unit);
       expect(allCalcElements[0].Archived).toEqual(
         calculationElement1Payload.archived
@@ -938,9 +936,7 @@ describe("CommInterface", () => {
         calculationElement2Payload.timeSample
       );
       expect(allCalcElements[1].Name).toEqual(calculationElement2Payload.name);
-      expect(allCalcElements[1].TypeName).toEqual(
-        calculationElement2Payload.type
-      );
+      expect(allCalcElements[1].Type).toEqual(calculationElement2Payload.type);
       expect(allCalcElements[1].Unit).toEqual(calculationElement2Payload.unit);
       expect(allCalcElements[1].Archived).toEqual(
         calculationElement2Payload.archived
@@ -951,7 +947,7 @@ describe("CommInterface", () => {
       let varaible1Payload = {
         timeSample: 2,
         name: "test variable 1",
-        type: "int16",
+        type: "mbInt16",
         offset: 2,
         fCode: 3,
         archived: true
@@ -959,7 +955,7 @@ describe("CommInterface", () => {
       let varaible2Payload = {
         timeSample: 3,
         name: "test variable 2",
-        type: "boolean",
+        type: "mbBoolean",
         offset: 1,
         fCode: 1,
         archived: false
@@ -967,7 +963,7 @@ describe("CommInterface", () => {
       let varaible3Payload = {
         timeSample: 4,
         name: "test variable 3",
-        type: "int32",
+        type: "mbInt32",
         offset: 5,
         fCode: 4,
         archived: true
@@ -1032,9 +1028,7 @@ describe("CommInterface", () => {
         calculationElement1Payload.timeSample
       );
       expect(allCalcElements[0].Name).toEqual(calculationElement1Payload.name);
-      expect(allCalcElements[0].TypeName).toEqual(
-        calculationElement1Payload.type
-      );
+      expect(allCalcElements[0].Type).toEqual(calculationElement1Payload.type);
       expect(allCalcElements[0].Unit).toEqual(calculationElement1Payload.unit);
       expect(allCalcElements[0].Archived).toEqual(
         calculationElement1Payload.archived
@@ -1045,9 +1039,7 @@ describe("CommInterface", () => {
         calculationElement2Payload.timeSample
       );
       expect(allCalcElements[1].Name).toEqual(calculationElement2Payload.name);
-      expect(allCalcElements[1].TypeName).toEqual(
-        calculationElement2Payload.type
-      );
+      expect(allCalcElements[1].Type).toEqual(calculationElement2Payload.type);
       expect(allCalcElements[1].Unit).toEqual(calculationElement2Payload.unit);
       expect(allCalcElements[1].Archived).toEqual(
         calculationElement2Payload.archived
@@ -1058,7 +1050,7 @@ describe("CommInterface", () => {
       let varaible1Payload = {
         timeSample: 2,
         name: "test variable 1",
-        type: "int16",
+        type: "mbInt16",
         offset: 2,
         fCode: 3,
         archived: true
@@ -1066,7 +1058,7 @@ describe("CommInterface", () => {
       let varaible2Payload = {
         timeSample: 3,
         name: "test variable 2",
-        type: "boolean",
+        type: "mbBoolean",
         offset: 1,
         fCode: 1,
         archived: false
@@ -1074,7 +1066,7 @@ describe("CommInterface", () => {
       let varaible3Payload = {
         timeSample: 4,
         name: "test variable 3",
-        type: "int32",
+        type: "mbInt32",
         offset: 5,
         fCode: 4,
         archived: true
@@ -1272,7 +1264,7 @@ describe("CommInterface", () => {
       let varaible1Payload = {
         id: "1234",
         timeSample: 2,
-        name: "int16",
+        name: "mbInt16",
         type: "not recongized type",
         offset: 2,
         fCode: 3
@@ -1289,7 +1281,7 @@ describe("CommInterface", () => {
         id: "1236",
         timeSample: 4,
         name: "test variable 3",
-        type: "int32",
+        type: "mbInt32",
         offset: 5,
         fCode: 4
       };
@@ -1478,7 +1470,7 @@ describe("CommInterface", () => {
       variable1Id = "0001";
       variable1TimeSample = 2;
       variable1Name = "test variable 1";
-      variable1Type = "int16";
+      variable1Type = "mbInt16";
       variable1Offset = 5;
       variable1FCode = 3;
       variable1Value = 1;
@@ -1486,7 +1478,7 @@ describe("CommInterface", () => {
       variable2Id = "0002";
       variable2TimeSample = 3;
       variable2Name = "test variable 2";
-      variable2Type = "int32";
+      variable2Type = "mbInt32";
       variable2Offset = 6;
       variable2FCode = 4;
       variable2Value = 2;
@@ -1494,7 +1486,7 @@ describe("CommInterface", () => {
       variable3Id = "0003";
       variable3TimeSample = 4;
       variable3Name = "test variable 3";
-      variable3Type = "float";
+      variable3Type = "mbFloat";
       variable3Offset = 7;
       variable3FCode = 16;
       variable3Value = 3;
@@ -1502,7 +1494,7 @@ describe("CommInterface", () => {
       variable4Id = "0004";
       variable4TimeSample = 2;
       variable4Name = "test variable 4";
-      variable4Type = "boolean";
+      variable4Type = "mbBoolean";
       variable4Offset = 5;
       variable4FCode = 1;
       variable4Value = true;
@@ -1510,7 +1502,7 @@ describe("CommInterface", () => {
       variable5Id = "0005";
       variable5TimeSample = 3;
       variable5Name = "test variable 5";
-      variable5Type = "int32";
+      variable5Type = "mbInt32";
       variable5Offset = 6;
       variable5FCode = 4;
       variable5Value = 5;
@@ -1518,7 +1510,7 @@ describe("CommInterface", () => {
       variable6Id = "0006";
       variable6TimeSample = 4;
       variable6Name = "test variable 6";
-      variable6Type = "float";
+      variable6Type = "mbFloat";
       variable6Offset = 7;
       variable6FCode = 16;
       variable6Value = 6;
@@ -2134,7 +2126,7 @@ describe("CommInterface", () => {
       variable1Id = "0001";
       variable1TimeSample = 2;
       variable1Name = "test variable 1";
-      variable1Type = "int16";
+      variable1Type = "mbInt16";
       variable1Offset = 5;
       variable1FCode = 3;
       variable1Value = 1;
@@ -2142,7 +2134,7 @@ describe("CommInterface", () => {
       variable2Id = "0002";
       variable2TimeSample = 3;
       variable2Name = "test variable 2";
-      variable2Type = "int32";
+      variable2Type = "mbInt32";
       variable2Offset = 6;
       variable2FCode = 4;
       variable2Value = 2;
@@ -2150,7 +2142,7 @@ describe("CommInterface", () => {
       variable3Id = "0003";
       variable3TimeSample = 4;
       variable3Name = "test variable 3";
-      variable3Type = "float";
+      variable3Type = "mbFloat";
       variable3Offset = 7;
       variable3FCode = 16;
       variable3Value = 3;
@@ -2158,7 +2150,7 @@ describe("CommInterface", () => {
       variable4Id = "0004";
       variable4TimeSample = 2;
       variable4Name = "test variable 4";
-      variable4Type = "boolean";
+      variable4Type = "mbBoolean";
       variable4Offset = 5;
       variable4FCode = 1;
       variable4Value = true;
@@ -2166,7 +2158,7 @@ describe("CommInterface", () => {
       variable5Id = "0005";
       variable5TimeSample = 3;
       variable5Name = "test variable 5";
-      variable5Type = "int32";
+      variable5Type = "mbInt32";
       variable5Offset = 6;
       variable5FCode = 4;
       variable5Value = 5;
@@ -2174,7 +2166,7 @@ describe("CommInterface", () => {
       variable6Id = "0006";
       variable6TimeSample = 4;
       variable6Name = "test variable 6";
-      variable6Type = "float";
+      variable6Type = "mbFloat";
       variable6Offset = 7;
       variable6FCode = 16;
       variable6Value = 6;
@@ -3369,7 +3361,7 @@ describe("CommInterface", () => {
           length: 1,
           fCode: 3,
           value: 1,
-          type: "int32",
+          type: "mbInt32",
           archived: true,
           getSingleFCode: 3,
           setSingleFCode: 16
@@ -3382,7 +3374,7 @@ describe("CommInterface", () => {
           length: 2,
           fCode: 4,
           value: 2,
-          type: "float",
+          type: "mbFloat",
           archived: true,
           getSingleFCode: 4,
           setSingleFCode: 16
@@ -3713,7 +3705,7 @@ describe("CommInterface", () => {
       variableName = "test variable";
       variableFcode = 3;
       variableOffset = 2;
-      variableType = "float";
+      variableType = "mbFloat";
       variableTimeSample = 5;
       variableArchived = true;
       variableGetSingleFCode = 3;
@@ -4240,7 +4232,7 @@ describe("CommInterface", () => {
     });
 
     it("should not edit variable type if it is defined in payload", async () => {
-      editVariableType = "float";
+      editVariableType = "mbFloat";
 
       let result = await exec();
 
@@ -4992,7 +4984,7 @@ describe("CommInterface", () => {
       let columnName = result.Device.ArchiveManager.getColumnNameById(
         result.Id
       );
-      let columnType = result.Device.ArchiveManager.getColumnTypeCalculationElement(
+      let columnType = result.Device.ArchiveManager.getColumnType(
         result
       );
 
@@ -5015,7 +5007,7 @@ describe("CommInterface", () => {
       let columnName = result.Device.ArchiveManager.getColumnNameById(
         result.Id
       );
-      let columnType = result.Device.ArchiveManager.getColumnTypeCalculationElement(
+      let columnType = result.Device.ArchiveManager.getColumnType(
         result
       );
 
@@ -5202,7 +5194,7 @@ describe("CommInterface", () => {
       let columnName = element.Device.ArchiveManager.getColumnNameById(
         calculationElementId
       );
-      let columnType = element.Device.ArchiveManager.getColumnTypeCalculationElement(
+      let columnType = element.Device.ArchiveManager.getColumnType(
         element
       );
 

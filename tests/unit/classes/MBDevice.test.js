@@ -681,21 +681,21 @@ describe("MBDevice", () => {
           Id: "var1",
           Name: "name1",
           Payload: "variable1",
-          Type: "float",
+          Type: "mbFloat",
           Value: 1
         },
         {
           Id: "var2",
           Name: "name2",
           Payload: "variable2",
-          Type: "float",
+          Type: "mbFloat",
           Value: 2
         },
         {
           Id: "var3",
           Name: "name3",
           Payload: "variable3",
-          Type: "float",
+          Type: "mbFloat",
           Value: 3
         }
       ];
@@ -1459,7 +1459,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = undefined;
-      varType = "bool";
+      varType = "mbBoolean";
       varTimeSample = 1;
       varName = "test variable";
       varOffset = 2;
@@ -1670,7 +1670,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = undefined;
-      varType = "float";
+      varType = "mbFloat";
       varTimeSample = 1;
       varName = "test variable";
       varOffset = 2;
@@ -2090,7 +2090,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = undefined;
-      varType = "int32";
+      varType = "mbInt32";
       varTimeSample = 1;
       varName = "test variable";
       varOffset = 2;
@@ -2510,7 +2510,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = undefined;
-      varType = "int32";
+      varType = "mbInt32";
       varTimeSample = 1;
       varName = "test variable";
       varOffset = 2;
@@ -2930,7 +2930,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = undefined;
-      varType = "int16";
+      varType = "mbInt16";
       varTimeSample = 1;
       varName = "test variable";
       varOffset = 2;
@@ -3140,7 +3140,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = undefined;
-      varType = "int16";
+      varType = "mbInt16";
       varTimeSample = 1;
       varName = "test variable";
       varOffset = 2;
@@ -3589,7 +3589,7 @@ describe("MBDevice", () => {
       expect(result).toBeDefined();
       expect(result.Id).toEqual(calculationElement1Id);
       expect(result.Name).toEqual(calculationElement1Name);
-      expect(result.TypeName).toEqual(calculationElement1Type);
+      expect(result.Type).toEqual(calculationElement1Type);
       expect(result.Archived).toEqual(calculationElement1Archived);
       expect(result.Value).toEqual(0);
     });
@@ -3601,9 +3601,7 @@ describe("MBDevice", () => {
       let columnName = device.ArchiveManager.getColumnNameById(
         calculationElement1Id
       );
-      let columnType = device.ArchiveManager.getColumnTypeCalculationElement(
-        result
-      );
+      let columnType = device.ArchiveManager.getColumnType(result);
 
       let columnExists = await checkIfColumnExists(
         databaseFileName,
@@ -3631,9 +3629,7 @@ describe("MBDevice", () => {
       let columnName = device.ArchiveManager.getColumnNameById(
         calculationElement1Id
       );
-      let columnType = device.ArchiveManager.getColumnTypeCalculationElement(
-        result
-      );
+      let columnType = device.ArchiveManager.getColumnType(result);
 
       let columnExists = await checkIfColumnExists(
         databaseFileName,
@@ -3704,7 +3700,7 @@ describe("MBDevice", () => {
       varOffset = 5;
       varLength = 123;
       varFcode = 3;
-      varType = "boolean";
+      varType = "mbBoolean";
       _createBooleanVariableMockFuncResult = "some value boolean";
       _createByteArrayVariableMockFuncResult = "some value byte array";
       _createFloatVariableMockFuncResult = "some value float";
@@ -3783,7 +3779,7 @@ describe("MBDevice", () => {
     };
 
     it("should create and return boolean variable if payload type is boolean", async () => {
-      varType = "boolean";
+      varType = "mbBoolean";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).toHaveBeenCalledTimes(1);
@@ -3805,7 +3801,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return byteArray variable if payload type is boolean", async () => {
-      varType = "byteArray";
+      varType = "mbByteArray";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3826,7 +3822,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return float variable if payload type is boolean", async () => {
-      varType = "float";
+      varType = "mbFloat";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3847,7 +3843,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return int16 variable if payload type is boolean", async () => {
-      varType = "int16";
+      varType = "mbInt16";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3868,7 +3864,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return int32 variable if payload type is boolean", async () => {
-      varType = "int32";
+      varType = "mbInt32";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3889,7 +3885,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return swapped float variable if payload type is boolean", async () => {
-      varType = "swappedFloat";
+      varType = "mbSwappedFloat";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3910,7 +3906,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return swapped int32 variable if payload type is boolean", async () => {
-      varType = "swappedInt32";
+      varType = "mbSwappedInt32";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3931,7 +3927,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return swapped uint32 variable if payload type is boolean", async () => {
-      varType = "swappedUInt32";
+      varType = "mbSwappedUInt32";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3952,7 +3948,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return uint16 variable if payload type is boolean", async () => {
-      varType = "uInt16";
+      varType = "mbUInt16";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -3973,7 +3969,7 @@ describe("MBDevice", () => {
     });
 
     it("should create and return uint32 variable if payload type is boolean", async () => {
-      varType = "uInt32";
+      varType = "mbUInt32";
       let result = await exec();
 
       expect(_createBooleanVariableMockFunc).not.toHaveBeenCalled();
@@ -4094,7 +4090,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
       variableId = 1234;
       variableName = "test variable";
-      variableType = "int32";
+      variableType = "integer";
       variableArchived = true;
     });
 
@@ -4115,7 +4111,7 @@ describe("MBDevice", () => {
         Id: variableId,
         Name: variableName,
         Archived: variableArchived,
-        Type: variableType
+        ValueType: variableType
       };
 
       return device.addVariable(variable);
@@ -4318,7 +4314,7 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = 1234;
-      varType = "int16";
+      varType = "mbInt16";
       varTimeSample = 1;
       varName = "test variable";
       varOffset = 2;
@@ -5212,7 +5208,7 @@ describe("MBDevice", () => {
         Id: calculationElementId,
         Name: calculationElementName,
         Archived: calculationElementArchived,
-        TypeName: calculationElementType,
+        Type: calculationElementType,
         ValueType: calculationElementValueType,
         SampleTime: calculationElementSampleTime
       };
@@ -5266,7 +5262,7 @@ describe("MBDevice", () => {
         Id: calculationElementId,
         Name: "newElement",
         Archived: false,
-        TypeName: "sumElement",
+        Type: "sumElement",
         SampleTime: 10
       };
 
@@ -5326,7 +5322,7 @@ describe("MBDevice", () => {
         Id: calculationElementId,
         Name: calculationElementName,
         Archived: calculationElementArchived,
-        TypeName: calculationElementType,
+        Type: calculationElementType,
         ValueType: calculationElementValueType,
         SampleTime: calculationElementSampleTime
       };
@@ -5376,7 +5372,7 @@ describe("MBDevice", () => {
         Id: calculationElementId,
         Name: calculationElementName,
         Archived: calculationElementArchived,
-        TypeName: calculationElementType,
+        Type: calculationElementType,
         ValueType: calculationElementValueType,
         SampleTime: calculationElementSampleTime
       };
@@ -5444,7 +5440,7 @@ describe("MBDevice", () => {
         Id: calculationElementId,
         Name: calculationElementName,
         Archived: calculationElementArchived,
-        TypeName: calculationElementType,
+        Type: calculationElementType,
         ValueType: calculationElementValueType,
         SampleTime: calculationElementSampleTime
       };
@@ -5589,7 +5585,7 @@ describe("MBDevice", () => {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "float",
+        type: "mbFloat",
         archived: false
       };
 
@@ -5601,7 +5597,7 @@ describe("MBDevice", () => {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "float",
+        type: "mbFloat",
         archived: false
       };
 
@@ -5613,7 +5609,7 @@ describe("MBDevice", () => {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "float",
+        type: "mbFloat",
         archived: false
       };
 

@@ -5,13 +5,13 @@ const Project = require("../../classes/project/Project");
 
 let generateSchema = variableType => {
   switch (variableType) {
-    case "boolean": {
+    case "mbBoolean": {
       return {
         value: Joi.bool().required()
       };
     }
 
-    case "int16": {
+    case "mbInt16": {
       return {
         value: Joi.number()
           .integer()
@@ -20,7 +20,7 @@ let generateSchema = variableType => {
       };
     }
 
-    case "int32": {
+    case "mbInt32": {
       return {
         value: Joi.number()
           .integer()
@@ -29,7 +29,7 @@ let generateSchema = variableType => {
       };
     }
 
-    case "uInt16": {
+    case "mbUInt16": {
       return {
         value: Joi.number()
           .integer()
@@ -39,7 +39,7 @@ let generateSchema = variableType => {
       };
     }
 
-    case "uInt32": {
+    case "mbUInt32": {
       return {
         value: Joi.number()
           .integer()
@@ -49,19 +49,19 @@ let generateSchema = variableType => {
       };
     }
 
-    case "float": {
+    case "mbFloat": {
       return {
         value: Joi.number().required()
       };
     }
 
-    case "swappedFloat": {
+    case "mbSwappedFloat": {
       return {
         value: Joi.number().required()
       };
     }
 
-    case "swappedInt32": {
+    case "mbSwappedInt32": {
       return {
         value: Joi.number()
           .integer()
@@ -70,13 +70,37 @@ let generateSchema = variableType => {
       };
     }
 
-    case "swappedUInt32": {
+    case "mbSwappedUInt32": {
       return {
         value: Joi.number()
           .integer()
           .max(4294967295)
           .min(0)
           .required()
+      };
+    }
+
+    case "averageElement": {
+      return {
+        value: Joi.number().required()
+      };
+    }
+
+    case "sumElement": {
+      return {
+        value: Joi.number().required()
+      };
+    }
+
+    case "factorElement": {
+      return {
+        value: Joi.number().required()
+      };
+    }
+
+    case "increaseElement": {
+      return {
+        value: Joi.number().required()
       };
     }
 
@@ -127,7 +151,7 @@ let validateEdit = function(req) {
     );
 
     //Generating schema based on type - variable has type defined on variable Type and calcElement on ValueType
-    let schema = generateSchema(element.Type || element.ValueType);
+    let schema = generateSchema(element.Type);
 
     //Standard mechanism - Joi validation
     if (schema) {
@@ -142,7 +166,7 @@ let validateEdit = function(req) {
     //Non standard validation - eg. ByteArray
     else {
       switch (element.Type) {
-        case "byteArray": {
+        case "mbByteArray": {
           if (!req.body.value) return resolve("value has to be defined");
 
           return resolve(validateValue(req.body.value, element.Length));

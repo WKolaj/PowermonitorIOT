@@ -3,7 +3,7 @@ const Project = require("../../../classes/project/Project");
 
 let MBBoleanVariableCreateSchema = Joi.object().keys({
   type: Joi.string()
-    .valid("boolean")
+    .valid("mbBoolean")
     .required(),
   name: Joi.string()
     .min(3)

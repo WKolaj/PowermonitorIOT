@@ -3,7 +3,7 @@ const Project = require("../../../classes/project/Project");
 
 let MBInt16VariableCreateSchema = Joi.object().keys({
   type: Joi.string()
-    .valid("int16")
+    .valid("mbInt16")
     .required(),
   name: Joi.string()
     .min(3)

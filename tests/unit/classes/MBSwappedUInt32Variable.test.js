@@ -118,7 +118,7 @@ describe("MBSwappedUInt32Variable", () => {
     it("should set Type to corresponding type", async () => {
       await exec();
 
-      expect(variable.Type).toEqual("swappedUInt32");
+      expect(variable.Type).toEqual("mbSwappedUInt32");
     });
   });
 

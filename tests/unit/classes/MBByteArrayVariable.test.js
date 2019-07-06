@@ -116,7 +116,7 @@ describe("MBByteArrayVariable", () => {
     it("should set Type to corresponding type", async () => {
       await exec();
 
-      expect(variable.Type).toEqual("byteArray");
+      expect(variable.Type).toEqual("mbByteArray");
     });
   });
 

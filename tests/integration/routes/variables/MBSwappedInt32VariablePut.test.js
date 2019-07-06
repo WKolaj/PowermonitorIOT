@@ -17,7 +17,7 @@ describe("variables route", () => {
 
     testMBVariableEdition(
       "MBSwappedInt32Variable",
-      "swappedInt32",
+      "mbSwappedInt32",
       123,
       3,
       3,

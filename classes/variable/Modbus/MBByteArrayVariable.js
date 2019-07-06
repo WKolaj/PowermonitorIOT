@@ -57,7 +57,7 @@ class MBByteArrayVariable extends MBVariable {
     payload.setSingleFCode = 16;
 
     await super.init(payload);
-    this._type = "byteArray";
+    this._type = "mbByteArray";
   }
 
   /**
@@ -205,6 +205,13 @@ class MBByteArrayVariable extends MBVariable {
     let varToReturn = await super.editWithPayload(payload);
 
     return varToReturn;
+  }
+
+  /**
+   * @description Method for generating type of value of variable
+   */
+  _getValueType() {
+    return "byteArray";
   }
 }
 

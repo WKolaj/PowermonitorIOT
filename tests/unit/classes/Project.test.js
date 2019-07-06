@@ -53,7 +53,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 3,
         value: 1,
-        type: "int16",
+        type: "mbInt16",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -68,7 +68,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 2,
-        type: "int32",
+        type: "mbInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -83,7 +83,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 3.3,
-        type: "float",
+        type: "mbFloat",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -151,7 +151,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 1,
         value: true,
-        type: "boolean",
+        type: "mbBoolean",
         archived: true,
         getSingleFCode: 1,
         setSingleFCode: 15,
@@ -166,7 +166,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 5,
-        type: "swappedInt32",
+        type: "mbSwappedInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -181,7 +181,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 6.6,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -208,7 +208,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 3,
         value: 7,
-        type: "uInt16",
+        type: "mbUInt16",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -223,7 +223,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 8,
-        type: "swappedUInt32",
+        type: "mbSwappedUInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -238,7 +238,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 3,
         value: 9,
-        type: "uInt32",
+        type: "mbUInt32",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -957,21 +957,21 @@ describe("Project", () => {
         login: "testUser1",
         password: await hashString("123456"),
         permissions: 1,
-        lang : "en"
+        lang: "en"
       };
 
       user2Payload = {
         login: "testUser2",
         password: await hashString("23456"),
         permissions: 2,
-        lang : "pl"
+        lang: "pl"
       };
 
       user3Payload = {
         login: "testUser3",
         password: await hashString("34567"),
         permissions: 3,
-        lang : "en"
+        lang: "en"
       };
 
       privateKey = "testPrivateKey";
@@ -1752,7 +1752,7 @@ describe("Project", () => {
           length: 1,
           fCode: 3,
           value: 1,
-          type: "int32",
+          type: "mbInt32",
           archived: true,
           getSingleFCode: 3,
           setSingleFCode: 16
@@ -1765,7 +1765,7 @@ describe("Project", () => {
           length: 2,
           fCode: 4,
           value: 2,
-          type: "float",
+          type: "mbFloat",
           archived: true,
           getSingleFCode: 4,
           setSingleFCode: 16
@@ -2194,7 +2194,7 @@ describe("Project", () => {
             length: 1,
             fCode: 3,
             value: 7,
-            type: "uInt16",
+            type: "mbUInt16",
             archived: false,
             getSingleFCode: 3,
             setSingleFCode: 16,
@@ -2209,7 +2209,7 @@ describe("Project", () => {
             length: 2,
             fCode: 4,
             value: 8,
-            type: "swappedUInt32",
+            type: "mbSwappedUInt32",
             archived: true,
             getSingleFCode: 4,
             setSingleFCode: 16,
@@ -2224,7 +2224,7 @@ describe("Project", () => {
             length: 2,
             fCode: 3,
             value: 9,
-            type: "uInt32",
+            type: "mbUInt32",
             archived: false,
             getSingleFCode: 3,
             setSingleFCode: 16,
@@ -2657,7 +2657,7 @@ describe("Project", () => {
 
     it("should throw if mbDevice payload is not correct - one of varaibles have invalid payload", async () => {
       let corruptedPayload = {
-        type: "float"
+        type: "mbFloat"
       };
 
       mbDevicePayload.variables.push(corruptedPayload);
@@ -2714,12 +2714,12 @@ describe("Project", () => {
         length: 2,
         fCode: 3,
         value: 9,
-        type: "uInt32",
+        type: "mbUInt32",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit9",
-        archiveTimeSample : 5
+        archiveTimeSample: 5
       };
 
       mbDevicePayload.variables.push(corruptedPayload);
@@ -2913,7 +2913,7 @@ describe("Project", () => {
         );
         expect(element.Factor).toEqual(elPayload.factor);
         expect(element.Archived).toEqual(elPayload.archived);
-        expect(element.TypeName).toEqual(elPayload.type);
+        expect(element.Type).toEqual(elPayload.type);
       }
     });
 
@@ -3056,12 +3056,12 @@ describe("Project", () => {
           length: 1,
           fCode: 3,
           value: 1,
-          type: "int16",
+          type: "mbInt16",
           archived: false,
           getSingleFCode: 3,
           setSingleFCode: 16,
           unit: "unit1",
-          archiveTimeSample : 5
+          archiveTimeSample: 5
         },
         {
           id: "5002",
@@ -3071,12 +3071,12 @@ describe("Project", () => {
           length: 2,
           fCode: 4,
           value: 2,
-          type: "int32",
+          type: "mbInt32",
           archived: true,
           getSingleFCode: 4,
           setSingleFCode: 16,
           unit: "unit2",
-          archiveTimeSample : 5
+          archiveTimeSample: 5
         },
         {
           id: "5003",
@@ -3086,12 +3086,12 @@ describe("Project", () => {
           length: 2,
           fCode: 16,
           value: 3.3,
-          type: "float",
+          type: "mbFloat",
           archived: false,
           getSingleFCode: 3,
           setSingleFCode: 16,
           unit: "unit3",
-          archiveTimeSample : 5
+          archiveTimeSample: 5
         }
       ];
 
@@ -3703,10 +3703,10 @@ describe("Project", () => {
       let calcElement = await exec();
 
       let filePath = calcElement.Device.ArchiveManager.FilePath;
-      let columnName = calcElement.Device.ArchiveManager.getColumnNameOfCalculationElement(
+      let columnName = calcElement.Device.ArchiveManager.getColumnName(
         calcElement
       );
-      let columnType = calcElement.Device.ArchiveManager.getColumnTypeCalculationElement(
+      let columnType = calcElement.Device.ArchiveManager.getColumnType(
         calcElement
       );
 
@@ -3902,7 +3902,7 @@ describe("Project", () => {
       variable1Id = "0001";
       variable1TimeSample = 2;
       variable1Name = "test variable 1";
-      variable1Type = "int16";
+      variable1Type = "mbInt16";
       variable1Offset = 5;
       variable1FCode = 3;
       variable1Value = 1;
@@ -3910,7 +3910,7 @@ describe("Project", () => {
       variable2Id = "0002";
       variable2TimeSample = 3;
       variable2Name = "test variable 2";
-      variable2Type = "int32";
+      variable2Type = "mbInt32";
       variable2Offset = 6;
       variable2FCode = 4;
       variable2Value = 2;
@@ -3918,7 +3918,7 @@ describe("Project", () => {
       variable3Id = "0003";
       variable3TimeSample = 4;
       variable3Name = "test variable 3";
-      variable3Type = "float";
+      variable3Type = "mbFloat";
       variable3Offset = 7;
       variable3FCode = 16;
       variable3Value = 3;
@@ -4199,7 +4199,7 @@ describe("Project", () => {
       variable1Id = "0001";
       variable1TimeSample = 2;
       variable1Name = "test variable 1";
-      variable1Type = "int16";
+      variable1Type = "mbInt16";
       variable1Offset = 5;
       variable1FCode = 3;
       variable1Value = 1;
@@ -4207,7 +4207,7 @@ describe("Project", () => {
       variable2Id = "0002";
       variable2TimeSample = 3;
       variable2Name = "test variable 2";
-      variable2Type = "int32";
+      variable2Type = "mbInt32";
       variable2Offset = 6;
       variable2FCode = 4;
       variable2Value = 2;
@@ -4215,7 +4215,7 @@ describe("Project", () => {
       variable3Id = "0003";
       variable3TimeSample = 4;
       variable3Name = "test variable 3";
-      variable3Type = "float";
+      variable3Type = "mbFloat";
       variable3Offset = 7;
       variable3FCode = 16;
       variable3Value = 3;
@@ -4334,7 +4334,7 @@ describe("Project", () => {
       expect(result).toBeDefined();
       //Variable "0002" has value 2
       expect(result).toEqual({
-        "0" : 2
+        "0": 2
       });
     });
 
@@ -4345,7 +4345,7 @@ describe("Project", () => {
       expect(result).toBeDefined();
       //Variable "1002" has value 321
       expect(result).toEqual({
-        "0" : 321
+        "0": 321
       });
     });
 
@@ -4572,7 +4572,7 @@ describe("Project", () => {
         fCode: 3,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        type: "float",
+        type: "mbFloat",
         value: 3,
         archiveTimeSample: 5
       };
@@ -4637,7 +4637,7 @@ describe("Project", () => {
         fCode: 3,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        type: "float",
+        type: "mbFloat",
         value: 3,
         archiveTimeSample: 5
       };
@@ -4852,7 +4852,7 @@ describe("Project", () => {
         fCode: 3,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        type: "float",
+        type: "mbFloat",
         value: 3,
         archiveTimeSample: 5
       };
@@ -5052,7 +5052,7 @@ describe("Project", () => {
         fCode: 3,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        type: "float",
+        type: "mbFloat",
         value: 3,
         archiveTimeSample: 5
       };
@@ -5282,7 +5282,7 @@ describe("Project", () => {
         fCode: 3,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        type: "float",
+        type: "mbFloat",
         value: 3,
         archiveTimeSample: 5
       };
@@ -5297,7 +5297,7 @@ describe("Project", () => {
         fCode: 3,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        type: "float",
+        type: "mbFloat",
         value: 4,
         archiveTimeSample: 5
       };

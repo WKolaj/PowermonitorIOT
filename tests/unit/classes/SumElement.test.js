@@ -128,27 +128,27 @@ describe("SumElement", () => {
       deviceId = "1234";
 
       deviceVariable1Id = "0001";
-      deviceVariable1Type = "int32";
+      deviceVariable1Type = "mbInt32";
       deviceVariable1Archived = false;
       deviceVariable1Value = 1;
 
       deviceVariable2Id = "0002";
-      deviceVariable2Type = "int32";
+      deviceVariable2Type = "mbInt32";
       deviceVariable2Archived = false;
       deviceVariable2Value = 2;
 
       deviceVariable3Id = "0003";
-      deviceVariable3Type = "float";
+      deviceVariable3Type = "mbFloat";
       deviceVariable3Archived = false;
       deviceVariable3Value = 3;
 
       deviceVariable4Id = "0004";
-      deviceVariable4Type = "float";
+      deviceVariable4Type = "mbFloat";
       deviceVariable4Archived = false;
       deviceVariable4Value = 4.5;
 
       deviceVariable5Id = "0005";
-      deviceVariable5Type = "float";
+      deviceVariable5Type = "mbFloat";
       deviceVariable5Archived = false;
       deviceVariable5Value = 6.5;
 
@@ -181,7 +181,7 @@ describe("SumElement", () => {
         timeSample: 1,
         name: "variable1",
         offset: 1,
-        fCode: deviceVariable1Type === "boolean" ? 15 : 3
+        fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable2Payload = {
@@ -192,7 +192,7 @@ describe("SumElement", () => {
         timeSample: 2,
         name: "variable2",
         offset: 3,
-        fCode: deviceVariable2Type === "boolean" ? 15 : 3
+        fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable3Payload = {
@@ -203,7 +203,7 @@ describe("SumElement", () => {
         timeSample: 3,
         name: "variable3",
         offset: 5,
-        fCode: deviceVariable3Type === "boolean" ? 15 : 3
+        fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable4Payload = {
@@ -214,7 +214,7 @@ describe("SumElement", () => {
         timeSample: 4,
         name: "variable4",
         offset: 7,
-        fCode: deviceVariable4Type === "boolean" ? 15 : 3
+        fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable5Payload = {
@@ -225,7 +225,7 @@ describe("SumElement", () => {
         timeSample: 5,
         name: "variable5",
         offset: 9,
-        fCode: deviceVariable5Type === "boolean" ? 15 : 3
+        fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
       };
 
       devicePayload = {
@@ -505,27 +505,27 @@ describe("SumElement", () => {
       deviceId = "1234";
 
       deviceVariable1Id = "0001";
-      deviceVariable1Type = "int32";
+      deviceVariable1Type = "mbInt32";
       deviceVariable1Archived = false;
       deviceVariable1Value = 1;
 
       deviceVariable2Id = "0002";
-      deviceVariable2Type = "int32";
+      deviceVariable2Type = "mbInt32";
       deviceVariable2Archived = false;
       deviceVariable2Value = 2;
 
       deviceVariable3Id = "0003";
-      deviceVariable3Type = "float";
+      deviceVariable3Type = "mbFloat";
       deviceVariable3Archived = false;
       deviceVariable3Value = 3;
 
       deviceVariable4Id = "0004";
-      deviceVariable4Type = "float";
+      deviceVariable4Type = "mbFloat";
       deviceVariable4Archived = false;
       deviceVariable4Value = 4.5;
 
       deviceVariable5Id = "0005";
-      deviceVariable5Type = "float";
+      deviceVariable5Type = "mbFloat";
       deviceVariable5Archived = false;
       deviceVariable5Value = 6.5;
 
@@ -558,7 +558,7 @@ describe("SumElement", () => {
         timeSample: 1,
         name: "variable1",
         offset: 1,
-        fCode: deviceVariable1Type === "boolean" ? 15 : 3
+        fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable2Payload = {
@@ -569,7 +569,7 @@ describe("SumElement", () => {
         timeSample: 2,
         name: "variable2",
         offset: 3,
-        fCode: deviceVariable2Type === "boolean" ? 15 : 3
+        fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable3Payload = {
@@ -580,7 +580,7 @@ describe("SumElement", () => {
         timeSample: 3,
         name: "variable3",
         offset: 5,
-        fCode: deviceVariable3Type === "boolean" ? 15 : 3
+        fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable4Payload = {
@@ -591,7 +591,7 @@ describe("SumElement", () => {
         timeSample: 4,
         name: "variable4",
         offset: 7,
-        fCode: deviceVariable4Type === "boolean" ? 15 : 3
+        fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable5Payload = {
@@ -602,7 +602,7 @@ describe("SumElement", () => {
         timeSample: 5,
         name: "variable5",
         offset: 9,
-        fCode: deviceVariable5Type === "boolean" ? 15 : 3
+        fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
       };
 
       devicePayload = {
@@ -772,7 +772,7 @@ describe("SumElement", () => {
 
       sumElement = new SumElement(device);
       await sumElement.init(sumElementPayload);
-      return sumElement.TypeName;
+      return sumElement.Type;
     };
 
     it("should return string that represents SumElement type", async () => {
@@ -1174,27 +1174,27 @@ describe("SumElement", () => {
       deviceId = "1234";
 
       deviceVariable1Id = "0001";
-      deviceVariable1Type = "int32";
+      deviceVariable1Type = "mbInt32";
       deviceVariable1Archived = false;
       deviceVariable1Value = 1;
 
       deviceVariable2Id = "0002";
-      deviceVariable2Type = "int32";
+      deviceVariable2Type = "mbInt32";
       deviceVariable2Archived = false;
       deviceVariable2Value = 2;
 
       deviceVariable3Id = "0003";
-      deviceVariable3Type = "float";
+      deviceVariable3Type = "mbFloat";
       deviceVariable3Archived = false;
       deviceVariable3Value = 3;
 
       deviceVariable4Id = "0004";
-      deviceVariable4Type = "float";
+      deviceVariable4Type = "mbFloat";
       deviceVariable4Archived = false;
       deviceVariable4Value = 4.5;
 
       deviceVariable5Id = "0005";
-      deviceVariable5Type = "float";
+      deviceVariable5Type = "mbFloat";
       deviceVariable5Archived = false;
       deviceVariable5Value = 6.5;
 
@@ -1227,7 +1227,7 @@ describe("SumElement", () => {
         timeSample: 1,
         name: "variable1",
         offset: 1,
-        fCode: deviceVariable1Type === "boolean" ? 15 : 3
+        fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable2Payload = {
@@ -1238,7 +1238,7 @@ describe("SumElement", () => {
         timeSample: 2,
         name: "variable2",
         offset: 3,
-        fCode: deviceVariable2Type === "boolean" ? 15 : 3
+        fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable3Payload = {
@@ -1249,7 +1249,7 @@ describe("SumElement", () => {
         timeSample: 3,
         name: "variable3",
         offset: 5,
-        fCode: deviceVariable3Type === "boolean" ? 15 : 3
+        fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable4Payload = {
@@ -1260,7 +1260,7 @@ describe("SumElement", () => {
         timeSample: 4,
         name: "variable4",
         offset: 7,
-        fCode: deviceVariable4Type === "boolean" ? 15 : 3
+        fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable5Payload = {
@@ -1271,7 +1271,7 @@ describe("SumElement", () => {
         timeSample: 5,
         name: "variable5",
         offset: 9,
-        fCode: deviceVariable5Type === "boolean" ? 15 : 3
+        fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
       };
 
       devicePayload = {
@@ -1368,14 +1368,14 @@ describe("SumElement", () => {
     });
 
     it("should not throw but use 1 if one of variables is boolean and value is true", async () => {
-      deviceVariable1Type = "boolean";
+      deviceVariable1Type = "mbBoolean";
       deviceVariable1Value = true;
 
       let result = await exec();
 
       let sumOfAllValues = 0;
       for (let variableObject of Object.values(sumElement.Variables)) {
-        if (variableObject.variable.Type !== "boolean") {
+        if (variableObject.variable.Type !== "mbBoolean") {
           let variableValue = variableObject.variable.Value;
           let factor = variableObject.factor;
           sumOfAllValues += factor * variableValue;
@@ -1390,14 +1390,14 @@ describe("SumElement", () => {
     });
 
     it("should not throw but use 0 if one of variables is boolean and value is true", async () => {
-      deviceVariable1Type = "boolean";
+      deviceVariable1Type = "mbBoolean";
       deviceVariable1Value = false;
 
       let result = await exec();
 
       let sumOfAllValues = 0;
       for (let variableObject of Object.values(sumElement.Variables)) {
-        if (variableObject.variable.Type !== "boolean") {
+        if (variableObject.variable.Type !== "mbBoolean") {
           let variableValue = variableObject.variable.Value;
           let factor = variableObject.factor;
           sumOfAllValues += factor * variableValue;
@@ -1479,27 +1479,27 @@ describe("SumElement", () => {
       deviceId = "1234";
 
       deviceVariable1Id = "0001";
-      deviceVariable1Type = "int32";
+      deviceVariable1Type = "mbInt32";
       deviceVariable1Archived = false;
       deviceVariable1Value = 1;
 
       deviceVariable2Id = "0002";
-      deviceVariable2Type = "int32";
+      deviceVariable2Type = "mbInt32";
       deviceVariable2Archived = false;
       deviceVariable2Value = 2;
 
       deviceVariable3Id = "0003";
-      deviceVariable3Type = "float";
+      deviceVariable3Type = "mbFloat";
       deviceVariable3Archived = false;
       deviceVariable3Value = 3;
 
       deviceVariable4Id = "0004";
-      deviceVariable4Type = "float";
+      deviceVariable4Type = "mbFloat";
       deviceVariable4Archived = false;
       deviceVariable4Value = 4.5;
 
       deviceVariable5Id = "0005";
-      deviceVariable5Type = "float";
+      deviceVariable5Type = "mbFloat";
       deviceVariable5Archived = false;
       deviceVariable5Value = 6.5;
 
@@ -1532,7 +1532,7 @@ describe("SumElement", () => {
         timeSample: 1,
         name: "variable1",
         offset: 1,
-        fCode: deviceVariable1Type === "boolean" ? 15 : 3
+        fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable2Payload = {
@@ -1543,7 +1543,7 @@ describe("SumElement", () => {
         timeSample: 2,
         name: "variable2",
         offset: 3,
-        fCode: deviceVariable2Type === "boolean" ? 15 : 3
+        fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable3Payload = {
@@ -1554,7 +1554,7 @@ describe("SumElement", () => {
         timeSample: 3,
         name: "variable3",
         offset: 5,
-        fCode: deviceVariable3Type === "boolean" ? 15 : 3
+        fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable4Payload = {
@@ -1565,7 +1565,7 @@ describe("SumElement", () => {
         timeSample: 4,
         name: "variable4",
         offset: 7,
-        fCode: deviceVariable4Type === "boolean" ? 15 : 3
+        fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable5Payload = {
@@ -1576,7 +1576,7 @@ describe("SumElement", () => {
         timeSample: 5,
         name: "variable5",
         offset: 9,
-        fCode: deviceVariable5Type === "boolean" ? 15 : 3
+        fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
       };
 
       devicePayload = {
@@ -1732,27 +1732,27 @@ describe("SumElement", () => {
       deviceId = "1234";
 
       deviceVariable1Id = "0001";
-      deviceVariable1Type = "int32";
+      deviceVariable1Type = "mbInt32";
       deviceVariable1Archived = false;
       deviceVariable1Value = 1;
 
       deviceVariable2Id = "0002";
-      deviceVariable2Type = "int32";
+      deviceVariable2Type = "mbInt32";
       deviceVariable2Archived = false;
       deviceVariable2Value = 2;
 
       deviceVariable3Id = "0003";
-      deviceVariable3Type = "float";
+      deviceVariable3Type = "mbFloat";
       deviceVariable3Archived = false;
       deviceVariable3Value = 3;
 
       deviceVariable4Id = "0004";
-      deviceVariable4Type = "float";
+      deviceVariable4Type = "mbFloat";
       deviceVariable4Archived = false;
       deviceVariable4Value = 4.5;
 
       deviceVariable5Id = "0005";
-      deviceVariable5Type = "float";
+      deviceVariable5Type = "mbFloat";
       deviceVariable5Archived = false;
       deviceVariable5Value = 6.5;
 
@@ -1785,7 +1785,7 @@ describe("SumElement", () => {
         timeSample: 1,
         name: "variable1",
         offset: 1,
-        fCode: deviceVariable1Type === "boolean" ? 15 : 3
+        fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable2Payload = {
@@ -1796,7 +1796,7 @@ describe("SumElement", () => {
         timeSample: 2,
         name: "variable2",
         offset: 3,
-        fCode: deviceVariable2Type === "boolean" ? 15 : 3
+        fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable3Payload = {
@@ -1807,7 +1807,7 @@ describe("SumElement", () => {
         timeSample: 3,
         name: "variable3",
         offset: 5,
-        fCode: deviceVariable3Type === "boolean" ? 15 : 3
+        fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable4Payload = {
@@ -1818,7 +1818,7 @@ describe("SumElement", () => {
         timeSample: 4,
         name: "variable4",
         offset: 7,
-        fCode: deviceVariable4Type === "boolean" ? 15 : 3
+        fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
       };
 
       deviceVariable5Payload = {
@@ -1829,7 +1829,7 @@ describe("SumElement", () => {
         timeSample: 5,
         name: "variable5",
         offset: 9,
-        fCode: deviceVariable5Type === "boolean" ? 15 : 3
+        fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
       };
 
       devicePayload = {

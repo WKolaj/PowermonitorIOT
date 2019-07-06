@@ -17,7 +17,7 @@ describe("variables route", () => {
 
     testMBVariableEdition(
       "MBFloatVariable",
-      "float",
+      "mbFloat",
       123.321,
       3,
       3,

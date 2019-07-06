@@ -17,7 +17,7 @@ describe("variables route", () => {
 
     testMBVariableEdition(
       "MBInt32Variable",
-      "int32",
+      "mbInt32",
       123,
       3,
       3,

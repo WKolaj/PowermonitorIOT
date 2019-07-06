@@ -137,7 +137,7 @@ describe("variables route", () => {
       token = await dataAdmin.generateToken();
       deviceId = mbDevice.Id;
       variableBody = {
-        type: "byteArray",
+        type: "mbByteArray",
         name: "varialeTestName",
         timeSample: 1,
         value: [0, 1, 0, 1],

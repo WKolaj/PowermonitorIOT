@@ -21,7 +21,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 0,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -33,7 +33,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 0,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -45,7 +45,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -57,7 +57,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -69,7 +69,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -81,7 +81,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -93,7 +93,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "A",
         archiveTimeSample: 10
@@ -105,7 +105,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "A",
         archiveTimeSample: 10
@@ -117,7 +117,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "A",
         archiveTimeSample: 10
@@ -129,7 +129,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
         archiveTimeSample: 10
@@ -141,7 +141,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
         archiveTimeSample: 10
@@ -153,7 +153,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
         archiveTimeSample: 10
@@ -165,7 +165,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "W",
         archiveTimeSample: 10
@@ -177,7 +177,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "W",
         archiveTimeSample: 10
@@ -189,7 +189,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "W",
         archiveTimeSample: 10
@@ -201,7 +201,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "var",
         archiveTimeSample: 10
@@ -213,7 +213,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "var",
         archiveTimeSample: 10
@@ -225,7 +225,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "var",
         archiveTimeSample: 10
@@ -237,7 +237,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "",
         archiveTimeSample: 10
@@ -249,7 +249,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "",
         archiveTimeSample: 10
@@ -261,7 +261,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "",
         archiveTimeSample: 10
@@ -273,7 +273,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -285,7 +285,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -297,7 +297,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -309,7 +309,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 1,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -321,7 +321,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 2,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -333,7 +333,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -345,7 +345,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "Hz",
         archiveTimeSample: 10
@@ -357,7 +357,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -369,7 +369,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "V",
         archiveTimeSample: 10
@@ -381,7 +381,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "A",
         archiveTimeSample: 10
@@ -393,7 +393,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
         archiveTimeSample: 10
@@ -405,7 +405,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "W",
         archiveTimeSample: 10
@@ -417,7 +417,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "var",
         archiveTimeSample: 10
@@ -429,7 +429,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "",
         archiveTimeSample: 10
@@ -441,7 +441,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -453,7 +453,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "%",
         archiveTimeSample: 10
@@ -465,7 +465,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         unit: "Wh",
         archiveTimeSample: 60
@@ -477,7 +477,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "Wh",
         archiveTimeSample: 60
@@ -489,7 +489,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         unit: "Wh",
         archiveTimeSample: 60
@@ -501,7 +501,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "Wh",
         archiveTimeSample: 60
@@ -513,7 +513,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         unit: "varh",
         archiveTimeSample: 60
@@ -525,7 +525,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "varh",
         archiveTimeSample: 60
@@ -537,7 +537,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         unit: "varh",
         archiveTimeSample: 60
@@ -549,7 +549,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "varh",
         archiveTimeSample: 60
@@ -561,7 +561,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         unit: "VAh",
         archiveTimeSample: 60
@@ -573,7 +573,7 @@ class PAC2200TCP extends MBDeviceWithTemplate {
         length: 2,
         fCode: 3,
         value: 3,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: false,
         unit: "VAh",
         archiveTimeSample: 60

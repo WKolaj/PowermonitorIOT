@@ -3,7 +3,7 @@ const Project = require("../../../classes/project/Project");
 
 let MBSwappedFloatVariableCreateSchema = Joi.object().keys({
   type: Joi.string()
-    .valid("swappedFloat")
+    .valid("mbSwappedFloat")
     .required(),
   name: Joi.string()
     .min(3)

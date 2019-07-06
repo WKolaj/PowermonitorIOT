@@ -77,68 +77,11 @@ class ArchiveManager {
   }
 
   /**
-   * @description Method for getting column type of variable
-   * @param {object} variable
+   * @description Method for getting column type
+   * @param {object} element
    */
-  getColumnType(variable) {
-    switch (variable.Type) {
-      case "boolean": {
-        return "INTEGER";
-      }
-      case "float": {
-        return "REAL";
-      }
-      case "swappedFloat": {
-        return "REAL";
-      }
-      case "int16": {
-        return "INTEGER";
-      }
-      case "uInt16": {
-        return "INTEGER";
-      }
-      case "int32": {
-        return "INTEGER";
-      }
-      case "uInt32": {
-        return "INTEGER";
-      }
-      case "swappedInt32": {
-        return "INTEGER";
-      }
-      case "swappedUInt32": {
-        return "INTEGER";
-      }
-      default: {
-        throw new Error(
-          `Given variable type is not recognized: ${variable.Type}`
-        );
-      }
-    }
-  }
-
-  /**
-   * @description Method for getting column name based on variable
-   * @param {object} variable variable object
-   */
-  getColumnName(variable) {
-    return this.getColumnNameById(variable.Id);
-  }
-
-  /**
-   * @description Method for getting column name based on variable or calculation element id
-   * @param {string} variableId id of variable or calculation element
-   */
-  getColumnNameById(variableId) {
-    return `col_${variableId}`;
-  }
-
-  /**
-   * @description Method for getting column type on the basis of calculation element
-   * @param {object} calculationElement Calculation element
-   */
-  getColumnTypeCalculationElement(calculationElement) {
-    switch (calculationElement.ValueType) {
+  getColumnType(element) {
+    switch (element.ValueType) {
       case "boolean": {
         return "INTEGER";
       }
@@ -150,20 +93,26 @@ class ArchiveManager {
       }
       default: {
         throw new Error(
-          `Given variable type is not recognized: ${
-            calculationElement.ValueType
-          }`
+          `Given variable type is not recognized: ${element.ValueType}`
         );
       }
     }
   }
 
   /**
-   * @description Method for getting column name based on calculation element
-   * @param {object} calculationElement Calculation element
+   * @description Method for getting column name based on element
+   * @param {object} element variable object
    */
-  getColumnNameOfCalculationElement(calculationElement) {
-    return this.getColumnNameById(calculationElement.Id);
+  getColumnName(element) {
+    return this.getColumnNameById(element.Id);
+  }
+
+  /**
+   * @description Method for getting column name based on variable or calculation element id
+   * @param {string} elementId id of variable or calculation element
+   */
+  getColumnNameById(elementId) {
+    return `col_${elementId}`;
   }
 
   /**
@@ -314,12 +263,8 @@ class ArchiveManager {
         this.checkIfCalculationElementExists(calculationElement);
         this.checkIfBusy();
 
-        let columnType = this.getColumnTypeCalculationElement(
-          calculationElement
-        );
-        let columnName = this.getColumnNameOfCalculationElement(
-          calculationElement
-        );
+        let columnType = this.getColumnType(calculationElement);
+        let columnName = this.getColumnName(calculationElement);
 
         let doesColumnAlreadyExists = await this.doesColumnExist(columnName);
 

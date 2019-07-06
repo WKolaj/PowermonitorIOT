@@ -449,132 +449,10 @@ describe("ArchiveManager", () => {
     });
 
     let exec = async () => {
-      variable = { Type: variableType };
-      archiveManager = new ArchiveManager(fileName);
-      await archiveManager.init();
-      return archiveManager.getColumnType(variable);
-    };
-
-    it("should return INTEGER if variable type is boolean", async () => {
-      variableType = "boolean";
-      let result = await exec();
-
-      expect(result).toEqual("INTEGER");
-    });
-
-    it("should return REAL if variable type is float", async () => {
-      variableType = "float";
-      let result = await exec();
-
-      expect(result).toEqual("REAL");
-    });
-
-    it("should return REAL if variable type is swappedFloat", async () => {
-      variableType = "swappedFloat";
-      let result = await exec();
-
-      expect(result).toEqual("REAL");
-    });
-
-    it("should return INTEGER if variable type is int16", async () => {
-      variableType = "int16";
-      let result = await exec();
-
-      expect(result).toEqual("INTEGER");
-    });
-
-    it("should return INTEGER if variable type is uInt16", async () => {
-      variableType = "uInt16";
-      let result = await exec();
-
-      expect(result).toEqual("INTEGER");
-    });
-
-    it("should return INTEGER if variable type is int32", async () => {
-      variableType = "int32";
-      let result = await exec();
-
-      expect(result).toEqual("INTEGER");
-    });
-
-    it("should return INTEGER if variable type is uInt32", async () => {
-      variableType = "uInt32";
-      let result = await exec();
-
-      expect(result).toEqual("INTEGER");
-    });
-
-    it("should return INTEGER if variable type is swappedInt32", async () => {
-      variableType = "swappedInt32";
-      let result = await exec();
-
-      expect(result).toEqual("INTEGER");
-    });
-
-    it("should return INTEGER if variable type is swappedUInt32", async () => {
-      variableType = "swappedUInt32";
-      let result = await exec();
-
-      expect(result).toEqual("INTEGER");
-    });
-
-    it("should throw if type is not recognized", async () => {
-      variableType = "test type";
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).rejects.toBeDefined();
-    });
-  });
-
-  describe("getColumnName", () => {
-    let fileName;
-    let archiveManager;
-    let variableId;
-    let variable;
-
-    beforeEach(() => {
-      fileName = "testDB.db";
-      variableId = "1234";
-    });
-
-    let exec = async () => {
-      variable = { Id: variableId };
-      archiveManager = new ArchiveManager(fileName);
-      await archiveManager.init();
-      return archiveManager.getColumnName(variable);
-    };
-
-    it("should return col_id", async () => {
-      let result = await exec();
-
-      expect(result).toEqual(`col_${variableId}`);
-    });
-  });
-
-  describe("getColumnTypeCalculationElement", () => {
-    let fileName;
-    let archiveManager;
-    let variableType;
-    let variable;
-
-    beforeEach(() => {
-      fileName = "testDB.db";
-      variableType = "boolean";
-    });
-
-    let exec = async () => {
       variable = { ValueType: variableType };
       archiveManager = new ArchiveManager(fileName);
       await archiveManager.init();
-      return archiveManager.getColumnTypeCalculationElement(variable);
+      return archiveManager.getColumnType(variable);
     };
 
     it("should return INTEGER if variable type is boolean", async () => {
@@ -614,7 +492,7 @@ describe("ArchiveManager", () => {
     });
   });
 
-  describe("getColumnNameOfCalculationElement", () => {
+  describe("getColumnName", () => {
     let fileName;
     let archiveManager;
     let variableId;
@@ -629,7 +507,7 @@ describe("ArchiveManager", () => {
       variable = { Id: variableId };
       archiveManager = new ArchiveManager(fileName);
       await archiveManager.init();
-      return archiveManager.getColumnNameOfCalculationElement(variable);
+      return archiveManager.getColumnName(variable);
     };
 
     it("should return col_id", async () => {
@@ -727,9 +605,9 @@ describe("ArchiveManager", () => {
 
     beforeEach(() => {
       fileName = "testDB";
-      variable1 = { Id: "1234", Type: "float" };
-      variable2 = { Id: "1235", Type: "boolean" };
-      variable3 = { Id: "1236", Type: "int32" };
+      variable1 = { Id: "1234", ValueType: "float" };
+      variable2 = { Id: "1235", ValueType: "boolean" };
+      variable3 = { Id: "1236", ValueType: "integer" };
       variableId = "1235";
     });
 
@@ -771,7 +649,7 @@ describe("ArchiveManager", () => {
     beforeEach(() => {
       fileName = "testDB";
       variableId = "testColumn";
-      variableType = "int32";
+      variableType = "integer";
       columnNameToCheck = "col_" + variableId;
       archiveManagerInit = true;
       archiveManagerBusy = false;
@@ -780,7 +658,7 @@ describe("ArchiveManager", () => {
     let exec = async () => {
       variablePayload = {
         Id: variableId,
-        Type: variableType
+        ValueType: variableType
       };
 
       archiveManager = new ArchiveManager(fileName);
@@ -860,9 +738,9 @@ describe("ArchiveManager", () => {
 
     beforeEach(() => {
       fileName = "testDB";
-      variable1 = { Id: "1234", Type: "float" };
-      variable2 = { Id: "1235", Type: "boolean" };
-      variable3 = { Id: "1236", Type: "int32" };
+      variable1 = { Id: "1234", ValueType: "float" };
+      variable2 = { Id: "1235", ValueType: "boolean" };
+      variable3 = { Id: "1236", ValueType: "integer" };
       variableId = "1237";
     });
 
@@ -1012,7 +890,7 @@ describe("ArchiveManager", () => {
     });
 
     let exec = async () => {
-      variable = { Id: variableId, Type: variableType };
+      variable = { Id: variableId, ValueType: variableType };
       archiveManager = new ArchiveManager(fileName);
 
       if (initManager) {
@@ -1109,9 +987,9 @@ describe("ArchiveManager", () => {
 
     beforeEach(() => {
       fileName = "testDB";
-      variable1 = { Id: "1234", Type: "float" };
-      variable2 = { Id: "1235", Type: "boolean" };
-      variable3 = { Id: "1236", Type: "int32" };
+      variable1 = { Id: "1234", ValueType: "float" };
+      variable2 = { Id: "1235", ValueType: "boolean" };
+      variable3 = { Id: "1236", ValueType: "integer" };
       variableId = "1235";
     });
 
@@ -1351,12 +1229,12 @@ describe("ArchiveManager", () => {
 
     beforeEach(() => {
       fileName = "testDB";
-      variable1 = { Id: "1234", Type: "float" };
-      variable2 = { Id: "1235", Type: "boolean" };
-      variable3 = { Id: "1236", Type: "int32" };
-      variableInPayload1 = { Id: "1235", Type: "boolean" };
-      variableInPayload2 = { Id: "1236", Type: "int32" };
-      variableInPayload3 = { Id: "1237", Type: "swappedFloat" };
+      variable1 = { Id: "1234", ValueType: "float" };
+      variable2 = { Id: "1235", ValueType: "boolean" };
+      variable3 = { Id: "1236", ValueType: "integer" };
+      variableInPayload1 = { Id: "1235", ValueType: "boolean" };
+      variableInPayload2 = { Id: "1236", ValueType: "integer" };
+      variableInPayload3 = { Id: "1237", ValueType: "float" };
       calculationElement1 = { Id: "4321", ValueType: "float" };
       calculationElement2 = { Id: "4322", ValueType: "boolean" };
       calculationElement3 = { Id: "4323", ValueType: "integer" };
@@ -1416,9 +1294,9 @@ describe("ArchiveManager", () => {
     });
 
     it("should return empty object if none of variables and calculation elements are inside archiveManager", async () => {
-      variableInPayload1 = { Id: "1238", Type: "boolean" };
-      variableInPayload2 = { Id: "1239", Type: "int32" };
-      variableInPayload3 = { Id: "1240", Type: "swappedFloat" };
+      variableInPayload1 = { Id: "1238", ValueType: "boolean" };
+      variableInPayload2 = { Id: "1239", ValueType: "integer" };
+      variableInPayload3 = { Id: "1240", ValueType: "float" };
       calculationElementInPayload1 = { Id: "4328", ValueType: "boolean" };
       calculationElementInPayload2 = { Id: "4329", ValueType: "integer" };
       calculationElementInPayload3 = { Id: "4330", ValueType: "float" };
@@ -1600,10 +1478,10 @@ describe("ArchiveManager", () => {
       variable3Id = "1236";
       variable4Id = "1237";
 
-      variable1Type = "int32";
+      variable1Type = "integer";
       variable2Type = "float";
       variable3Type = "boolean";
-      variable4Type = "uInt32";
+      variable4Type = "integer";
 
       variable1Value = 1;
       variable2Value = 2.3;
@@ -1653,19 +1531,19 @@ describe("ArchiveManager", () => {
     let exec = async () => {
       variable1Payload = {
         Id: variable1Id,
-        Type: variable1Type
+        ValueType: variable1Type
       };
       variable2Payload = {
         Id: variable2Id,
-        Type: variable2Type
+        ValueType: variable2Type
       };
       variable3Payload = {
         Id: variable3Id,
-        Type: variable3Type
+        ValueType: variable3Type
       };
       variable4Payload = {
         Id: variable4Id,
-        Type: variable4Type
+        ValueType: variable4Type
       };
 
       calculationElement1Payload = {
@@ -2001,10 +1879,10 @@ describe("ArchiveManager", () => {
       variable3Id = "1236";
       variable4Id = "1237";
 
-      variable1Type = "int32";
+      variable1Type = "integer";
       variable2Type = "float";
       variable3Type = "boolean";
-      variable4Type = "uInt32";
+      variable4Type = "integer";
 
       variable2Value1 = 1.3;
       variable2Value2 = 1.4;
@@ -2059,19 +1937,19 @@ describe("ArchiveManager", () => {
     let exec = async () => {
       variable1Payload = {
         Id: variable1Id,
-        Type: variable1Type
+        ValueType: variable1Type
       };
       variable2Payload = {
         Id: variable2Id,
-        Type: variable2Type
+        ValueType: variable2Type
       };
       variable3Payload = {
         Id: variable3Id,
-        Type: variable3Type
+        ValueType: variable3Type
       };
       variable4Payload = {
         Id: variable4Id,
-        Type: variable4Type
+        ValueType: variable4Type
       };
       calculationElement1Payload = {
         Id: calculationElement1Id,

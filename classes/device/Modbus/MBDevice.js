@@ -181,34 +181,34 @@ class MBDevice extends Device {
       throw new Error(`Variable with id ${payload.id} already exists!`);
 
     switch (payload.type) {
-      case "boolean": {
+      case "mbBoolean": {
         return this._createBooleanVariable(payload);
       }
-      case "byteArray": {
+      case "mbByteArray": {
         return this._createByteArrayVariable(payload);
       }
-      case "float": {
+      case "mbFloat": {
         return this._createFloatVariable(payload);
       }
-      case "swappedFloat": {
+      case "mbSwappedFloat": {
         return this._createSwappedFloatVariable(payload);
       }
-      case "int16": {
+      case "mbInt16": {
         return this._createInt16Variable(payload);
       }
-      case "uInt16": {
+      case "mbUInt16": {
         return this._createUInt16Variable(payload);
       }
-      case "int32": {
+      case "mbInt32": {
         return this._createInt32Variable(payload);
       }
-      case "uInt32": {
+      case "mbUInt32": {
         return this._createUInt32Variable(payload);
       }
-      case "swappedInt32": {
+      case "mbSwappedInt32": {
         return this._createSwappedInt32Variable(payload);
       }
-      case "swappedUInt32": {
+      case "mbSwappedUInt32": {
         return this._createSwappedUInt32Variable(payload);
       }
       default: {

@@ -117,7 +117,7 @@ describe("MBSwappedFloatVariable", () => {
     it("should set Type to corresponding type", async () => {
       await exec();
 
-      expect(variable.Type).toEqual("swappedFloat");
+      expect(variable.Type).toEqual("mbSwappedFloat");
     });
   });
 

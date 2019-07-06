@@ -81,7 +81,7 @@ class CalculationElement {
   /**
    * @description Type name of calculation element
    */
-  get TypeName() {
+  get Type() {
     return this._getTypeName();
   }
 
@@ -268,7 +268,7 @@ class CalculationElement {
 
     payloadToReturn.id = this.Id;
     payloadToReturn.name = this.Name;
-    payloadToReturn.type = this.TypeName;
+    payloadToReturn.type = this.Type;
     payloadToReturn.archived = this.Archived;
     payloadToReturn.unit = this.Unit;
     payloadToReturn.sampleTime = this.SampleTime;

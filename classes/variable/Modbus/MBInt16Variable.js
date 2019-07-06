@@ -74,7 +74,7 @@ class MBInt16Variable extends MBVariable {
       payload.fCode === 3 || payload.fCode == 4 ? payload.fCode : 3;
 
     await super.init(payload);
-    this._type = "int16";
+    this._type = "mbInt16";
   }
 
   /**
@@ -113,6 +113,13 @@ class MBInt16Variable extends MBVariable {
     //Setting alwyas function 3 in case given fcode is write option - fcode 16
     payload.getSingleFCode = fCode === 3 || fCode == 4 ? fCode : 3;
     return super.editWithPayload(payload);
+  }
+
+  /**
+   * @description Method for generating type of value of variable
+   */
+  _getValueType() {
+    return "integer";
   }
 }
 

@@ -33,34 +33,34 @@ let validateCreate = function(req) {
       deviceType === "PAC4200TCP"
     ) {
       switch (req.body.type) {
-        case "boolean": {
+        case "mbBoolean": {
           return resolve(await MBBooleanVariableValidator.create(req));
         }
-        case "byteArray": {
+        case "mbByteArray": {
           return resolve(await MBByteArrayVariableValidator.create(req));
         }
-        case "float": {
+        case "mbFloat": {
           return resolve(await MBFloatVariableValidator.create(req));
         }
-        case "swappedFloat": {
+        case "mbSwappedFloat": {
           return resolve(await MBSwappedFloatVariableValidator.create(req));
         }
-        case "int16": {
+        case "mbInt16": {
           return resolve(await MBInt16VariableValidator.create(req));
         }
-        case "uInt16": {
+        case "mbUInt16": {
           return resolve(await MBUInt16VariableValidator.create(req));
         }
-        case "int32": {
+        case "mbInt32": {
           return resolve(await MBInt32VariableValidator.create(req));
         }
-        case "uInt32": {
+        case "mbUInt32": {
           return resolve(await MBUInt32VariableValidator.create(req));
         }
-        case "swappedInt32": {
+        case "mbSwappedInt32": {
           return resolve(await MBSwappedInt32VariableValidator.create(req));
         }
-        case "swappedUInt32": {
+        case "mbSwappedUInt32": {
           return resolve(await MBSwappedUInt32VariableValidator.create(req));
         }
         default: {
@@ -119,34 +119,34 @@ let validateEdit = function(req) {
       deviceType === "PAC2200TCP"
     ) {
       switch (variableType) {
-        case "boolean": {
+        case "mbBoolean": {
           return resolve(await MBBooleanVariableValidator.edit(req));
         }
-        case "byteArray": {
+        case "mbByteArray": {
           return resolve(await MBByteArrayVariableValidator.edit(req));
         }
-        case "float": {
+        case "mbFloat": {
           return resolve(await MBFloatVariableValidator.edit(req));
         }
-        case "swappedFloat": {
+        case "mbSwappedFloat": {
           return resolve(await MBSwappedFloatVariableValidator.edit(req));
         }
-        case "int16": {
+        case "mbInt16": {
           return resolve(await MBInt16VariableValidator.edit(req));
         }
-        case "uInt16": {
+        case "mbUInt16": {
           return resolve(await MBUInt16VariableValidator.edit(req));
         }
-        case "int32": {
+        case "mbInt32": {
           return resolve(await MBInt32VariableValidator.edit(req));
         }
-        case "uInt32": {
+        case "mbUInt32": {
           return resolve(await MBUInt32VariableValidator.edit(req));
         }
-        case "swappedInt32": {
+        case "mbSwappedInt32": {
           return resolve(await MBSwappedInt32VariableValidator.edit(req));
         }
-        case "swappedUInt32": {
+        case "mbSwappedUInt32": {
           return resolve(await MBSwappedUInt32VariableValidator.edit(req));
         }
         default: {

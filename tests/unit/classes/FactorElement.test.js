@@ -110,7 +110,7 @@ describe("FactorElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -265,7 +265,7 @@ describe("FactorElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -363,7 +363,7 @@ describe("FactorElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1
@@ -461,7 +461,7 @@ describe("FactorElement", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         archived: false,
-        type: "float",
+        type: "mbFloat",
         unit: "A",
         value: variableValue,
         timeSample: 1

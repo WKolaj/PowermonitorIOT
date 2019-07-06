@@ -126,7 +126,7 @@ describe("variables route", () => {
   });
 
   describe("UPDATE /:deviceId/:variableId", () => {
-    let variableTypeCreate = "byteArray";
+    let variableTypeCreate = "mbByteArray";
     let variableValueCreate = [0, 1, 0, 1];
     let variableFCodeCreate = 3;
     let variableLengthCreate = 2;

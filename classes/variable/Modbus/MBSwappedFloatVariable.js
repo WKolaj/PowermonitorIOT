@@ -91,7 +91,7 @@ class MBSwappedFloatVariable extends MBVariable {
 
     await super.init(payload);
 
-    this._type = "swappedFloat";
+    this._type = "mbSwappedFloat";
   }
 
   /**
@@ -130,6 +130,13 @@ class MBSwappedFloatVariable extends MBVariable {
     //Setting alwyas function 3 in case given fcode is write option - fcode 16
     payload.getSingleFCode = fCode === 3 || fCode == 4 ? fCode : 3;
     return super.editWithPayload(payload);
+  }
+
+  /**
+   * @description Method for generating type of value of variable
+   */
+  _getValueType() {
+    return "float";
   }
 }
 

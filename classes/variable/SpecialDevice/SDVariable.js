@@ -1,5 +1,4 @@
 const Variable = require("../Variable");
-const Project = require("../../project/Project");
 const { exists } = require("../../../utilities/utilities");
 
 class SDVariable extends Variable {
@@ -9,6 +8,13 @@ class SDVariable extends Variable {
    */
   constructor(device) {
     super(device);
+
+    //Assigning project to comm interface - as a new object
+    this._commInterface = require("../../commInterface/CommInterface");
+  }
+
+  get CommInterface() {
+    return this._commInterface;
   }
 
   /**
@@ -23,25 +29,34 @@ class SDVariable extends Variable {
     if (!exists(payload.elementId))
       throw new Error("elementId cannot be empty");
 
-    //Checking if element exists
     if (
-      !Project.CurrentProject.CommInterface.doesElementExist(
-        elementDeviceId,
-        elementId
+      !this.CommInterface.doesElementExist(
+        payload.elementDeviceId,
+        payload.elementId
       )
     )
       throw new Error(
-        `element of id ${elementDeviceId} in device ${elementId} cannot be empty`
+        `Element of id ${payload.elementId} does not exist in device of id ${
+          payload.elementDeviceId
+        }`
       );
 
     this._elementDeviceId = payload.elementDeviceId;
     this._elementId = payload.elementId;
-    this._element = Project.CurrentProject.CommInterface.getEl;
+    this._element = this.CommInterface.getElement(
+      this.ElementDeviceId,
+      this.ElementId
+    );
   }
 
-  /**
-   * @description Element connected to variable
-   */
+  get ElementDeviceId() {
+    return this._elementDeviceId;
+  }
+
+  get ElementId() {
+    return this._elementId;
+  }
+
   get Element() {
     return this._element;
   }
@@ -57,7 +72,7 @@ class SDVariable extends Variable {
    * @description Private method called to set value on the basis of new value
    */
   _setValue(value) {
-    return (this.Element.Value = value);
+    this.Element.Value = value;
   }
 
   /**
@@ -66,74 +81,58 @@ class SDVariable extends Variable {
   _generatePayload() {
     let payload = super._generatePayload();
 
-    payload.deviceId = this.Offset;
-    payload.length = this.Length;
+    payload.elementDeviceId = this.ElementDeviceId;
+    payload.elementId = this.ElementId;
 
     return payload;
   }
 
   /**
+   * @description Method for edition of variable associated with changes with connection to element
+   * @param {object} payload Payload of edition
+   */
+  _editElementAssignment(payload) {
+    //Editing element if edition is associated with changes of deviceId or elementId
+    if (exists(payload.elementDeviceId) || exists(payload.elementId)) {
+      //Calculation new ids based on payload
+      let newElementDeviceId = exists(payload.elementDeviceId)
+        ? payload.elementDeviceId
+        : this.ElementDeviceId;
+      let newElementId = exists(payload.newElementId)
+        ? payload.newElementId
+        : this.ElementId;
+
+      //Checking if element of given ids exists
+      if (
+        !this.CommInterface.doesElementExist(newElementDeviceId, newElementId)
+      )
+        throw new Error(
+          `Element of id ${newElementId} does not exist in device of id ${newElementDeviceId}`
+        );
+
+      this._elementDeviceId = newElementDeviceId;
+      this._elementId = newElementId;
+      this._element = this.CommInterface.getElement(
+        this.ElementDeviceId,
+        this.ElementId
+      );
+    }
+  }
+
+  /**
    * @description Method for editting variable based on given payload
    */
-  editWithPayload(payload) {
-    //Controlling if functions are possible
-    let allPossibleFCodes = this._getPossibleFCodes();
-
-    if (payload.fCode && !allPossibleFCodes.includes(payload.fCode))
-      throw new Error(
-        `Fcode ${payload.fCode} cannot be applied to given variable`
-      );
-
-    if (
-      payload.setSingleFCode &&
-      !allPossibleFCodes.includes(payload.setSingleFCode)
-    )
-      throw new Error(
-        `Fcode ${payload.setSingleFCode} cannot be applied to given variable`
-      );
-
-    if (
-      payload.getSingleFCode &&
-      !allPossibleFCodes.includes(payload.getSingleFCode)
-    )
-      throw new Error(
-        `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
-      );
-
-    super.editWithPayload(payload);
-
-    if (payload.offset) {
-      this._offset = payload.offset;
-    }
-    if (payload.length) {
-      this._length = payload.length;
-    }
-    if (payload.fCode) {
-      this._fcode = payload.fCode;
-    }
-    if (payload.value !== undefined) {
-      this.Value = payload.value;
-    }
-    if (payload.getSingleFCode) {
-      this._getSingleFCode = payload.getSingleFCode;
-      this._getSingleRequest = new MBRequest(
-        this.Device.MBDriver,
-        payload.getSingleFCode,
-        this.Device.UnitId
-      );
-      this._getSingleRequest.addVariable(this);
-    }
-    if (payload.setSingleFCode) {
-      this._setSingleFCode = payload.setSingleFCode;
-      this._setSingleRequest = new MBRequest(
-        this.Device.MBDriver,
-        payload.setSingleFCode,
-        this.Device.UnitId
-      );
-      this._setSingleRequest.addVariable(this);
-    }
-
+  async editWithPayload(payload) {
+    await super.editWithPayload(payload);
+    this._editElementAssignment(payload);
     return this;
+  }
+
+  /**
+   * @description Method for generating type of value of variable
+   */
+  _getValueType() {
+    return this.Element.Type;
   }
 }
 

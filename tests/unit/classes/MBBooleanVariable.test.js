@@ -118,7 +118,7 @@ describe("MBBooleanVariable", () => {
     it("should set Type to corresponding type", async () => {
       await exec();
 
-      expect(variable.Type).toEqual("boolean");
+      expect(variable.Type).toEqual("mbBoolean");
     });
   });
 

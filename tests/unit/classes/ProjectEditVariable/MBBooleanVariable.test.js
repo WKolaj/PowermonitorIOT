@@ -53,7 +53,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 3,
         value: 1,
-        type: "int16",
+        type: "mbInt16",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -68,7 +68,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 2,
-        type: "int32",
+        type: "mbInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -83,7 +83,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 3.3,
-        type: "float",
+        type: "mbFloat",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -151,7 +151,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 1,
         value: true,
-        type: "boolean",
+        type: "mbBoolean",
         archived: true,
         getSingleFCode: 1,
         setSingleFCode: 15,
@@ -166,7 +166,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 5,
-        type: "swappedInt32",
+        type: "mbSwappedInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -181,7 +181,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 16,
         value: 6.6,
-        type: "swappedFloat",
+        type: "mbSwappedFloat",
         archived: true,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -208,7 +208,7 @@ let testPayload = JSON.stringify({
         length: 1,
         fCode: 3,
         value: 7,
-        type: "uInt16",
+        type: "mbUInt16",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -223,7 +223,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 4,
         value: 8,
-        type: "swappedUInt32",
+        type: "mbSwappedUInt32",
         archived: true,
         getSingleFCode: 4,
         setSingleFCode: 16,
@@ -238,7 +238,7 @@ let testPayload = JSON.stringify({
         length: 2,
         fCode: 3,
         value: 9,
-        type: "uInt32",
+        type: "mbUInt32",
         archived: false,
         getSingleFCode: 3,
         setSingleFCode: 16,
@@ -436,7 +436,7 @@ describe("Project", () => {
       createPayload.fCode = 3;
       createPayload.getSingleFCode = 3;
       createPayload.setSingleFCode = 16;
-      createPayload.type = "byteArray";
+      createPayload.type = "mbByteArray";
       createPayload.value = [0, 0, 0, 0];
       createPayload.archiveTimeSample = 5;
 
@@ -451,7 +451,7 @@ describe("Project", () => {
       editPayload.fCode = 4;
       editPayload.getSingleFCode = 4;
       editPayload.setSingleFCode = 16;
-      editPayload.type = "byteArray";
+      editPayload.type = "mbByteArray";
       editPayload.value = [0, 1, 0, 1, 0, 1, 0, 1];
       editPayload.archiveTimeSample = 10;
 
@@ -904,7 +904,7 @@ describe("Project", () => {
       [1],
       15,
       1,
-      "boolean",
+      "mbBoolean",
       false,
       true
     );

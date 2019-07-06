@@ -235,6 +235,20 @@ class Variable {
     //returning edited variable
     return this;
   }
+
+  /**
+   * @description Method for generating type name that represents value type of variable
+   */
+  _getValueType() {
+    throw new Error("Method not implemented");
+  }
+
+  /**
+   * @description Value type name of calculation element
+   */
+  get ValueType() {
+    return this._getValueType();
+  }
 }
 
 module.exports = Variable;

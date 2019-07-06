@@ -17,7 +17,7 @@ describe("variables route", () => {
 
     testMBVariableCreation(
       "MBSwappedUInt32Variable",
-      "swappedUInt32",
+      "mbSwappedUInt32",
       123,
       3,
       3,

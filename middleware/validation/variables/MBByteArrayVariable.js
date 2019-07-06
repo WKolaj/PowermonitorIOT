@@ -3,7 +3,7 @@ const Project = require("../../../classes/project/Project");
 
 let MBByteArrayVariableCreateSchema = Joi.object().keys({
   type: Joi.string()
-    .valid("byteArray")
+    .valid("mbByteArray")
     .required(),
   name: Joi.string()
     .min(3)

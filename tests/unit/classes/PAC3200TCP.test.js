@@ -134,7 +134,7 @@ describe("PAC3200TCP", () => {
         );
         expect(element.Factor).toEqual(elPayload.factor);
         expect(element.Archived).toEqual(elPayload.archived);
-        expect(element.TypeName).toEqual(elPayload.type);
+        expect(element.Type).toEqual(elPayload.type);
       }
     });
 

@@ -32,7 +32,7 @@ class MBBooleanVariable extends MBVariable {
 
     await super.init(payload);
 
-    this._type = "boolean";
+    this._type = "mbBoolean";
   }
 
   /**
@@ -69,6 +69,13 @@ class MBBooleanVariable extends MBVariable {
     payload.getSingleFCode = fCode === 1 || fCode == 2 ? fCode : 1;
     payload.setSingleFCode = 15;
     return super.editWithPayload(payload);
+  }
+
+  /**
+   * @description Method for generating type of value of variable
+   */
+  _getValueType() {
+    return "boolean";
   }
 }
 

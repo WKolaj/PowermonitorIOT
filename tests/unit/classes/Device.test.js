@@ -538,12 +538,14 @@ describe("Device", () => {
     let variable;
     let variableId;
     let variableType;
+    let variableValueType;
     let variableArchived;
     let payload;
 
     beforeEach(() => {
       name = "test name";
-      variableType = "int32";
+      variableType = "mbInt32";
+      variableValueType = "integer";
       variableArchived = true;
       variableId = "test_variable";
     });
@@ -552,6 +554,7 @@ describe("Device", () => {
       variable = {
         Id: variableId,
         Type: variableType,
+        ValueType: variableValueType,
         Archived: variableArchived
       };
       payload = { name: name };
@@ -639,7 +642,7 @@ describe("Device", () => {
     });
 
     it("should create new column with Integer type in database file based on variable id and variable Integer type", async () => {
-      variableType = "int32";
+      variableValueType = "integer";
       variableArchived = true;
 
       await exec();
@@ -656,7 +659,7 @@ describe("Device", () => {
     });
 
     it("should create new column with REAL type in database file based on variable id and variable Float type", async () => {
-      variableType = "float";
+      variableValueType = "float";
       variableArchived = true;
 
       await exec();
@@ -673,7 +676,7 @@ describe("Device", () => {
     });
 
     it("should create new column with INTEGER type in database file based on variable id and variable Boolean type", async () => {
-      variableType = "boolean";
+      variableValueType = "boolean";
       variableArchived = true;
 
       await exec();
@@ -714,13 +717,15 @@ describe("Device", () => {
     let variable;
     let variableId;
     let variableType;
+    let variableValueType;
     let variableArchived;
     let payload;
 
     beforeEach(() => {
       name = "test name";
       variableId = "testVariable";
-      variableType = "int32";
+      variableValueType = "integer";
+      variableType = "mbInt32";
       variableArchived = false;
     });
 
@@ -728,6 +733,7 @@ describe("Device", () => {
       variable = {
         Id: variableId,
         Type: variableType,
+        ValueType: variableValueType,
         Archived: variableArchived
       };
 
@@ -1151,6 +1157,7 @@ describe("Device", () => {
     let variable;
     let variableId;
     let variableType;
+    let variableValueType;
     let variableArchived;
     let payload;
     let tickNumber;
@@ -1167,7 +1174,8 @@ describe("Device", () => {
     beforeEach(() => {
       name = "test name";
       variableId = "testVariable";
-      variableType = "int32";
+      variableType = "mbInt32";
+      variableValueType = "integer";
       variableArchived = true;
       tickNumber = 1234;
       archiveValue = 9876;
@@ -1182,6 +1190,7 @@ describe("Device", () => {
       variable = {
         Id: variableId,
         Type: variableType,
+        ValueType: variableValueType,
         Archived: variableArchived,
         Value: archiveValue,
         ArchiveTickId: archiveTimeSample
@@ -1201,7 +1210,7 @@ describe("Device", () => {
 
         variable2 = {
           Id: variableId,
-          Type: variableType,
+          ValueType: variableType,
           Archived: variableArchived,
           Value: archiveSecondValue,
           ArchiveTickId: 1
