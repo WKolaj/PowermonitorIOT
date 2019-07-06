@@ -1,6 +1,6 @@
 {
   "name": "powermonitoriot",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Application for monitoring low voltage cabinetts",
   "main": "index.js",
   "scripts": {

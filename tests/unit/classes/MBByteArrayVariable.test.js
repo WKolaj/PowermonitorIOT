@@ -46,7 +46,7 @@ describe("MBByteArrayVariable", () => {
       length = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -57,8 +57,8 @@ describe("MBByteArrayVariable", () => {
       return variable.init(payload);
     };
 
-    it("should create new MBByteArray based on given arguments", () => {
-      exec();
+    it("should create new MBByteArray based on given arguments", async () => {
+      await exec();
 
       expect(variable.Name).toEqual(name);
       expect(variable.FCode).toEqual(fcode);
@@ -66,38 +66,55 @@ describe("MBByteArrayVariable", () => {
       expect(variable.Length).toEqual(length);
     });
 
-    it("should throw if payload is empty", () => {
-      expect(() => {
-        variable = new MBByteArrayVariable(device);
-        variable.init();
-      }).toThrow();
+    it("should throw if payload is empty", async () => {
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            variable = new MBByteArrayVariable(device);
+            await variable.init();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should set default value if value is not given in payload", () => {
-      exec();
+    it("should set default value if value is not given in payload", async () => {
+      await exec();
 
       expect(variable.Value).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
     });
 
-    it("should throw if fcode is no associated with byte variable - fCode 1", () => {
+    it("should throw if fcode is no associated with byte variable - fCode 1", async () => {
       fcode = 1;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            variable = new MBByteArrayVariable(device);
+            await variable.init();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should set GetSingleFCode = 3", () => {
-      exec();
+    it("should set GetSingleFCode = 3", async () => {
+      await exec();
 
       expect(variable.GetSingleFCode).toEqual(3);
     });
 
-    it("should set SetSingleFCode = 16", () => {
-      exec();
+    it("should set SetSingleFCode = 16", async () => {
+      await exec();
 
       expect(variable.SetSingleFCode).toEqual(16);
     });
 
-    it("should set Type to corresponding type", () => {
-      exec();
+    it("should set Type to corresponding type", async () => {
+      await exec();
 
       expect(variable.Type).toEqual("byteArray");
     });
@@ -126,7 +143,7 @@ describe("MBByteArrayVariable", () => {
       length = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -134,12 +151,12 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._getPossibleFCodes();
     };
 
-    it("should return all fCodes associated with byte operations", () => {
-      let result = exec();
+    it("should return all fCodes associated with byte operations", async () => {
+      let result = await exec();
 
       expect(result.length).toEqual(3);
       expect(result).toContain(3);
@@ -173,7 +190,7 @@ describe("MBByteArrayVariable", () => {
       dataToConvert = [513, 2052, 8208, 32832];
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -181,12 +198,12 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
-    it("should convert data to value and return it", () => {
-      let result = exec();
+    it("should convert data to value and return it", async () => {
+      let result = await exec();
 
       expect(result).toEqual([1, 2, 4, 8, 16, 32, 64, 128]);
     });
@@ -217,7 +234,7 @@ describe("MBByteArrayVariable", () => {
       length = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -225,12 +242,12 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
-    it("should convert value to data and return it", () => {
-      let result = exec();
+    it("should convert value to data and return it", async () => {
+      let result = await exec();
 
       expect(result).toEqual([513, 2052, 8208, 32832]);
     });
@@ -246,7 +263,7 @@ describe("MBByteArrayVariable", () => {
     let byteToCheck;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       device = {
         UnitId: 2,
         MBDriver: {
@@ -267,10 +284,10 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
     });
 
-    it("should get bit value of variable based on bit number", () => {
+    it("should get bit value of variable based on bit number", async () => {
       expect(mbVariable._getBit(byteToCheck, 0)).toBeTruthy();
       expect(mbVariable._getBit(byteToCheck, 1)).toBeFalsy();
       expect(mbVariable._getBit(byteToCheck, 2)).toBeTruthy();
@@ -291,7 +308,7 @@ describe("MBByteArrayVariable", () => {
     let byteToSet;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       device = {
         UnitId: 2,
         MBDriver: {
@@ -311,10 +328,10 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
     });
 
-    it("should return value with given bit set", () => {
+    it("should return value with given bit set", async () => {
       expect(mbVariable._setBit(byteToSet, 0)).toEqual(1);
       expect(mbVariable._setBit(byteToSet, 1)).toEqual(2);
       expect(mbVariable._setBit(byteToSet, 2)).toEqual(4);
@@ -335,7 +352,7 @@ describe("MBByteArrayVariable", () => {
     let byteToClear;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       device = {
         UnitId: 2,
         MBDriver: {
@@ -355,10 +372,10 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
     });
 
-    it("should return value with given bit cleared", () => {
+    it("should return value with given bit cleared", async () => {
       expect(mbVariable._clearBit(byteToClear, 0)).toEqual(254);
       expect(mbVariable._clearBit(byteToClear, 1)).toEqual(253);
       expect(mbVariable._clearBit(byteToClear, 2)).toEqual(251);
@@ -380,7 +397,7 @@ describe("MBByteArrayVariable", () => {
     let valueToSet;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       device = {
         UnitId: 2,
         MBDriver: {
@@ -404,11 +421,11 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
-    it("should get bit value of variable based on byte number and bit number", () => {
+    it("should get bit value of variable based on byte number and bit number", async () => {
       expect(mbVariable.getBit(0, 0)).toEqual(true);
       expect(mbVariable.getBit(0, 1)).toEqual(false);
       expect(mbVariable.getBit(0, 2)).toEqual(true);
@@ -457,7 +474,7 @@ describe("MBByteArrayVariable", () => {
     let valueToSet;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       device = {
         UnitId: 2,
         MBDriver: {
@@ -477,11 +494,11 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
-    it("should set bit value of variable based on byte number and bit number", () => {
+    it("should set bit value of variable based on byte number and bit number", async () => {
       mbVariable.setBit(0, 0);
       expect(mbVariable.Value).toEqual([1, 0, 0, 0]);
       mbVariable.setBit(0, 1);
@@ -562,7 +579,7 @@ describe("MBByteArrayVariable", () => {
     let valueToSet;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       device = {
         UnitId: 2,
         MBDriver: {
@@ -582,11 +599,11 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
-    it("should clear bit value of variable based on byte number and bit number", () => {
+    it("should clear bit value of variable based on byte number and bit number", async () => {
       mbVariable.clearBit(0, 0);
       expect(mbVariable.Value).toEqual([254, 255, 255, 255]);
       mbVariable.clearBit(0, 1);
@@ -667,7 +684,7 @@ describe("MBByteArrayVariable", () => {
     let valueToSet;
     let payload;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       device = {
         UnitId: 2,
         MBDriver: {
@@ -691,7 +708,7 @@ describe("MBByteArrayVariable", () => {
         length: length
       };
       mbVariable = new MBByteArrayVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable.Value = valueToSet;
     });
 
@@ -699,8 +716,8 @@ describe("MBByteArrayVariable", () => {
       return mbVariable.convertToBits();
     };
 
-    it("should get bit value of variable based on byte number and bit number", () => {
-      let result = exec();
+    it("should get bit value of variable based on byte number and bit number", async () => {
+      let result = await exec();
 
       expect(result).toEqual([
         true,
@@ -794,7 +811,7 @@ describe("MBByteArrayVariable", () => {
       editSetSingleFCode = 16;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         id: id,
         name: name,
@@ -811,7 +828,7 @@ describe("MBByteArrayVariable", () => {
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
       variable = new MBByteArrayVariable(device);
-      variable.init(payload);
+      await variable.init(payload);
 
       editPayload = {
         id: editId,
@@ -828,17 +845,26 @@ describe("MBByteArrayVariable", () => {
       return variable.editWithPayload(editPayload);
     };
 
-    it("should return edited variable", () => {
-      let result = exec();
+    it("should return edited variable", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result).toEqual(variable);
     });
 
-    it("should throw and not change anything if given id is different than id of variable", () => {
+    it("should throw and not change anything if given id is different than id of variable", async () => {
       editId = "corruptId";
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -852,10 +878,19 @@ describe("MBByteArrayVariable", () => {
       expect(variable.Value).toEqual(payload.value);
     });
 
-    it("should throw and not change anything if fCode number is invalid", () => {
+    it("should throw and not change anything if fCode number is invalid", async () => {
       editFCode = 9999;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -869,8 +904,8 @@ describe("MBByteArrayVariable", () => {
       expect(variable.Value).toEqual(payload.value);
     });
 
-    it("should edit variable with appropriate parameters if all parameters are passed", () => {
-      let result = exec();
+    it("should edit variable with appropriate parameters if all parameters are passed", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -886,7 +921,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should generate identical variable with payload with appropriate parameters if only timeSample", () => {
+    it("should generate identical variable with payload with appropriate parameters if only timeSample", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -896,7 +931,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -912,7 +947,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with timeSample equal to timeSample given in payload", () => {
+    it("should generate variable with timeSample equal to timeSample given in payload", async () => {
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -921,7 +956,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -937,7 +972,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Name equal to Name given in payload", () => {
+    it("should generate variable with Name equal to Name given in payload", async () => {
       editTimeSample = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -946,7 +981,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -962,7 +997,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Offset equal to Offset given in payload", () => {
+    it("should generate variable with Offset equal to Offset given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editLength = undefined;
@@ -971,7 +1006,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -987,7 +1022,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should generate variable with Length equal to Length given in payload - and set value to [0,0...,0] if it doesn't correspond to given length", () => {
+    it("should generate variable with Length equal to Length given in payload - and set value to [0,0...,0] if it doesn't correspond to given length", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -996,7 +1031,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1012,7 +1047,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual([0, 0, 0, 0, 0, 0]);
     });
 
-    it("should generate variable with Length equal to Length given in payload - and leave value if it corresponds to given length", () => {
+    it("should generate variable with Length equal to Length given in payload - and leave value if it corresponds to given length", async () => {
       editLength = 2;
       editTimeSample = undefined;
       editName = undefined;
@@ -1022,7 +1057,7 @@ describe("MBByteArrayVariable", () => {
       editSetSingleFCode = undefined;
       editValue = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1038,7 +1073,7 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(variable.Value);
     });
 
-    it("should generate variable with FCode equal to FCode given in payload", () => {
+    it("should generate variable with FCode equal to FCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -1047,7 +1082,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1064,15 +1099,15 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set GetSingleFCode to correspond fcode - despite value in payload", () => {
+    it("should alwyas set GetSingleFCode to correspond fcode - despite value in payload", async () => {
       editGetSingleFCode = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.GetSingleFCode).toEqual(editFCode);
     });
 
-    it("should generate variable with Value equal to Value given in payload if length of variable is ok", () => {
+    it("should generate variable with Value equal to Value given in payload if length of variable is ok", async () => {
       editValue = [5, 6, 7, 8];
       editTimeSample = undefined;
       editName = undefined;
@@ -1082,7 +1117,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1098,15 +1133,15 @@ describe("MBByteArrayVariable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should alwyas set SetSingleFCode to 16 - despite value in payload", () => {
+    it("should alwyas set SetSingleFCode to 16 - despite value in payload", async () => {
       editSetSingleFCode = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.SetSingleFCode).toEqual(16);
     });
 
-    it("should generate variable with SetSingleFCode equal to SetSingleFCode given in payload", () => {
+    it("should generate variable with SetSingleFCode equal to SetSingleFCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -1115,7 +1150,7 @@ describe("MBByteArrayVariable", () => {
       editGetSingleFCode = undefined;
       editValue = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);

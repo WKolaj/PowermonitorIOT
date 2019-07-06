@@ -19,7 +19,7 @@ class Variable {
    * @description Method for initializing variable by payload
    * @param {object} payload variable payload
    */
-  init(payload) {
+  async init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     if (!payload.name) throw new Error("Payload Name cannot be empty");
     this._name = payload.name;
@@ -217,7 +217,7 @@ class Variable {
   /**
    * @description Method for editing variable based on given payload
    */
-  editWithPayload(payload) {
+  async editWithPayload(payload) {
     //Coping all neccessary data to payload
     if (payload.id && payload.id !== this.Id)
       throw new Error(

@@ -81,7 +81,7 @@ class MBFloatVariable extends MBVariable {
    * @description Method for initializing variable by payload
    * @param {object} payload variable payload
    */
-  init(payload) {
+  async init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 2;
     payload.setSingleFCode = 16;
@@ -89,7 +89,7 @@ class MBFloatVariable extends MBVariable {
     payload.getSingleFCode =
       payload.fCode === 3 || payload.fCode == 4 ? payload.fCode : 3;
 
-    super.init(payload);
+    await super.init(payload);
 
     this._type = "float";
   }

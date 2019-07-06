@@ -44,7 +44,7 @@ describe("MBInt32Variable", () => {
       offset = 1;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -54,50 +54,68 @@ describe("MBInt32Variable", () => {
       return variable.init(payload);
     };
 
-    it("should throw if payload is empty", () => {
-      variable = new MBInt32Variable(device, payload);
-      expect(() => variable.init()).toThrow();
+    it("should throw if payload is empty", async () => {
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            variable = new MBInt32Variable(device, payload);
+            await variable.init();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should init new MBBoleanVariable based on given arguments", () => {
-      exec();
+    it("should init new MBBoleanVariable based on given arguments", async () => {
+      await exec();
 
       expect(variable.Name).toEqual(name);
       expect(variable.FCode).toEqual(fcode);
       expect(variable.Offset).toEqual(offset);
     });
 
-    it("should set length to 2", () => {
-      exec();
+    it("should set length to 2", async () => {
+      await exec();
 
       expect(variable.Length).toEqual(2);
     });
 
-    it("should set default value if value is not given in payload", () => {
-      let result = exec();
+    it("should set default value if value is not given in payload", async () => {
+      let result = await exec();
 
       expect(variable.Value).toEqual(0);
     });
 
-    it("should throw if fcode is no associated with boolean variable - fCode 3", () => {
+    it("should throw if fcode is no associated with boolean variable - fCode 3", async () => {
       fcode = 1;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should set GetSingleFCode = 3", () => {
-      exec();
+    it("should set GetSingleFCode = 3", async () => {
+      await exec();
 
       expect(variable.GetSingleFCode).toEqual(3);
     });
 
-    it("should set SetSingleFCode = 16", () => {
-      exec();
+    it("should set SetSingleFCode = 16", async () => {
+      await exec();
 
       expect(variable.SetSingleFCode).toEqual(16);
     });
 
-    it("should set Type to corresponding type", () => {
-      exec();
+    it("should set Type to corresponding type", async () => {
+      await exec();
 
       expect(variable.Type).toEqual("int32");
     });
@@ -124,7 +142,7 @@ describe("MBInt32Variable", () => {
       offset = 1;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -132,12 +150,12 @@ describe("MBInt32Variable", () => {
       };
 
       mbVariable = new MBInt32Variable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._getPossibleFCodes();
     };
 
-    it("should return all fCodes associated with analog operations", () => {
-      let result = exec();
+    it("should return all fCodes associated with analog operations", async () => {
+      let result = await exec();
 
       expect(result.length).toEqual(3);
       expect(result).toContain(3);
@@ -172,7 +190,7 @@ describe("MBInt32Variable", () => {
       dataToConvert = [1234, 5678];
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -180,23 +198,23 @@ describe("MBInt32Variable", () => {
       };
 
       mbVariable = new MBInt32Variable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
-    it("should convert data to value and return it", () => {
-      let result = exec();
+    it("should convert data to value and return it", async () => {
+      let result = await exec();
 
       expect(result).toEqual(372114642);
     });
 
-    it("should be able to covert negative values", () => {
+    it("should be able to covert negative values", async () => {
       //65535 => -1 * 65535
       //1234 => + 1234
       // -64302
       dataToConvert = [1234, 65535];
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toEqual(-64302);
     });
@@ -225,26 +243,26 @@ describe("MBInt32Variable", () => {
       valueToConvert = 372114642;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
         offset: offset
       };
       mbVariable = new MBInt32Variable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
-    it("should convert value to data and return it", () => {
-      let result = exec();
+    it("should convert value to data and return it", async () => {
+      let result = await exec();
       //console.log(result);
       expect(result).toEqual([1234, 5678]);
     });
 
-    it("should be able to convert negative values", () => {
+    it("should be able to convert negative values", async () => {
       valueToConvert = -64302;
-      let result = exec();
+      let result = await exec();
 
       expect(result).toEqual([1234, 65535]);
     });
@@ -305,7 +323,7 @@ describe("MBInt32Variable", () => {
       editSetSingleFCode = 16;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         id: id,
         name: name,
@@ -322,7 +340,7 @@ describe("MBInt32Variable", () => {
       getValueMockFunction = jest.fn().mockReturnValue(value);
 
       variable = new MBInt32Variable(device, payload);
-      variable.init(payload);
+      await variable.init(payload);
 
       editPayload = {
         id: editId,
@@ -339,15 +357,15 @@ describe("MBInt32Variable", () => {
       return variable.editWithPayload(editPayload);
     };
 
-    it("should return edited variable", () => {
-      let result = exec();
+    it("should return edited variable", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result).toEqual(variable);
     });
 
-    it("should edit variable with payload with appropriate parameters if all parameters are passed", () => {
-      let result = exec();
+    it("should edit variable with payload with appropriate parameters if all parameters are passed", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -363,10 +381,19 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should throw and not change anything if given id is different than id of variable", () => {
+    it("should throw and not change anything if given id is different than id of variable", async () => {
       editId = "corruptId";
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -380,10 +407,19 @@ describe("MBInt32Variable", () => {
       expect(variable.Value).toEqual(payload.value);
     });
 
-    it("should throw and not change anything if fCode number is invalid", () => {
+    it("should throw and not change anything if fCode number is invalid", async () => {
       editFCode = 9999;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -397,7 +433,7 @@ describe("MBInt32Variable", () => {
       expect(variable.Value).toEqual(payload.value);
     });
 
-    it("should edit identical variable with payload with appropriate parameters if no parameters are passed in payload", () => {
+    it("should edit identical variable with payload with appropriate parameters if no parameters are passed in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -407,7 +443,7 @@ describe("MBInt32Variable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -423,7 +459,7 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with timeSample equal to timeSample given in payload", () => {
+    it("should edit variable with timeSample equal to timeSample given in payload", async () => {
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -432,7 +468,7 @@ describe("MBInt32Variable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -448,7 +484,7 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with Name equal to Name given in payload", () => {
+    it("should edit variable with Name equal to Name given in payload", async () => {
       editTimeSample = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -457,7 +493,7 @@ describe("MBInt32Variable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -473,7 +509,7 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with Offset equal to Offset given in payload", () => {
+    it("should edit variable with Offset equal to Offset given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editLength = undefined;
@@ -482,7 +518,7 @@ describe("MBInt32Variable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -498,7 +534,7 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with Length equal to Length given in payload", () => {
+    it("should edit variable with Length equal to Length given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -507,7 +543,7 @@ describe("MBInt32Variable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -523,15 +559,15 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set Length to 2 - despite value in payload", () => {
+    it("should alwyas set Length to 2 - despite value in payload", async () => {
       editLength = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.Length).toEqual(2);
     });
 
-    it("should edit variable with FCode equal to FCode given in payload", () => {
+    it("should edit variable with FCode equal to FCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -540,7 +576,7 @@ describe("MBInt32Variable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -556,24 +592,24 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set GetSingleFCode to fcode if fcode is read function - despite value in payload", () => {
+    it("should alwyas set GetSingleFCode to fcode if fcode is read function - despite value in payload", async () => {
       editGetSingleFCode = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.GetSingleFCode).toEqual(fcode);
     });
 
-    it("should alwyas set GetSingleFCode to 3 if fcode is write function - despite value in payload", () => {
+    it("should alwyas set GetSingleFCode to 3 if fcode is write function - despite value in payload", async () => {
       editGetSingleFCode = 1234;
       editFCode = 16;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.GetSingleFCode).toEqual(3);
     });
 
-    it("should edit variable with Value equal to Value given in payload", () => {
+    it("should edit variable with Value equal to Value given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -582,7 +618,7 @@ describe("MBInt32Variable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -598,10 +634,10 @@ describe("MBInt32Variable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should alwyas set SetSingleFCode to 16 - despite value in payload", () => {
+    it("should alwyas set SetSingleFCode to 16 - despite value in payload", async () => {
       editSetSingleFCode = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.SetSingleFCode).toEqual(16);
     });

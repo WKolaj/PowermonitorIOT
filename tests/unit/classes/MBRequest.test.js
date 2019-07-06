@@ -143,7 +143,7 @@ describe("MBRequest", () => {
       overrideDataToSend = false;
     });
 
-    let exec = () => {
+    let exec = async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -159,7 +159,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -172,7 +172,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -192,9 +192,9 @@ describe("MBRequest", () => {
       return mbRequest._createAction();
     };
 
-    it("should create call createGetDataAction of driver based of current offset and data length if fCode is read and should be called every added variable", () => {
+    it("should create call createGetDataAction of driver based of current offset and data length if fCode is read and should be called every added variable", async () => {
       fcode = 3;
-      let action = exec();
+      let action = await exec();
 
       //Calls three time - every added varaible + calling createAction
       expect(mbDriverCreateGetActionMock).toHaveBeenCalledTimes(3);
@@ -224,9 +224,9 @@ describe("MBRequest", () => {
       expect(mbDriverCreateGetActionMock.mock.calls[2][3]).toEqual(unitId);
     });
 
-    it("should create call createSetDataAction of driver based of current offset and data length if fCode is write and should be called every added variable", () => {
+    it("should create call createSetDataAction of driver based of current offset and data length if fCode is write and should be called every added variable", async () => {
       fcode = 16;
-      let action = exec();
+      let action = await exec();
 
       //Calls three time - every added varaible + calling createAction
       expect(mbDriverCreateSetActionMock).toHaveBeenCalledTimes(3);
@@ -264,13 +264,20 @@ describe("MBRequest", () => {
       expect(mbDriverCreateSetActionMock.mock.calls[2][3]).toEqual(unitId);
     });
 
-    it("should throw if fCode is write but data to send is empty", () => {
+    it("should throw if fCode is write but data to send is empty", async () => {
       fcode = 16;
       overrideDataToSend = true;
 
-      expect(() => {
-        exec();
-      }).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
   });
 
@@ -318,7 +325,7 @@ describe("MBRequest", () => {
       intVariable4ResponseData = 321;
     });
 
-    let exec = () => {
+    let exec = async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -334,7 +341,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -347,7 +354,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -360,7 +367,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable3.init({
+      await intVariable3.init({
         name: "Var3",
         fCode: fcode,
         offset: initialOffset + 2
@@ -373,7 +380,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable4.init({
+      await intVariable4.init({
         name: "Var4",
         fCode: fcode,
         offset: initialOffset + 4
@@ -401,8 +408,8 @@ describe("MBRequest", () => {
       mbRequest.setResponseData(responseData);
     };
 
-    it("should set data of every variable data based on response data", () => {
-      exec();
+    it("should set data of every variable data based on response data", async () => {
+      await exec();
 
       expect(intVariable1.Data).toEqual([intVariable1ResponseData]);
       expect(intVariable2.Data).toEqual([intVariable2ResponseData]);
@@ -410,8 +417,8 @@ describe("MBRequest", () => {
       expect(intVariable4.Data).toEqual([intVariable4ResponseData]);
     });
 
-    it("should set response data in every object of VariableConnections", () => {
-      exec();
+    it("should set response data in every object of VariableConnections", async () => {
+      await exec();
 
       expect(
         mbRequest.VariableConnections[intVariable1.Id].responseData
@@ -427,18 +434,32 @@ describe("MBRequest", () => {
       ).toEqual([intVariable4ResponseData]);
     });
 
-    it("should throw if data response is undefined", () => {
-      expect(() => {
-        mbRequest.setResponseData();
-      }).toThrow();
+    it("should throw if data response is undefined", async () => {
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await mbRequest.setResponseData();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should thow if response data length is invalid", () => {
+    it("should thow if response data length is invalid", async () => {
       intVariable3ResponseData = undefined;
 
-      expect(() => {
-        exec();
-      }).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
   });
 
@@ -480,7 +501,7 @@ describe("MBRequest", () => {
       variableToAddInitialOffset = initialOffset + 2;
     });
 
-    let exec = () => {
+    let exec = async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -496,7 +517,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -509,7 +530,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -526,7 +547,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      variableToAdd.init({
+      await variableToAdd.init({
         name: variableToAddName,
         fCode: variableToAddFcode,
         offset: variableToAddInitialOffset
@@ -535,7 +556,7 @@ describe("MBRequest", () => {
       return mbRequest.canVariableBeAddedToRequest(variableToAdd);
     };
 
-    it("should return true if request offset is not defined - first variable", () => {
+    it("should return true if request offset is not defined - first variable", async () => {
       //Whatever number
       variableToAddInitialOffset = 1532;
 
@@ -546,7 +567,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      variableToAdd.init({
+      await variableToAdd.init({
         name: variableToAddName,
         fCode: variableToAddFcode,
         offset: variableToAddInitialOffset
@@ -563,37 +584,37 @@ describe("MBRequest", () => {
       expect(result).toBeTruthy();
     });
 
-    it("should return true if variable is possible to add to request", () => {
-      let result = exec();
+    it("should return true if variable is possible to add to request", async () => {
+      let result = await exec();
 
       expect(result).toBeTruthy();
     });
 
-    it("should return false if variable offset is greater than request offset + request length", () => {
+    it("should return false if variable offset is greater than request offset + request length", async () => {
       variableToAddInitialOffset = initialOffset + 3;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeFalsy();
     });
 
-    it("should return false if variable unitId is different than request unitId", () => {
+    it("should return false if variable unitId is different than request unitId", async () => {
       unitId = 4;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeFalsy();
     });
 
-    it("should return true if variable with such name is was already added to request", () => {
+    it("should return true if variable with such name is was already added to request", async () => {
       variableToAddName = "Var1";
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeTruthy();
     });
 
-    it("should return false if variable with such id is already added to request", () => {
+    it("should return false if variable with such id is already added to request", async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -609,7 +630,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -622,7 +643,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -638,7 +659,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      variableToAdd.init({
+      await variableToAdd.init({
         name: variableToAddName,
         fCode: variableToAddFcode,
         offset: variableToAddInitialOffset
@@ -652,18 +673,18 @@ describe("MBRequest", () => {
       expect(result).toBeFalsy();
     });
 
-    it("should return false if variable offset is smaller than request offset + request length", () => {
+    it("should return false if variable offset is smaller than request offset + request length", async () => {
       variableToAddInitialOffset = initialOffset + 1;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeFalsy();
     });
 
-    it("should return false if variable offset + request offset + request length is greater than MB request limit", () => {
+    it("should return false if variable offset + request offset + request length is greater than MB request limit", async () => {
       maxRequestLength = 2;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeFalsy();
     });
@@ -710,7 +731,7 @@ describe("MBRequest", () => {
       mbRequestUpdateActionMock = jest.fn();
     });
 
-    let exec = () => {
+    let exec = async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -727,7 +748,7 @@ describe("MBRequest", () => {
         }
       });
 
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -741,7 +762,7 @@ describe("MBRequest", () => {
         }
       });
 
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -760,7 +781,7 @@ describe("MBRequest", () => {
         }
       });
 
-      variableToAdd.init({
+      await variableToAdd.init({
         name: variableToAddName,
         fCode: variableToAddFcode,
         offset: variableToAddInitialOffset
@@ -769,14 +790,22 @@ describe("MBRequest", () => {
       mbRequest.addVariable(variableToAdd);
     };
 
-    it("should throw if variable offset is greater than request offset + request length", () => {
+    it("should throw if variable offset is greater than request offset + request length", async () => {
       variableToAddInitialOffset = initialOffset + 3;
-      expect(() => {
-        exec();
-      }).toThrow();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if variable with such Id was already added to request", () => {
+    it("should throw if variable with such Id was already added to request", async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -793,7 +822,7 @@ describe("MBRequest", () => {
         }
       });
 
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -807,7 +836,7 @@ describe("MBRequest", () => {
         }
       });
 
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -825,7 +854,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      variableToAdd.init({
+      await variableToAdd.init({
         name: variableToAddName,
         fCode: variableToAddFcode,
         offset: variableToAddInitialOffset
@@ -834,45 +863,81 @@ describe("MBRequest", () => {
       //Setting the same Id to variable to Add
       variableToAdd.Id = intVariable2.Id;
 
-      expect(() => {
-        mbRequest.addVariable(variableToAdd);
-      }).not.toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await mbRequest.addVariable(variableToAdd);
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
     });
 
-    it("should not throw if variable with such name is was already added to request", () => {
+    it("should not throw if variable with such name is was already added to request", async () => {
       variableToAddName = "Var1";
 
-      expect(() => {
-        exec();
-      }).not.toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
     });
 
-    it("should throw if variable unitId is different than request unitId", () => {
+    it("should throw if variable unitId is different than request unitId", async () => {
       unitId = 4;
 
-      expect(() => {
-        exec();
-      }).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+      ``;
     });
 
-    it("should throw if variable offset is smaller than request offset + request length", () => {
+    it("should throw if variable offset is smaller than request offset + request length", async () => {
       variableToAddInitialOffset = initialOffset + 1;
 
-      expect(() => {
-        exec();
-      }).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if variable offset + request offset + request length is greater than MB request limit", () => {
+    it("should throw if variable offset + request offset + request length is greater than MB request limit", async () => {
       maxRequestLength = 2;
 
-      expect(() => {
-        exec();
-      }).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should add variable to VariableConnections as a new variableObject", () => {
-      exec();
+    it("should add variable to VariableConnections as a new variableObject", async () => {
+      await exec();
 
       let variableObject = {
         requestOffset: 2,
@@ -889,15 +954,15 @@ describe("MBRequest", () => {
       );
     });
 
-    it("should increment length of request", () => {
+    it("should increment length of request", async () => {
       let lengthBefore = 2;
-      exec();
+      await exec();
 
       expect(mbRequest.Length).toEqual(lengthBefore + 2);
     });
 
-    it("should call updateAction", () => {
-      exec();
+    it("should call updateAction", async () => {
+      await exec();
 
       expect(mbRequestUpdateActionMock).toHaveBeenCalledTimes(1);
     });
@@ -936,7 +1001,7 @@ describe("MBRequest", () => {
       maxRequestLength = 100;
     });
 
-    let exec = () => {
+    let exec = async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -951,7 +1016,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -964,7 +1029,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -977,7 +1042,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable3.init({
+      await intVariable3.init({
         name: "Var3",
         fCode: fcode,
         offset: initialOffset + 3
@@ -990,7 +1055,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable4.init({
+      await intVariable4.init({
         name: "Var4",
         fCode: fcode,
         offset: initialOffset + 4
@@ -1003,7 +1068,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable5.init({
+      await intVariable5.init({
         name: "Var5",
         fCode: fcode,
         offset: initialOffset + 6
@@ -1025,21 +1090,21 @@ describe("MBRequest", () => {
       return mbRequest._formatDataToSend();
     };
 
-    it("should set DataToSend buffer on the basis of variables values - if there are several variables", () => {
-      exec();
+    it("should set DataToSend buffer on the basis of variables values - if there are several variables", async () => {
+      await exec();
 
       expect(mbRequest.DataToSend).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
 
-    it("should not set DataToSend buffer on the basis of variables values - if MB function is not write", () => {
+    it("should not set DataToSend buffer on the basis of variables values - if MB function is not write", async () => {
       fcode = 3;
 
-      exec();
+      await exec();
 
       expect(mbRequest.DataToSend).toEqual([]);
     });
 
-    it("should set DataToSend buffer on the basis of variables values - if there is one variable with value 1", () => {
+    it("should set DataToSend buffer on the basis of variables values - if there is one variable with value 1", async () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       intVariable1 = new MBInt16Variable({
@@ -1050,7 +1115,7 @@ describe("MBRequest", () => {
         }
       });
 
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -1065,7 +1130,7 @@ describe("MBRequest", () => {
       expect(mbRequest.DataToSend).toEqual([1]);
     });
 
-    it("should set DataToSend buffer on the basis of variables values - if there is one variable with value 0", () => {
+    it("should set DataToSend buffer on the basis of variables values - if there is one variable with value 0", async () => {
       mbRequest = new MBRequest(mbDriver, fcode, unitId, maxRequestLength);
 
       intVariable1 = new MBInt16Variable({
@@ -1075,7 +1140,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -1109,7 +1174,7 @@ describe("MBRequest", () => {
       maxRequestLength = 100;
     });
 
-    let exec = () => {
+    let exec = async () => {
       mbDriver = {
         createSetDataAction: jest.fn().mockReturnValue({}),
         createGetDataAction: jest.fn().mockReturnValue({})
@@ -1126,7 +1191,7 @@ describe("MBRequest", () => {
         }
       });
 
-      variable1.init({
+      await variable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -1140,7 +1205,7 @@ describe("MBRequest", () => {
         }
       });
 
-      variable2.init({
+      await variable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -1158,7 +1223,7 @@ describe("MBRequest", () => {
         }
       });
 
-      variable.init({
+      await variable.init({
         name: "Var3",
         fCode: fcode,
         offset: initialOffset + 2
@@ -1167,8 +1232,8 @@ describe("MBRequest", () => {
       return mbRequest._createVariableObject(variable);
     };
 
-    it("should create variable object on the basis of variable", () => {
-      let variableObject = exec();
+    it("should create variable object on the basis of variable", async () => {
+      let variableObject = await exec();
 
       let mockVariable = {
         requestOffset: 2,
@@ -1214,7 +1279,7 @@ describe("MBRequest", () => {
       maxRequestLength = 100;
     });
 
-    let exec = () => {
+    let exec = async () => {
       mbDriver = {
         createSetDataAction: mbDriverCreateSetActionMock,
         createGetDataAction: mbDriverCreateGetActionMock
@@ -1229,7 +1294,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable1.init({
+      await intVariable1.init({
         name: "Var1",
         fCode: fcode,
         offset: initialOffset
@@ -1242,7 +1307,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable2.init({
+      await intVariable2.init({
         name: "Var2",
         fCode: fcode,
         offset: initialOffset + 1
@@ -1255,7 +1320,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable3.init({
+      await intVariable3.init({
         name: "Var3",
         fCode: fcode,
         offset: initialOffset + 3
@@ -1268,7 +1333,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable4.init({
+      await intVariable4.init({
         name: "Var4",
         fCode: fcode,
         offset: initialOffset + 4
@@ -1281,7 +1346,7 @@ describe("MBRequest", () => {
           createSetDataAction: jest.fn().mockReturnValue(2)
         }
       });
-      intVariable5.init({
+      await intVariable5.init({
         name: "Var5",
         fCode: fcode,
         offset: initialOffset + 6
@@ -1303,25 +1368,25 @@ describe("MBRequest", () => {
       mbRequest.updateAction();
     };
 
-    it("should set data to be send if mbfunction is write", () => {
+    it("should set data to be send if mbfunction is write", async () => {
       fcode = 16;
 
-      exec();
+      await exec();
 
       expect(mbRequest.DataToSend).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
 
-    it("should not set data to be send if mbfunction is read", () => {
+    it("should not set data to be send if mbfunction is read", async () => {
       fcode = 4;
 
-      exec();
+      await exec();
 
       expect(mbRequest.DataToSend).toEqual([]);
     });
 
     it("should set Action object of request on the basis of variables if function is reading data", async () => {
       fcode = 4;
-      exec();
+      await exec();
 
       expect(mbRequest.Action).toBeDefined();
       expect(mbRequest.Action).toEqual(actionOfGettingData);
@@ -1330,7 +1395,7 @@ describe("MBRequest", () => {
     it("should set Action object of request on the basis of variables if function is writing data", async () => {
       fcode = 16;
 
-      exec();
+      await exec();
 
       expect(mbRequest.Action).toBeDefined();
       expect(mbRequest.Action).toEqual(actionOfSettingData);

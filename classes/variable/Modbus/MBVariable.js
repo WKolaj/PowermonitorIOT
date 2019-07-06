@@ -15,8 +15,8 @@ class MBVariable extends Variable {
    * @description Method for initializing variable by payload
    * @param {object} payload variable payload
    */
-  init(payload) {
-    super.init(payload);
+  async init(payload) {
+    await super.init(payload);
 
     if (!exists(payload.fCode)) throw new Error("FCode cannot be empty");
     if (!exists(payload.offset)) throw new Error("Offset cannot be empty");
@@ -261,7 +261,7 @@ class MBVariable extends Variable {
   /**
    * @description Method for editting variable based on given payload
    */
-  editWithPayload(payload) {
+  async editWithPayload(payload) {
     //Controlling if functions are possible
     let allPossibleFCodes = this._getPossibleFCodes();
 
@@ -286,7 +286,7 @@ class MBVariable extends Variable {
         `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
       );
 
-    super.editWithPayload(payload);
+    await super.editWithPayload(payload);
 
     if (payload.offset) {
       this._offset = payload.offset;

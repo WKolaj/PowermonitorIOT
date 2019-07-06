@@ -66,7 +66,7 @@ describe("MBVariable", () => {
       MBVariable.prototype._setValue = realSetValueMockFunction;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -81,8 +81,8 @@ describe("MBVariable", () => {
       return variable.init(payload);
     };
 
-    it("should initialize MBVariable based on given parameters", () => {
-      exec();
+    it("should initialize MBVariable based on given parameters", async () => {
+      await exec();
 
       expect(variable.Device).toEqual(device);
       expect(variable.Name).toEqual(name);
@@ -95,99 +95,180 @@ describe("MBVariable", () => {
       expect(setValueMockFunction.mock.calls[0][0]).toEqual(value);
     });
 
-    it("should throw if name is empty", () => {
+    it("should throw if name is empty", async () => {
       name = undefined;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if fcode is empty", () => {
+    it("should throw if fcode is empty", async () => {
       fcode = undefined;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if setSingleFcode is empty", () => {
+    it("should throw if setSingleFcode is empty", async () => {
       setSingleFCode = undefined;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if getSingleFcode is empty", () => {
+    it("should throw if getSingleFcode is empty", async () => {
       getSingleFCode = undefined;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if offset is empty", () => {
+    it("should throw if offset is empty", async () => {
       offset = undefined;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if length is empty", () => {
+    it("should throw if length is empty", async () => {
       length = undefined;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should if fCode is not containted in possible functions", () => {
+    it("should if fCode is not containted in possible functions", async () => {
       fcode = 10;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if setSingFcode is not containted in possible functions", () => {
+    it("should throw if setSingFcode is not containted in possible functions", async () => {
       setSingleFCode = 10;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should throw if getSingleFcode is not containted in possible functions", () => {
+    it("should throw if getSingleFcode is not containted in possible functions", async () => {
       getSingleFCode = 10;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should set _getSingleRequest unitId based on given unitId", () => {
-      exec();
+    it("should set _getSingleRequest unitId based on given unitId", async () => {
+      await exec();
 
       expect(variable._getSingleRequest.UnitId).toEqual(unitId);
     });
 
-    it("should set _getSingleRequest fCode based on given fCode", () => {
-      exec();
+    it("should set _getSingleRequest fCode based on given fCode", async () => {
+      await exec();
 
       expect(variable._getSingleRequest.FCode).toEqual(getSingleFCode);
     });
 
-    it("should set _setSingleRequest unitId based on given unitId", () => {
-      exec();
+    it("should set _setSingleRequest unitId based on given unitId", async () => {
+      await exec();
 
       expect(variable._setSingleRequest.UnitId).toEqual(unitId);
     });
 
-    it("should set _setSingleRequest fCode based on given fCode", () => {
-      exec();
+    it("should set _setSingleRequest fCode based on given fCode", async () => {
+      await exec();
 
       expect(variable._setSingleRequest.FCode).toEqual(setSingleFCode);
     });
 
-    it("should create and set _getSingleRequest", () => {
-      exec();
+    it("should create and set _getSingleRequest", async () => {
+      await exec();
 
       expect(variable._getSingleRequest).toBeDefined();
     });
 
-    it("should create and set _setSingleRequest", () => {
-      exec();
+    it("should create and set _setSingleRequest", async () => {
+      await exec();
 
       expect(variable._setSingleRequest).toBeDefined();
     });
 
-    it("should not set value if value in payload is not defined", () => {
+    it("should not set value if value in payload is not defined", async () => {
       value = undefined;
-      exec();
+      await exec();
 
       expect(setValueMockFunction).not.toHaveBeenCalled();
     });
@@ -218,7 +299,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -228,12 +309,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.FCode;
     };
 
-    it("should return FCode", () => {
-      let result = exec();
+    it("should return FCode", async () => {
+      let result = await exec();
 
       expect(result).toEqual(fcode);
     });
@@ -264,7 +345,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -274,12 +355,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.Offset;
     };
 
-    it("should return offset", () => {
-      let result = exec();
+    it("should return offset", async () => {
+      let result = await exec();
 
       expect(result).toEqual(offset);
     });
@@ -310,7 +391,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -320,12 +401,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.Length;
     };
 
-    it("should return length", () => {
-      let result = exec();
+    it("should return length", async () => {
+      let result = await exec();
 
       expect(result).toEqual(length);
     });
@@ -356,7 +437,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -366,12 +447,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.UnitId;
     };
 
-    it("should return unitId", () => {
-      let result = exec();
+    it("should return unitId", async () => {
+      let result = await exec();
 
       expect(result).toEqual(unitId);
     });
@@ -402,7 +483,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -412,12 +493,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.SetSingleFCode;
     };
 
-    it("should return SetSingleFCode", () => {
-      let result = exec();
+    it("should return SetSingleFCode", async () => {
+      let result = await exec();
 
       expect(result).toEqual(mbVariable._setSingleFCode);
     });
@@ -448,7 +529,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -458,12 +539,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.GetSingleFCode;
     };
 
-    it("should return GetSingleFCode", () => {
-      let result = exec();
+    it("should return GetSingleFCode", async () => {
+      let result = await exec();
 
       expect(result).toEqual(mbVariable._getSingleFCode);
     });
@@ -494,7 +575,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -504,12 +585,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.SetSingleRequest;
     };
 
-    it("should return SetSingleRequest", () => {
-      let result = exec();
+    it("should return SetSingleRequest", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result).toEqual(mbVariable._setSingleRequest);
@@ -541,7 +622,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -551,12 +632,12 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable.GetSingleRequest;
     };
 
-    it("should return GetSingleRequest", () => {
-      let result = exec();
+    it("should return GetSingleRequest", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result).toEqual(mbVariable._getSingleRequest);
@@ -590,7 +671,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -600,13 +681,13 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable._data = data;
       return mbVariable.Data;
     };
 
-    it("should return data", () => {
-      let result = exec();
+    it("should return data", async () => {
+      let result = await exec();
 
       expect(result).toEqual(data);
     });
@@ -647,7 +728,7 @@ describe("MBVariable", () => {
       _emitValueChangeMock = jest.fn();
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -657,26 +738,26 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable._emitValueChange = _emitValueChangeMock;
       mbVariable._convertDataToValue = _convertDataToValueMock;
       mbVariable.Data = dataToSet;
     };
 
-    it("should set data of the variable", () => {
-      exec();
+    it("should set data of the variable", async () => {
+      await exec();
 
       expect(mbVariable.Data).toEqual(dataToSet);
     });
 
-    it("should set value as convertedData", () => {
-      exec();
+    it("should set value as convertedData", async () => {
+      await exec();
 
       expect(mbVariable.Value).toEqual(dataCovertedToValue);
     });
 
-    it("should invoke value change event only once", () => {
-      exec();
+    it("should invoke value change event only once", async () => {
+      await exec();
 
       expect(_emitValueChangeMock).toHaveBeenCalledTimes(1);
       expect(_emitValueChangeMock.mock.calls[0][0]).toEqual(
@@ -684,9 +765,18 @@ describe("MBVariable", () => {
       );
     });
 
-    it("should throw if data length is invalid", () => {
+    it("should throw if data length is invalid", async () => {
       dataToSet = [1, 2, 3];
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
   });
 
@@ -716,7 +806,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -726,13 +816,13 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable._value = value;
       return mbVariable._getValue();
     };
 
-    it("should return value", () => {
-      let result = exec();
+    it("should return value", async () => {
+      let result = await exec();
 
       expect(result).toEqual(value);
     });
@@ -771,7 +861,7 @@ describe("MBVariable", () => {
       _emitValueChangeMock = jest.fn();
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -781,26 +871,26 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable._emitValueChange = _emitValueChangeMock;
       mbVariable._convertValueToData = _convertValueToDataMock;
       mbVariable._setValue(valueToSet);
     };
 
-    it("should set value of the variable", () => {
-      exec();
+    it("should set value of the variable", async () => {
+      await exec();
 
       expect(mbVariable.Value).toEqual(valueToSet);
     });
 
-    it("should set data as convertedValue", () => {
-      exec();
+    it("should set data as convertedValue", async () => {
+      await exec();
 
       expect(mbVariable.Data).toEqual(valueConvertedToData);
     });
 
-    it("should not invoke value change event - it is called in base class Variable during setting Value", () => {
-      exec();
+    it("should not invoke value change event - it is called in base class Variable during setting Value", async () => {
+      await exec();
 
       expect(_emitValueChangeMock).not.toHaveBeenCalled();
     });
@@ -833,7 +923,7 @@ describe("MBVariable", () => {
       fcode = 4;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -843,13 +933,13 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable._value = value;
       return mbVariable.Value;
     };
 
-    it("should return value", () => {
-      let result = exec();
+    it("should return value", async () => {
+      let result = await exec();
 
       expect(result).toEqual(value);
     });
@@ -888,7 +978,7 @@ describe("MBVariable", () => {
       _emitValueChangeMock = jest.fn();
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -898,26 +988,26 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       mbVariable._emitValueChange = _emitValueChangeMock;
       mbVariable._convertValueToData = _convertValueToDataMock;
       mbVariable.Value = valueToSet;
     };
 
-    it("should set value of the variable", () => {
-      exec();
+    it("should set value of the variable", async () => {
+      await exec();
 
       expect(mbVariable.Value).toEqual(valueToSet);
     });
 
-    it("should set data as convertedValue", () => {
-      exec();
+    it("should set data as convertedValue", async () => {
+      await exec();
 
       expect(mbVariable.Data).toEqual(valueConvertedToData);
     });
 
-    it("should invoke _emitValueChangeMock just once with new value", () => {
-      exec();
+    it("should invoke _emitValueChangeMock just once with new value", async () => {
+      await exec();
 
       expect(_emitValueChangeMock).toHaveBeenCalledTimes(1);
       expect(_emitValueChangeMock.mock.calls[0][0]).toEqual(valueToSet);
@@ -956,7 +1046,7 @@ describe("MBVariable", () => {
       mockGetAction = jest.fn().mockResolvedValue(3);
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -966,7 +1056,7 @@ describe("MBVariable", () => {
         setSingleFCode: 16
       };
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       //Setting in order to check Value by GetSingle
       mbVariable._value = 1234;
       return mbVariable.getSingle();
@@ -1023,7 +1113,7 @@ describe("MBVariable", () => {
       mockSetAction = jest.fn().mockResolvedValue(3);
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -1034,7 +1124,7 @@ describe("MBVariable", () => {
       };
 
       mbVariable = new MBVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       //Setting in order to check Value by GetSingle
       mbVariable._value = 1234;
       mbVariable._setValue = mockSetValueFunc;
@@ -1111,7 +1201,7 @@ describe("MBVariable", () => {
       MBVariable.prototype._getValue = realGetValueMockFunction;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -1129,12 +1219,12 @@ describe("MBVariable", () => {
       MBVariable.prototype._setValue = setValueMockFunction;
       MBVariable.prototype._getValue = getValueMockFunction;
       variable = new MBVariable(device);
-      variable.init(payload);
+      await variable.init(payload);
       return variable.Payload;
     };
 
-    it("should generate payload with appropriate parameters", () => {
-      let result = exec();
+    it("should generate payload with appropriate parameters", async () => {
+      let result = await exec();
 
       let validPayload = {
         name: variable.Name,
@@ -1151,10 +1241,10 @@ describe("MBVariable", () => {
       expect(result).toMatchObject(validPayload);
     });
 
-    it("should generate payload with appropriate parameters if value is undefined", () => {
+    it("should generate payload with appropriate parameters if value is undefined", async () => {
       value = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       let validPayload = {
         name: variable.Name,
@@ -1217,7 +1307,7 @@ describe("MBVariable", () => {
       MBVariable.prototype._getValue = realGetValueMockFunction;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
@@ -1235,12 +1325,12 @@ describe("MBVariable", () => {
       MBVariable.prototype._setValue = setValueMockFunction;
       MBVariable.prototype._getValue = getValueMockFunction;
       variable = new MBVariable(device);
-      variable.init(payload);
+      await variable.init(payload);
       return variable._generatePayload();
     };
 
-    it("should generate payload with appropriate parameters", () => {
-      let result = exec();
+    it("should generate payload with appropriate parameters", async () => {
+      let result = await exec();
 
       let validPayload = {
         name: variable.Name,
@@ -1257,10 +1347,10 @@ describe("MBVariable", () => {
       expect(result).toMatchObject(validPayload);
     });
 
-    it("should generate payload with appropriate parameters if value is undefined", () => {
+    it("should generate payload with appropriate parameters if value is undefined", async () => {
       value = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       let validPayload = {
         name: variable.Name,
@@ -1345,7 +1435,7 @@ describe("MBVariable", () => {
       MBVariable.prototype._getValue = realGetValueMockFunction;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         id: id,
         name: name,
@@ -1364,7 +1454,7 @@ describe("MBVariable", () => {
       MBVariable.prototype._setValue = setValueMockFunction;
       MBVariable.prototype._getValue = getValueMockFunction;
       variable = new MBVariable(device);
-      variable.init(payload);
+      await variable.init(payload);
 
       editPayload = {
         id: editId,
@@ -1381,8 +1471,8 @@ describe("MBVariable", () => {
       return variable.editWithPayload(editPayload);
     };
 
-    it("should edit variable with payload with appropriate parameters if all parameters are passed", () => {
-      let result = exec();
+    it("should edit variable with payload with appropriate parameters if all parameters are passed", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1400,16 +1490,25 @@ describe("MBVariable", () => {
       expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
     });
 
-    it("should return edited variable", () => {
-      let result = exec();
+    it("should return edited variable", async () => {
+      let result = await exec();
 
       expect(result).toEqual(variable);
     });
 
-    it("should throw and not change anything if given id is different than id of variable", () => {
+    it("should throw and not change anything if given id is different than id of variable", async () => {
       editId = "corruptId";
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -1424,10 +1523,19 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw and not change anything if fCode number is invalid", () => {
+    it("should throw and not change anything if fCode number is invalid", async () => {
       editFCode = 9999;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -1442,10 +1550,19 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw and not change anything if getSingleFCode number is invalid", () => {
+    it("should throw and not change anything if getSingleFCode number is invalid", async () => {
       editGetSingleFCode = 9999;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -1460,10 +1577,19 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should throw and not change anything if setSingleFCode number is invalid", () => {
+    it("should throw and not change anything if setSingleFCode number is invalid", async () => {
       editSetSingleFCode = 9999;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -1478,7 +1604,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should edit variable with timeSample equal to timeSample given in payload", () => {
+    it("should edit variable with timeSample equal to timeSample given in payload", async () => {
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -1487,7 +1613,7 @@ describe("MBVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1504,7 +1630,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should edit variable with Name equal to Name given in payload", () => {
+    it("should edit variable with Name equal to Name given in payload", async () => {
       editTimeSample = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -1513,7 +1639,7 @@ describe("MBVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1530,7 +1656,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should edit variable with Offset equal to Offset given in payload", () => {
+    it("should edit variable with Offset equal to Offset given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editLength = undefined;
@@ -1539,7 +1665,7 @@ describe("MBVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1556,7 +1682,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should edit variable with Length equal to Length given in payload", () => {
+    it("should edit variable with Length equal to Length given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -1565,7 +1691,7 @@ describe("MBVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1582,7 +1708,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should edit variable with FCode equal to FCode given in payload", () => {
+    it("should edit variable with FCode equal to FCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -1591,7 +1717,7 @@ describe("MBVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1608,7 +1734,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should edit variable with Value equal to Value given in payload", () => {
+    it("should edit variable with Value equal to Value given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -1617,7 +1743,7 @@ describe("MBVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1635,7 +1761,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
     });
 
-    it("should edit variable with GetSingleFCode equal to GetSingleFCode given in payload", () => {
+    it("should edit variable with GetSingleFCode equal to GetSingleFCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -1644,7 +1770,7 @@ describe("MBVariable", () => {
       editSetSingleFCode = undefined;
       editValue = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -1661,7 +1787,7 @@ describe("MBVariable", () => {
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
     });
 
-    it("should edit variable with SetSingleFCode equal to SetSingleFCode given in payload", () => {
+    it("should edit variable with SetSingleFCode equal to SetSingleFCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -1670,7 +1796,7 @@ describe("MBVariable", () => {
       editGetSingleFCode = undefined;
       editValue = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);

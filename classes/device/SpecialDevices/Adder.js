@@ -15,9 +15,9 @@ const MBUInt32Variable = require("../../variable/Modbus/MBUInt32Variable");
 const logger = require("../../../logger/logger");
 const { exists } = require("../../../utilities/utilities");
 
-class MBDevice extends Device {
+class Adder extends Device {
   /**
-   * @description Modbus device
+   * @description Adder device
    */
   constructor() {
     super();
@@ -29,27 +29,6 @@ class MBDevice extends Device {
    */
   async init(payload) {
     await super.init(payload);
-
-    if (!payload.ipAdress) throw new Error("ipAdress cannot be empty");
-    if (!payload.portNumber) throw new Error("port number cannot be empty");
-    if (!payload.timeout) throw new Error("timeout cannot be empty");
-    if (!payload.unitId) throw new Error("unitId cannot be empty");
-
-    //Binding methods to device object
-    this.disconnect = this.disconnect.bind(this);
-    this.connect = this.connect.bind(this);
-
-    //Setting modbus driver
-    this._driver = new MBDriver(
-      this,
-      payload.ipAdress,
-      payload.portNumber,
-      payload.timeout,
-      payload.unitId
-    );
-    this._mbRequestGrouper = new MBRequestGrouper(this);
-    this._requests = {};
-
     //Initializing variables if they are given in payload
     if (payload.variables) await this._initVariables(payload.variables);
 
@@ -58,10 +37,7 @@ class MBDevice extends Device {
       await this._initCalculationElements(payload.calculationElements);
 
     //If type is given in payload - set it according to payload - mechanism implemented to support child classes - otherwise set default mbDevice type
-    this._type = payload.type ? payload.type : "mbDevice";
-
-    //Connecting if device should be active according to payload
-    if (payload.isActive) this.connect();
+    this._type = "adder";
   }
 
   /**
@@ -74,149 +50,11 @@ class MBDevice extends Device {
   }
 
   /**
-   * @description All requests divided by tickId
-   */
-  get Requests() {
-    return this._requests;
-  }
-
-  /**
-   * @description MBRequestGrouper associated with driver
-   */
-  get RequestGrouper() {
-    return this._mbRequestGrouper;
-  }
-
-  /**
-   * @description MBDevice associated with driver
-   */
-  get MBDriver() {
-    return this._driver;
-  }
-
-  /**
-   * @description IPAdress used by driver
-   */
-  get IPAdress() {
-    return this._driver.IPAdress;
-  }
-
-  /**
-   * @description PortNumber used by driver
-   */
-  get PortNumber() {
-    return this._driver.PortNumber;
-  }
-
-  /**
-   * @description Timeout of driver
-   */
-  get Timeout() {
-    return this._driver.Timeout;
-  }
-
-  /**
-   * @description Default unit ID used by driver
-   */
-  get UnitId() {
-    return this._driver.UnitId;
-  }
-
-  /**
-   * @description Is device connected?
-   */
-  get Connected() {
-    return this._driver.Connected;
-  }
-
-  /**
-   * @description Is device active? this means, if driver is enabled to exchange data
-   */
-  get IsActive() {
-    return this._driver.IsActive;
-  }
-
-  /**
-   * @description Connecting to modbus device
-   * */
-  connect() {
-    return this._driver.connect();
-  }
-
-  /**
-   * @description Connecting to modbus device
-   * */
-  disconnect() {
-    return this._driver.disconnect();
-  }
-
-  /**
-   * @description Rebuilding all request groups
-   * */
-  _refreshRequestGroups() {
-    this._requests = {};
-    let allVariables = Device.divideVariablesByTickId(
-      Object.values(this.Variables)
-    );
-    let allTickIds = Object.keys(allVariables);
-
-    for (let tickId of allTickIds) {
-      let variablesOfTickId = allVariables[tickId];
-      this._requests[tickId] = this.RequestGrouper.ConvertVariablesToRequests(
-        variablesOfTickId
-      );
-    }
-  }
-
-  /**
    * @description creating variable and adding it to the Device
    * @param {object} payload Payload of variable to be created
    */
   async createVariable(payload) {
-    if (!payload) throw new Error("Given payload cannot be empty");
-    if (!payload.type)
-      throw new Error("Given variable payload has no type defined");
-
-    if (payload.id && this.Variables[payload.id])
-      throw new Error(`Variable with id ${payload.id} already exists!`);
-
-    switch (payload.type) {
-      case "boolean": {
-        return this._createBooleanVariable(payload);
-      }
-      case "byteArray": {
-        return this._createByteArrayVariable(payload);
-      }
-      case "float": {
-        return this._createFloatVariable(payload);
-      }
-      case "swappedFloat": {
-        return this._createSwappedFloatVariable(payload);
-      }
-      case "int16": {
-        return this._createInt16Variable(payload);
-      }
-      case "uInt16": {
-        return this._createUInt16Variable(payload);
-      }
-      case "int32": {
-        return this._createInt32Variable(payload);
-      }
-      case "uInt32": {
-        return this._createUInt32Variable(payload);
-      }
-      case "swappedInt32": {
-        return this._createSwappedInt32Variable(payload);
-      }
-      case "swappedUInt32": {
-        return this._createSwappedUInt32Variable(payload);
-      }
-      default: {
-        throw new Error(
-          `Given variable type is not recognized: ${payload.type}`
-        );
-      }
-    }
+    throw new Error("Cannot add variable to special device!");
   }
 
   /**
@@ -232,7 +70,7 @@ class MBDevice extends Device {
 
     let variableArchivedBefore = variableToEdit.Archived;
 
-    await variableToEdit.editWithPayload(payload);
+    variableToEdit.editWithPayload(payload);
 
     let variableArchivedAfter = variableToEdit.Archived;
 
@@ -265,7 +103,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBBooleanVariable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -287,7 +125,7 @@ class MBDevice extends Device {
       throw new Error("variable length in payload is not defined");
 
     let variableToAdd = new MBByteArrayVariable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -307,7 +145,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBFloatVariable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -327,7 +165,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedFloatVariable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -347,7 +185,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBInt16Variable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -367,7 +205,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBInt32Variable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -387,7 +225,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedInt32Variable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -407,7 +245,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBUInt16Variable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -427,7 +265,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBUInt32Variable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -447,7 +285,7 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedUInt32Variable(this);
-    await variableToAdd.init(payload);
+    variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
   }
@@ -599,4 +437,4 @@ class MBDevice extends Device {
   }
 }
 
-module.exports = MBDevice;
+module.exports = Adder;

@@ -54,50 +54,69 @@ describe("MBBooleanVariable", () => {
       return variable.init(payload);
     };
 
-    it("should throw if payload is empty", () => {
+    it("should throw if payload is empty", async () => {
       variable = new MBBooleanVariable(device, payload);
-      expect(() => variable.init()).toThrow();
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await variable.init();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should init new MBBoleanVariable based on given arguments", () => {
-      exec();
+    it("should init new MBBoleanVariable based on given arguments", async () => {
+      await exec();
 
       expect(variable.Name).toEqual(name);
       expect(variable.FCode).toEqual(fcode);
       expect(variable.Offset).toEqual(offset);
     });
 
-    it("should set length to 1", () => {
-      exec();
+    it("should set length to 1", async () => {
+      await exec();
 
       expect(variable.Length).toEqual(1);
     });
 
-    it("should set default value if value is not given in payload", () => {
-      let result = exec();
+    it("should set default value if value is not given in payload", async () => {
+      let result = await exec();
 
       expect(variable.Value).toEqual(false);
     });
 
-    it("should throw if fcode is no associated with boolean variable - fCode 3", () => {
+    it("should throw if fcode is no associated with boolean variable - fCode 3", async () => {
       fcode = 3;
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
     });
 
-    it("should set GetSingleFCode = 1", () => {
-      exec();
+    it("should set GetSingleFCode = 1", async () => {
+      await exec();
 
       expect(variable.GetSingleFCode).toEqual(1);
     });
 
-    it("should set SetSingleFCode = 15", () => {
-      exec();
+    it("should set SetSingleFCode = 15", async () => {
+      await exec();
 
       expect(variable.SetSingleFCode).toEqual(15);
     });
 
-    it("should set Type to corresponding type", () => {
-      exec();
+    it("should set Type to corresponding type", async () => {
+      await exec();
 
       expect(variable.Type).toEqual("boolean");
     });
@@ -124,19 +143,19 @@ describe("MBBooleanVariable", () => {
       offset = 1;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
         offset: offset
       };
       mbVariable = new MBBooleanVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._getPossibleFCodes();
     };
 
-    it("should return all fCodes associated with boolean operations", () => {
-      let result = exec();
+    it("should return all fCodes associated with boolean operations", async () => {
+      let result = await exec();
 
       expect(result.length).toEqual(3);
       expect(result).toContain(1);
@@ -168,26 +187,26 @@ describe("MBBooleanVariable", () => {
       dataToConvert = [true];
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
         offset: offset
       };
       mbVariable = new MBBooleanVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._convertDataToValue(dataToConvert);
     };
 
-    it("should convert data to value and return it if data is [true]", () => {
-      let result = exec();
+    it("should convert data to value and return it if data is [true]", async () => {
+      let result = await exec();
 
       expect(result).toEqual(true);
     });
 
-    it("should convert data to value and return it if data is [false]", () => {
+    it("should convert data to value and return it if data is [false]", async () => {
       dataToConvert = [false];
-      let result = exec();
+      let result = await exec();
 
       expect(result).toEqual(false);
     });
@@ -216,26 +235,26 @@ describe("MBBooleanVariable", () => {
       valueToConvert = true;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         name: name,
         fCode: fcode,
         offset: offset
       };
       mbVariable = new MBBooleanVariable(device);
-      mbVariable.init(payload);
+      await mbVariable.init(payload);
       return mbVariable._convertValueToData(valueToConvert);
     };
 
-    it("should convert value to data and return it if value is true", () => {
-      let result = exec();
+    it("should convert value to data and return it if value is true", async () => {
+      let result = await exec();
 
       expect(result).toEqual([true]);
     });
 
-    it("should convert value to data and return it if value is false", () => {
+    it("should convert value to data and return it if value is false", async () => {
       valueToConvert = false;
-      let result = exec();
+      let result = await exec();
 
       expect(result).toEqual([false]);
     });
@@ -296,7 +315,7 @@ describe("MBBooleanVariable", () => {
       editId = undefined;
     });
 
-    let exec = () => {
+    let exec = async () => {
       payload = {
         id: id,
         name: name,
@@ -310,7 +329,7 @@ describe("MBBooleanVariable", () => {
       };
 
       variable = new MBBooleanVariable(device);
-      variable.init(payload);
+      await variable.init(payload);
 
       editPayload = {
         id: editId,
@@ -327,15 +346,15 @@ describe("MBBooleanVariable", () => {
       return variable.editWithPayload(editPayload);
     };
 
-    it("should return edited variable", () => {
-      let result = exec();
+    it("should return edited variable", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result).toEqual(variable);
     });
 
-    it("should edit variable with payload with appropriate parameters if all parameters are passed", () => {
-      let result = exec();
+    it("should edit variable with payload with appropriate parameters if all parameters are passed", async () => {
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -351,10 +370,18 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should throw and not change anything if given id is different than id of variable", () => {
+    it("should throw and not change anything if given id is different than id of variable", async () => {
       editId = "corruptId";
-
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -368,10 +395,19 @@ describe("MBBooleanVariable", () => {
       expect(variable.Value).toEqual(payload.value);
     });
 
-    it("should throw and not change anything if fCode number is invalid", () => {
+    it("should throw and not change anything if fCode number is invalid", async () => {
       editFCode = 9999;
 
-      expect(() => exec()).toThrow();
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
@@ -385,7 +421,7 @@ describe("MBBooleanVariable", () => {
       expect(variable.Value).toEqual(payload.value);
     });
 
-    it("should edit variable with payload with appropriate parameters if only timeSample", () => {
+    it("should edit variable with payload with appropriate parameters if only timeSample", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -395,7 +431,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -411,7 +447,7 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with timeSample equal to timeSample given in payload", () => {
+    it("should edit variable with timeSample equal to timeSample given in payload", async () => {
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -420,7 +456,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -436,7 +472,7 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with Name equal to Name given in payload", () => {
+    it("should edit variable with Name equal to Name given in payload", async () => {
       editTimeSample = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -445,7 +481,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -461,7 +497,7 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with Offset equal to Offset given in payload", () => {
+    it("should edit variable with Offset equal to Offset given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editLength = undefined;
@@ -470,7 +506,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -486,7 +522,7 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with Length equal to Length given in payload", () => {
+    it("should edit variable with Length equal to Length given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -495,7 +531,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -511,15 +547,15 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set Length to 1 - despite value in payload", () => {
+    it("should alwyas set Length to 1 - despite value in payload", async () => {
       editLength = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.Length).toEqual(1);
     });
 
-    it("should edit variable with FCode equal to FCode given in payload", () => {
+    it("should edit variable with FCode equal to FCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editOffset = undefined;
@@ -528,7 +564,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -544,15 +580,15 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit set GetSingleFCode to 1 - despite value in payload", () => {
+    it("should edit set GetSingleFCode to 1 - despite value in payload", async () => {
       editGetSingleFCode = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.GetSingleFCode).toEqual(1);
     });
 
-    it("should edit variable with Value equal to Value given in payload", () => {
+    it("should edit variable with Value equal to Value given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -561,7 +597,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editSetSingleFCode = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -577,7 +613,7 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(editValue);
     });
 
-    it("should edit variable with GetSingleFCode equal to GetSingleFCode given in payload", () => {
+    it("should edit variable with GetSingleFCode equal to GetSingleFCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -586,7 +622,7 @@ describe("MBBooleanVariable", () => {
       editSetSingleFCode = undefined;
       editValue = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);
@@ -602,15 +638,15 @@ describe("MBBooleanVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should alwyas set SetSingleFCode to 15 - despite value in payload", () => {
+    it("should alwyas set SetSingleFCode to 15 - despite value in payload", async () => {
       editSetSingleFCode = 1234;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result.SetSingleFCode).toEqual(15);
     });
 
-    it("should edit variable with SetSingleFCode equal to SetSingleFCode given in payload", () => {
+    it("should edit variable with SetSingleFCode equal to SetSingleFCode given in payload", async () => {
       editTimeSample = undefined;
       editName = undefined;
       editFCode = undefined;
@@ -619,7 +655,7 @@ describe("MBBooleanVariable", () => {
       editGetSingleFCode = undefined;
       editValue = undefined;
 
-      let result = exec();
+      let result = await exec();
 
       expect(result).toBeDefined();
       expect(result.Id).toEqual(variable.Id);

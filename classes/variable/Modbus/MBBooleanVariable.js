@@ -23,14 +23,14 @@ class MBBooleanVariable extends MBVariable {
    * @description Method for initializing variable by payload
    * @param {object} payload variable payload
    */
-  init(payload) {
+  async init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.length = 1;
     payload.getSingleFCode =
       payload.fCode === 2 || payload.fCode == 1 ? payload.fCode : 1;
     payload.setSingleFCode = 15;
 
-    super.init(payload);
+    await super.init(payload);
 
     this._type = "boolean";
   }
@@ -62,7 +62,7 @@ class MBBooleanVariable extends MBVariable {
    * @description Method for edditing variable
    * @param {Object} payload Payload to edit
    */
-  editWithPayload(payload) {
+  async editWithPayload(payload) {
     payload.length = 1;
     let fCode = this.FCode;
     if (payload.fCode) fCode = payload.fCode;

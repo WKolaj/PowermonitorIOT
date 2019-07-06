@@ -51,12 +51,12 @@ class MBByteArrayVariable extends MBVariable {
    * @description Method for initializing variable by payload
    * @param {object} payload variable payload
    */
-  init(payload) {
+  async init(payload) {
     if (!payload) throw new Error("Payload cannot be empty");
     payload.getSingleFCode = payload.fCode;
     payload.setSingleFCode = 16;
 
-    super.init(payload);
+    await super.init(payload);
     this._type = "byteArray";
   }
 
@@ -169,7 +169,7 @@ class MBByteArrayVariable extends MBVariable {
    * @description Method for edditing variable
    * @param {Object} payload Payload to edit
    */
-  editWithPayload(payload) {
+  async editWithPayload(payload) {
     //Setting fCode of getSingleFCode according to new or old fCode
     let fCode = this.FCode;
     if (payload.fCode) {
@@ -202,7 +202,7 @@ class MBByteArrayVariable extends MBVariable {
     payload.getSingleFCode = fCode;
     payload.setSingleFCode = 16;
 
-    let varToReturn = super.editWithPayload(payload);
+    let varToReturn = await super.editWithPayload(payload);
 
     return varToReturn;
   }
