@@ -4,6 +4,7 @@ const mbDeviceValidator = require("./devices/mbDevice");
 const PAC3200TCPValidator = require("./devices/PAC3200TCP");
 const PAC2200TCPValidator = require("./devices/PAC2200TCP");
 const PAC4200TCPValidator = require("./devices/PAC4200TCP");
+const SpecialDeviceValidator = require("./devices/specialDevice");
 
 /**
  * @description Method for validate if element is valid while creating - return error message if object is not valid or undefined instead
@@ -25,6 +26,9 @@ let validateCreate = function(req) {
       }
       case "PAC4200TCP": {
         return resolve(await PAC4200TCPValidator.create(req));
+      }
+      case "specialDevice": {
+        return resolve(await SpecialDeviceValidator.create(req));
       }
       default: {
         return resolve("Given type is not recognized");
@@ -59,6 +63,9 @@ let validateEdit = function(req) {
       }
       case "PAC4200TCP": {
         return resolve(await PAC4200TCPValidator.edit(req));
+      }
+      case "specialDevice": {
+        return resolve(await SpecialDeviceValidator.edit(req));
       }
       default: {
         return resolve("Given type is not recognized");

@@ -24,7 +24,8 @@ let validateCreate = function(req) {
       deviceType === "mbDevice" ||
       deviceType === "PAC3200TCP" ||
       deviceType === "PAC4200TCP" ||
-      deviceType === "PAC2200TCP"
+      deviceType === "PAC2200TCP" ||
+      deviceType === "specialDevice"
     ) {
       switch (req.body.type) {
         case "factorElement": {
@@ -89,7 +90,8 @@ let validateEdit = function(req) {
       deviceType === "mbDevice" ||
       deviceType === "PAC3200TCP" ||
       deviceType === "PAC4200TCP" ||
-      deviceType === "PAC2200TCP"
+      deviceType === "PAC2200TCP" ||
+      deviceType === "specialDevice"
     ) {
       switch (calcElementType) {
         case "factorElement": {

@@ -1,6 +1,8 @@
 const Sampler = require("../sampler/Sampler");
 
+const logger = require("../../logger/logger");
 const MBDevice = require("../device/Modbus/MBDevice");
+const SpecialDevice = require("../device/SpecialDevices/SpecialDevice");
 
 const PAC3200TCP = require("../device/Modbus/Meters/PAC3200TCP");
 const PAC2200TCP = require("../device/Modbus/Meters/PAC2200TCP");
@@ -22,6 +24,12 @@ class CommInterface {
     this._project = project;
   }
 
+  _isPayloadOfSpecialDevice(payload) {
+    let specialDeviceTypes = ["specialDevice"];
+
+    return specialDeviceTypes.includes(payload.type);
+  }
+
   /**
    * @description method for initializing communication interface based on payload
    * @param payload payload to initalize
@@ -34,10 +42,30 @@ class CommInterface {
       this._initialized = true;
 
       if (payload) {
-        let allDevicesPayloads = Object.values(payload);
+        //Initializing normal devices first
+        let allNormalDevicesPayloads = Object.values(payload).filter(
+          devicePayload => !this._isPayloadOfSpecialDevice(devicePayload)
+        );
 
-        for (let devicePayload of allDevicesPayloads) {
-          await this.createNewDevice(devicePayload);
+        for (let devicePayload of allNormalDevicesPayloads) {
+          try {
+            await this.createNewDevice(devicePayload);
+          } catch (err) {
+            logger.error(err);
+          }
+        }
+
+        //Initializing special devices as a second
+        let allSpecialDevicesPayloads = Object.values(payload).filter(
+          devicePayload => this._isPayloadOfSpecialDevice(devicePayload)
+        );
+
+        for (let devicePayload of allSpecialDevicesPayloads) {
+          try {
+            await this.createNewDevice(devicePayload);
+          } catch (err) {
+            logger.error(err);
+          }
         }
       }
     }
@@ -286,6 +314,9 @@ class CommInterface {
       case "PAC4200TCP": {
         return this._createPAC4200TCPDevice(payload);
       }
+      case "specialDevice": {
+        return this._createSpecialDevice(payload);
+      }
       default: {
         return Promise.reject(
           new Error(`Given device type is not recognized: ${payload.type}`)
@@ -359,6 +390,25 @@ class CommInterface {
     return new Promise(async (resolve, reject) => {
       try {
         let newDevice = new PAC4200TCP();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for creating SpecialDevice based on payload
+   * @param {object} payload
+   */
+  async _createSpecialDevice(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new SpecialDevice();
         await newDevice.init(payload);
         this.Devices[newDevice.Id] = newDevice;
         this.Sampler.addDevice(newDevice);

@@ -294,34 +294,608 @@ describe("SDVariable", () => {
   });
 
   describe("init", () => {
-    let initialPayload;
+    let sdVariable;
+    let variablePayload;
 
     beforeEach(() => {
-      initialPayload = {
+      variablePayload = {
         name: "testSpecialDevice",
         id: "987654321",
         sampleTime: 5,
         archived: true,
         unit: 15,
         archiveSampleTime: 10,
-        elementDeviceId: "1235"
+        elementDeviceId: "1235",
+        elementId: "0006",
+        type: "sdVariable"
       };
     });
 
-    let exec = () => {
-      return new SDVariable(fakeDevice);
+    let exec = async () => {
+      sdVariable = new SDVariable(fakeDevice);
+      return sdVariable.init(variablePayload);
     };
 
-    it("should assign device to Device object", () => {
-      let result = exec();
-      expect(result.Device).toBeDefined();
-      expect(result.Device).toEqual(fakeDevice);
+    it("should initialize variable based on given payload", async () => {
+      await exec();
+
+      expect(sdVariable.Payload).toBeDefined();
+      expect(sdVariable.Payload).toEqual({
+        ...variablePayload,
+        value: sdVariable.Value
+      });
     });
 
-    it("should assign commInterface to variable", () => {
-      let result = exec();
-      expect(result.CommInterface).toBeDefined();
-      expect(result.CommInterface).toEqual(commInterface);
+    it("should assign element to variable if it is variable", async () => {
+      let elementToAssign = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+      await exec();
+
+      expect(sdVariable.Element).toBeDefined();
+      expect(sdVariable.Element).toEqual(elementToAssign);
+    });
+
+    it("should throw if elementId is not defined", async () => {
+      variablePayload.elementId = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if elementDeviceId is not defined", async () => {
+      variablePayload.elementDeviceId = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no device of given id", async () => {
+      variablePayload.elementDeviceId = "fakeDevice";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if there is no element of given id", async () => {
+      variablePayload.elementId = "fakeElement";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+  });
+
+  describe("get Value", () => {
+    let sdVariable;
+    let variablePayload;
+
+    beforeEach(() => {
+      variablePayload = {
+        name: "testSpecialDevice",
+        id: "987654321",
+        sampleTime: 5,
+        archived: true,
+        unit: 15,
+        archiveSampleTime: 10,
+        elementDeviceId: "1235",
+        elementId: "0006",
+        type: "sdVariable"
+      };
+    });
+
+    let exec = async () => {
+      sdVariable = new SDVariable(fakeDevice);
+      await sdVariable.init(variablePayload);
+      return sdVariable.Value;
+    };
+
+    it("should return value of connected variable", async () => {
+      let result = await exec();
+      let elementToAssign = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      expect(result).toBeDefined();
+      expect(result).toEqual(elementToAssign.Value);
+    });
+  });
+
+  describe("set Value", () => {
+    let sdVariable;
+    let variablePayload;
+    let newValue;
+
+    beforeEach(() => {
+      variablePayload = {
+        name: "testSpecialDevice",
+        id: "987654321",
+        sampleTime: 5,
+        archived: true,
+        unit: 15,
+        archiveSampleTime: 10,
+        elementDeviceId: "1235",
+        elementId: "0006",
+        type: "sdVariable"
+      };
+
+      newValue = "123456.654321";
+    });
+
+    let exec = async () => {
+      sdVariable = new SDVariable(fakeDevice);
+      await sdVariable.init(variablePayload);
+      sdVariable.Value = newValue;
+    };
+
+    it("should assign value to connected variable", async () => {
+      await exec();
+      let elementToAssign = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      expect(elementToAssign.Value).toEqual(newValue);
+    });
+  });
+
+  describe("Payload", () => {
+    let sdVariable;
+    let variablePayload;
+
+    beforeEach(() => {
+      variablePayload = {
+        name: "testSpecialDevice",
+        id: "987654321",
+        sampleTime: 5,
+        archived: true,
+        unit: 15,
+        archiveSampleTime: 10,
+        elementDeviceId: "1235",
+        elementId: "0006",
+        type: "sdVariable"
+      };
+    });
+
+    let exec = async () => {
+      sdVariable = new SDVariable(fakeDevice);
+      await sdVariable.init(variablePayload);
+      return sdVariable.Payload;
+    };
+
+    it("should return valid payload of variable", async () => {
+      let result = await exec();
+      expect(result).toEqual({
+        ...variablePayload,
+        value: sdVariable.Value
+      });
+    });
+
+    it("should be possible to recreate variable based on this Payload", async () => {
+      let result = await exec();
+      let newVariable = new SDVariable(fakeDevice);
+      await newVariable.init(result);
+
+      expect(newVariable.Payload).toEqual({
+        ...variablePayload,
+        value: sdVariable.Value
+      });
+    });
+  });
+
+  describe("_editElementAssignment", () => {
+    let sdVariable;
+    let variablePayload;
+    let editElementPayload;
+
+    beforeEach(() => {
+      variablePayload = {
+        name: "testSpecialDevice",
+        id: "987654321",
+        sampleTime: 5,
+        archived: true,
+        unit: 15,
+        archiveSampleTime: 10,
+        elementDeviceId: "1235",
+        elementId: "0006",
+        type: "sdVariable"
+      };
+      editElementPayload = {
+        elementDeviceId: "1234",
+        elementId: "0003"
+      };
+    });
+
+    let exec = async () => {
+      sdVariable = new SDVariable(fakeDevice);
+      await sdVariable.init(variablePayload);
+      return sdVariable._editElementAssignment(editElementPayload);
+    };
+
+    it("should reassign connected variable", async () => {
+      let reassignElement = await commInterface.getElement(
+        editElementPayload.elementDeviceId,
+        editElementPayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.ElementId).toEqual(editElementPayload.elementId);
+      expect(sdVariable.ElementDeviceId).toEqual(
+        editElementPayload.elementDeviceId
+      );
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+    });
+
+    it("should not reassign variableif elementDeviceId and elementId are not presented in payload", async () => {
+      let initialElementToAssign = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      editElementPayload.elementDeviceId = undefined;
+      editElementPayload.elementId = undefined;
+
+      await exec();
+
+      expect(sdVariable.ElementId).toEqual(variablePayload.elementId);
+      expect(sdVariable.ElementDeviceId).toEqual(
+        variablePayload.elementDeviceId
+      );
+      expect(sdVariable.Element).toEqual(initialElementToAssign);
+      expect(sdVariable.ValueType).toEqual(initialElementToAssign.ValueType);
+    });
+
+    it("should not reassign variable but throw if there is no device of given id", async () => {
+      let initialElementToAssign = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      editElementPayload.elementDeviceId = "fakeDevice";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(sdVariable.ElementId).toEqual(variablePayload.elementId);
+      expect(sdVariable.ElementDeviceId).toEqual(
+        variablePayload.elementDeviceId
+      );
+      expect(sdVariable.Element).toEqual(initialElementToAssign);
+      expect(sdVariable.ValueType).toEqual(initialElementToAssign.ValueType);
+    });
+
+    it("should not reassign variable but throw if there is no element of given id", async () => {
+      let initialElementToAssign = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      editElementPayload.elementId = "fakeElement";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(sdVariable.ElementId).toEqual(variablePayload.elementId);
+      expect(sdVariable.ElementDeviceId).toEqual(
+        variablePayload.elementDeviceId
+      );
+      expect(sdVariable.Element).toEqual(initialElementToAssign);
+      expect(sdVariable.ValueType).toEqual(initialElementToAssign.ValueType);
+    });
+
+    it("should reassign connected variable if changes are associated only with elementId", async () => {
+      editElementPayload.elementId = "0005";
+      editElementPayload.elementDeviceId = undefined;
+
+      let reassignElement = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        editElementPayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.ElementId).toEqual(editElementPayload.elementId);
+      expect(sdVariable.ElementDeviceId).toEqual(
+        variablePayload.elementDeviceId
+      );
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+    });
+  });
+
+  describe("editWithPayload", () => {
+    let sdVariable;
+    let variablePayload;
+    let editPayload;
+
+    beforeEach(() => {
+      variablePayload = {
+        name: "testSpecialDevice",
+        id: "987654321",
+        sampleTime: 5,
+        archived: true,
+        unit: 15,
+        archiveSampleTime: 10,
+        elementDeviceId: "1235",
+        elementId: "0006",
+        type: "sdVariable"
+      };
+      editPayload = {
+        name: "testSpecialDevice",
+        sampleTime: 15,
+        archived: false,
+        unit: 20,
+        archiveSampleTime: 30,
+        elementDeviceId: "1234",
+        elementId: "0003"
+      };
+    });
+
+    let exec = async () => {
+      sdVariable = new SDVariable(fakeDevice);
+      await sdVariable.init(variablePayload);
+      return sdVariable.editWithPayload(editPayload);
+    };
+
+    it("should edit variable based on given payload", async () => {
+      await exec();
+      let expectedPayload = {
+        ...editPayload,
+        type: variablePayload.type,
+        id: variablePayload.id,
+        value: sdVariable.Value
+      };
+
+      expect(sdVariable.Payload).toEqual(expectedPayload);
+    });
+
+    it("should reassign connected variable", async () => {
+      let reassignElement = await commInterface.getElement(
+        editPayload.elementDeviceId,
+        editPayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.ElementId).toEqual(editPayload.elementId);
+      expect(sdVariable.ElementDeviceId).toEqual(editPayload.elementDeviceId);
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+    });
+
+    it("should not edit id but throw if id is given in payload", async () => {
+      editPayload.id = "10101010";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(sdVariable.Id).toEqual(variablePayload.id);
+    });
+
+    it("should not edit id but throw if there is no device of given id", async () => {
+      editPayload.elementDeviceId = "10101010";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(sdVariable.Payload).toEqual({
+        ...variablePayload,
+        value: sdVariable.Value
+      });
+    });
+
+    it("should only reassign connected variable if only elementId and deviceId is given in payload", async () => {
+      editPayload = {
+        elementDeviceId: editPayload.elementDeviceId,
+        elementId: editPayload.elementId
+      };
+
+      let reassignElement = await commInterface.getElement(
+        editPayload.elementDeviceId,
+        editPayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.ElementId).toEqual(editPayload.elementId);
+      expect(sdVariable.ElementDeviceId).toEqual(editPayload.elementDeviceId);
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+
+      let expectedPayload = {
+        ...variablePayload,
+        ...editPayload,
+        value: sdVariable.Value
+      };
+
+      expect(sdVariable.Payload).toEqual(expectedPayload);
+    });
+
+    it("should edit only name if only name is given in payload", async () => {
+      editPayload = {
+        name: editPayload.name
+      };
+
+      let reassignElement = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+
+      let expectedPayload = {
+        ...variablePayload,
+        ...editPayload,
+        value: sdVariable.Value
+      };
+
+      expect(sdVariable.Payload).toEqual(expectedPayload);
+    });
+
+    it("should edit only unit if only unit is given in payload", async () => {
+      editPayload = {
+        unit: editPayload.unit
+      };
+
+      let reassignElement = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+
+      let expectedPayload = {
+        ...variablePayload,
+        ...editPayload,
+        value: sdVariable.Value
+      };
+
+      expect(sdVariable.Payload).toEqual(expectedPayload);
+    });
+
+    it("should edit only unit if only archive is given in payload", async () => {
+      editPayload = {
+        archived: editPayload.archived
+      };
+
+      let reassignElement = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+
+      let expectedPayload = {
+        ...variablePayload,
+        ...editPayload,
+        value: sdVariable.Value
+      };
+
+      expect(sdVariable.Payload).toEqual(expectedPayload);
+    });
+
+    it("should edit only sampleTime if only sampleTime is given in payload", async () => {
+      editPayload = {
+        sampleTime: editPayload.sampleTime
+      };
+
+      let reassignElement = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+
+      let expectedPayload = {
+        ...variablePayload,
+        ...editPayload,
+        value: sdVariable.Value
+      };
+
+      expect(sdVariable.Payload).toEqual(expectedPayload);
+    });
+
+    it("should edit only archiveSampleTime if only archiveSampleTime is given in payload", async () => {
+      editPayload = {
+        archiveSampleTime: editPayload.archiveSampleTime
+      };
+
+      let reassignElement = await commInterface.getElement(
+        variablePayload.elementDeviceId,
+        variablePayload.elementId
+      );
+
+      await exec();
+      expect(sdVariable.Element).toEqual(reassignElement);
+      //Value type should also change
+      expect(sdVariable.ValueType).toEqual(reassignElement.ValueType);
+
+      let expectedPayload = {
+        ...variablePayload,
+        ...editPayload,
+        value: sdVariable.Value
+      };
+
+      expect(sdVariable.Payload).toEqual(expectedPayload);
     });
   });
 });

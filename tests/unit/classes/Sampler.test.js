@@ -224,7 +224,7 @@ describe("Sampler", () => {
     });
   });
 
-  describe("_refreshAllDevices", () => {
+  describe("_refreshAllNormalDevices", () => {
     let sampler;
     let device1Mock;
     let device1Id;
@@ -250,7 +250,8 @@ describe("Sampler", () => {
         Name: device1Name,
         refresh: device1RefreshMock,
         Id: device1Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group1")
+        getRefreshGroupId: jest.fn().mockReturnValue("group1"),
+        isSpecial: jest.fn().mockReturnValue(false)
       };
 
       device2Name = "Dev2";
@@ -260,7 +261,8 @@ describe("Sampler", () => {
         Name: device2Name,
         refresh: device2RefreshMock,
         Id: device2Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group2")
+        getRefreshGroupId: jest.fn().mockReturnValue("group2"),
+        isSpecial: jest.fn().mockReturnValue(false)
       };
 
       device3Name = "Dev3";
@@ -270,7 +272,8 @@ describe("Sampler", () => {
         Name: device3Name,
         refresh: device3RefreshMock,
         Id: device3Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group3")
+        getRefreshGroupId: jest.fn().mockReturnValue("group3"),
+        isSpecial: jest.fn().mockReturnValue(false)
       };
 
       sampler = new Sampler();
@@ -280,106 +283,7 @@ describe("Sampler", () => {
     });
 
     let exec = () => {
-      return sampler._refreshAllDevices(tickNumber);
-    };
-
-    it("Should invoke refresh of all devices with the parameter of tickNumber", async () => {
-      await exec();
-
-      expect(device1RefreshMock).toHaveBeenCalledTimes(1);
-      expect(device1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
-      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-      expect(device3RefreshMock).toHaveBeenCalledTimes(1);
-      expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-    });
-
-    it("Should invoke refresh of all devices with the parameter of tickNumber", async () => {
-      await exec();
-
-      expect(device1RefreshMock).toHaveBeenCalledTimes(1);
-      expect(device1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
-      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-      expect(device3RefreshMock).toHaveBeenCalledTimes(1);
-      expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
-    });
-
-    it("Should not throw if one of devices throws an error while refreshing", async () => {
-      device1Mock.refresh = jest.fn().mockImplementation(() => {
-        throw new Error();
-      });
-
-      await expect(
-        new Promise(async (resolve, reject) => {
-          try {
-            await exec();
-            return resolve(true);
-          } catch (err) {
-            return reject(err);
-          }
-        })
-      ).resolves.toBeDefined();
-    });
-  });
-
-  describe("_refreshAllDevices", () => {
-    let sampler;
-    let device1Mock;
-    let device1Id;
-    let device1Name;
-    let device1RefreshMock;
-    let device2Mock;
-    let device2Id;
-    let device2Name;
-    let device2RefreshMock;
-    let device3Mock;
-    let device3Id;
-    let device3Name;
-    let device3RefreshMock;
-    let tickNumber;
-
-    beforeEach(() => {
-      tickNumber = 123;
-
-      device1Name = "Dev1";
-      device1Id = "0001";
-      device1RefreshMock = jest.fn();
-      device1Mock = {
-        Name: device1Name,
-        refresh: device1RefreshMock,
-        Id: device1Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group1")
-      };
-
-      device2Name = "Dev2";
-      device2Id = "0002";
-      device2RefreshMock = jest.fn();
-      device2Mock = {
-        Name: device2Name,
-        refresh: device2RefreshMock,
-        Id: device2Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group2")
-      };
-
-      device3Name = "Dev3";
-      device3Id = "0003";
-      device3RefreshMock = jest.fn();
-      device3Mock = {
-        Name: device3Name,
-        refresh: device3RefreshMock,
-        Id: device3Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group3")
-      };
-
-      sampler = new Sampler();
-      sampler.addDevice(device1Mock);
-      sampler.addDevice(device2Mock);
-      sampler.addDevice(device3Mock);
-    });
-
-    let exec = () => {
-      return sampler._refreshAllDevices(tickNumber);
+      return sampler._refreshAllNormalDevices(tickNumber);
     };
 
     it("Should invoke refresh of all devices with the parameter of tickNumber", async () => {
@@ -474,6 +378,184 @@ describe("Sampler", () => {
         })
       ).resolves.toBeDefined();
     });
+
+    it("Should not invoke refresh of all devices which are special", async () => {
+      device1Mock.isSpecial = jest.fn().mockReturnValue(true);
+      await exec();
+
+      expect(device1RefreshMock).not.toHaveBeenCalled();
+      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+    });
+  });
+
+  describe("_refreshAllSpecialDevices", () => {
+    let sampler;
+    let device1Mock;
+    let device1Id;
+    let device1Name;
+    let device1RefreshMock;
+    let device2Mock;
+    let device2Id;
+    let device2Name;
+    let device2RefreshMock;
+    let device3Mock;
+    let device3Id;
+    let device3Name;
+    let device3RefreshMock;
+    let tickNumber;
+
+    beforeEach(() => {
+      tickNumber = 123;
+
+      device1Name = "Dev1";
+      device1Id = "0001";
+      device1RefreshMock = jest.fn();
+      device1Mock = {
+        Name: device1Name,
+        refresh: device1RefreshMock,
+        Id: device1Id,
+        getRefreshGroupId: jest.fn().mockReturnValue("group1"),
+        isSpecial: jest.fn().mockReturnValue(true)
+      };
+
+      device2Name = "Dev2";
+      device2Id = "0002";
+      device2RefreshMock = jest.fn();
+      device2Mock = {
+        Name: device2Name,
+        refresh: device2RefreshMock,
+        Id: device2Id,
+        getRefreshGroupId: jest.fn().mockReturnValue("group2"),
+        isSpecial: jest.fn().mockReturnValue(true)
+      };
+
+      device3Name = "Dev3";
+      device3Id = "0003";
+      device3RefreshMock = jest.fn();
+      device3Mock = {
+        Name: device3Name,
+        refresh: device3RefreshMock,
+        Id: device3Id,
+        getRefreshGroupId: jest.fn().mockReturnValue("group3"),
+        isSpecial: jest.fn().mockReturnValue(true)
+      };
+
+      sampler = new Sampler();
+      sampler.addDevice(device1Mock);
+      sampler.addDevice(device2Mock);
+      sampler.addDevice(device3Mock);
+    });
+
+    let exec = () => {
+      return sampler._refreshAllSpecialDevices(tickNumber);
+    };
+
+    it("Should invoke refresh of all devices with the parameter of tickNumber", async () => {
+      await exec();
+
+      expect(device1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+    });
+
+    it("Should invoke refresh of all devices with the parameter of tickNumber", async () => {
+      await exec();
+
+      expect(device1RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device1RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+    });
+
+    it("Should not invoke refresh methods parallel of devices from the same group but inoke in parallel device which are not from the same group", async () => {
+      let checkValueNotParallel = 0;
+      let checkValueParallel = 0;
+      device1Mock.getRefreshGroupId = jest.fn().mockReturnValue("group1");
+      device2Mock.getRefreshGroupId = jest.fn().mockReturnValue("group1");
+      device3Mock.getRefreshGroupId = jest.fn().mockReturnValue("group2");
+
+      let runningInParallelWorks = true;
+      let runningNotInParallelWorks = true;
+      //Methods for device1 and device2 should not be invoked in parralel - one after antorher
+      device1Mock.refresh = async () => {
+        checkValueNotParallel = 1;
+        await snooze(1000);
+        if (checkValueNotParallel !== 1) runningNotInParallelWorks = false;
+        if (checkValueParallel !== 3) runningInParallelWorks = false;
+      };
+
+      device2Mock.refresh = async () => {
+        checkValueNotParallel = 2;
+        await snooze(1000);
+        if (checkValueNotParallel !== 2) runningNotInParallelWorks = false;
+        if (checkValueParallel !== 3) runningInParallelWorks = false;
+      };
+
+      //Method refresh for device3Mock should be invoked in parralel and modify variable
+      device3Mock.refresh = async () => {
+        await snooze(500);
+        checkValueParallel = 3;
+      };
+
+      await exec();
+
+      expect(runningInParallelWorks).toEqual(true);
+      expect(runningNotInParallelWorks).toEqual(true);
+    });
+
+    it("Should invoke rest of devices from the same group if one throws during refreshing", async () => {
+      device1Mock.getRefreshGroupId = jest.fn().mockReturnValue("group1");
+      device2Mock.getRefreshGroupId = jest.fn().mockReturnValue("group1");
+      device3Mock.getRefreshGroupId = jest.fn().mockReturnValue("group1");
+
+      //Methods for device1 and device2 should not be invoked in parralel - one after antorher
+      device1Mock.refresh = async () => {
+        throw new Error("Test error");
+      };
+
+      await exec();
+
+      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+    });
+
+    it("Should not throw if one of devices throws an error while refreshing", async () => {
+      device1Mock.refresh = jest.fn().mockImplementation(() => {
+        throw new Error();
+      });
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+    });
+
+    it("Should not invoke refresh of all devices which are normal", async () => {
+      device1Mock.isSpecial = jest.fn().mockReturnValue(false);
+      await exec();
+
+      expect(device1RefreshMock).not.toHaveBeenCalled();
+      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device3RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+    });
   });
 
   describe("_emitTick", () => {
@@ -489,9 +571,21 @@ describe("Sampler", () => {
     let device3Mock;
     let device3Name;
     let device3RefreshMock;
+    let device3Id;
+    let device4Mock;
+    let device4Name;
+    let device4RefreshMock;
+    let device4Id;
+    let device5Mock;
+    let device5Name;
+    let device5RefreshMock;
+    let device5Id;
+    let device6Mock;
+    let device6Name;
+    let device6RefreshMock;
+    let device6Id;
     let tickNumber;
     let tickEventHandler;
-    let device3Id;
 
     beforeEach(() => {
       tickNumber = 123;
@@ -503,7 +597,8 @@ describe("Sampler", () => {
         Name: device1Name,
         refresh: device1RefreshMock,
         Id: device1Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group1")
+        getRefreshGroupId: jest.fn().mockReturnValue("group1"),
+        isSpecial: jest.fn().mockReturnValue(false)
       };
 
       device2Name = "Dev2";
@@ -513,7 +608,8 @@ describe("Sampler", () => {
         Name: device2Name,
         refresh: device2RefreshMock,
         Id: device2Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group2")
+        getRefreshGroupId: jest.fn().mockReturnValue("group2"),
+        isSpecial: jest.fn().mockReturnValue(true)
       };
 
       device3Name = "Dev3";
@@ -523,13 +619,50 @@ describe("Sampler", () => {
         Name: device3Name,
         refresh: device3RefreshMock,
         Id: device3Id,
-        getRefreshGroupId: jest.fn().mockReturnValue("group3")
+        getRefreshGroupId: jest.fn().mockReturnValue("group3"),
+        isSpecial: jest.fn().mockReturnValue(false)
+      };
+
+      device4Name = "Dev4";
+      device4Id = "0004";
+      device4RefreshMock = jest.fn();
+      device4Mock = {
+        Name: device4Name,
+        refresh: device4RefreshMock,
+        Id: device4Id,
+        getRefreshGroupId: jest.fn().mockReturnValue("group4"),
+        isSpecial: jest.fn().mockReturnValue(true)
+      };
+
+      device5Name = "Dev5";
+      device5Id = "0005";
+      device5RefreshMock = jest.fn();
+      device5Mock = {
+        Name: device5Name,
+        refresh: device5RefreshMock,
+        Id: device5Id,
+        getRefreshGroupId: jest.fn().mockReturnValue("group5"),
+        isSpecial: jest.fn().mockReturnValue(false)
+      };
+
+      device6Name = "Dev6";
+      device6Id = "0006";
+      device6RefreshMock = jest.fn();
+      device6Mock = {
+        Name: device6Name,
+        refresh: device6RefreshMock,
+        Id: device6Id,
+        getRefreshGroupId: jest.fn().mockReturnValue("group6"),
+        isSpecial: jest.fn().mockReturnValue(true)
       };
 
       sampler = new Sampler();
       sampler.addDevice(device1Mock);
       sampler.addDevice(device2Mock);
       sampler.addDevice(device3Mock);
+      sampler.addDevice(device4Mock);
+      sampler.addDevice(device5Mock);
+      sampler.addDevice(device6Mock);
 
       tickEventHandler = jest.fn();
 
@@ -549,10 +682,62 @@ describe("Sampler", () => {
       expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
       expect(device3RefreshMock).toHaveBeenCalledTimes(1);
       expect(device3RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device4RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device4RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device5RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device5RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device6RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device6RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+    });
+
+    it("Should invoke refresh of all special devices after normal devices", async () => {
+      await exec();
+
+      expect(device2RefreshMock).toHaveBeenCalledAfter(device1RefreshMock);
+      expect(device2RefreshMock).toHaveBeenCalledAfter(device3RefreshMock);
+      expect(device2RefreshMock).toHaveBeenCalledAfter(device5RefreshMock);
+      expect(device4RefreshMock).toHaveBeenCalledAfter(device1RefreshMock);
+      expect(device4RefreshMock).toHaveBeenCalledAfter(device3RefreshMock);
+      expect(device4RefreshMock).toHaveBeenCalledAfter(device5RefreshMock);
+      expect(device6RefreshMock).toHaveBeenCalledAfter(device1RefreshMock);
+      expect(device6RefreshMock).toHaveBeenCalledAfter(device3RefreshMock);
+      expect(device6RefreshMock).toHaveBeenCalledAfter(device5RefreshMock);
+    });
+
+    it("Should invoke refresh of all special devices even if normal devices throws while refreshing", async () => {
+      device1Mock.refresh = jest.fn().mockImplementation(() => {
+        throw new Error();
+      });
+
+      await exec();
+
+      expect(device2RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device2RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device4RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device4RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
+      expect(device6RefreshMock).toHaveBeenCalledTimes(1);
+      expect(device6RefreshMock.mock.calls[0][0]).toEqual(tickNumber);
     });
 
     it("Should not throw if one of devices throws an error while refreshing", async () => {
       device1Mock.refresh = jest.fn().mockImplementation(() => {
+        throw new Error();
+      });
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+    });
+
+    it("Should not throw if one of special devices throws an error while refreshing", async () => {
+      device2Mock.refresh = jest.fn().mockImplementation(() => {
         throw new Error();
       });
 

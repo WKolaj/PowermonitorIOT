@@ -10,6 +10,7 @@ const MBSwappedInt32VariableValidator = require("./variables/MBSwappedInt32Varia
 const MBSwappedUInt32VariableValidator = require("./variables/MBSwappedUInt32Variable");
 const MBUInt16VariableValidator = require("./variables/MBUInt16Variable");
 const MBUInt32VariableValidator = require("./variables/MBUInt32Variable");
+const SDVariableValidator = require("./variables/SDVariable");
 
 /**
  * @description Method for validate if element is valid while creating - return error message if object is not valid or undefined instead
@@ -62,6 +63,15 @@ let validateCreate = function(req) {
         }
         case "mbSwappedUInt32": {
           return resolve(await MBSwappedUInt32VariableValidator.create(req));
+        }
+        default: {
+          return resolve("Given variable type is not recognized");
+        }
+      }
+    } else if (deviceType === "specialDevice") {
+      switch (req.body.type) {
+        case "sdVariable": {
+          return resolve(await SDVariableValidator.create(req));
         }
         default: {
           return resolve("Given variable type is not recognized");
@@ -148,6 +158,15 @@ let validateEdit = function(req) {
         }
         case "mbSwappedUInt32": {
           return resolve(await MBSwappedUInt32VariableValidator.edit(req));
+        }
+        default: {
+          return resolve("Given variable type is not recognized");
+        }
+      }
+    } else if (deviceType === "specialDevice") {
+      switch (variableType) {
+        case "sdVariable": {
+          return resolve(await SDVariableValidator.edit(req));
         }
         default: {
           return resolve("Given variable type is not recognized");

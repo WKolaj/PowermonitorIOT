@@ -378,6 +378,13 @@ describe("auth route", () => {
       };
     };
 
+    getSpecialDeviceBody = function() {
+      return {
+        name: "testDevice1",
+        type: "specialDevice"
+      };
+    };
+
     it("should create mbDevice according to given payload", async () => {
       await exec();
 
@@ -851,6 +858,88 @@ describe("auth route", () => {
     it("should not create device and return 400 if type is PAC3200TCP and isActive is defined", async () => {
       body = getPAC3200TCPBody();
       body.isActive = false;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should create specialDevice according to given payload", async () => {
+      body = getSpecialDeviceBody();
+      await exec();
+
+      let createdDevice = (await Project.CurrentProject.getAllDevices()).find(
+        device => device.Name === body.name
+      );
+
+      let createdDevicePayload = {
+        name: createdDevice.Name,
+        type: createdDevice.Type
+      };
+
+      expect(createdDevicePayload).toEqual(body);
+    });
+
+    it("should return with code 200 and new created specialDevice", async () => {
+      body = getSpecialDeviceBody();
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let createdDevice = (await Project.CurrentProject.getAllDevices()).find(
+        device => device.Name === body.name
+      );
+
+      let expectedPayload = {
+        ...createdDevice.Payload,
+        connected: createdDevice.Connected,
+        variables: [],
+        calculationElements: []
+      };
+
+      expect(result.body).toEqual(expectedPayload);
+    });
+
+    it("should not create device and return 400 if type is specialDevice and there is no name defined", async () => {
+      body = getSpecialDeviceBody();
+      body.name = undefined;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/\"name\" is required/);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is specialDevice and name is shorter than 3 signs", async () => {
+      body = getSpecialDeviceBody();
+      body.name = "ab";
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is specialDevice and name is longer than 20 signs", async () => {
+      body = getSpecialDeviceBody();
+      body.name = new Array(101 + 1).join("a");
 
       let devicesBefore = await Project.CurrentProject.getAllDevices();
 

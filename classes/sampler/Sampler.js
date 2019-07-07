@@ -83,8 +83,11 @@ class Sampler {
       //setting last tick number to actual
       this._lastTickTimeNumber = tickNumber;
 
-      //Refreshing all devices
-      await this._refreshAllDevices(tickNumber);
+      //Refreshing all normal devices
+      await this._refreshAllNormalDevices(tickNumber);
+
+      //Refreshing all speical devices - after refreshing normal ones
+      await this._refreshAllSpecialDevices(tickNumber);
 
       //emiting tick event
       this.Events.emit("OnTick", [tickNumber]);
@@ -93,11 +96,38 @@ class Sampler {
     }
   }
 
-  getRefreshGroupsFromDevices() {
-    let groupsToReturn = {};
-    let allDevices = Object.values(this.AllDevices);
+  getNormalDevices() {
+    return Object.values(this.AllDevices).filter(device => !device.isSpecial());
+  }
 
-    for (let device of allDevices) {
+  getSpecialDevices() {
+    return Object.values(this.AllDevices).filter(device => device.isSpecial());
+  }
+
+  getRefreshGroupsFromNormalDevices() {
+    let groupsToReturn = {};
+    //Refreshing only normal devices - special devices will be refreshed later
+    let allNormalDevices = this.getNormalDevices();
+
+    for (let device of allNormalDevices) {
+      let refreshGroupId = device.getRefreshGroupId();
+
+      //Creating new empty group if not exist
+      if (!(refreshGroupId in groupsToReturn))
+        groupsToReturn[refreshGroupId] = [];
+
+      //Assigning device to group
+      groupsToReturn[refreshGroupId].push(device);
+    }
+
+    return groupsToReturn;
+  }
+
+  getRefreshGroupsFromSpecialDevices() {
+    let groupsToReturn = {};
+    let allSpecialDevices = this.getSpecialDevices();
+
+    for (let device of allSpecialDevices) {
       let refreshGroupId = device.getRefreshGroupId();
 
       //Creating new empty group if not exist
@@ -112,11 +142,11 @@ class Sampler {
   }
 
   /**
-   * @description Refreshing all devices
+   * @description Refreshing all normal devices
    * @param {number} tickNumber Actual tick number
    */
-  async _refreshAllDevices(tickNumber) {
-    let refreshGroups = this.getRefreshGroupsFromDevices();
+  async _refreshAllNormalDevices(tickNumber) {
+    let refreshGroups = this.getRefreshGroupsFromNormalDevices();
     let refreshPromises = [];
     let groupIds = Object.keys(refreshGroups);
 
@@ -142,6 +172,36 @@ class Sampler {
     return Promise.all(refreshPromises);
   }
 
+  /**
+   * @description Refreshing all normal devices
+   * @param {number} tickNumber Actual tick number
+   */
+  async _refreshAllSpecialDevices(tickNumber) {
+    let refreshGroups = this.getRefreshGroupsFromSpecialDevices();
+    let refreshPromises = [];
+    let groupIds = Object.keys(refreshGroups);
+
+    for (let groupId of groupIds) {
+      let newPromise = new Promise(async (resolve, reject) => {
+        let refreshResult = {};
+
+        for (let device of refreshGroups[groupId]) {
+          try {
+            await device.refresh(tickNumber);
+            refreshResult[device.Id] = true;
+          } catch (err) {
+            refreshResult[device.Id] = err;
+          }
+        }
+
+        return resolve(refreshResult);
+      });
+
+      refreshPromises.push(newPromise);
+    }
+
+    return Promise.all(refreshPromises);
+  }
   /**
    * @description Adding new device to the sampler
    * @param {object} device Device to be added

@@ -43,10 +43,17 @@ class SDVariable extends Variable {
 
     this._elementDeviceId = payload.elementDeviceId;
     this._elementId = payload.elementId;
-    this._element = this.CommInterface.getElement(
+    this._element = await this.CommInterface.getElement(
       this.ElementDeviceId,
       this.ElementId
     );
+  }
+
+  /**
+   * @description Method called while refreshing variable
+   */
+  refresh(tickNumber) {
+    return this.Value;
   }
 
   get ElementDeviceId() {
@@ -83,6 +90,7 @@ class SDVariable extends Variable {
 
     payload.elementDeviceId = this.ElementDeviceId;
     payload.elementId = this.ElementId;
+    payload.value = this.Value;
 
     return payload;
   }
@@ -91,17 +99,33 @@ class SDVariable extends Variable {
    * @description Method for edition of variable associated with changes with connection to element
    * @param {object} payload Payload of edition
    */
-  _editElementAssignment(payload) {
+  async _editElementAssignment(payload) {
     //Editing element if edition is associated with changes of deviceId or elementId
     if (exists(payload.elementDeviceId) || exists(payload.elementId)) {
-      //Calculation new ids based on payload
-      let newElementDeviceId = exists(payload.elementDeviceId)
-        ? payload.elementDeviceId
-        : this.ElementDeviceId;
-      let newElementId = exists(payload.newElementId)
-        ? payload.newElementId
-        : this.ElementId;
+      let {
+        newElementDeviceId,
+        newElementId
+      } = await this._checkElementAssignment(payload);
 
+      this._elementDeviceId = newElementDeviceId;
+      this._elementId = newElementId;
+      this._element = await this.CommInterface.getElement(
+        this.ElementDeviceId,
+        this.ElementId
+      );
+    }
+  }
+
+  async _checkElementAssignment(payload) {
+    //Calculation new ids based on payload
+    let newElementDeviceId = exists(payload.elementDeviceId)
+      ? payload.elementDeviceId
+      : this.ElementDeviceId;
+    let newElementId = exists(payload.elementId)
+      ? payload.elementId
+      : this.ElementId;
+
+    if (exists(payload.elementDeviceId) || exists(payload.elementId)) {
       //Checking if element of given ids exists
       if (
         !this.CommInterface.doesElementExist(newElementDeviceId, newElementId)
@@ -109,22 +133,21 @@ class SDVariable extends Variable {
         throw new Error(
           `Element of id ${newElementId} does not exist in device of id ${newElementDeviceId}`
         );
-
-      this._elementDeviceId = newElementDeviceId;
-      this._elementId = newElementId;
-      this._element = this.CommInterface.getElement(
-        this.ElementDeviceId,
-        this.ElementId
-      );
     }
+
+    return {
+      newElementDeviceId,
+      newElementId
+    };
   }
 
   /**
    * @description Method for editting variable based on given payload
    */
   async editWithPayload(payload) {
+    await this._checkElementAssignment(payload);
     await super.editWithPayload(payload);
-    this._editElementAssignment(payload);
+    await this._editElementAssignment(payload);
     return this;
   }
 
@@ -132,7 +155,14 @@ class SDVariable extends Variable {
    * @description Method for generating type of value of variable
    */
   _getValueType() {
-    return this.Element.Type;
+    return this.Element.ValueType;
+  }
+
+  /**
+   * @description Method for generating type name that represents variable
+   */
+  _getTypeName() {
+    return "sdVariable";
   }
 }
 

@@ -7,7 +7,7 @@ const {
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
 
-describe("auth route", () => {
+describe("devices route", () => {
   //Database directory should be cleared'
   let Project;
   let db1Path;
@@ -339,11 +339,14 @@ describe("auth route", () => {
     let token;
     let mbDeviceBodyCreate;
     let PAC3200TCPBodyCreate;
+    let specialDeviceBodyCreate;
 
     let mbDeviceBodyEdit;
     let PAC3200TCPBodyEdit;
+    let specialDeviceBodyEdit;
 
     let editPAC3200;
+    let editSpecialDevice;
     let editedDevice;
     let editedDeviceBeforePayload;
     let setFakeDeviceId;
@@ -388,7 +391,17 @@ describe("auth route", () => {
         isActive: true
       };
 
+      specialDeviceBodyCreate = {
+        type: "specialDevice",
+        name: "specialDeviceCreateName"
+      };
+
+      specialDeviceBodyEdit = {
+        name: "specialDeviceEditName"
+      };
+
       editPAC3200 = false;
+      editSpecialDevice = false;
       setFakeDeviceId = false;
     });
 
@@ -399,6 +412,14 @@ describe("auth route", () => {
           PAC3200TCPBodyCreate
         );
         body = PAC3200TCPBodyEdit;
+        deviceId = editedDevice.Id;
+      } else if (editSpecialDevice) {
+        //Editing special device
+        editedDevice = await Project.CurrentProject.createDevice(
+          specialDeviceBodyCreate
+        );
+
+        body = specialDeviceBodyEdit;
         deviceId = editedDevice.Id;
       } else {
         //Editing Modbus device
@@ -859,6 +880,62 @@ describe("auth route", () => {
       editPAC3200 = true;
 
       PAC3200TCPBodyEdit.isActive = "string";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(editedDeviceBeforePayload).toEqual(editedDevice.Payload);
+    });
+
+    it("should edit specialDevice according to given payload", async () => {
+      editSpecialDevice = true;
+
+      await exec();
+
+      let editedDevicePayload = {
+        name: editedDevice.Name
+      };
+
+      expect(editedDevicePayload).toEqual(body);
+    });
+
+    it("should return payload of edited specialDevice", async () => {
+      editSpecialDevice = true;
+      let result = await exec();
+      let expectedPayload = editedDevice.Payload;
+      expectedPayload.connected = editedDevice.Connected;
+
+      expectedPayload.variables = [];
+
+      expectedPayload.calculationElements = [];
+      expect(result.body).toEqual(expectedPayload);
+    });
+
+    it("should edit only name if only name is passed - if device is specialDevice", async () => {
+      editSpecialDevice = true;
+
+      specialDeviceBodyEdit = _.pick(specialDeviceBodyEdit, "name");
+
+      await exec();
+
+      expect(editedDevice.Name).toEqual(specialDeviceBodyEdit.name);
+    });
+
+    it("should return 400 and not edit device if name is shorter than 3 characters - if device is specialDevice", async () => {
+      editSpecialDevice = true;
+
+      specialDeviceBodyEdit.name = "ab";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(editedDeviceBeforePayload).toEqual(editedDevice.Payload);
+    });
+
+    it("should return 400 and not edit device if name is longer than 100 characters - if device is specialDevice", async () => {
+      editSpecialDevice = true;
+
+      specialDeviceBodyEdit.name = new Array(101 + 1).join("a").toString();
 
       let result = await exec();
 

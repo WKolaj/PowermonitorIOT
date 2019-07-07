@@ -151,6 +151,25 @@ class SpecialDevice extends Device {
   }
 
   /**
+   * @description Refreshing variables based on tickNumber
+   */
+  async refresh(tickNumber) {
+    //Method has to be override - due to calling _refreshSpecialDevice after refreshing and archiving all other data
+    await super.refresh(tickNumber);
+    try {
+      await this._refreshSpecialDevice(tickNumber);
+    } catch (err) {
+      logger.error(err);
+    }
+  }
+
+  /**
+   * @description Refreshing special device - method should be overwritten in child classes
+   * @param {number} tickNumber Tick number
+   */
+  async _refreshSpecialDevice(tickNumber) {}
+
+  /**
    * @description Method for refreshing all variables elements associated with device - if the correspond to tick number
    * @param {*} tickNumber Tick number
    * @param {*} payloadToAppend Payload to append by results of refresh
@@ -211,6 +230,19 @@ class SpecialDevice extends Device {
    */
   async editWithPayload(payload) {
     return super.editWithPayload(payload);
+  }
+
+  /**
+   * @description Method for getting sampler group for given variable - based on theses groups sampler controls paralel data exchange
+   */
+  getRefreshGroupId() {
+    return this.Id;
+  }
+  /**
+   * @description Method for determining if device is special - special devices has to be refreshed after normal devices
+   */
+  isSpecial() {
+    return true;
   }
 }
 

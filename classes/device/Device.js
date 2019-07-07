@@ -510,6 +510,8 @@ class Device {
   async editWithPayload(payload) {
     //Setting new values if they are given in payload
     if (payload.name) this._name = payload.name;
+
+    return this;
   }
 
   async getVariableValueFromDB(variableId, date) {
@@ -629,6 +631,24 @@ class Device {
    */
   getRefreshGroupId() {
     throw new Error("Method not implemented");
+  }
+
+  /**
+   * @description Should be override in child classes
+   */
+  async connect() {}
+
+  /**
+   * @description Should be override in child classes
+   */
+  async disconnect() {}
+
+  /**
+   * @description Method for determining if device is special - special devices has to be refreshed after normal devices
+   * Should be override in child classes
+   */
+  isSpecial() {
+    return false;
   }
 }
 

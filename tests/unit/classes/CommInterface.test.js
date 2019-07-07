@@ -282,6 +282,49 @@ describe("CommInterface", () => {
     });
   });
 
+  describe("_isPayloadOfSpecialDevice", () => {
+    let deviceType;
+    let devicePayload;
+
+    let exec = () => {
+      devicePayload = {
+        type: deviceType
+      };
+
+      return commInterface._isPayloadOfSpecialDevice(devicePayload);
+    };
+
+    it("should return false for mbDevice", () => {
+      deviceType = "mbDevice";
+      let result = exec();
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false for PAC2200TCP", () => {
+      deviceType = "PAC2200TCP";
+      let result = exec();
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false for PAC3200TCP", () => {
+      deviceType = "PAC3200TCP";
+      let result = exec();
+      expect(result).toBeFalsy();
+    });
+
+    it("should return false for PAC4200TCP", () => {
+      deviceType = "PAC4200TCP";
+      let result = exec();
+      expect(result).toBeFalsy();
+    });
+
+    it("should return true for specialDevice", () => {
+      deviceType = "specialDevice";
+      let result = exec();
+      expect(result).toBeTruthy();
+    });
+  });
+
   describe("assignToProject", () => {
     let project;
 
