@@ -31,8 +31,13 @@ class MBBooleanVariable extends MBVariable {
     payload.setSingleFCode = 15;
 
     await super.init(payload);
+  }
 
-    this._type = "mbBoolean";
+  /**
+   * @description Method for generating type name that represents variable
+   */
+  _getTypeName() {
+    return "mbBoolean";
   }
 
   /**

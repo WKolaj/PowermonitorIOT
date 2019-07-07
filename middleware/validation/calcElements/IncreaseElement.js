@@ -28,7 +28,7 @@ let IncreaseElementVariableCreateSchema = Joi.object().keys({
     .max(10000)
     .required(),
   overflow: Joi.number().required(),
-  archiveTimeSample: Joi.number()
+  archiveSampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000)
@@ -55,7 +55,7 @@ let IncreaseElementVariableEditSchema = Joi.object().keys({
     .min(0)
     .max(10000),
   overflow: Joi.number(),
-  archiveTimeSample: Joi.number()
+  archiveSampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000)
@@ -63,7 +63,7 @@ let IncreaseElementVariableEditSchema = Joi.object().keys({
 
 let setDefaultValues = function(req) {
   if (req.body.sampleTime === undefined) req.body.sampleTime = 1;
-  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
+  if (req.body.archiveSampleTime === undefined) req.body.archiveSampleTime = 1;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;
 };

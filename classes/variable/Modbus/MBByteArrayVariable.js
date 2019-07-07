@@ -57,7 +57,13 @@ class MBByteArrayVariable extends MBVariable {
     payload.setSingleFCode = 16;
 
     await super.init(payload);
-    this._type = "mbByteArray";
+  }
+
+  /**
+   * @description Method for generating type name that represents variable
+   */
+  _getTypeName() {
+    return "mbByteArray";
   }
 
   /**

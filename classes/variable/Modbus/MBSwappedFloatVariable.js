@@ -90,8 +90,13 @@ class MBSwappedFloatVariable extends MBVariable {
       payload.fCode === 3 || payload.fCode == 4 ? payload.fCode : 3;
 
     await super.init(payload);
+  }
 
-    this._type = "mbSwappedFloat";
+  /**
+   * @description Method for generating type name that represents variable
+   */
+  _getTypeName() {
+    return "mbSwappedFloat";
   }
 
   /**

@@ -78,6 +78,13 @@ class MBVariable extends Variable {
   }
 
   /**
+   * @description Method for generating type name that represents variable
+   */
+  _getTypeName() {
+    return "mbVariable";
+  }
+
+  /**
    * @description Method for reassigning driver to variable
    */
   reassignDriver() {
@@ -251,7 +258,6 @@ class MBVariable extends Variable {
     payload.length = this.Length;
     payload.fCode = this.FCode;
     payload.value = this.Value;
-    payload.type = this.Type;
     payload.getSingleFCode = this.GetSingleFCode;
     payload.setSingleFCode = this.SetSingleFCode;
 

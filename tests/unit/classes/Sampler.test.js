@@ -102,25 +102,25 @@ describe("Sampler", () => {
     });
   });
 
-  describe("convertTimeSampleToTickId", () => {
-    let timeSample;
+  describe("convertSampleTimeToTickId", () => {
+    let sampleTime;
 
     beforeEach(() => {
-      timeSample = 15;
+      sampleTime = 15;
     });
 
     let exec = () => {
-      return Sampler.convertTimeSampleToTickId(timeSample);
+      return Sampler.convertSampleTimeToTickId(sampleTime);
     };
 
-    it("should convert timeSample to tickId - return timeSample in seconds", () => {
+    it("should convert sampleTime to tickId - return sampleTime in seconds", () => {
       let result = exec();
 
       expect(result).toEqual(15);
     });
   });
 
-  describe("convertTickIdToTimeSample", () => {
+  describe("convertTickIdToSampleTime", () => {
     let tickId;
 
     beforeEach(() => {
@@ -128,10 +128,10 @@ describe("Sampler", () => {
     });
 
     let exec = () => {
-      return Sampler.convertTickIdToTimeSample(tickId);
+      return Sampler.convertTickIdToSampleTime(tickId);
     };
 
-    it("should convert tickId to timeSample - return timeSample in seconds", () => {
+    it("should convert tickId to sampleTime - return sampleTime in seconds", () => {
       let result = exec();
 
       expect(result).toEqual(15);

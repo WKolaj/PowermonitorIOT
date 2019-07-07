@@ -47,7 +47,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0001",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         offset: 5,
         length: 1,
@@ -58,11 +58,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit1",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0002",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         offset: 6,
         length: 2,
@@ -73,11 +73,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit2",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0003",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         offset: 7,
         length: 2,
@@ -88,7 +88,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit3",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     calculationElements: [
@@ -109,7 +109,7 @@ let testPayload = JSON.stringify({
             factor: 2
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "1002",
@@ -128,7 +128,7 @@ let testPayload = JSON.stringify({
             factor: 3
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -145,7 +145,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0004",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 5,
         length: 1,
@@ -156,11 +156,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 1,
         setSingleFCode: 15,
         unit: "unit4",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0005",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 6,
         length: 2,
@@ -171,11 +171,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit5",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0006",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -186,7 +186,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit6",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -202,7 +202,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0007",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 4,
         length: 1,
@@ -213,11 +213,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit7",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0008",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 5,
         length: 2,
@@ -228,11 +228,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit8",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0009",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -243,7 +243,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit9",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     calculationElements: [
@@ -264,7 +264,7 @@ let testPayload = JSON.stringify({
             factor: 2
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "3002",
@@ -283,7 +283,7 @@ let testPayload = JSON.stringify({
             factor: 3
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -420,7 +420,7 @@ describe("Project", () => {
       variablePayload = {};
       variablePayload.id = "000x";
       variablePayload.name = "testVariable";
-      variablePayload.timeSample = 5;
+      variablePayload.sampleTime = 5;
       variablePayload.unit = "A";
       variablePayload.archived = false;
       variablePayload.length = 4;
@@ -430,7 +430,7 @@ describe("Project", () => {
       variablePayload.setSingleFCode = 16;
       variablePayload.type = "mbByteArray";
       variablePayload.value = [0, 0, 0, 0, 0, 0, 0, 0];
-      variablePayload.archiveTimeSample = 10;
+      variablePayload.archiveSampleTime = 10;
       await createInitialFiles();
     });
 
@@ -467,7 +467,7 @@ describe("Project", () => {
         variablePayload = {};
         variablePayload.id = "000x";
         variablePayload.name = "testVariable";
-        variablePayload.timeSample = 5;
+        variablePayload.sampleTime = 5;
         variablePayload.unit = "A";
         variablePayload.archived = true;
         variablePayload.length = expectedLength;
@@ -477,7 +477,7 @@ describe("Project", () => {
         variablePayload.setSingleFCode = expectedSetSingleFCode;
         variablePayload.type = expectedTypeName;
         variablePayload.value = expectedDefaultValue;
-        variablePayload.archiveTimeSample = 10;
+        variablePayload.archiveSampleTime = 10;
         await createInitialFiles();
       });
 
@@ -598,8 +598,8 @@ describe("Project", () => {
         ).rejects.toBeDefined();
       });
 
-      it(`${className} - should throw if timeSample is not defined`, async () => {
-        delete variablePayload.timeSample;
+      it(`${className} - should throw if sampleTime is not defined`, async () => {
+        delete variablePayload.sampleTime;
 
         await expect(
           new Promise(async (resolve, reject) => {
@@ -917,8 +917,8 @@ describe("Project", () => {
       ).rejects.toBeDefined();
     });
 
-    it(`MBByteArrayVariable - should throw if timeSample is not defined`, async () => {
-      delete variablePayload.timeSample;
+    it(`MBByteArrayVariable - should throw if sampleTime is not defined`, async () => {
+      delete variablePayload.sampleTime;
 
       await expect(
         new Promise(async (resolve, reject) => {

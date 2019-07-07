@@ -40,14 +40,14 @@ describe("Variable", () => {
     let archived;
     let payload;
     let variable;
-    let timeSample;
-    let archiveTimeSample;
+    let sampleTime;
+    let archiveSampleTime;
 
     beforeEach(() => {
       device = "My test device";
       name = "Name of variable";
-      timeSample = 2;
-      archiveTimeSample = 3;
+      sampleTime = 2;
+      archiveSampleTime = 3;
       archived = true;
     });
 
@@ -55,8 +55,8 @@ describe("Variable", () => {
       payload = {
         name: name,
         archived: archived,
-        archiveTimeSample: archiveTimeSample,
-        timeSample: timeSample
+        archiveSampleTime: archiveSampleTime,
+        sampleTime: sampleTime
       };
       variable = new Variable(device);
       return variable.init(payload);
@@ -69,10 +69,10 @@ describe("Variable", () => {
       expect(variable.Device).toEqual(device);
       expect(variable.Name).toEqual(name);
       expect(variable.Archived).toEqual(archived);
-      expect(variable.TimeSample).toEqual(timeSample);
-      expect(variable.ArchiveTimeSample).toEqual(archiveTimeSample);
+      expect(variable.SampleTime).toEqual(sampleTime);
+      expect(variable.ArchiveSampleTime).toEqual(archiveSampleTime);
       expect(variable.ArchiveTickId).toEqual(
-        Sampler.convertTimeSampleToTickId(archiveTimeSample)
+        Sampler.convertSampleTimeToTickId(archiveSampleTime)
       );
     });
 
@@ -92,29 +92,29 @@ describe("Variable", () => {
       expect(variable.Archived).toEqual(false);
     });
 
-    it("should set default time sample to 1s if timeSample is not defined", async () => {
-      timeSample = undefined;
+    it("should set default time sample to 1s if sampleTime is not defined", async () => {
+      sampleTime = undefined;
 
       await exec();
 
-      expect(variable.TimeSample).toEqual(1);
+      expect(variable.SampleTime).toEqual(1);
     });
 
-    it("should set archiveTimeSample to timeSample if archiveTimeSample is not defined", async () => {
-      archiveTimeSample = undefined;
+    it("should set archiveSampleTime to sampleTime if archiveSampleTime is not defined", async () => {
+      archiveSampleTime = undefined;
 
       await exec();
 
-      expect(variable.ArchiveTimeSample).toEqual(timeSample);
+      expect(variable.ArchiveSampleTime).toEqual(sampleTime);
     });
 
-    it("should set archiveTimeSample to 1 if archiveTimeSample and timeSample is not defined", async () => {
-      archiveTimeSample = undefined;
-      timeSample = undefined;
+    it("should set archiveSampleTime to 1 if archiveSampleTime and sampleTime is not defined", async () => {
+      archiveSampleTime = undefined;
+      sampleTime = undefined;
 
       await exec();
 
-      expect(variable.ArchiveTimeSample).toEqual(1);
+      expect(variable.ArchiveSampleTime).toEqual(1);
     });
 
     it("should set event emitter", async () => {
@@ -270,7 +270,7 @@ describe("Variable", () => {
     });
   });
 
-  describe("get TimeSample", () => {
+  describe("get SampleTime", () => {
     let device;
     let name;
     let variable;
@@ -285,7 +285,7 @@ describe("Variable", () => {
       payload = { name: name };
       variable = new Variable(device);
       await variable.init(payload);
-      return variable.TimeSample;
+      return variable.SampleTime;
     };
 
     it("should return tickId converted to SampleTime", async () => {
@@ -293,29 +293,29 @@ describe("Variable", () => {
 
       expect(result).toBeDefined();
       expect(result).toEqual(
-        Sampler.convertTickIdToTimeSample(variable._tickId)
+        Sampler.convertTickIdToSampleTime(variable._tickId)
       );
     });
   });
 
-  describe("set TimeSample", () => {
+  describe("set SampleTime", () => {
     let device;
     let name;
     let variable;
-    let timeSample;
+    let sampleTime;
     let payload;
 
     beforeEach(() => {
       device = "My test device";
       name = "Name of variable";
-      timeSample = 15;
+      sampleTime = 15;
     });
 
     let exec = async () => {
       payload = { name: name };
       variable = new Variable(device);
       await variable.init(payload);
-      variable.TimeSample = timeSample;
+      variable.SampleTime = sampleTime;
     };
 
     it("should set tickId converted from SampleTime", async () => {
@@ -323,7 +323,7 @@ describe("Variable", () => {
 
       expect(variable._tickId).toBeDefined();
       expect(variable._tickId).toEqual(
-        Sampler.convertTimeSampleToTickId(timeSample)
+        Sampler.convertSampleTimeToTickId(sampleTime)
       );
     });
   });
@@ -552,10 +552,11 @@ describe("Variable", () => {
       let validPayload = {
         name: variable.Name,
         id: variable.Id,
-        timeSample: variable.TimeSample,
+        sampleTime: variable.SampleTime,
         archived: variable.Archived,
-        archiveTimeSample: variable.ArchiveTimeSample,
-        unit: variable.Unit
+        archiveSampleTime: variable.ArchiveSampleTime,
+        unit: variable.Unit,
+        type: variable.Type
       };
       expect(result).toBeDefined();
       expect(result).toEqual(validPayload);
@@ -587,9 +588,9 @@ describe("Variable", () => {
       let validPayload = {
         name: variable.Name,
         id: variable.Id,
-        timeSample: variable.TimeSample,
+        sampleTime: variable.SampleTime,
         archived: variable.Archived,
-        archiveTimeSample: variable.ArchiveTimeSample,
+        archiveSampleTime: variable.ArchiveSampleTime,
         unit: variable.Unit
       };
       expect(result).toBeDefined();
@@ -607,10 +608,10 @@ describe("Variable", () => {
     let variable;
     let payload;
     let payloadToEdit;
-    let timeSampleToEdit;
+    let sampleTimeToEdit;
     let nameToEdit;
     let unitToEdit;
-    let archiveTimeSampleToEdit;
+    let archiveSampleTimeToEdit;
 
     beforeEach(() => {
       id = "1234";
@@ -622,8 +623,8 @@ describe("Variable", () => {
       editId = undefined;
       archivedToEdit = true;
       unitToEdit = "B";
-      timeSampleToEdit = 5;
-      archiveTimeSampleToEdit = 10;
+      sampleTimeToEdit = 5;
+      archiveSampleTimeToEdit = 10;
     });
 
     let exec = async () => {
@@ -634,10 +635,10 @@ describe("Variable", () => {
       payloadToEdit = {
         id: editId,
         name: nameToEdit,
-        timeSample: timeSampleToEdit,
+        sampleTime: sampleTimeToEdit,
         archived: archivedToEdit,
         unit: unitToEdit,
-        archiveTimeSample: archiveTimeSampleToEdit
+        archiveSampleTime: archiveSampleTimeToEdit
       };
 
       return variable.editWithPayload(payloadToEdit);
@@ -654,11 +655,11 @@ describe("Variable", () => {
       let result = await exec();
 
       expect(result).toBeDefined();
-      expect(result.TimeSample).toEqual(timeSampleToEdit);
+      expect(result.SampleTime).toEqual(sampleTimeToEdit);
       expect(result.Name).toEqual(nameToEdit);
       expect(result.Archived).toEqual(archivedToEdit);
       expect(result.Unit).toEqual(unitToEdit);
-      expect(result.ArchiveTimeSample).toEqual(archiveTimeSampleToEdit);
+      expect(result.ArchiveSampleTime).toEqual(archiveSampleTimeToEdit);
     });
 
     it("should return variable with event emitter being the same object as in original ", async () => {
@@ -688,18 +689,18 @@ describe("Variable", () => {
           }
         })
       ).rejects.toBeDefined();
-      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.SampleTime).toEqual(payload.sampleTime);
       expect(variable.Name).toEqual(payload.name);
       expect(variable.Archived).toEqual(payload.archived);
       expect(variable.Unit).toEqual(payload.unit);
     });
 
-    it("should not set timeSample if it is not given in edit payload", async () => {
-      timeSampleToEdit = undefined;
+    it("should not set sampleTime if it is not given in edit payload", async () => {
+      sampleTimeToEdit = undefined;
       let result = await exec();
 
-      expect(result.TimeSample).toBeDefined();
-      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.SampleTime).toBeDefined();
+      expect(result.SampleTime).toEqual(variable.SampleTime);
     });
 
     it("should not set name if it is not given in edit payload", async () => {

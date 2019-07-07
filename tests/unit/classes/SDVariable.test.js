@@ -14,7 +14,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0001",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         offset: 5,
         length: 1,
@@ -28,7 +28,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0002",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         offset: 6,
         length: 2,
@@ -42,7 +42,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0003",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         offset: 7,
         length: 2,
@@ -106,7 +106,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0004",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 5,
         length: 1,
@@ -120,7 +120,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0005",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 6,
         length: 2,
@@ -134,7 +134,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0006",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -160,7 +160,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0007",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 4,
         length: 1,
@@ -174,7 +174,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0008",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 5,
         length: 2,
@@ -188,7 +188,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0009",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -300,10 +300,10 @@ describe("SDVariable", () => {
       initialPayload = {
         name: "testSpecialDevice",
         id: "987654321",
-        timeSample: 5,
+        sampleTime: 5,
         archived: true,
         unit: 15,
-        archiveTimeSample: 10,
+        archiveSampleTime: 10,
         elementDeviceId: "1235"
       };
     });

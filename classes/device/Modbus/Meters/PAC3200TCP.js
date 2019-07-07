@@ -16,7 +16,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
     return {
       "Voltage L1-N": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 1,
         length: 2,
         fCode: 3,
@@ -24,11 +24,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Voltage L2-N": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 3,
         length: 2,
         fCode: 3,
@@ -36,11 +36,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Voltage L3-N": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 5,
         length: 2,
         fCode: 3,
@@ -48,11 +48,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Voltage L1-L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 7,
         length: 2,
         fCode: 3,
@@ -60,11 +60,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Voltage L2-L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 9,
         length: 2,
         fCode: 3,
@@ -72,11 +72,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Voltage L3-L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 11,
         length: 2,
         fCode: 3,
@@ -84,11 +84,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Current L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 13,
         length: 2,
         fCode: 3,
@@ -96,11 +96,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "A",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Current L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 15,
         length: 2,
         fCode: 3,
@@ -108,11 +108,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "A",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Current L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 17,
         length: 2,
         fCode: 3,
@@ -120,11 +120,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "A",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Apparent power L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 19,
         length: 2,
         fCode: 3,
@@ -132,11 +132,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Apparent power L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 21,
         length: 2,
         fCode: 3,
@@ -144,11 +144,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Apparent power L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 23,
         length: 2,
         fCode: 3,
@@ -156,11 +156,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Active power L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 25,
         length: 2,
         fCode: 3,
@@ -168,11 +168,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "W",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Active power L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 27,
         length: 2,
         fCode: 3,
@@ -180,11 +180,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "W",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Active power L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 29,
         length: 2,
         fCode: 3,
@@ -192,11 +192,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "W",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Reactive power L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 31,
         length: 2,
         fCode: 3,
@@ -204,11 +204,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "var",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Reactive power L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 33,
         length: 2,
         fCode: 3,
@@ -216,11 +216,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "var",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Reactive power L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 35,
         length: 2,
         fCode: 3,
@@ -228,11 +228,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "var",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Power factor L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 37,
         length: 2,
         fCode: 3,
@@ -240,11 +240,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Power factor L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 39,
         length: 2,
         fCode: 3,
@@ -252,11 +252,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Power factor L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 41,
         length: 2,
         fCode: 3,
@@ -264,11 +264,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "THD Voltage L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 43,
         length: 2,
         fCode: 3,
@@ -276,11 +276,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "THD Voltage L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 45,
         length: 2,
         fCode: 3,
@@ -288,11 +288,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "THD Voltage L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 47,
         length: 2,
         fCode: 3,
@@ -300,11 +300,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "THD Current L1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 49,
         length: 2,
         fCode: 3,
@@ -312,11 +312,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "THD Current L2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 51,
         length: 2,
         fCode: 3,
@@ -324,11 +324,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "THD Current L3": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 53,
         length: 2,
         fCode: 3,
@@ -336,11 +336,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       Frequency: {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 55,
         length: 2,
         fCode: 3,
@@ -348,11 +348,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "Hz",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Average voltage L-N": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 57,
         length: 2,
         fCode: 3,
@@ -360,11 +360,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Average voltage L-L": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 59,
         length: 2,
         fCode: 3,
@@ -372,11 +372,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "V",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Average current": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 61,
         length: 2,
         fCode: 3,
@@ -384,11 +384,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "A",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Total apparent power": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 63,
         length: 2,
         fCode: 3,
@@ -396,11 +396,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "VA",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Total active power": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 65,
         length: 2,
         fCode: 3,
@@ -408,11 +408,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "W",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Total reactive power": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 67,
         length: 2,
         fCode: 3,
@@ -420,11 +420,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "var",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Total power factor": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 69,
         length: 2,
         fCode: 3,
@@ -432,11 +432,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Voltage unbalance": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 71,
         length: 2,
         fCode: 3,
@@ -444,11 +444,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Current unbalance": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 73,
         length: 2,
         fCode: 3,
@@ -456,11 +456,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "%",
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       },
       "Active energy import - tarif 1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2801,
         length: 2,
         fCode: 3,
@@ -468,11 +468,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: true,
         unit: "Wh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Active energy import - tarif 2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2803,
         length: 2,
         fCode: 3,
@@ -480,11 +480,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "Wh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Active energy export - tarif 1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2805,
         length: 2,
         fCode: 3,
@@ -492,11 +492,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: true,
         unit: "Wh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Active energy export - tarif 2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2807,
         length: 2,
         fCode: 3,
@@ -504,11 +504,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "Wh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Reactive energy import - tarif 1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2809,
         length: 2,
         fCode: 3,
@@ -516,11 +516,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: true,
         unit: "varh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Reactive energy import - tarif 2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2811,
         length: 2,
         fCode: 3,
@@ -528,11 +528,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "varh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Reactive energy export - tarif 1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2813,
         length: 2,
         fCode: 3,
@@ -540,11 +540,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: true,
         unit: "varh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Reactive energy export - tarif 2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2815,
         length: 2,
         fCode: 3,
@@ -552,11 +552,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "varh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Apparent energy - tarif 1": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2817,
         length: 2,
         fCode: 3,
@@ -564,11 +564,11 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: true,
         unit: "VAh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       },
       "Apparent energy - tarif 2": {
         id: Variable.generateRandId(),
-        timeSample: 1,
+        sampleTime: 1,
         offset: 2819,
         length: 2,
         fCode: 3,
@@ -576,7 +576,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         type: "mbSwappedFloat",
         archived: false,
         unit: "VAh",
-        archiveTimeSample: 60
+        archiveSampleTime: 60
       }
     };
   }
@@ -614,7 +614,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         variableId: activeEnergyImportT1Id,
         type: "increaseElement",
         overflow: 1000000000000,
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Active power export 15-min - tarif 1": {
         id: Variable.generateRandId(),
@@ -626,7 +626,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         variableId: activeEnergyExportT1Id,
         type: "increaseElement",
         overflow: 1000000000000,
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Reactive power import 15-min - tarif 1": {
         id: Variable.generateRandId(),
@@ -638,7 +638,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         variableId: reactiveEnergyImportT1Id,
         type: "increaseElement",
         overflow: 1000000000000,
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Reactive power export 15-min - tarif 1": {
         id: Variable.generateRandId(),
@@ -650,7 +650,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         variableId: reactiveEnergyExportT1Id,
         type: "increaseElement",
         overflow: 1000000000000,
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Apparent power 15-min - tarif 1": {
         id: Variable.generateRandId(),
@@ -662,7 +662,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         variableId: apparentEnergyId,
         type: "increaseElement",
         overflow: 1000000000000,
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Total active power average": {
         id: Variable.generateRandId(),
@@ -673,7 +673,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         archived: true,
         variableId: totalActivePowerId,
         type: "averageElement",
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Total reactive power average": {
         id: Variable.generateRandId(),
@@ -684,7 +684,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         archived: true,
         variableId: totalReactivePowerId,
         type: "averageElement",
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Total apparent power average": {
         id: Variable.generateRandId(),
@@ -695,7 +695,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         archived: true,
         variableId: totalApparentPowerId,
         type: "averageElement",
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Total power factor average": {
         id: Variable.generateRandId(),
@@ -706,7 +706,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         archived: true,
         variableId: totalPowerFactorId,
         type: "averageElement",
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Current L1 average": {
         id: Variable.generateRandId(),
@@ -717,7 +717,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         archived: true,
         variableId: currentL1Id,
         type: "averageElement",
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Current L2 average": {
         id: Variable.generateRandId(),
@@ -728,7 +728,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         archived: true,
         variableId: currentL2Id,
         type: "averageElement",
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       },
       "Current L3 average": {
         id: Variable.generateRandId(),
@@ -739,7 +739,7 @@ class PAC3200TCP extends MBDeviceWithTemplate {
         archived: true,
         variableId: currentL3Id,
         type: "averageElement",
-        archiveTimeSample: 1
+        archiveSampleTime: 1
       }
     };
   }

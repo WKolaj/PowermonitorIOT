@@ -135,7 +135,7 @@ module.exports.testMBVariableCreation = function(
     variableBody = {
       type: variableType,
       name: "varialeTestName",
-      timeSample: 1,
+      sampleTime: 1,
       value: variableValue,
       unit: "A",
       archived: false,
@@ -143,7 +143,7 @@ module.exports.testMBVariableCreation = function(
       fCode: variableFCode,
       getSingleFCode: variableGetSingleFCode,
       setSingleFCode: variableSetSingleFCode,
-      archiveTimeSample: 3
+      archiveSampleTime: 3
     };
   });
 
@@ -216,7 +216,7 @@ module.exports.testMBVariableCreation = function(
       let variablePayload = {
         type: variable.Type,
         name: variable.Name,
-        timeSample: variable.TimeSample,
+        sampleTime: variable.SampleTime,
         value: variable.Value,
         unit: variable.Unit,
         archived: variable.Archived,
@@ -224,7 +224,7 @@ module.exports.testMBVariableCreation = function(
         fCode: variable.FCode,
         getSingleFCode: variable.GetSingleFCode,
         setSingleFCode: variable.SetSingleFCode,
-        archiveTimeSample: variable.ArchiveTimeSample
+        archiveSampleTime: variable.ArchiveSampleTime
       };
 
       expect(variablePayload).toEqual(variableBody);
@@ -321,25 +321,25 @@ module.exports.testMBVariableCreation = function(
 
   it(
     `${typeName} - ` +
-      "should set timeSample to default value if it is not defined in payload",
+      "should set sampleTime to default value if it is not defined in payload",
     async () => {
-      variableBody.timeSample = undefined;
+      variableBody.sampleTime = undefined;
 
       let result = await exec();
 
-      expect(result.body.timeSample).toEqual(1);
+      expect(result.body.sampleTime).toEqual(1);
     }
   );
 
   it(
     `${typeName} - ` +
-      "should set archiveTimeSample to default value if it is not defined in payload",
+      "should set archiveSampleTime to default value if it is not defined in payload",
     async () => {
-      variableBody.archiveTimeSample = undefined;
+      variableBody.archiveSampleTime = undefined;
 
       let result = await exec();
 
-      expect(result.body.archiveTimeSample).toEqual(1);
+      expect(result.body.archiveSampleTime).toEqual(1);
     }
   );
 
@@ -471,9 +471,9 @@ module.exports.testMBVariableCreation = function(
 
   it(
     `${typeName} - ` +
-      "should return code 400 and do not create variable if timeSample is less than 1",
+      "should return code 400 and do not create variable if sampleTime is less than 1",
     async () => {
-      variableBody.timeSample = "ab";
+      variableBody.sampleTime = "ab";
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
@@ -493,9 +493,9 @@ module.exports.testMBVariableCreation = function(
 
   it(
     `${typeName} - ` +
-      "should return code 400 and do not create variable if timeSample is greater than 10000",
+      "should return code 400 and do not create variable if sampleTime is greater than 10000",
     async () => {
-      variableBody.timeSample = 10001;
+      variableBody.sampleTime = 10001;
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
@@ -515,9 +515,9 @@ module.exports.testMBVariableCreation = function(
 
   it(
     `${typeName} - ` +
-      "should return code 400 and do not create variable if archiveTimeSample is less than 1",
+      "should return code 400 and do not create variable if archiveSampleTime is less than 1",
     async () => {
-      variableBody.archiveTimeSample = 0;
+      variableBody.archiveSampleTime = 0;
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
@@ -537,9 +537,9 @@ module.exports.testMBVariableCreation = function(
 
   it(
     `${typeName} - ` +
-      "should return code 400 and do not create variable if archiveTimeSample is greater than 10000",
+      "should return code 400 and do not create variable if archiveSampleTime is greater than 10000",
     async () => {
-      variableBody.archiveTimeSample = 10001;
+      variableBody.archiveSampleTime = 10001;
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
@@ -875,7 +875,7 @@ module.exports.testMBVariableEdition = function(
     variableBodyCreate = {
       type: variableTypeCreate,
       name: "varialeTestNameBefire",
-      timeSample: 2,
+      sampleTime: 2,
       value: variableValueCreate,
       unit: "B",
       archived: true,
@@ -886,7 +886,7 @@ module.exports.testMBVariableEdition = function(
     };
     variableBodyEdit = {
       name: "varialeTestName",
-      timeSample: 1,
+      sampleTime: 1,
       value: variableValueEdit,
       unit: "A",
       archived: false,
@@ -968,7 +968,7 @@ module.exports.testMBVariableEdition = function(
 
       let variablePayload = {
         name: variable.Name,
-        timeSample: variable.TimeSample,
+        sampleTime: variable.SampleTime,
         value: variable.Value,
         unit: variable.Unit,
         archived: variable.Archived,
@@ -1083,13 +1083,13 @@ module.exports.testMBVariableEdition = function(
 
   it(
     `${typeName} - ` +
-      "should edit only timeSample if only timeSample is defined in payload",
+      "should edit only sampleTime if only sampleTime is defined in payload",
     async () => {
-      variableBodyEdit = _.pick(variableBodyEdit, "timeSample");
+      variableBodyEdit = _.pick(variableBodyEdit, "sampleTime");
 
       let result = await exec();
 
-      expect(result.body.timeSample).toEqual(1);
+      expect(result.body.sampleTime).toEqual(1);
     }
   );
 
@@ -1199,9 +1199,9 @@ module.exports.testMBVariableEdition = function(
 
   it(
     `${typeName} - ` +
-      "should return code 400 and do not edit variable if timeSample is less than 1",
+      "should return code 400 and do not edit variable if sampleTime is less than 1",
     async () => {
-      variableBodyEdit.timeSample = "ab";
+      variableBodyEdit.sampleTime = "ab";
 
       let result = await exec();
 
@@ -1218,9 +1218,9 @@ module.exports.testMBVariableEdition = function(
 
   it(
     `${typeName} - ` +
-      "should return code 400 and do not edit variable if timeSample is greater than 10000",
+      "should return code 400 and do not edit variable if sampleTime is greater than 10000",
     async () => {
-      variableBodyEdit.timeSample = 10001;
+      variableBodyEdit.sampleTime = 10001;
 
       let result = await exec();
 

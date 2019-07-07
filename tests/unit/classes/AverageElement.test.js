@@ -72,7 +72,7 @@ describe("AverageElement", () => {
     let averageElementType;
     let averageElementSampleTime;
     let averageElementCalculationInterval;
-    let averageElementArchiveTimeSample;
+    let averageElementArchiveSampleTime;
 
     beforeEach(() => {
       deviceId = "0001";
@@ -87,7 +87,7 @@ describe("AverageElement", () => {
       averageElementSampleTime = 1;
       averageElementType = "averageElement";
       averageElementCalculationInterval = 10;
-      averageElementArchiveTimeSample = 20;
+      averageElementArchiveSampleTime = 20;
     });
 
     let exec = async () => {
@@ -102,7 +102,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -133,7 +133,7 @@ describe("AverageElement", () => {
         variableId: averageElementVariableId,
         type: averageElementType,
         calculationInterval: averageElementCalculationInterval,
-        archiveTimeSample: averageElementArchiveTimeSample
+        archiveSampleTime: averageElementArchiveSampleTime
       };
 
       averageElement = new AverageElement(device);
@@ -348,7 +348,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -438,7 +438,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -542,7 +542,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -642,7 +642,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -803,7 +803,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -997,7 +997,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1164,7 +1164,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1333,7 +1333,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1506,7 +1506,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1621,7 +1621,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1786,7 +1786,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1981,7 +1981,7 @@ describe("AverageElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -2012,7 +2012,7 @@ describe("AverageElement", () => {
         variableId: averageElementVariableId,
         calculationInterval: averageElementCalculationInterval,
         type: "averageElement",
-        archiveTimeSample: averageElementAchiveSampleTime
+        archiveSampleTime: averageElementAchiveSampleTime
       };
 
       averageElement = new AverageElement(device);

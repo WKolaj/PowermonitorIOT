@@ -21,7 +21,7 @@ let SumElementVariableCreateSchema = Joi.object().keys({
     .required(),
   archived: Joi.boolean().required(),
   variables: Joi.array().required(),
-  archiveTimeSample: Joi.number()
+  archiveSampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000)
@@ -42,7 +42,7 @@ let SumElementVariableEditSchema = Joi.object().keys({
     .allow(""),
   archived: Joi.boolean(),
   variables: Joi.array(),
-  archiveTimeSample: Joi.number()
+  archiveSampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000)
@@ -70,7 +70,7 @@ let checkVariableArray = async function(deviceId, variableArray) {
 
 let setDefaultValues = function(req) {
   if (req.body.sampleTime === undefined) req.body.sampleTime = 1;
-  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
+  if (req.body.archiveSampleTime === undefined) req.body.archiveSampleTime = 1;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;
 };

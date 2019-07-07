@@ -187,17 +187,17 @@ class Sampler {
 
   /**
    * @description Converting time sample to TickId
-   * @param {number} timeSample Sample time
+   * @param {number} sampleTime Sample time
    */
-  static convertTimeSampleToTickId(timeSample) {
-    return timeSample;
+  static convertSampleTimeToTickId(sampleTime) {
+    return sampleTime;
   }
 
   /**
    * @description Converting tick id to time sample
    * @param {number} tickId Tick id
    */
-  static convertTickIdToTimeSample(tickId) {
+  static convertTickIdToSampleTime(tickId) {
     return tickId;
   }
 }

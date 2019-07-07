@@ -47,7 +47,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0001",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         offset: 5,
         length: 1,
@@ -58,11 +58,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit1",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0002",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         offset: 6,
         length: 2,
@@ -73,11 +73,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit2",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0003",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         offset: 7,
         length: 2,
@@ -88,7 +88,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit3",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     calculationElements: [
@@ -109,7 +109,7 @@ let testPayload = JSON.stringify({
             factor: 2
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "1002",
@@ -128,7 +128,7 @@ let testPayload = JSON.stringify({
             factor: 3
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -145,7 +145,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0004",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 5,
         length: 1,
@@ -156,11 +156,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 1,
         setSingleFCode: 15,
         unit: "unit4",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0005",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 6,
         length: 2,
@@ -171,11 +171,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit5",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0006",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -186,7 +186,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit6",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -202,7 +202,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0007",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 4,
         length: 1,
@@ -213,11 +213,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit7",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0008",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 5,
         length: 2,
@@ -228,11 +228,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit8",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0009",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -243,7 +243,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit9",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     calculationElements: [
@@ -264,7 +264,7 @@ let testPayload = JSON.stringify({
             factor: 2
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "3002",
@@ -283,7 +283,7 @@ let testPayload = JSON.stringify({
             factor: 3
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -1746,7 +1746,7 @@ describe("Project", () => {
       editVariables = [
         {
           id: "0010",
-          timeSample: 2,
+          sampleTime: 2,
           name: "test variable 10",
           offset: 5,
           length: 1,
@@ -1759,7 +1759,7 @@ describe("Project", () => {
         },
         {
           id: "0011",
-          timeSample: 3,
+          sampleTime: 3,
           name: "test variable 11",
           offset: 7,
           length: 2,
@@ -2188,7 +2188,7 @@ describe("Project", () => {
         variables: [
           {
             id: "0101",
-            timeSample: 2,
+            sampleTime: 2,
             name: "test variable 4",
             offset: 4,
             length: 1,
@@ -2199,11 +2199,11 @@ describe("Project", () => {
             getSingleFCode: 3,
             setSingleFCode: 16,
             unit: "unit7",
-            archiveTimeSample: 5
+            archiveSampleTime: 5
           },
           {
             id: "0102",
-            timeSample: 3,
+            sampleTime: 3,
             name: "test variable 5",
             offset: 5,
             length: 2,
@@ -2214,11 +2214,11 @@ describe("Project", () => {
             getSingleFCode: 4,
             setSingleFCode: 16,
             unit: "unit8",
-            archiveTimeSample: 5
+            archiveSampleTime: 5
           },
           {
             id: "0103",
-            timeSample: 4,
+            sampleTime: 4,
             name: "test variable 6",
             offset: 7,
             length: 2,
@@ -2229,7 +2229,7 @@ describe("Project", () => {
             getSingleFCode: 3,
             setSingleFCode: 16,
             unit: "unit9",
-            archiveTimeSample: 5
+            archiveSampleTime: 5
           }
         ],
         calculationElements: [
@@ -2250,7 +2250,7 @@ describe("Project", () => {
                 factor: 2
               }
             ],
-            archiveTimeSample: 5
+            archiveSampleTime: 5
           },
           {
             id: "4002",
@@ -2269,7 +2269,7 @@ describe("Project", () => {
                 factor: 3
               }
             ],
-            archiveTimeSample: 5
+            archiveSampleTime: 5
           }
         ],
         type: "mbDevice"
@@ -2708,7 +2708,7 @@ describe("Project", () => {
     it("should throw if mbDevice payload is not correct - one of variable have already defined id", async () => {
       let corruptedPayload = {
         id: "0103",
-        timeSample: 4,
+        sampleTime: 4,
         name: "corrupted test variable ",
         offset: 15,
         length: 2,
@@ -2719,7 +2719,7 @@ describe("Project", () => {
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit9",
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       mbDevicePayload.variables.push(corruptedPayload);
@@ -2872,7 +2872,7 @@ describe("Project", () => {
         expect(variable.Id).toBeDefined();
         expect(variable.Name).toEqual(varName);
 
-        expect(variable.TimeSample).toEqual(varPayload.timeSample);
+        expect(variable.SampleTime).toEqual(varPayload.sampleTime);
         expect(variable.Offset).toEqual(varPayload.offset);
         expect(variable.Length).toEqual(varPayload.length);
         expect(variable.FCode).toEqual(varPayload.fCode);
@@ -3050,7 +3050,7 @@ describe("Project", () => {
       pac3200TCPPayload.variables = [
         {
           id: "5001",
-          timeSample: 2,
+          sampleTime: 2,
           name: "test variable 1",
           offset: 5,
           length: 1,
@@ -3061,11 +3061,11 @@ describe("Project", () => {
           getSingleFCode: 3,
           setSingleFCode: 16,
           unit: "unit1",
-          archiveTimeSample: 5
+          archiveSampleTime: 5
         },
         {
           id: "5002",
-          timeSample: 3,
+          sampleTime: 3,
           name: "test variable 2",
           offset: 6,
           length: 2,
@@ -3076,11 +3076,11 @@ describe("Project", () => {
           getSingleFCode: 4,
           setSingleFCode: 16,
           unit: "unit2",
-          archiveTimeSample: 5
+          archiveSampleTime: 5
         },
         {
           id: "5003",
-          timeSample: 4,
+          sampleTime: 4,
           name: "test variable 3",
           offset: 7,
           length: 2,
@@ -3091,7 +3091,7 @@ describe("Project", () => {
           getSingleFCode: 3,
           setSingleFCode: 16,
           unit: "unit3",
-          archiveTimeSample: 5
+          archiveSampleTime: 5
         }
       ];
 
@@ -3132,7 +3132,7 @@ describe("Project", () => {
           name: "sumElement1",
           unit: "C",
           variables: [],
-          archiveTimeSample: 5
+          archiveSampleTime: 5
         },
         {
           id: "3002",
@@ -3142,7 +3142,7 @@ describe("Project", () => {
           name: "sumElement2",
           unit: "D",
           variables: [],
-          archiveTimeSample: 5
+          archiveSampleTime: 5
         }
       ];
 
@@ -3838,7 +3838,7 @@ describe("Project", () => {
 
     let variable1Payload;
     let variable1Id;
-    let variable1TimeSample;
+    let variable1SampleTime;
     let variable1Name;
     let variable1Type;
     let variable1Offset;
@@ -3847,7 +3847,7 @@ describe("Project", () => {
 
     let variable2Payload;
     let variable2Id;
-    let variable2TimeSample;
+    let variable2SampleTime;
     let variable2Name;
     let variable2Type;
     let variable2Offset;
@@ -3856,7 +3856,7 @@ describe("Project", () => {
 
     let variable3Payload;
     let variable3Id;
-    let variable3TimeSample;
+    let variable3SampleTime;
     let variable3Name;
     let variable3Type;
     let variable3Offset;
@@ -3900,7 +3900,7 @@ describe("Project", () => {
       deviceId = device1Id;
 
       variable1Id = "0001";
-      variable1TimeSample = 2;
+      variable1SampleTime = 2;
       variable1Name = "test variable 1";
       variable1Type = "mbInt16";
       variable1Offset = 5;
@@ -3908,7 +3908,7 @@ describe("Project", () => {
       variable1Value = 1;
 
       variable2Id = "0002";
-      variable2TimeSample = 3;
+      variable2SampleTime = 3;
       variable2Name = "test variable 2";
       variable2Type = "mbInt32";
       variable2Offset = 6;
@@ -3916,7 +3916,7 @@ describe("Project", () => {
       variable2Value = 2;
 
       variable3Id = "0003";
-      variable3TimeSample = 4;
+      variable3SampleTime = 4;
       variable3Name = "test variable 3";
       variable3Type = "mbFloat";
       variable3Offset = 7;
@@ -3950,7 +3950,7 @@ describe("Project", () => {
 
       variable1Payload = {
         id: variable1Id,
-        timeSample: variable1TimeSample,
+        sampleTime: variable1SampleTime,
         name: variable1Name,
         type: variable1Type,
         offset: variable1Offset,
@@ -3960,7 +3960,7 @@ describe("Project", () => {
 
       variable2Payload = {
         id: variable2Id,
-        timeSample: variable2TimeSample,
+        sampleTime: variable2SampleTime,
         name: variable2Name,
         type: variable2Type,
         offset: variable2Offset,
@@ -3970,7 +3970,7 @@ describe("Project", () => {
 
       variable3Payload = {
         id: variable3Id,
-        timeSample: variable3TimeSample,
+        sampleTime: variable3SampleTime,
         name: variable3Name,
         type: variable3Type,
         offset: variable3Offset,
@@ -4135,7 +4135,7 @@ describe("Project", () => {
 
     let variable1Payload;
     let variable1Id;
-    let variable1TimeSample;
+    let variable1SampleTime;
     let variable1Name;
     let variable1Type;
     let variable1Offset;
@@ -4144,7 +4144,7 @@ describe("Project", () => {
 
     let variable2Payload;
     let variable2Id;
-    let variable2TimeSample;
+    let variable2SampleTime;
     let variable2Name;
     let variable2Type;
     let variable2Offset;
@@ -4153,7 +4153,7 @@ describe("Project", () => {
 
     let variable3Payload;
     let variable3Id;
-    let variable3TimeSample;
+    let variable3SampleTime;
     let variable3Name;
     let variable3Type;
     let variable3Offset;
@@ -4197,7 +4197,7 @@ describe("Project", () => {
       deviceId = device1Id;
 
       variable1Id = "0001";
-      variable1TimeSample = 2;
+      variable1SampleTime = 2;
       variable1Name = "test variable 1";
       variable1Type = "mbInt16";
       variable1Offset = 5;
@@ -4205,7 +4205,7 @@ describe("Project", () => {
       variable1Value = 1;
 
       variable2Id = "0002";
-      variable2TimeSample = 3;
+      variable2SampleTime = 3;
       variable2Name = "test variable 2";
       variable2Type = "mbInt32";
       variable2Offset = 6;
@@ -4213,7 +4213,7 @@ describe("Project", () => {
       variable2Value = 2;
 
       variable3Id = "0003";
-      variable3TimeSample = 4;
+      variable3SampleTime = 4;
       variable3Name = "test variable 3";
       variable3Type = "mbFloat";
       variable3Offset = 7;
@@ -4249,7 +4249,7 @@ describe("Project", () => {
 
       variable1Payload = {
         id: variable1Id,
-        timeSample: variable1TimeSample,
+        sampleTime: variable1SampleTime,
         name: variable1Name,
         type: variable1Type,
         offset: variable1Offset,
@@ -4259,7 +4259,7 @@ describe("Project", () => {
 
       variable2Payload = {
         id: variable2Id,
-        timeSample: variable2TimeSample,
+        sampleTime: variable2SampleTime,
         name: variable2Name,
         type: variable2Type,
         offset: variable2Offset,
@@ -4269,7 +4269,7 @@ describe("Project", () => {
 
       variable3Payload = {
         id: variable3Id,
-        timeSample: variable3TimeSample,
+        sampleTime: variable3SampleTime,
         name: variable3Name,
         type: variable3Type,
         offset: variable3Offset,
@@ -4565,7 +4565,7 @@ describe("Project", () => {
       variablePayload = {
         id: "000y",
         name: "testVariable",
-        timeSample: 5,
+        sampleTime: 5,
         unit: "A",
         archived: false,
         offset: 1,
@@ -4574,7 +4574,7 @@ describe("Project", () => {
         setSingleFCode: 16,
         type: "mbFloat",
         value: 3,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       elementPayload = {
@@ -4587,7 +4587,7 @@ describe("Project", () => {
         factor: 2,
         calculationInterval: 5,
         type: "averageElement",
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       await createInitialFiles();
@@ -4630,7 +4630,7 @@ describe("Project", () => {
       variablePayload = {
         id: "000y",
         name: "testVariable",
-        timeSample: 5,
+        sampleTime: 5,
         unit: "A",
         archived: false,
         offset: 1,
@@ -4639,7 +4639,7 @@ describe("Project", () => {
         setSingleFCode: 16,
         type: "mbFloat",
         value: 3,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       elementPayload = {
@@ -4652,7 +4652,7 @@ describe("Project", () => {
         factor: 2,
         calculationInterval: 5,
         type: "averageElement",
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       await createInitialFiles();
@@ -4709,20 +4709,22 @@ describe("Project", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should throw if sampleTime is not defined", async () => {
+    it("should not throw if sampleTime is not defined but set it to 1", async () => {
       delete elementPayload.sampleTime;
+      let result = null;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
-            await exec();
+            result = await exec();
             return resolve(true);
           } catch (err) {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
-    });
+      ).resolves.toBeDefined();
 
+      expect(result.SampleTime).toEqual(1);
+    });
     it("should throw if variableId is not defined", async () => {
       delete elementPayload.variableId;
       await expect(
@@ -4845,7 +4847,7 @@ describe("Project", () => {
       variablePayload = {
         id: "000y",
         name: "testVariable",
-        timeSample: 5,
+        sampleTime: 5,
         unit: "A",
         archived: false,
         offset: 1,
@@ -4854,7 +4856,7 @@ describe("Project", () => {
         setSingleFCode: 16,
         type: "mbFloat",
         value: 3,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       elementPayload = {
@@ -4866,7 +4868,7 @@ describe("Project", () => {
         variableId: "000y",
         factor: 2,
         type: "factorElement",
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       await createInitialFiles();
@@ -4923,18 +4925,21 @@ describe("Project", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should throw if sampleTime is not defined", async () => {
+    it("should not throw if sampleTime is not defined but set it to 1", async () => {
       delete elementPayload.sampleTime;
+      let result = null;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
-            await exec();
+            result = await exec();
             return resolve(true);
           } catch (err) {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
+      ).resolves.toBeDefined();
+
+      expect(result.SampleTime).toEqual(1);
     });
 
     it("should throw if variableId is not defined", async () => {
@@ -5045,7 +5050,7 @@ describe("Project", () => {
       variablePayload = {
         id: "000y",
         name: "testVariable",
-        timeSample: 5,
+        sampleTime: 5,
         unit: "A",
         archived: false,
         offset: 1,
@@ -5054,7 +5059,7 @@ describe("Project", () => {
         setSingleFCode: 16,
         type: "mbFloat",
         value: 3,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       elementPayload = {
@@ -5068,7 +5073,7 @@ describe("Project", () => {
         calculationInterval: 5,
         type: "increaseElement",
         overflow: 1000,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       await createInitialFiles();
@@ -5125,18 +5130,21 @@ describe("Project", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should throw if sampleTime is not defined", async () => {
+    it("should not throw if sampleTime is not defined but set it to 1", async () => {
       delete elementPayload.sampleTime;
+      let result = null;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
-            await exec();
+            result = await exec();
             return resolve(true);
           } catch (err) {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
+      ).resolves.toBeDefined();
+
+      expect(result.SampleTime).toEqual(1);
     });
 
     it("should throw if overflow is not defined", async () => {
@@ -5275,7 +5283,7 @@ describe("Project", () => {
       variable1Payload = {
         id: "000y",
         name: "testVariable1",
-        timeSample: 5,
+        sampleTime: 5,
         unit: "A",
         archived: false,
         offset: 1,
@@ -5284,13 +5292,13 @@ describe("Project", () => {
         setSingleFCode: 16,
         type: "mbFloat",
         value: 3,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       variable2Payload = {
         id: "000z",
         name: "testVariable2",
-        timeSample: 5,
+        sampleTime: 5,
         unit: "A",
         archived: false,
         offset: 1,
@@ -5299,7 +5307,7 @@ describe("Project", () => {
         setSingleFCode: 16,
         type: "mbFloat",
         value: 4,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       elementPayload = {
@@ -5310,7 +5318,7 @@ describe("Project", () => {
         unit: "A",
         variables: [{ id: "000y", factor: 2 }, { id: "000z", factor: 3 }],
         type: "sumElement",
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
 
       await createInitialFiles();
@@ -5368,18 +5376,21 @@ describe("Project", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should throw if sampleTime is not defined", async () => {
+    it("should not throw if sampleTime is not defined but set it to 1", async () => {
       delete elementPayload.sampleTime;
+      let result = null;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
-            await exec();
+            result = await exec();
             return resolve(true);
           } catch (err) {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
+      ).resolves.toBeDefined();
+
+      expect(result.SampleTime).toEqual(1);
     });
 
     it("should not throw there are no variables", async () => {

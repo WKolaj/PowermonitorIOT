@@ -1440,7 +1440,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -1460,7 +1460,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "mbBoolean";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 1;
@@ -1484,7 +1484,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -1508,7 +1508,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(1);
@@ -1529,8 +1529,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -1651,7 +1651,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -1671,7 +1671,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "mbFloat";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -1695,7 +1695,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -1719,7 +1719,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(2);
@@ -1740,8 +1740,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -1861,7 +1861,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -1881,7 +1881,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "swappedFloat";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -1905,7 +1905,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -1929,7 +1929,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(2);
@@ -1950,8 +1950,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -2071,7 +2071,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -2091,7 +2091,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "mbInt32";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -2115,7 +2115,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -2139,7 +2139,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(2);
@@ -2160,8 +2160,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -2281,7 +2281,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -2301,7 +2301,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "swappedInt32";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -2325,7 +2325,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -2349,7 +2349,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(2);
@@ -2370,8 +2370,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -2491,7 +2491,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -2511,7 +2511,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "mbInt32";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -2535,7 +2535,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -2559,7 +2559,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(2);
@@ -2580,8 +2580,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -2701,7 +2701,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -2721,7 +2721,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "swappedUInt32";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -2745,7 +2745,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -2769,7 +2769,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(2);
@@ -2790,8 +2790,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -2911,7 +2911,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -2931,7 +2931,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "mbInt16";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -2955,7 +2955,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -2979,7 +2979,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(1);
@@ -3000,8 +3000,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -3121,7 +3121,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -3141,7 +3141,7 @@ describe("MBDevice", () => {
 
       varId = undefined;
       varType = "mbInt16";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -3165,7 +3165,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -3189,7 +3189,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(1);
@@ -3210,8 +3210,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -3332,7 +3332,7 @@ describe("MBDevice", () => {
     let device;
     let refreshGroupMock;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -3352,8 +3352,8 @@ describe("MBDevice", () => {
       refreshGroupMock = jest.fn();
 
       varId = undefined;
-      varType = "byteArray";
-      varTimeSample = 1;
+      varType = "mbByteArray";
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -3378,7 +3378,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -3403,7 +3403,7 @@ describe("MBDevice", () => {
 
       expect(result instanceof varClass).toBeTruthy();
       expect(result.Id).toBeDefined();
-      expect(result.TimeSample).toEqual(varTimeSample);
+      expect(result.SampleTime).toEqual(varSampleTime);
       expect(result.Name).toEqual(varName);
       expect(result.Offset).toEqual(varOffset);
       expect(result.Length).toEqual(varLength);
@@ -3424,8 +3424,8 @@ describe("MBDevice", () => {
       expect(result.Value).toEqual(varValue);
     });
 
-    it("should throw if TimeSample in payload is empty", async () => {
-      varTimeSample = undefined;
+    it("should throw if SampleTime in payload is empty", async () => {
+      varSampleTime = undefined;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
@@ -3660,7 +3660,7 @@ describe("MBDevice", () => {
     let timeout;
     let unitId;
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varLength;
@@ -3695,7 +3695,7 @@ describe("MBDevice", () => {
       timeout = 2000;
       unitId = 1;
       refreshGroupMock = jest.fn();
-      varTimeSample = 2;
+      varSampleTime = 2;
       varName = "test variable";
       varOffset = 5;
       varLength = 123;
@@ -3757,7 +3757,7 @@ describe("MBDevice", () => {
 
       variablePayload = {
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -4286,7 +4286,7 @@ describe("MBDevice", () => {
     let refreshGroupMock;
 
     let variablePayload;
-    let varTimeSample;
+    let varSampleTime;
     let varName;
     let varOffset;
     let varFcode;
@@ -4297,7 +4297,7 @@ describe("MBDevice", () => {
     let variable;
 
     let editVariablePayload;
-    let editVarTimeSample;
+    let editVarSampleTime;
     let editVarName;
     let editVarOffset;
     let editVarFcode;
@@ -4315,7 +4315,7 @@ describe("MBDevice", () => {
 
       varId = 1234;
       varType = "mbInt16";
-      varTimeSample = 1;
+      varSampleTime = 1;
       varName = "test variable";
       varOffset = 2;
       varFcode = 3;
@@ -4323,7 +4323,7 @@ describe("MBDevice", () => {
       varArchived = false;
 
       editVarId = undefined;
-      editVarTimeSample = 2;
+      editVarSampleTime = 2;
       editVarName = "test variable2";
       editVarOffset = 3;
       editVarFcode = 4;
@@ -4347,7 +4347,7 @@ describe("MBDevice", () => {
       variablePayload = {
         id: varId,
         type: varType,
-        timeSample: varTimeSample,
+        sampleTime: varSampleTime,
         name: varName,
         offset: varOffset,
         fCode: varFcode,
@@ -4359,7 +4359,7 @@ describe("MBDevice", () => {
 
       editVariablePayload = {
         id: editVarId,
-        timeSample: editVarTimeSample,
+        sampleTime: editVarSampleTime,
         name: editVarName,
         offset: editVarOffset,
         fCode: editVarFcode,
@@ -4378,7 +4378,7 @@ describe("MBDevice", () => {
       expect(result).toEqual(variable);
       expect(result).toEqual(editedVariable);
 
-      expect(editedVariable.TimeSample).toEqual(editVarTimeSample);
+      expect(editedVariable.SampleTime).toEqual(editVarSampleTime);
       expect(editedVariable.Name).toEqual(editVarName);
       expect(editedVariable.Offset).toEqual(editVarOffset);
       expect(editedVariable.FCode).toEqual(editVarFcode);
@@ -5062,7 +5062,7 @@ describe("MBDevice", () => {
       calculationElement1Payload = {
         id: calculationElement1Id,
         type: calculationElement1Type,
-        timeSample: calculationElement1SampleTime,
+        sampleTime: calculationElement1SampleTime,
         name: calculationElement1Name,
         archived: calculationElement1Archived
       };
@@ -5579,7 +5579,7 @@ describe("MBDevice", () => {
 
       variable1Payload = {
         id: "0001",
-        timeSample: 1,
+        sampleTime: 1,
         name: "testVariable1",
         offset: 2,
         length: 2,
@@ -5591,7 +5591,7 @@ describe("MBDevice", () => {
 
       variable2Payload = {
         id: "0002",
-        timeSample: 1,
+        sampleTime: 1,
         name: "testVariable2",
         offset: 4,
         length: 2,
@@ -5603,7 +5603,7 @@ describe("MBDevice", () => {
 
       variable3Payload = {
         id: "0003",
-        timeSample: 1,
+        sampleTime: 1,
         name: "testVariable3",
         offset: 6,
         length: 2,

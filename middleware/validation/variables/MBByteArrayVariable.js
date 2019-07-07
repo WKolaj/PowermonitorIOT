@@ -9,7 +9,7 @@ let MBByteArrayVariableCreateSchema = Joi.object().keys({
     .min(3)
     .max(100)
     .required(),
-  timeSample: Joi.number()
+  sampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000)
@@ -34,7 +34,7 @@ let MBByteArrayVariableCreateSchema = Joi.object().keys({
   fCode: Joi.valid(3, 4, 16).required(),
   getSingleFCode: Joi.valid(3, 4).required(),
   setSingleFCode: Joi.valid(16).required(),
-  archiveTimeSample: Joi.number()
+  archiveSampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000)
@@ -45,7 +45,7 @@ let MBByteArrayVariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
     .max(100),
-  timeSample: Joi.number()
+  sampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000),
@@ -66,7 +66,7 @@ let MBByteArrayVariableEditSchema = Joi.object().keys({
   fCode: Joi.valid(3, 4, 16),
   getSingleFCode: Joi.valid(3, 4),
   setSingleFCode: Joi.valid(16),
-  archiveTimeSample: Joi.number()
+  archiveSampleTime: Joi.number()
     .integer()
     .min(1)
     .max(10000)
@@ -87,8 +87,8 @@ let generateDefaultValue = function(length) {
 };
 
 let setDefaultValues = function(req) {
-  if (req.body.timeSample === undefined) req.body.timeSample = 1;
-  if (req.body.archiveTimeSample === undefined) req.body.archiveTimeSample = 1;
+  if (req.body.sampleTime === undefined) req.body.sampleTime = 1;
+  if (req.body.archiveSampleTime === undefined) req.body.archiveSampleTime = 1;
   if (req.body.value === undefined)
     req.body.value = generateDefaultValue(req.body.length);
   if (req.body.unit === undefined) req.body.unit = "";

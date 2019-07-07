@@ -254,14 +254,14 @@ describe("MBSwappedFloatVariable", () => {
     let offset;
     let length;
     let unitId;
-    let timeSample;
+    let sampleTime;
     let getSingleFCode;
     let setSingleFCode;
     let value;
     let payload;
     let variable;
     let editPayload;
-    let editTimeSample;
+    let editSampleTime;
     let editName;
     let editOffset;
     let editLength;
@@ -287,10 +287,10 @@ describe("MBSwappedFloatVariable", () => {
       getSingleFCode = 3;
       setSingleFCode = 16;
       value = 1234.4321;
-      timeSample = 3;
+      sampleTime = 3;
 
       editId = undefined;
-      editTimeSample = 5;
+      editSampleTime = 5;
       editName = "Edited name";
       editOffset = 6;
       editLength = 2;
@@ -304,7 +304,7 @@ describe("MBSwappedFloatVariable", () => {
       payload = {
         id: id,
         name: name,
-        timeSample: timeSample,
+        sampleTime: sampleTime,
         fCode: fcode,
         offset: offset,
         length: length,
@@ -321,7 +321,7 @@ describe("MBSwappedFloatVariable", () => {
 
       editPayload = {
         id: editId,
-        timeSample: editTimeSample,
+        sampleTime: editSampleTime,
         name: editName,
         fCode: editFCode,
         offset: editOffset,
@@ -348,7 +348,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(editTimeSample);
+      expect(result.SampleTime).toEqual(editSampleTime);
       expect(result.Name).toEqual(editName);
       expect(result.FCode).toEqual(editFCode);
       expect(result.Offset).toEqual(editOffset);
@@ -374,7 +374,7 @@ describe("MBSwappedFloatVariable", () => {
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
-      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.SampleTime).toEqual(payload.sampleTime);
       expect(variable.Name).toEqual(payload.name);
       expect(variable.FCode).toEqual(payload.fCode);
       expect(variable.Offset).toEqual(payload.offset);
@@ -400,7 +400,7 @@ describe("MBSwappedFloatVariable", () => {
 
       expect(variable).toBeDefined();
       expect(variable.Id).toEqual(payload.id);
-      expect(variable.TimeSample).toEqual(payload.timeSample);
+      expect(variable.SampleTime).toEqual(payload.sampleTime);
       expect(variable.Name).toEqual(payload.name);
       expect(variable.FCode).toEqual(payload.fCode);
       expect(variable.Offset).toEqual(payload.offset);
@@ -411,7 +411,7 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     it("should edit variable with payload with appropriate parameters if no parameters are passed in payload", async () => {
-      editTimeSample = undefined;
+      editSampleTime = undefined;
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -426,7 +426,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.SampleTime).toEqual(variable.SampleTime);
       expect(result.Name).toEqual(variable.Name);
       expect(result.FCode).toEqual(variable.FCode);
       expect(result.Offset).toEqual(variable.Offset);
@@ -436,7 +436,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Value).toEqual(value);
     });
 
-    it("should edit variable with timeSample equal to timeSample given in payload", async () => {
+    it("should edit variable with sampleTime equal to sampleTime given in payload", async () => {
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -451,7 +451,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(editTimeSample);
+      expect(result.SampleTime).toEqual(editSampleTime);
       expect(result.Name).toEqual(variable.Name);
       expect(result.FCode).toEqual(variable.FCode);
       expect(result.Offset).toEqual(variable.Offset);
@@ -462,7 +462,7 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     it("should edit variable with Name equal to Name given in payload", async () => {
-      editTimeSample = undefined;
+      editSampleTime = undefined;
       editOffset = undefined;
       editLength = undefined;
       editFCode = undefined;
@@ -476,7 +476,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.SampleTime).toEqual(variable.SampleTime);
       expect(result.Name).toEqual(editName);
       expect(result.FCode).toEqual(variable.FCode);
       expect(result.Offset).toEqual(variable.Offset);
@@ -487,7 +487,7 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     it("should edit variable with Offset equal to Offset given in payload", async () => {
-      editTimeSample = undefined;
+      editSampleTime = undefined;
       editName = undefined;
       editLength = undefined;
       editFCode = undefined;
@@ -501,7 +501,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.SampleTime).toEqual(variable.SampleTime);
       expect(result.Name).toEqual(variable.Name);
       expect(result.FCode).toEqual(variable.FCode);
       expect(result.Offset).toEqual(editOffset);
@@ -512,7 +512,7 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     it("should edit variable with Length equal to Length given in payload", async () => {
-      editTimeSample = undefined;
+      editSampleTime = undefined;
       editName = undefined;
       editOffset = undefined;
       editFCode = undefined;
@@ -526,7 +526,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.SampleTime).toEqual(variable.SampleTime);
       expect(result.Name).toEqual(variable.Name);
       expect(result.FCode).toEqual(variable.FCode);
       expect(result.Offset).toEqual(variable.Offset);
@@ -545,7 +545,7 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     it("should edit variable with FCode equal to FCode given in payload", async () => {
-      editTimeSample = undefined;
+      editSampleTime = undefined;
       editName = undefined;
       editOffset = undefined;
       editLength = undefined;
@@ -559,7 +559,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.SampleTime).toEqual(variable.SampleTime);
       expect(result.Name).toEqual(variable.Name);
       expect(result.FCode).toEqual(editFCode);
       expect(result.Offset).toEqual(variable.Offset);
@@ -587,7 +587,7 @@ describe("MBSwappedFloatVariable", () => {
     });
 
     it("should edit variable with Value equal to Value given in payload", async () => {
-      editTimeSample = undefined;
+      editSampleTime = undefined;
       editName = undefined;
       editFCode = undefined;
       editOffset = undefined;
@@ -601,7 +601,7 @@ describe("MBSwappedFloatVariable", () => {
       expect(result.Id).toEqual(variable.Id);
       expect(result.Events).toEqual(variable.Events);
 
-      expect(result.TimeSample).toEqual(variable.TimeSample);
+      expect(result.SampleTime).toEqual(variable.SampleTime);
       expect(result.Name).toEqual(variable.Name);
       expect(result.FCode).toEqual(variable.FCode);
       expect(result.Offset).toEqual(variable.Offset);

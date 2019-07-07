@@ -74,7 +74,13 @@ class MBUInt16Variable extends MBVariable {
       payload.fCode === 3 || payload.fCode == 4 ? payload.fCode : 3;
 
     await super.init(payload);
-    this._type = "mbUInt16";
+  }
+
+  /**
+   * @description Method for generating type name that represents variable
+   */
+  _getTypeName() {
+    return "mbUInt16";
   }
 
   /**

@@ -53,14 +53,13 @@ describe("SumElement", () => {
       expect(result.Device).toEqual(device);
     });
 
-    it("should create initial objects for Events, Variables, SumValue, Unit", async () => {
+    it("should create initial objects for Events, Variables, SumValue", async () => {
       let result = await exec();
 
       expect(result.Events).toBeDefined();
       expect(result.Variables).toEqual({});
       expect(result._sumValue).toEqual(0);
       expect(result.Value).toEqual(0);
-      expect(result.Unit).toEqual("");
     });
   });
 
@@ -178,7 +177,7 @@ describe("SumElement", () => {
         type: deviceVariable1Type,
         archived: deviceVariable1Archived,
         value: deviceVariable1Value,
-        timeSample: 1,
+        sampleTime: 1,
         name: "variable1",
         offset: 1,
         fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
@@ -189,7 +188,7 @@ describe("SumElement", () => {
         type: deviceVariable2Type,
         archived: deviceVariable2Archived,
         value: deviceVariable2Value,
-        timeSample: 2,
+        sampleTime: 2,
         name: "variable2",
         offset: 3,
         fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
@@ -200,7 +199,7 @@ describe("SumElement", () => {
         type: deviceVariable3Type,
         archived: deviceVariable3Archived,
         value: deviceVariable3Value,
-        timeSample: 3,
+        sampleTime: 3,
         name: "variable3",
         offset: 5,
         fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
@@ -211,7 +210,7 @@ describe("SumElement", () => {
         type: deviceVariable4Type,
         archived: deviceVariable4Archived,
         value: deviceVariable4Value,
-        timeSample: 4,
+        sampleTime: 4,
         name: "variable4",
         offset: 7,
         fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
@@ -222,7 +221,7 @@ describe("SumElement", () => {
         type: deviceVariable5Type,
         archived: deviceVariable5Archived,
         value: deviceVariable5Value,
-        timeSample: 5,
+        sampleTime: 5,
         name: "variable5",
         offset: 9,
         fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
@@ -413,7 +412,7 @@ describe("SumElement", () => {
     it("should throw if name is not defined in payload", async () => {
       sumElementName = undefined;
 
-      expect(
+      await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
@@ -425,10 +424,10 @@ describe("SumElement", () => {
       ).rejects.toBeDefined();
     });
 
-    it("should throw if sampleTime is not defined in payload", async () => {
+    it("should not throw but set sampleTime to 1 if it is not defined in payload", async () => {
       sumElementSampleTime = undefined;
 
-      expect(
+      await expect(
         new Promise(async (resolve, reject) => {
           try {
             await exec();
@@ -437,7 +436,8 @@ describe("SumElement", () => {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
+      ).resolves.toBeDefined();
+      expect(sumElement.SampleTime).toEqual(1);
     });
   });
 
@@ -486,6 +486,7 @@ describe("SumElement", () => {
     let sumElementArchived;
     let sumElementUnit;
     let sumElementSampleTime;
+    let sumElementArchiveSampleTime;
     let sumElementVariable1Payload;
     let sumElementVariable1Id;
     let sumElementVariable1Factor;
@@ -544,6 +545,7 @@ describe("SumElement", () => {
       sumElementArchived = true;
       sumElementUnit = "TestUnit";
       sumElementSampleTime = 2;
+      sumElementArchiveSampleTime = 10;
 
       addVariables = true;
       customVariablesPayload = undefined;
@@ -555,7 +557,7 @@ describe("SumElement", () => {
         type: deviceVariable1Type,
         archived: deviceVariable1Archived,
         value: deviceVariable1Value,
-        timeSample: 1,
+        sampleTime: 1,
         name: "variable1",
         offset: 1,
         fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
@@ -566,7 +568,7 @@ describe("SumElement", () => {
         type: deviceVariable2Type,
         archived: deviceVariable2Archived,
         value: deviceVariable2Value,
-        timeSample: 2,
+        sampleTime: 2,
         name: "variable2",
         offset: 3,
         fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
@@ -577,7 +579,7 @@ describe("SumElement", () => {
         type: deviceVariable3Type,
         archived: deviceVariable3Archived,
         value: deviceVariable3Value,
-        timeSample: 3,
+        sampleTime: 3,
         name: "variable3",
         offset: 5,
         fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
@@ -588,7 +590,7 @@ describe("SumElement", () => {
         type: deviceVariable4Type,
         archived: deviceVariable4Archived,
         value: deviceVariable4Value,
-        timeSample: 4,
+        sampleTime: 4,
         name: "variable4",
         offset: 7,
         fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
@@ -599,7 +601,7 @@ describe("SumElement", () => {
         type: deviceVariable5Type,
         archived: deviceVariable5Archived,
         value: deviceVariable5Value,
-        timeSample: 5,
+        sampleTime: 5,
         name: "variable5",
         offset: 9,
         fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
@@ -649,6 +651,7 @@ describe("SumElement", () => {
         archived: sumElementArchived,
         unit: sumElementUnit,
         sampleTime: sumElementSampleTime,
+        archiveSampleTime: sumElementArchiveSampleTime,
         variables: addVariables
           ? [
               sumElementVariable1Payload,
@@ -665,8 +668,9 @@ describe("SumElement", () => {
 
     it("should return valid payload of CalculationElement", async () => {
       let result = await exec();
-
       let expectedPayload = {
+        archiveSampleTime: sumElementArchiveSampleTime,
+        unit: sumElementUnit,
         id: sumElementId,
         name: sumElementName,
         archived: sumElementArchived,
@@ -679,7 +683,7 @@ describe("SumElement", () => {
         ]
       };
 
-      expect(result).toMatchObject(expectedPayload);
+      expect(result).toEqual(expectedPayload);
     });
 
     it("should return valid payload and new sumElement created on the basis of this payload, should return the same payload", async () => {
@@ -1224,7 +1228,7 @@ describe("SumElement", () => {
         type: deviceVariable1Type,
         archived: deviceVariable1Archived,
         value: deviceVariable1Value,
-        timeSample: 1,
+        sampleTime: 1,
         name: "variable1",
         offset: 1,
         fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
@@ -1235,7 +1239,7 @@ describe("SumElement", () => {
         type: deviceVariable2Type,
         archived: deviceVariable2Archived,
         value: deviceVariable2Value,
-        timeSample: 2,
+        sampleTime: 2,
         name: "variable2",
         offset: 3,
         fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
@@ -1246,7 +1250,7 @@ describe("SumElement", () => {
         type: deviceVariable3Type,
         archived: deviceVariable3Archived,
         value: deviceVariable3Value,
-        timeSample: 3,
+        sampleTime: 3,
         name: "variable3",
         offset: 5,
         fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
@@ -1257,7 +1261,7 @@ describe("SumElement", () => {
         type: deviceVariable4Type,
         archived: deviceVariable4Archived,
         value: deviceVariable4Value,
-        timeSample: 4,
+        sampleTime: 4,
         name: "variable4",
         offset: 7,
         fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
@@ -1268,7 +1272,7 @@ describe("SumElement", () => {
         type: deviceVariable5Type,
         archived: deviceVariable5Archived,
         value: deviceVariable5Value,
-        timeSample: 5,
+        sampleTime: 5,
         name: "variable5",
         offset: 9,
         fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
@@ -1529,7 +1533,7 @@ describe("SumElement", () => {
         type: deviceVariable1Type,
         archived: deviceVariable1Archived,
         value: deviceVariable1Value,
-        timeSample: 1,
+        sampleTime: 1,
         name: "variable1",
         offset: 1,
         fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
@@ -1540,7 +1544,7 @@ describe("SumElement", () => {
         type: deviceVariable2Type,
         archived: deviceVariable2Archived,
         value: deviceVariable2Value,
-        timeSample: 2,
+        sampleTime: 2,
         name: "variable2",
         offset: 3,
         fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
@@ -1551,7 +1555,7 @@ describe("SumElement", () => {
         type: deviceVariable3Type,
         archived: deviceVariable3Archived,
         value: deviceVariable3Value,
-        timeSample: 3,
+        sampleTime: 3,
         name: "variable3",
         offset: 5,
         fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
@@ -1562,7 +1566,7 @@ describe("SumElement", () => {
         type: deviceVariable4Type,
         archived: deviceVariable4Archived,
         value: deviceVariable4Value,
-        timeSample: 4,
+        sampleTime: 4,
         name: "variable4",
         offset: 7,
         fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
@@ -1573,7 +1577,7 @@ describe("SumElement", () => {
         type: deviceVariable5Type,
         archived: deviceVariable5Archived,
         value: deviceVariable5Value,
-        timeSample: 5,
+        sampleTime: 5,
         name: "variable5",
         offset: 9,
         fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3
@@ -1782,7 +1786,7 @@ describe("SumElement", () => {
         type: deviceVariable1Type,
         archived: deviceVariable1Archived,
         value: deviceVariable1Value,
-        timeSample: 1,
+        sampleTime: 1,
         name: "variable1",
         offset: 1,
         fCode: deviceVariable1Type === "mbBoolean" ? 15 : 3
@@ -1793,7 +1797,7 @@ describe("SumElement", () => {
         type: deviceVariable2Type,
         archived: deviceVariable2Archived,
         value: deviceVariable2Value,
-        timeSample: 2,
+        sampleTime: 2,
         name: "variable2",
         offset: 3,
         fCode: deviceVariable2Type === "mbBoolean" ? 15 : 3
@@ -1804,7 +1808,7 @@ describe("SumElement", () => {
         type: deviceVariable3Type,
         archived: deviceVariable3Archived,
         value: deviceVariable3Value,
-        timeSample: 3,
+        sampleTime: 3,
         name: "variable3",
         offset: 5,
         fCode: deviceVariable3Type === "mbBoolean" ? 15 : 3
@@ -1815,7 +1819,7 @@ describe("SumElement", () => {
         type: deviceVariable4Type,
         archived: deviceVariable4Archived,
         value: deviceVariable4Value,
-        timeSample: 4,
+        sampleTime: 4,
         name: "variable4",
         offset: 7,
         fCode: deviceVariable4Type === "mbBoolean" ? 15 : 3
@@ -1826,7 +1830,7 @@ describe("SumElement", () => {
         type: deviceVariable5Type,
         archived: deviceVariable5Archived,
         value: deviceVariable5Value,
-        timeSample: 5,
+        sampleTime: 5,
         name: "variable5",
         offset: 9,
         fCode: deviceVariable5Type === "mbBoolean" ? 15 : 3

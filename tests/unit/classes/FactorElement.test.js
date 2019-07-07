@@ -54,14 +54,13 @@ describe("FactorElement", () => {
       expect(result.Device).toEqual(device);
     });
 
-    it("should create initial objects for Factor, Variable, Value, Unit", async () => {
+    it("should create initial objects for Factor, Variable, Value", async () => {
       let result = await exec();
 
       expect(result.Events).toBeDefined();
       expect(result.Variable).toEqual(null);
       expect(result.Factor).toEqual(null);
       expect(result.Value).toEqual(0);
-      expect(result.Unit).toEqual("");
     });
   });
 
@@ -84,7 +83,7 @@ describe("FactorElement", () => {
     let factorElementArchived;
     let factorElementType;
     let factorElementSampleTime;
-    let factorElementArchiveTimeSample;
+    let factorElementArchiveSampleTime;
 
     beforeEach(() => {
       deviceId = "0001";
@@ -98,7 +97,7 @@ describe("FactorElement", () => {
       factorElementArchived = true;
       factorElementSampleTime = 5;
       factorElementType = "factorElement";
-      factorElementArchiveTimeSample = 10;
+      factorElementArchiveSampleTime = 10;
     });
 
     let exec = async () => {
@@ -113,7 +112,7 @@ describe("FactorElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -143,7 +142,7 @@ describe("FactorElement", () => {
         sampleTime: factorElementSampleTime,
         variableId: factorElementVariableId,
         type: factorElementType,
-        archiveTimeSample: factorElementArchiveTimeSample
+        archiveSampleTime: factorElementArchiveSampleTime
       };
 
       factorElement = new FactorElement(device);
@@ -156,10 +155,10 @@ describe("FactorElement", () => {
       expect(factorElement.Payload).toEqual(factorElementPayload);
       expect(factorElement.Variable).toEqual(variable);
       expect(factorElement.ArchiveTickId).toEqual(
-        Sampler.convertTimeSampleToTickId(factorElementArchiveTimeSample)
+        Sampler.convertSampleTimeToTickId(factorElementArchiveSampleTime)
       );
       expect(factorElement.TickId).toEqual(
-        Sampler.convertTimeSampleToTickId(factorElementSampleTime)
+        Sampler.convertSampleTimeToTickId(factorElementSampleTime)
       );
     });
 
@@ -171,10 +170,10 @@ describe("FactorElement", () => {
     });
 
     it("should set archive sample time to sample if it is not defined", async () => {
-      factorElementArchiveTimeSample = undefined;
+      factorElementArchiveSampleTime = undefined;
       await exec();
 
-      expect(factorElement.ArchiveTimeSample).toEqual(factorElementSampleTime);
+      expect(factorElement.ArchiveSampleTime).toEqual(factorElementSampleTime);
     });
 
     it("should throw if there is no variable of given id in device", async () => {
@@ -268,7 +267,7 @@ describe("FactorElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -366,7 +365,7 @@ describe("FactorElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -464,7 +463,7 @@ describe("FactorElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {

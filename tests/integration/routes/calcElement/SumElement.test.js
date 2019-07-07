@@ -467,7 +467,7 @@ describe("calcElements route", () => {
             factor: 7
           }
         ],
-        archiveTimeSample: 50
+        archiveSampleTime: 50
       };
     });
 
@@ -528,7 +528,7 @@ describe("calcElements route", () => {
         archived: newElement.Archived,
         factor: newElement.Factor,
         variables: variables,
-        archiveTimeSample: newElement.ArchiveTimeSample
+        archiveSampleTime: newElement.ArchiveSampleTime
       };
 
       expect(calcElementBody).toEqual(expectedPayload);
@@ -641,8 +641,8 @@ describe("calcElements route", () => {
       expect(result.status).toEqual(400);
     });
 
-    it("should return code 400 and do not create element if archiveTimeSample smaller than 1", async () => {
-      calcElementBody.archiveTimeSample = 0;
+    it("should return code 400 and do not create element if archiveSampleTime smaller than 1", async () => {
+      calcElementBody.archiveSampleTime = 0;
 
       let elementsBefore = await Project.CurrentProject.getAllCalcElements(
         deviceId
@@ -658,8 +658,8 @@ describe("calcElements route", () => {
       expect(result.status).toEqual(400);
     });
 
-    it("should return code 400 and do not create element if archiveTimeSample is bigger than 10000", async () => {
-      calcElementBody.archiveTimeSample = 10001;
+    it("should return code 400 and do not create element if archiveSampleTime is bigger than 10000", async () => {
+      calcElementBody.archiveSampleTime = 10001;
 
       let elementsBefore = await Project.CurrentProject.getAllCalcElements(
         deviceId
@@ -786,13 +786,13 @@ describe("calcElements route", () => {
       expect(result.body.sampleTime).toEqual(1);
     });
 
-    it("should return code 200 and create element with default archiveTimeSample if sampleTime is undefined", async () => {
-      calcElementBody.archiveTimeSample = undefined;
+    it("should return code 200 and create element with default archiveSampleTime if sampleTime is undefined", async () => {
+      calcElementBody.archiveSampleTime = undefined;
 
       let result = await exec();
 
       expect(result.status).toEqual(200);
-      expect(result.body.archiveTimeSample).toEqual(1);
+      expect(result.body.archiveSampleTime).toEqual(1);
     });
 
     it("should return code 200 and create element with default sampleTime if sampleTime is undefined", async () => {

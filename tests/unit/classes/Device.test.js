@@ -1163,7 +1163,7 @@ describe("Device", () => {
     let tickNumber;
     let archiveValue;
     let archivePayload;
-    let archiveTimeSample;
+    let archiveSampleTime;
 
     let insertSecondTime;
     let archiveSecondPayload;
@@ -1183,7 +1183,7 @@ describe("Device", () => {
 
       tickNumberSecond = 1235;
       archiveSecondValue = 9877;
-      archiveTimeSample = 1;
+      archiveSampleTime = 1;
     });
 
     let exec = async () => {
@@ -1193,7 +1193,7 @@ describe("Device", () => {
         ValueType: variableValueType,
         Archived: variableArchived,
         Value: archiveValue,
-        ArchiveTickId: archiveTimeSample
+        ArchiveTickId: archiveSampleTime
       };
 
       payload = { name: name };
@@ -1244,7 +1244,7 @@ describe("Device", () => {
     });
 
     it("should not insert value into database of all variables where archiveTickId don't suits tickNumber", async () => {
-      archiveTimeSample = 99;
+      archiveSampleTime = 99;
       await exec();
 
       let valueFromDB = await device.getVariableValueFromDB(

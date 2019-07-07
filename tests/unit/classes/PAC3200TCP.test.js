@@ -95,7 +95,7 @@ describe("PAC3200TCP", () => {
         expect(variable.Id).toBeDefined();
         expect(variable.Name).toEqual(varName);
 
-        expect(variable.TimeSample).toEqual(varPayload.timeSample);
+        expect(variable.SampleTime).toEqual(varPayload.sampleTime);
         expect(variable.Offset).toEqual(varPayload.offset);
         expect(variable.Length).toEqual(varPayload.length);
         expect(variable.FCode).toEqual(varPayload.fCode);

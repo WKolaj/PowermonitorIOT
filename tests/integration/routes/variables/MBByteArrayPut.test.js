@@ -235,7 +235,7 @@ describe("variables route", () => {
       variableBodyCreate = {
         type: variableTypeCreate,
         name: "varialeTestNameBefire",
-        timeSample: 2,
+        sampleTime: 2,
         value: variableValueCreate,
         unit: "B",
         archived: true,
@@ -244,11 +244,11 @@ describe("variables route", () => {
         fCode: variableFCodeCreate,
         getSingleFCode: variableGetSingleFCodeCreate,
         setSingleFCode: variableSetSingleFCodeCreate,
-        archiveTimeSample: 10
+        archiveSampleTime: 10
       };
       variableBodyEdit = {
         name: "varialeTestName",
-        timeSample: 1,
+        sampleTime: 1,
         value: variableValueEdit,
         unit: "A",
         archived: false,
@@ -257,7 +257,7 @@ describe("variables route", () => {
         fCode: variableFCodeEdit,
         getSingleFCode: variableGetSingleFCodeEdit,
         setSingleFCode: variableSetSingleFCodeEdit,
-        archiveTimeSample: 20
+        archiveSampleTime: 20
       };
     });
 
@@ -315,7 +315,7 @@ describe("variables route", () => {
 
       let variablePayload = {
         name: variable.Name,
-        timeSample: variable.TimeSample,
+        sampleTime: variable.SampleTime,
         value: variable.Value,
         unit: variable.Unit,
         archived: variable.Archived,
@@ -324,7 +324,7 @@ describe("variables route", () => {
         fCode: variable.FCode,
         getSingleFCode: variable.GetSingleFCode,
         setSingleFCode: variable.SetSingleFCode,
-        archiveTimeSample: variable.ArchiveTimeSample
+        archiveSampleTime: variable.ArchiveSampleTime
       };
 
       expect(variablePayload).toEqual(variableBodyEdit);
@@ -410,20 +410,20 @@ describe("variables route", () => {
       expect(variablePayloadBefore).toEqual(payloadAfter);
     });
 
-    it("should edit only timeSample if only timeSample is defined in payload", async () => {
-      variableBodyEdit = _.pick(variableBodyEdit, "timeSample");
+    it("should edit only sampleTime if only sampleTime is defined in payload", async () => {
+      variableBodyEdit = _.pick(variableBodyEdit, "sampleTime");
 
       let result = await exec();
 
-      expect(result.body.timeSample).toEqual(1);
+      expect(result.body.sampleTime).toEqual(1);
     });
 
-    it("should edit only archiveTimeSample if only archiveTimeSample is defined in payload", async () => {
-      variableBodyEdit = _.pick(variableBodyEdit, "archiveTimeSample");
+    it("should edit only archiveSampleTime if only archiveSampleTime is defined in payload", async () => {
+      variableBodyEdit = _.pick(variableBodyEdit, "archiveSampleTime");
 
       let result = await exec();
 
-      expect(result.body.archiveTimeSample).toEqual(20);
+      expect(result.body.archiveSampleTime).toEqual(20);
     });
 
     it("should edit only length if only length is defined in payload", async () => {
@@ -542,8 +542,8 @@ describe("variables route", () => {
       expect(variablePayloadBefore).toEqual(payloadAfter);
     });
 
-    it("should return code 400 and do not edit variable if timeSample is less than 1", async () => {
-      variableBodyEdit.timeSample = "ab";
+    it("should return code 400 and do not edit variable if sampleTime is less than 1", async () => {
+      variableBodyEdit.sampleTime = "ab";
 
       let result = await exec();
 
@@ -557,8 +557,8 @@ describe("variables route", () => {
       expect(variablePayloadBefore).toEqual(payloadAfter);
     });
 
-    it("should return code 400 and do not edit variable if timeSample is greater than 10000", async () => {
-      variableBodyEdit.timeSample = 10001;
+    it("should return code 400 and do not edit variable if sampleTime is greater than 10000", async () => {
+      variableBodyEdit.sampleTime = 10001;
 
       let result = await exec();
 
@@ -572,8 +572,8 @@ describe("variables route", () => {
       expect(variablePayloadBefore).toEqual(payloadAfter);
     });
 
-    it("should return code 400 and do not edit variable if archivetimeSample is less than 1", async () => {
-      variableBodyEdit.archiveTimeSample = 0;
+    it("should return code 400 and do not edit variable if archivesampleTime is less than 1", async () => {
+      variableBodyEdit.archiveSampleTime = 0;
 
       let result = await exec();
 
@@ -587,8 +587,8 @@ describe("variables route", () => {
       expect(variablePayloadBefore).toEqual(payloadAfter);
     });
 
-    it("should return code 400 and do not edit variable if archivetimeSample is greater than 10000", async () => {
-      variableBodyEdit.archiveTimeSample = 10001;
+    it("should return code 400 and do not edit variable if archivesampleTime is greater than 10000", async () => {
+      variableBodyEdit.archiveSampleTime = 10001;
 
       let result = await exec();
 

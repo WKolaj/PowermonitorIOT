@@ -255,7 +255,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createBooleanVariable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -275,7 +275,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createByteArrayVariable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -297,7 +297,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createFloatVariable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -317,7 +317,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createSwappedFloatVariable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -337,7 +337,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createInt16Variable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -357,7 +357,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createInt32Variable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -377,7 +377,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createSwappedInt32Variable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -397,7 +397,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createUInt16Variable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -417,7 +417,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createUInt32Variable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");
@@ -437,7 +437,7 @@ class MBDevice extends Device {
    * @param {*} payload Payload of edition
    */
   async _createSwappedUInt32Variable(payload) {
-    if (!exists(payload.timeSample))
+    if (!exists(payload.sampleTime))
       throw new Error("time sample in payload is not defined");
     if (!exists(payload.name))
       throw new Error("variable name in payload is not defined");

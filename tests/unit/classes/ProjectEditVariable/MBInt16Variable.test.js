@@ -47,7 +47,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0001",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         offset: 5,
         length: 1,
@@ -58,11 +58,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit1",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0002",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         offset: 6,
         length: 2,
@@ -73,11 +73,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit2",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0003",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         offset: 7,
         length: 2,
@@ -88,7 +88,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit3",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     calculationElements: [
@@ -109,7 +109,7 @@ let testPayload = JSON.stringify({
             factor: 2
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "1002",
@@ -128,7 +128,7 @@ let testPayload = JSON.stringify({
             factor: 3
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -145,7 +145,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0004",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 5,
         length: 1,
@@ -156,11 +156,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 1,
         setSingleFCode: 15,
         unit: "unit4",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0005",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 6,
         length: 2,
@@ -171,11 +171,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit5",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0006",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -186,7 +186,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit6",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -202,7 +202,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0007",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 4,
         length: 1,
@@ -213,11 +213,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit7",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0008",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 5,
         length: 2,
@@ -228,11 +228,11 @@ let testPayload = JSON.stringify({
         getSingleFCode: 4,
         setSingleFCode: 16,
         unit: "unit8",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "0009",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -243,7 +243,7 @@ let testPayload = JSON.stringify({
         getSingleFCode: 3,
         setSingleFCode: 16,
         unit: "unit9",
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     calculationElements: [
@@ -264,7 +264,7 @@ let testPayload = JSON.stringify({
             factor: 2
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       },
       {
         id: "3002",
@@ -283,7 +283,7 @@ let testPayload = JSON.stringify({
             factor: 3
           }
         ],
-        archiveTimeSample: 2
+        archiveSampleTime: 2
       }
     ],
     type: "mbDevice"
@@ -428,7 +428,7 @@ describe("Project", () => {
       createPayload = {};
       createPayload.id = "000x";
       createPayload.name = "testVariable";
-      createPayload.timeSample = 5;
+      createPayload.sampleTime = 5;
       createPayload.unit = "A";
       createPayload.archived = false;
       createPayload.length = 2;
@@ -438,12 +438,12 @@ describe("Project", () => {
       createPayload.setSingleFCode = 16;
       createPayload.type = "mbByteArray";
       createPayload.value = [0, 0, 0, 0];
-      createPayload.archiveTimeSample = 5;
+      createPayload.archiveSampleTime = 5;
 
       editPayload = {};
       editPayload.id = "000x";
       editPayload.name = "editedVariable";
-      editPayload.timeSample = 10;
+      editPayload.sampleTime = 10;
       editPayload.unit = "B";
       editPayload.archived = false;
       editPayload.length = 4;
@@ -453,7 +453,7 @@ describe("Project", () => {
       editPayload.setSingleFCode = 16;
       editPayload.type = "mbByteArray";
       editPayload.value = [0, 1, 0, 1, 0, 1, 0, 1];
-      editPayload.archiveTimeSample = 10;
+      editPayload.archiveSampleTime = 10;
 
       await createInitialFiles();
     });
@@ -547,7 +547,7 @@ describe("Project", () => {
         createPayload = {};
         createPayload.id = "000x";
         createPayload.name = "testVariable";
-        createPayload.timeSample = 5;
+        createPayload.sampleTime = 5;
         createPayload.unit = "A";
         createPayload.archived = false;
         createPayload.length = expectedLength;
@@ -557,12 +557,12 @@ describe("Project", () => {
         createPayload.setSingleFCode = expectedSetSingleFCode;
         createPayload.type = expectedTypeName;
         createPayload.value = defaultValue;
-        createPayload.archiveTimeSample = 1;
+        createPayload.archiveSampleTime = 1;
 
         editPayload = {};
         editPayload.id = "000x";
         editPayload.name = "editedVariable";
-        editPayload.timeSample = 10;
+        editPayload.sampleTime = 10;
         editPayload.unit = "B";
         editPayload.archived = true;
         editPayload.length = expectedLength;
@@ -572,7 +572,7 @@ describe("Project", () => {
         editPayload.setSingleFCode = expectedSetSingleFCode;
         editPayload.type = expectedTypeName;
         editPayload.value = editValue;
-        editPayload.archiveTimeSample = 10;
+        editPayload.archiveSampleTime = 10;
 
         await createInitialFiles();
       });
@@ -615,10 +615,10 @@ describe("Project", () => {
       });
 
       it(`${className} - should edit only time sample if only time sample is defined`, async () => {
-        let editedTimeSampleValue = 100;
+        let editedSampleTimeValue = 100;
 
         editPayload = {
-          timeSample: editedTimeSampleValue
+          sampleTime: editedSampleTimeValue
         };
 
         let expectedPayload = { ...createPayload, ...editPayload };
@@ -700,11 +700,11 @@ describe("Project", () => {
         expect(result.Payload).toEqual(expectedPayload);
       });
 
-      it(`${className} - should edit only archiveTimeSample if only archiveTimeSample is defined`, async () => {
-        let editArchiveTimeSample = 15;
+      it(`${className} - should edit only archiveSampleTime if only archiveSampleTime is defined`, async () => {
+        let editArchiveSampleTime = 15;
 
         editPayload = {
-          archiveTimeSample: editArchiveTimeSample
+          archiveSampleTime: editArchiveSampleTime
         };
 
         let expectedPayload = { ...createPayload, ...editPayload };
@@ -870,7 +870,7 @@ describe("Project", () => {
         let device = await project.getDevice(deviceId);
         let unitId = device.UnitId;
         let fCode = editPayload.fCode;
-        let tickId = editPayload.timeSample;
+        let tickId = editPayload.sampleTime;
 
         let reqExists = device.Requests[tickId].find(x => {
           let allConnectionIds = Object.keys(x.VariableConnections);

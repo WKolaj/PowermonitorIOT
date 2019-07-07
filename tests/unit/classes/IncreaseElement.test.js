@@ -87,7 +87,7 @@ describe("IncreaseElement", () => {
     let averageElementSampleTime;
     let averageElementCalculationInterval;
     let averageElementOverflow;
-    let averageElementArchiveTimeSample;
+    let averageElementArchiveSampleTime;
 
     beforeEach(() => {
       deviceId = "0001";
@@ -103,7 +103,7 @@ describe("IncreaseElement", () => {
       averageElementType = "increaseElement";
       averageElementCalculationInterval = 10;
       averageElementOverflow = 100;
-      averageElementArchiveTimeSample = 20;
+      averageElementArchiveSampleTime = 20;
     });
 
     let exec = async () => {
@@ -118,7 +118,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -150,7 +150,7 @@ describe("IncreaseElement", () => {
         type: averageElementType,
         calculationInterval: averageElementCalculationInterval,
         overflow: averageElementOverflow,
-        archiveTimeSample: averageElementArchiveTimeSample
+        archiveSampleTime: averageElementArchiveSampleTime
       };
 
       averageElement = new IncreaseElement(device);
@@ -382,7 +382,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -475,7 +475,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -572,7 +572,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -700,7 +700,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -842,7 +842,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -979,7 +979,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1084,7 +1084,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1193,7 +1193,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1314,7 +1314,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1435,7 +1435,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1541,7 +1541,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1656,7 +1656,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1800,7 +1800,6 @@ describe("IncreaseElement", () => {
     let averageElementSampleTime;
     let averageElementCalculationInterval;
     let averageElementOverflow;
-    let averageElementTimeSample;
 
     let tickId;
     let value;
@@ -1818,7 +1817,7 @@ describe("IncreaseElement", () => {
       averageElementSampleTime = 1;
       averageElementCalculationInterval = 10;
       averageElementOverflow = 100;
-      averageElementArchieveTimeSample = 20;
+      averageElementArchieveSampleTime = 20;
 
       //random values
       tickId = 15;
@@ -1837,7 +1836,7 @@ describe("IncreaseElement", () => {
         type: "mbFloat",
         unit: "A",
         value: variableValue,
-        timeSample: 1
+        sampleTime: 1
       };
 
       devicePayload = {
@@ -1869,7 +1868,7 @@ describe("IncreaseElement", () => {
         calculationInterval: averageElementCalculationInterval,
         type: "increaseElement",
         overflow: averageElementOverflow,
-        archiveTimeSample: averageElementArchieveTimeSample
+        archiveSampleTime: averageElementArchieveSampleTime
       };
 
       averageElement = new IncreaseElement(device);

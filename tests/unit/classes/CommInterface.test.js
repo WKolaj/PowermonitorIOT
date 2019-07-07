@@ -22,7 +22,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0001",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         offset: 5,
         length: 1,
@@ -36,7 +36,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0002",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         offset: 6,
         length: 2,
@@ -50,7 +50,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0003",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         offset: 7,
         length: 2,
@@ -114,7 +114,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0004",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 5,
         length: 1,
@@ -128,7 +128,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0005",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 6,
         length: 2,
@@ -142,7 +142,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0006",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -168,7 +168,7 @@ let testPayload = JSON.stringify({
     variables: [
       {
         id: "0007",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 4",
         offset: 4,
         length: 1,
@@ -182,7 +182,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0008",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 5",
         offset: 5,
         length: 2,
@@ -196,7 +196,7 @@ let testPayload = JSON.stringify({
       },
       {
         id: "0009",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 6",
         offset: 7,
         length: 2,
@@ -813,7 +813,7 @@ describe("CommInterface", () => {
     it("should create a new modbus device together with its variables and calculationElements if they are given", async () => {
       let varaible1Payload = {
         id: "1234",
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         type: "mbInt16",
         offset: 2,
@@ -823,7 +823,7 @@ describe("CommInterface", () => {
       };
       let varaible2Payload = {
         id: "1235",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         type: "mbBoolean",
         offset: 1,
@@ -833,7 +833,7 @@ describe("CommInterface", () => {
       };
       let varaible3Payload = {
         id: "1236",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         type: "mbInt32",
         offset: 5,
@@ -893,7 +893,7 @@ describe("CommInterface", () => {
 
       expect(allVariables.length).toEqual(3);
       expect(allVariables[0].Id).toEqual(varaible1Payload.id);
-      expect(allVariables[0].TimeSample).toEqual(varaible1Payload.timeSample);
+      expect(allVariables[0].SampleTime).toEqual(varaible1Payload.sampleTime);
       expect(allVariables[0].Name).toEqual(varaible1Payload.name);
       expect(allVariables[0].Type).toEqual(varaible1Payload.type);
       expect(allVariables[0].Offset).toEqual(varaible1Payload.offset);
@@ -901,7 +901,7 @@ describe("CommInterface", () => {
       expect(allVariables[0].Value).toEqual(varaible1Payload.value);
 
       expect(allVariables[1].Id).toEqual(varaible2Payload.id);
-      expect(allVariables[1].TimeSample).toEqual(varaible2Payload.timeSample);
+      expect(allVariables[1].SampleTime).toEqual(varaible2Payload.sampleTime);
       expect(allVariables[1].Name).toEqual(varaible2Payload.name);
       expect(allVariables[1].Type).toEqual(varaible2Payload.type);
       expect(allVariables[1].Offset).toEqual(varaible2Payload.offset);
@@ -909,7 +909,7 @@ describe("CommInterface", () => {
       expect(allVariables[1].Value).toEqual(varaible2Payload.value);
 
       expect(allVariables[2].Id).toEqual(varaible3Payload.id);
-      expect(allVariables[2].TimeSample).toEqual(varaible3Payload.timeSample);
+      expect(allVariables[2].SampleTime).toEqual(varaible3Payload.sampleTime);
       expect(allVariables[2].Name).toEqual(varaible3Payload.name);
       expect(allVariables[2].Type).toEqual(varaible3Payload.type);
       expect(allVariables[2].Offset).toEqual(varaible3Payload.offset);
@@ -921,8 +921,8 @@ describe("CommInterface", () => {
 
       expect(allCalcElements.length).toEqual(2);
       expect(allCalcElements[0].Id).toEqual(calculationElement1Payload.id);
-      expect(allCalcElements[0].TimeSample).toEqual(
-        calculationElement1Payload.timeSample
+      expect(allCalcElements[0].SampleTime).toEqual(
+        calculationElement1Payload.sampleTime
       );
       expect(allCalcElements[0].Name).toEqual(calculationElement1Payload.name);
       expect(allCalcElements[0].Type).toEqual(calculationElement1Payload.type);
@@ -932,8 +932,8 @@ describe("CommInterface", () => {
       );
 
       expect(allCalcElements[1].Id).toEqual(calculationElement2Payload.id);
-      expect(allCalcElements[1].TimeSample).toEqual(
-        calculationElement2Payload.timeSample
+      expect(allCalcElements[1].SampleTime).toEqual(
+        calculationElement2Payload.sampleTime
       );
       expect(allCalcElements[1].Name).toEqual(calculationElement2Payload.name);
       expect(allCalcElements[1].Type).toEqual(calculationElement2Payload.type);
@@ -945,7 +945,7 @@ describe("CommInterface", () => {
 
     it("should create a new device together with its variables and calculationElements if they are given - and create their ids if not given", async () => {
       let varaible1Payload = {
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         type: "mbInt16",
         offset: 2,
@@ -953,7 +953,7 @@ describe("CommInterface", () => {
         archived: true
       };
       let varaible2Payload = {
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         type: "mbBoolean",
         offset: 1,
@@ -961,7 +961,7 @@ describe("CommInterface", () => {
         archived: false
       };
       let varaible3Payload = {
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         type: "mbInt32",
         offset: 5,
@@ -1000,21 +1000,21 @@ describe("CommInterface", () => {
 
       expect(allVariables.length).toEqual(3);
       expect(allVariables[0].Id).toBeDefined();
-      expect(allVariables[0].TimeSample).toEqual(varaible1Payload.timeSample);
+      expect(allVariables[0].SampleTime).toEqual(varaible1Payload.sampleTime);
       expect(allVariables[0].Name).toEqual(varaible1Payload.name);
       expect(allVariables[0].Type).toEqual(varaible1Payload.type);
       expect(allVariables[0].Offset).toEqual(varaible1Payload.offset);
       expect(allVariables[0].FCode).toEqual(varaible1Payload.fCode);
 
       expect(allVariables[1].Id).toBeDefined();
-      expect(allVariables[1].TimeSample).toEqual(varaible2Payload.timeSample);
+      expect(allVariables[1].SampleTime).toEqual(varaible2Payload.sampleTime);
       expect(allVariables[1].Name).toEqual(varaible2Payload.name);
       expect(allVariables[1].Type).toEqual(varaible2Payload.type);
       expect(allVariables[1].Offset).toEqual(varaible2Payload.offset);
       expect(allVariables[1].FCode).toEqual(varaible2Payload.fCode);
 
       expect(allVariables[2].Id).toBeDefined();
-      expect(allVariables[2].TimeSample).toEqual(varaible3Payload.timeSample);
+      expect(allVariables[2].SampleTime).toEqual(varaible3Payload.sampleTime);
       expect(allVariables[2].Name).toEqual(varaible3Payload.name);
       expect(allVariables[2].Type).toEqual(varaible3Payload.type);
       expect(allVariables[2].Offset).toEqual(varaible3Payload.offset);
@@ -1024,8 +1024,8 @@ describe("CommInterface", () => {
 
       expect(allCalcElements.length).toEqual(2);
       expect(allCalcElements[0].Id).toBeDefined();
-      expect(allCalcElements[0].TimeSample).toEqual(
-        calculationElement1Payload.timeSample
+      expect(allCalcElements[0].SampleTime).toEqual(
+        calculationElement1Payload.sampleTime
       );
       expect(allCalcElements[0].Name).toEqual(calculationElement1Payload.name);
       expect(allCalcElements[0].Type).toEqual(calculationElement1Payload.type);
@@ -1035,8 +1035,8 @@ describe("CommInterface", () => {
       );
 
       expect(allCalcElements[1].Id).toBeDefined();
-      expect(allCalcElements[1].TimeSample).toEqual(
-        calculationElement2Payload.timeSample
+      expect(allCalcElements[1].SampleTime).toEqual(
+        calculationElement2Payload.sampleTime
       );
       expect(allCalcElements[1].Name).toEqual(calculationElement2Payload.name);
       expect(allCalcElements[1].Type).toEqual(calculationElement2Payload.type);
@@ -1048,7 +1048,7 @@ describe("CommInterface", () => {
 
     it("should create a new device together with its variables if they are given - and set default values if they are not given", async () => {
       let varaible1Payload = {
-        timeSample: 2,
+        sampleTime: 2,
         name: "test variable 1",
         type: "mbInt16",
         offset: 2,
@@ -1056,7 +1056,7 @@ describe("CommInterface", () => {
         archived: true
       };
       let varaible2Payload = {
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         type: "mbBoolean",
         offset: 1,
@@ -1064,7 +1064,7 @@ describe("CommInterface", () => {
         archived: false
       };
       let varaible3Payload = {
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         type: "mbInt32",
         offset: 5,
@@ -1081,7 +1081,7 @@ describe("CommInterface", () => {
 
       expect(allVariables.length).toEqual(3);
       expect(allVariables[0].Id).toEqual(varaible1Payload.id);
-      expect(allVariables[0].TimeSample).toEqual(varaible1Payload.timeSample);
+      expect(allVariables[0].SampleTime).toEqual(varaible1Payload.sampleTime);
       expect(allVariables[0].Name).toEqual(varaible1Payload.name);
       expect(allVariables[0].Type).toEqual(varaible1Payload.type);
       expect(allVariables[0].Offset).toEqual(varaible1Payload.offset);
@@ -1089,7 +1089,7 @@ describe("CommInterface", () => {
       expect(allVariables[0].Value).toEqual(0);
 
       expect(allVariables[1].Id).toEqual(varaible2Payload.id);
-      expect(allVariables[1].TimeSample).toEqual(varaible2Payload.timeSample);
+      expect(allVariables[1].SampleTime).toEqual(varaible2Payload.sampleTime);
       expect(allVariables[1].Name).toEqual(varaible2Payload.name);
       expect(allVariables[1].Type).toEqual(varaible2Payload.type);
       expect(allVariables[1].Offset).toEqual(varaible2Payload.offset);
@@ -1097,7 +1097,7 @@ describe("CommInterface", () => {
       expect(allVariables[1].Value).toEqual(false);
 
       expect(allVariables[2].Id).toEqual(varaible3Payload.id);
-      expect(allVariables[2].TimeSample).toEqual(varaible3Payload.timeSample);
+      expect(allVariables[2].SampleTime).toEqual(varaible3Payload.sampleTime);
       expect(allVariables[2].Name).toEqual(varaible3Payload.name);
       expect(allVariables[2].Type).toEqual(varaible3Payload.type);
       expect(allVariables[2].Offset).toEqual(varaible3Payload.offset);
@@ -1263,7 +1263,7 @@ describe("CommInterface", () => {
     it("should throw and do not add device to Devices or Sampler if MBdevice varaible payload is invalid", async () => {
       let varaible1Payload = {
         id: "1234",
-        timeSample: 2,
+        sampleTime: 2,
         name: "mbInt16",
         type: "not recongized type",
         offset: 2,
@@ -1271,7 +1271,7 @@ describe("CommInterface", () => {
       };
       let varaible2Payload = {
         id: "1235",
-        timeSample: 3,
+        sampleTime: 3,
         name: "test variable 2",
         type: "NOT RECONGIZED TYPE",
         offset: 1,
@@ -1279,7 +1279,7 @@ describe("CommInterface", () => {
       };
       let varaible3Payload = {
         id: "1236",
-        timeSample: 4,
+        sampleTime: 4,
         name: "test variable 3",
         type: "mbInt32",
         offset: 5,
@@ -1372,7 +1372,7 @@ describe("CommInterface", () => {
 
     let variable1Payload;
     let variable1Id;
-    let variable1TimeSample;
+    let variable1SampleTime;
     let variable1Name;
     let variable1Type;
     let variable1Offset;
@@ -1381,7 +1381,7 @@ describe("CommInterface", () => {
 
     let variable2Payload;
     let variable2Id;
-    let variable2TimeSample;
+    let variable2SampleTime;
     let variable2Name;
     let variable2Type;
     let variable2Offset;
@@ -1390,7 +1390,7 @@ describe("CommInterface", () => {
 
     let variable3Payload;
     let variable3Id;
-    let variable3TimeSample;
+    let variable3SampleTime;
     let variable3Name;
     let variable3Type;
     let variable3Offset;
@@ -1399,7 +1399,7 @@ describe("CommInterface", () => {
 
     let variable4Payload;
     let variable4Id;
-    let variable4TimeSample;
+    let variable4SampleTime;
     let variable4Name;
     let variable4Type;
     let variable4Offset;
@@ -1408,7 +1408,7 @@ describe("CommInterface", () => {
 
     let variable5Payload;
     let variable5Id;
-    let variable5TimeSample;
+    let variable5SampleTime;
     let variable5Name;
     let variable5Type;
     let variable5Offset;
@@ -1417,7 +1417,7 @@ describe("CommInterface", () => {
 
     let variable6Payload;
     let variable6Id;
-    let variable6TimeSample;
+    let variable6SampleTime;
     let variable6Name;
     let variable6Type;
     let variable6Offset;
@@ -1468,7 +1468,7 @@ describe("CommInterface", () => {
       device2sActive = false;
 
       variable1Id = "0001";
-      variable1TimeSample = 2;
+      variable1SampleTime = 2;
       variable1Name = "test variable 1";
       variable1Type = "mbInt16";
       variable1Offset = 5;
@@ -1476,7 +1476,7 @@ describe("CommInterface", () => {
       variable1Value = 1;
 
       variable2Id = "0002";
-      variable2TimeSample = 3;
+      variable2SampleTime = 3;
       variable2Name = "test variable 2";
       variable2Type = "mbInt32";
       variable2Offset = 6;
@@ -1484,7 +1484,7 @@ describe("CommInterface", () => {
       variable2Value = 2;
 
       variable3Id = "0003";
-      variable3TimeSample = 4;
+      variable3SampleTime = 4;
       variable3Name = "test variable 3";
       variable3Type = "mbFloat";
       variable3Offset = 7;
@@ -1492,7 +1492,7 @@ describe("CommInterface", () => {
       variable3Value = 3;
 
       variable4Id = "0004";
-      variable4TimeSample = 2;
+      variable4SampleTime = 2;
       variable4Name = "test variable 4";
       variable4Type = "mbBoolean";
       variable4Offset = 5;
@@ -1500,7 +1500,7 @@ describe("CommInterface", () => {
       variable4Value = true;
 
       variable5Id = "0005";
-      variable5TimeSample = 3;
+      variable5SampleTime = 3;
       variable5Name = "test variable 5";
       variable5Type = "mbInt32";
       variable5Offset = 6;
@@ -1508,7 +1508,7 @@ describe("CommInterface", () => {
       variable5Value = 5;
 
       variable6Id = "0006";
-      variable6TimeSample = 4;
+      variable6SampleTime = 4;
       variable6Name = "test variable 6";
       variable6Type = "mbFloat";
       variable6Offset = 7;
@@ -1542,7 +1542,7 @@ describe("CommInterface", () => {
 
       variable1Payload = {
         id: variable1Id,
-        timeSample: variable1TimeSample,
+        sampleTime: variable1SampleTime,
         name: variable1Name,
         type: variable1Type,
         offset: variable1Offset,
@@ -1552,7 +1552,7 @@ describe("CommInterface", () => {
 
       variable2Payload = {
         id: variable2Id,
-        timeSample: variable2TimeSample,
+        sampleTime: variable2SampleTime,
         name: variable2Name,
         type: variable2Type,
         offset: variable2Offset,
@@ -1562,7 +1562,7 @@ describe("CommInterface", () => {
 
       variable3Payload = {
         id: variable3Id,
-        timeSample: variable3TimeSample,
+        sampleTime: variable3SampleTime,
         name: variable3Name,
         type: variable3Type,
         offset: variable3Offset,
@@ -1572,7 +1572,7 @@ describe("CommInterface", () => {
 
       variable4Payload = {
         id: variable4Id,
-        timeSample: variable4TimeSample,
+        sampleTime: variable4SampleTime,
         name: variable4Name,
         type: variable4Type,
         offset: variable4Offset,
@@ -1582,7 +1582,7 @@ describe("CommInterface", () => {
 
       variable5Payload = {
         id: variable5Id,
-        timeSample: variable5TimeSample,
+        sampleTime: variable5SampleTime,
         name: variable5Name,
         type: variable5Type,
         offset: variable5Offset,
@@ -1592,7 +1592,7 @@ describe("CommInterface", () => {
 
       variable6Payload = {
         id: variable6Id,
-        timeSample: variable6TimeSample,
+        sampleTime: variable6SampleTime,
         name: variable6Name,
         type: variable6Type,
         offset: variable6Offset,
@@ -1739,7 +1739,7 @@ describe("CommInterface", () => {
 
       variable4Payload = {
         id: variable4Id,
-        timeSample: variable4TimeSample,
+        sampleTime: variable4SampleTime,
         name: variable4Name,
         type: variable4Type,
         offset: variable4Offset,
@@ -1749,7 +1749,7 @@ describe("CommInterface", () => {
 
       variable5Payload = {
         id: variable5Id,
-        timeSample: variable5TimeSample,
+        sampleTime: variable5SampleTime,
         name: variable5Name,
         type: variable5Type,
         offset: variable5Offset,
@@ -1759,7 +1759,7 @@ describe("CommInterface", () => {
 
       variable6Payload = {
         id: variable6Id,
-        timeSample: variable6TimeSample,
+        sampleTime: variable6SampleTime,
         name: variable6Name,
         type: variable6Type,
         offset: variable6Offset,
@@ -1835,7 +1835,7 @@ describe("CommInterface", () => {
 
       variable1Payload = {
         id: variable1Id,
-        timeSample: variable1TimeSample,
+        sampleTime: variable1SampleTime,
         name: variable1Name,
         type: variable1Type,
         offset: variable1Offset,
@@ -1845,7 +1845,7 @@ describe("CommInterface", () => {
 
       variable2Payload = {
         id: variable2Id,
-        timeSample: variable2TimeSample,
+        sampleTime: variable2SampleTime,
         name: variable2Name,
         type: variable2Type,
         offset: variable2Offset,
@@ -1855,7 +1855,7 @@ describe("CommInterface", () => {
 
       variable3Payload = {
         id: variable3Id,
-        timeSample: variable3TimeSample,
+        sampleTime: variable3SampleTime,
         name: variable3Name,
         type: variable3Type,
         offset: variable3Offset,
@@ -1865,7 +1865,7 @@ describe("CommInterface", () => {
 
       variable4Payload = {
         id: variable4Id,
-        timeSample: variable4TimeSample,
+        sampleTime: variable4SampleTime,
         name: variable4Name,
         type: variable4Type,
         offset: variable4Offset,
@@ -1875,7 +1875,7 @@ describe("CommInterface", () => {
 
       variable5Payload = {
         id: variable5Id,
-        timeSample: variable5TimeSample,
+        sampleTime: variable5SampleTime,
         name: variable5Name,
         type: variable5Type,
         offset: variable5Offset,
@@ -1885,7 +1885,7 @@ describe("CommInterface", () => {
 
       variable6Payload = {
         id: variable6Id,
-        timeSample: variable6TimeSample,
+        sampleTime: variable6SampleTime,
         name: variable6Name,
         type: variable6Type,
         offset: variable6Offset,
@@ -2028,7 +2028,7 @@ describe("CommInterface", () => {
 
     let variable1Payload;
     let variable1Id;
-    let variable1TimeSample;
+    let variable1SampleTime;
     let variable1Name;
     let variable1Type;
     let variable1Offset;
@@ -2037,7 +2037,7 @@ describe("CommInterface", () => {
 
     let variable2Payload;
     let variable2Id;
-    let variable2TimeSample;
+    let variable2SampleTime;
     let variable2Name;
     let variable2Type;
     let variable2Offset;
@@ -2046,7 +2046,7 @@ describe("CommInterface", () => {
 
     let variable3Payload;
     let variable3Id;
-    let variable3TimeSample;
+    let variable3SampleTime;
     let variable3Name;
     let variable3Type;
     let variable3Offset;
@@ -2055,7 +2055,7 @@ describe("CommInterface", () => {
 
     let variable4Payload;
     let variable4Id;
-    let variable4TimeSample;
+    let variable4SampleTime;
     let variable4Name;
     let variable4Type;
     let variable4Offset;
@@ -2064,7 +2064,7 @@ describe("CommInterface", () => {
 
     let variable5Payload;
     let variable5Id;
-    let variable5TimeSample;
+    let variable5SampleTime;
     let variable5Name;
     let variable5Type;
     let variable5Offset;
@@ -2073,7 +2073,7 @@ describe("CommInterface", () => {
 
     let variable6Payload;
     let variable6Id;
-    let variable6TimeSample;
+    let variable6SampleTime;
     let variable6Name;
     let variable6Type;
     let variable6Offset;
@@ -2124,7 +2124,7 @@ describe("CommInterface", () => {
       device2sActive = false;
 
       variable1Id = "0001";
-      variable1TimeSample = 2;
+      variable1SampleTime = 2;
       variable1Name = "test variable 1";
       variable1Type = "mbInt16";
       variable1Offset = 5;
@@ -2132,7 +2132,7 @@ describe("CommInterface", () => {
       variable1Value = 1;
 
       variable2Id = "0002";
-      variable2TimeSample = 3;
+      variable2SampleTime = 3;
       variable2Name = "test variable 2";
       variable2Type = "mbInt32";
       variable2Offset = 6;
@@ -2140,7 +2140,7 @@ describe("CommInterface", () => {
       variable2Value = 2;
 
       variable3Id = "0003";
-      variable3TimeSample = 4;
+      variable3SampleTime = 4;
       variable3Name = "test variable 3";
       variable3Type = "mbFloat";
       variable3Offset = 7;
@@ -2148,7 +2148,7 @@ describe("CommInterface", () => {
       variable3Value = 3;
 
       variable4Id = "0004";
-      variable4TimeSample = 2;
+      variable4SampleTime = 2;
       variable4Name = "test variable 4";
       variable4Type = "mbBoolean";
       variable4Offset = 5;
@@ -2156,7 +2156,7 @@ describe("CommInterface", () => {
       variable4Value = true;
 
       variable5Id = "0005";
-      variable5TimeSample = 3;
+      variable5SampleTime = 3;
       variable5Name = "test variable 5";
       variable5Type = "mbInt32";
       variable5Offset = 6;
@@ -2164,7 +2164,7 @@ describe("CommInterface", () => {
       variable5Value = 5;
 
       variable6Id = "0006";
-      variable6TimeSample = 4;
+      variable6SampleTime = 4;
       variable6Name = "test variable 6";
       variable6Type = "mbFloat";
       variable6Offset = 7;
@@ -2198,7 +2198,7 @@ describe("CommInterface", () => {
 
       variable1Payload = {
         id: variable1Id,
-        timeSample: variable1TimeSample,
+        sampleTime: variable1SampleTime,
         name: variable1Name,
         type: variable1Type,
         offset: variable1Offset,
@@ -2208,7 +2208,7 @@ describe("CommInterface", () => {
 
       variable2Payload = {
         id: variable2Id,
-        timeSample: variable2TimeSample,
+        sampleTime: variable2SampleTime,
         name: variable2Name,
         type: variable2Type,
         offset: variable2Offset,
@@ -2218,7 +2218,7 @@ describe("CommInterface", () => {
 
       variable3Payload = {
         id: variable3Id,
-        timeSample: variable3TimeSample,
+        sampleTime: variable3SampleTime,
         name: variable3Name,
         type: variable3Type,
         offset: variable3Offset,
@@ -2228,7 +2228,7 @@ describe("CommInterface", () => {
 
       variable4Payload = {
         id: variable4Id,
-        timeSample: variable4TimeSample,
+        sampleTime: variable4SampleTime,
         name: variable4Name,
         type: variable4Type,
         offset: variable4Offset,
@@ -2238,7 +2238,7 @@ describe("CommInterface", () => {
 
       variable5Payload = {
         id: variable5Id,
-        timeSample: variable5TimeSample,
+        sampleTime: variable5SampleTime,
         name: variable5Name,
         type: variable5Type,
         offset: variable5Offset,
@@ -2248,7 +2248,7 @@ describe("CommInterface", () => {
 
       variable6Payload = {
         id: variable6Id,
-        timeSample: variable6TimeSample,
+        sampleTime: variable6SampleTime,
         name: variable6Name,
         type: variable6Type,
         offset: variable6Offset,
@@ -2367,7 +2367,7 @@ describe("CommInterface", () => {
 
       variable4Payload = {
         id: variable4Id,
-        timeSample: variable4TimeSample,
+        sampleTime: variable4SampleTime,
         name: variable4Name,
         type: variable4Type,
         offset: variable4Offset,
@@ -2377,7 +2377,7 @@ describe("CommInterface", () => {
 
       variable5Payload = {
         id: variable5Id,
-        timeSample: variable5TimeSample,
+        sampleTime: variable5SampleTime,
         name: variable5Name,
         type: variable5Type,
         offset: variable5Offset,
@@ -2387,7 +2387,7 @@ describe("CommInterface", () => {
 
       variable6Payload = {
         id: variable6Id,
-        timeSample: variable6TimeSample,
+        sampleTime: variable6SampleTime,
         name: variable6Name,
         type: variable6Type,
         offset: variable6Offset,
@@ -2485,7 +2485,7 @@ describe("CommInterface", () => {
 
       variable1Payload = {
         id: variable1Id,
-        timeSample: variable1TimeSample,
+        sampleTime: variable1SampleTime,
         name: variable1Name,
         type: variable1Type,
         offset: variable1Offset,
@@ -2495,7 +2495,7 @@ describe("CommInterface", () => {
 
       variable2Payload = {
         id: variable2Id,
-        timeSample: variable2TimeSample,
+        sampleTime: variable2SampleTime,
         name: variable2Name,
         type: variable2Type,
         offset: variable2Offset,
@@ -2505,7 +2505,7 @@ describe("CommInterface", () => {
 
       variable3Payload = {
         id: variable3Id,
-        timeSample: variable3TimeSample,
+        sampleTime: variable3SampleTime,
         name: variable3Name,
         type: variable3Type,
         offset: variable3Offset,
@@ -2515,7 +2515,7 @@ describe("CommInterface", () => {
 
       variable4Payload = {
         id: variable4Id,
-        timeSample: variable4TimeSample,
+        sampleTime: variable4SampleTime,
         name: variable4Name,
         type: variable4Type,
         offset: variable4Offset,
@@ -2525,7 +2525,7 @@ describe("CommInterface", () => {
 
       variable5Payload = {
         id: variable5Id,
-        timeSample: variable5TimeSample,
+        sampleTime: variable5SampleTime,
         name: variable5Name,
         type: variable5Type,
         offset: variable5Offset,
@@ -2535,7 +2535,7 @@ describe("CommInterface", () => {
 
       variable6Payload = {
         id: variable6Id,
-        timeSample: variable6TimeSample,
+        sampleTime: variable6SampleTime,
         name: variable6Name,
         type: variable6Type,
         offset: variable6Offset,
@@ -3355,7 +3355,7 @@ describe("CommInterface", () => {
       editVariables = [
         {
           id: "0010",
-          timeSample: 2,
+          sampleTime: 2,
           name: "test variable 10",
           offset: 5,
           length: 1,
@@ -3368,7 +3368,7 @@ describe("CommInterface", () => {
         },
         {
           id: "0011",
-          timeSample: 3,
+          sampleTime: 3,
           name: "test variable 11",
           offset: 7,
           length: 2,
@@ -3690,7 +3690,7 @@ describe("CommInterface", () => {
     let variableFcode;
     let variableOffset;
     let variableType;
-    let variableTimeSample;
+    let variableSampleTime;
     let variableArchived;
     let variableGetSingleFCode;
     let variableSetSingleFCode;
@@ -3706,7 +3706,7 @@ describe("CommInterface", () => {
       variableFcode = 3;
       variableOffset = 2;
       variableType = "mbFloat";
-      variableTimeSample = 5;
+      variableSampleTime = 5;
       variableArchived = true;
       variableGetSingleFCode = 3;
       variableSetSingleFCode = 16;
@@ -3721,7 +3721,7 @@ describe("CommInterface", () => {
         fCode: variableFcode,
         offset: variableOffset,
         type: variableType,
-        timeSample: variableTimeSample,
+        sampleTime: variableSampleTime,
         getSingleFCode: variableGetSingleFCode,
         setSingleFCode: variableSetSingleFCode,
         archived: variableArchived,
@@ -3877,7 +3877,7 @@ describe("CommInterface", () => {
     });
 
     it("should throw and not add variable  if time sample is not given in payload", async () => {
-      variableTimeSample = undefined;
+      variableSampleTime = undefined;
 
       await expect(
         new Promise(async (resolve, reject) => {
@@ -4153,7 +4153,7 @@ describe("CommInterface", () => {
     let editVariableType;
     let editVariableFcode;
     let editVariableOffset;
-    let editVariableTimeSample;
+    let editVariableSampleTime;
     let editVariableArchived;
     let editVariableGetSingleFCode;
     let editVariableSetSingleFCode;
@@ -4171,7 +4171,7 @@ describe("CommInterface", () => {
       editVariableType = undefined;
       editVariableFcode = 3;
       editVariableOffset = 2;
-      editVariableTimeSample = 5;
+      editVariableSampleTime = 5;
       editVariableArchived = true;
       editVariableGetSingleFCode = 3;
       editVariableSetSingleFCode = 16;
@@ -4185,7 +4185,7 @@ describe("CommInterface", () => {
         name: editVariableName,
         fCode: editVariableFcode,
         offset: editVariableOffset,
-        timeSample: editVariableTimeSample,
+        sampleTime: editVariableSampleTime,
         getSingleFCode: editVariableGetSingleFCode,
         setSingleFCode: editVariableSetSingleFCode,
         archived: editVariableArchived,
@@ -4216,7 +4216,7 @@ describe("CommInterface", () => {
       expect(editedVariable.Name).toEqual(editVariableName);
       expect(editedVariable.FCode).toEqual(editVariableFcode);
       expect(editedVariable.Offset).toEqual(editVariableOffset);
-      expect(editedVariable.TimeSample).toEqual(editVariableTimeSample);
+      expect(editedVariable.SampleTime).toEqual(editVariableSampleTime);
       expect(editedVariable.Archived).toEqual(editVariableArchived);
       expect(editedVariable.GetSingleFCode).toEqual(editVariableGetSingleFCode);
       expect(editedVariable.SetSingleFCode).toEqual(editVariableSetSingleFCode);
@@ -4251,7 +4251,7 @@ describe("CommInterface", () => {
       expect(editedVariable.Name).toEqual(editVariableName);
       expect(editedVariable.FCode).toEqual(editVariableFcode);
       expect(editedVariable.Offset).toEqual(editVariableOffset);
-      expect(editedVariable.TimeSample).toEqual(editVariableTimeSample);
+      expect(editedVariable.SampleTime).toEqual(editVariableSampleTime);
       expect(editedVariable.Archived).toEqual(editVariableArchived);
       expect(editedVariable.GetSingleFCode).toEqual(editVariableGetSingleFCode);
       expect(editedVariable.SetSingleFCode).toEqual(editVariableSetSingleFCode);
@@ -4287,7 +4287,7 @@ describe("CommInterface", () => {
       expect(editedVariable.Name).toEqual(originalPayload.name);
       expect(editedVariable.FCode).toEqual(originalPayload.fCode);
       expect(editedVariable.Offset).toEqual(originalPayload.offset);
-      expect(editedVariable.TimeSample).toEqual(originalPayload.timeSample);
+      expect(editedVariable.SampleTime).toEqual(originalPayload.sampleTime);
       expect(editedVariable.Archived).toEqual(originalPayload.archived);
       expect(editedVariable.GetSingleFCode).toEqual(
         originalPayload.getSingleFCode
@@ -4317,7 +4317,7 @@ describe("CommInterface", () => {
     it("should edit only name if only name is defined in payload ", async () => {
       editVariableFcode = undefined;
       editVariableOffset = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableArchived = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
@@ -4333,7 +4333,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(editVariableName);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4344,7 +4344,7 @@ describe("CommInterface", () => {
     it("should edit only fcode if only fcode is defined in payload ", async () => {
       editVariableFcode = undefined;
       editVariableOffset = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableArchived = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
@@ -4360,7 +4360,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(editVariableName);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4371,7 +4371,7 @@ describe("CommInterface", () => {
     it("should edit only offset if only offset is defined in payload ", async () => {
       editVariableName = undefined;
       editVariableFcode = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableArchived = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
@@ -4387,7 +4387,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(initVariablePayload.name);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(editVariableOffset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4395,7 +4395,7 @@ describe("CommInterface", () => {
       expect(result.Unit).toEqual(initVariablePayload.unit);
     });
 
-    it("should edit only timeSample if only timeSample is defined in payload ", async () => {
+    it("should edit only sampleTime if only sampleTime is defined in payload ", async () => {
       editVariableName = undefined;
       editVariableFcode = undefined;
       editVariableOffset = undefined;
@@ -4414,7 +4414,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(initVariablePayload.name);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(editVariableTimeSample);
+      expect(result.SampleTime).toEqual(editVariableSampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4426,7 +4426,7 @@ describe("CommInterface", () => {
       editVariableName = undefined;
       editVariableFcode = undefined;
       editVariableOffset = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
@@ -4441,7 +4441,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(initVariablePayload.name);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(editVariableArchived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4453,7 +4453,7 @@ describe("CommInterface", () => {
       editVariableName = undefined;
       editVariableFcode = undefined;
       editVariableOffset = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
@@ -4468,7 +4468,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(initVariablePayload.name);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4479,7 +4479,7 @@ describe("CommInterface", () => {
     it("should edit only getSingleFCode if only getSingleFCode is defined in payload ", async () => {
       editVariableName = undefined;
       editVariableOffset = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableArchived = undefined;
       editVariableSetSingleFCode = undefined;
       editVariableValue = undefined;
@@ -4495,7 +4495,7 @@ describe("CommInterface", () => {
       //We have to change also the fcode of whole variable if changing getSingleFCode
       expect(result.FCode).toEqual(editVariableFcode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(editVariableGetSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4507,7 +4507,7 @@ describe("CommInterface", () => {
       editVariableName = undefined;
       editVariableFcode = undefined;
       editVariableOffset = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableArchived = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableValue = undefined;
@@ -4522,7 +4522,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(initVariablePayload.name);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(editVariableSetSingleFCode);
@@ -4534,7 +4534,7 @@ describe("CommInterface", () => {
       editVariableName = undefined;
       editVariableFcode = undefined;
       editVariableOffset = undefined;
-      editVariableTimeSample = undefined;
+      editVariableSampleTime = undefined;
       editVariableArchived = undefined;
       editVariableGetSingleFCode = undefined;
       editVariableSetSingleFCode = undefined;
@@ -4549,7 +4549,7 @@ describe("CommInterface", () => {
       expect(result.Name).toEqual(initVariablePayload.name);
       expect(result.FCode).toEqual(initVariablePayload.fCode);
       expect(result.Offset).toEqual(initVariablePayload.offset);
-      expect(result.TimeSample).toEqual(initVariablePayload.timeSample);
+      expect(result.SampleTime).toEqual(initVariablePayload.sampleTime);
       expect(result.Archived).toEqual(initVariablePayload.archived);
       expect(result.GetSingleFCode).toEqual(initVariablePayload.getSingleFCode);
       expect(result.SetSingleFCode).toEqual(initVariablePayload.setSingleFCode);
@@ -4742,7 +4742,7 @@ describe("CommInterface", () => {
     let calculationElementId;
     let calculationElementName;
     let calculationElementType;
-    let calculationElementTimeSample;
+    let calculationElementSampleTime;
     let calculationElementArchived;
     let calculationElementUnit;
     let calculationElementVariables;
@@ -4767,7 +4767,7 @@ describe("CommInterface", () => {
       calculationElementId = "9001";
       calculationElementName = "sumElement1";
       calculationElementType = "sumElement";
-      calculationElementTimeSample = 5;
+      calculationElementSampleTime = 5;
       calculationElementArchived = true;
       calculationElementUnit = "A";
 
@@ -4812,7 +4812,7 @@ describe("CommInterface", () => {
         id: calculationElementId,
         name: calculationElementName,
         type: calculationElementType,
-        sampleTime: calculationElementTimeSample,
+        sampleTime: calculationElementSampleTime,
         archived: calculationElementArchived,
         unit: calculationElementUnit,
         variables: calculationElementVariables
@@ -4914,24 +4914,25 @@ describe("CommInterface", () => {
       ).toEqual(0);
     });
 
-    it("should throw and not add element if sampleTime is not given in payload", async () => {
-      calculationElementTimeSample = undefined;
-
+    it("should not throw and  add element if sampleTime is not given in payload - set sampleTime to 1 instead", async () => {
+      calculationElementSampleTime = undefined;
+      let result = null;
       await expect(
         new Promise(async (resolve, reject) => {
           try {
-            await exec();
+            result = await exec();
             return resolve(true);
           } catch (err) {
             return reject(err);
           }
         })
-      ).rejects.toBeDefined();
+      ).resolves.toBeDefined();
 
       expect(
         Object.values(commInterface.getDevice(deviceId).CalculationElements)
           .length
-      ).toEqual(0);
+      ).toEqual(1);
+      expect(result.SampleTime).toEqual(1);
     });
 
     it("should throw and not add element if element of given id already exists", async () => {
@@ -4984,9 +4985,7 @@ describe("CommInterface", () => {
       let columnName = result.Device.ArchiveManager.getColumnNameById(
         result.Id
       );
-      let columnType = result.Device.ArchiveManager.getColumnType(
-        result
-      );
+      let columnType = result.Device.ArchiveManager.getColumnType(result);
 
       let columnExists = await checkIfColumnExists(
         dbFilePath,
@@ -5007,9 +5006,7 @@ describe("CommInterface", () => {
       let columnName = result.Device.ArchiveManager.getColumnNameById(
         result.Id
       );
-      let columnType = result.Device.ArchiveManager.getColumnType(
-        result
-      );
+      let columnType = result.Device.ArchiveManager.getColumnType(result);
 
       let columnExists = await checkIfColumnExists(
         dbFilePath,
@@ -5194,9 +5191,7 @@ describe("CommInterface", () => {
       let columnName = element.Device.ArchiveManager.getColumnNameById(
         calculationElementId
       );
-      let columnType = element.Device.ArchiveManager.getColumnType(
-        element
-      );
+      let columnType = element.Device.ArchiveManager.getColumnType(element);
 
       let columnExists = await checkIfColumnExists(
         filePath,

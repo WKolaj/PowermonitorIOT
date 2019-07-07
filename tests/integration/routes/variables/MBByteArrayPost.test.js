@@ -139,7 +139,7 @@ describe("variables route", () => {
       variableBody = {
         type: "mbByteArray",
         name: "varialeTestName",
-        timeSample: 1,
+        sampleTime: 1,
         value: [0, 1, 0, 1],
         length: 2,
         unit: "A",
@@ -148,7 +148,7 @@ describe("variables route", () => {
         fCode: 3,
         getSingleFCode: 3,
         setSingleFCode: 16,
-        archiveTimeSample: 5
+        archiveSampleTime: 5
       };
     });
 
@@ -204,7 +204,7 @@ describe("variables route", () => {
       let variablePayload = {
         type: variable.Type,
         name: variable.Name,
-        timeSample: variable.TimeSample,
+        sampleTime: variable.SampleTime,
         value: variable.Value,
         unit: variable.Unit,
         archived: variable.Archived,
@@ -213,7 +213,7 @@ describe("variables route", () => {
         getSingleFCode: variable.GetSingleFCode,
         setSingleFCode: variable.SetSingleFCode,
         length: variable.Length,
-        archiveTimeSample: variable.ArchiveTimeSample
+        archiveSampleTime: variable.ArchiveSampleTime
       };
 
       expect(variablePayload).toEqual(variableBody);
@@ -292,20 +292,20 @@ describe("variables route", () => {
       expect(variablesBefore).toEqual(variablesAfter);
     });
 
-    it("should set timeSample to default value if it is not defined in payload", async () => {
-      variableBody.timeSample = undefined;
+    it("should set sampleTime to default value if it is not defined in payload", async () => {
+      variableBody.sampleTime = undefined;
 
       let result = await exec();
 
-      expect(result.body.timeSample).toEqual(1);
+      expect(result.body.sampleTime).toEqual(1);
     });
 
-    it("should set archiveTimeSample to default value if it is not defined in payload", async () => {
-      variableBody.archiveTimeSample = undefined;
+    it("should set archiveSampleTime to default value if it is not defined in payload", async () => {
+      variableBody.archiveSampleTime = undefined;
 
       let result = await exec();
 
-      expect(result.body.archiveTimeSample).toEqual(1);
+      expect(result.body.archiveSampleTime).toEqual(1);
     });
 
     it("should set value to default value if it is not defined in payload", async () => {
@@ -420,8 +420,8 @@ describe("variables route", () => {
       expect(variablesBefore).toEqual(variablesAfter);
     });
 
-    it("should return code 400 and do not create variable if timeSample is less than 1", async () => {
-      variableBody.timeSample = "ab";
+    it("should return code 400 and do not create variable if sampleTime is less than 1", async () => {
+      variableBody.sampleTime = "ab";
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
@@ -438,8 +438,8 @@ describe("variables route", () => {
       expect(variablesBefore).toEqual(variablesAfter);
     });
 
-    it("should return code 400 and do not create variable if timeSample is greater than 10000", async () => {
-      variableBody.timeSample = 10001;
+    it("should return code 400 and do not create variable if sampleTime is greater than 10000", async () => {
+      variableBody.sampleTime = 10001;
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
@@ -456,8 +456,8 @@ describe("variables route", () => {
       expect(variablesBefore).toEqual(variablesAfter);
     });
 
-    it("should return code 400 and do not create variable if archiveTimeSample is less than 1", async () => {
-      variableBody.archiveTimeSample = 0;
+    it("should return code 400 and do not create variable if archiveSampleTime is less than 1", async () => {
+      variableBody.archiveSampleTime = 0;
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
@@ -474,8 +474,8 @@ describe("variables route", () => {
       expect(variablesBefore).toEqual(variablesAfter);
     });
 
-    it("should return code 400 and do not create variable if archiveTimeSample is greater than 10000", async () => {
-      variableBody.archiveTimeSample = 10001;
+    it("should return code 400 and do not create variable if archiveSampleTime is greater than 10000", async () => {
+      variableBody.archiveSampleTime = 10001;
 
       let variablesBefore = await Project.CurrentProject.getAllVariables(
         deviceId
