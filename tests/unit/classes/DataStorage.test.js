@@ -483,7 +483,7 @@ describe("DataStorage", () => {
     });
   });
 
-  describe("removeValues", () => {
+  describe("removeValue", () => {
     let dataStorage;
     let initialPayload;
     let insertTickId1;
@@ -527,7 +527,7 @@ describe("DataStorage", () => {
       await dataStorage.insertValues(insertTickId1, insertPayload1);
       await dataStorage.insertValues(insertTickId2, insertPayload2);
       await dataStorage.insertValues(insertTickId3, insertPayload3);
-      await dataStorage.removeValues(removeTickId);
+      await dataStorage.removeValue(removeTickId);
     };
 
     it("should remove variables of given id from database", async () => {
@@ -597,6 +597,371 @@ describe("DataStorage", () => {
       expect(data[0]).toEqual(expectedData1);
       expect(data[1]).toEqual(expectedData2);
       expect(data[2]).toEqual(expectedData3);
+    });
+  });
+
+  describe("removeValues", () => {
+    let dataStorage;
+    let initialPayload;
+    let insertTickId1;
+    let insertPayload1;
+    let insertTickId2;
+    let insertPayload2;
+    let insertTickId3;
+    let insertPayload3;
+    let removeTickIds;
+
+    beforeEach(() => {
+      initialPayload = {
+        filePath: path.join(dataStorageDirectory, "testFile.db"),
+        bufferSize: 20,
+        dataPointsId: ["dp1", "dp2", "dp3"]
+      };
+      insertTickId1 = 1000;
+      insertPayload1 = {
+        dp1: 1234,
+        dp2: 123.32,
+        dp3: 982
+      };
+      insertTickId2 = 2000;
+      insertPayload2 = {
+        dp1: 2234,
+        dp2: 2123.32,
+        dp3: 2982
+      };
+      insertTickId3 = 3000;
+      insertPayload3 = {
+        dp1: 31234,
+        dp2: 3123.32,
+        dp3: 3982
+      };
+      removeTickIds = [1000, 2000];
+    });
+
+    let exec = async () => {
+      dataStorage = new DataStorage();
+      await dataStorage.init(initialPayload);
+      await dataStorage.insertValues(insertTickId1, insertPayload1);
+      await dataStorage.insertValues(insertTickId2, insertPayload2);
+      await dataStorage.insertValues(insertTickId3, insertPayload3);
+      await dataStorage.removeValues(removeTickIds);
+    };
+
+    it("should remove variables of given id from database", async () => {
+      await exec();
+
+      let data = await readAllDataFromTable(initialPayload.filePath, "data");
+
+      expect(data.length).toEqual(1);
+
+      let expectedData3 = {
+        date: insertTickId3,
+        [DataStorage.getColumnName("dp1")]: insertPayload3["dp1"],
+        [DataStorage.getColumnName("dp2")]: insertPayload3["dp2"],
+        [DataStorage.getColumnName("dp3")]: insertPayload3["dp3"]
+      };
+
+      expect(data[0]).toEqual(expectedData3);
+    });
+
+    it("should remove all variables if all variables are given", async () => {
+      removeTickIds = [1000, 2000, 3000];
+      await exec();
+
+      let data = await readAllDataFromTable(initialPayload.filePath, "data");
+
+      expect(data.length).toEqual(0);
+    });
+
+    it("should not remove any variables if array object is given", async () => {
+      removeTickIds = [];
+      await exec();
+
+      let data = await readAllDataFromTable(initialPayload.filePath, "data");
+
+      expect(data.length).toEqual(3);
+
+      let expectedData1 = {
+        date: insertTickId1,
+        [DataStorage.getColumnName("dp1")]: insertPayload1["dp1"],
+        [DataStorage.getColumnName("dp2")]: insertPayload1["dp2"],
+        [DataStorage.getColumnName("dp3")]: insertPayload1["dp3"]
+      };
+
+      let expectedData2 = {
+        date: insertTickId2,
+        [DataStorage.getColumnName("dp1")]: insertPayload2["dp1"],
+        [DataStorage.getColumnName("dp2")]: insertPayload2["dp2"],
+        [DataStorage.getColumnName("dp3")]: insertPayload2["dp3"]
+      };
+
+      let expectedData3 = {
+        date: insertTickId3,
+        [DataStorage.getColumnName("dp1")]: insertPayload3["dp1"],
+        [DataStorage.getColumnName("dp2")]: insertPayload3["dp2"],
+        [DataStorage.getColumnName("dp3")]: insertPayload3["dp3"]
+      };
+
+      expect(data[0]).toEqual(expectedData1);
+      expect(data[1]).toEqual(expectedData2);
+      expect(data[2]).toEqual(expectedData3);
+    });
+
+    it("should not throw but not remove variables if there is no given tickIds in database", async () => {
+      removeTickIds = [7000, 8000, 9000];
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(1);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      let data = await readAllDataFromTable(initialPayload.filePath, "data");
+
+      expect(data.length).toEqual(3);
+
+      let expectedData1 = {
+        date: insertTickId1,
+        [DataStorage.getColumnName("dp1")]: insertPayload1["dp1"],
+        [DataStorage.getColumnName("dp2")]: insertPayload1["dp2"],
+        [DataStorage.getColumnName("dp3")]: insertPayload1["dp3"]
+      };
+
+      let expectedData2 = {
+        date: insertTickId2,
+        [DataStorage.getColumnName("dp1")]: insertPayload2["dp1"],
+        [DataStorage.getColumnName("dp2")]: insertPayload2["dp2"],
+        [DataStorage.getColumnName("dp3")]: insertPayload2["dp3"]
+      };
+
+      let expectedData3 = {
+        date: insertTickId3,
+        [DataStorage.getColumnName("dp1")]: insertPayload3["dp1"],
+        [DataStorage.getColumnName("dp2")]: insertPayload3["dp2"],
+        [DataStorage.getColumnName("dp3")]: insertPayload3["dp3"]
+      };
+
+      expect(data[0]).toEqual(expectedData1);
+      expect(data[1]).toEqual(expectedData2);
+      expect(data[2]).toEqual(expectedData3);
+    });
+  });
+
+  describe("clear", () => {
+    let dataStorage;
+    let initialPayload;
+    let insertTickId1;
+    let insertPayload1;
+    let insertTickId2;
+    let insertPayload2;
+    let insertTickId3;
+    let insertPayload3;
+
+    beforeEach(() => {
+      initialPayload = {
+        filePath: path.join(dataStorageDirectory, "testFile.db"),
+        bufferSize: 20,
+        dataPointsId: ["dp1", "dp2", "dp3"]
+      };
+      insertTickId1 = 1000;
+      insertPayload1 = {
+        dp1: 1234,
+        dp2: 123.32,
+        dp3: 982
+      };
+      insertTickId2 = 2000;
+      insertPayload2 = {
+        dp1: 2234,
+        dp2: 2123.32,
+        dp3: 2982
+      };
+      insertTickId3 = 3000;
+      insertPayload3 = {
+        dp1: 31234,
+        dp2: 3123.32,
+        dp3: 3982
+      };
+    });
+
+    let exec = async () => {
+      dataStorage = new DataStorage();
+      await dataStorage.init(initialPayload);
+      await dataStorage.insertValues(insertTickId1, insertPayload1);
+      await dataStorage.insertValues(insertTickId2, insertPayload2);
+      await dataStorage.insertValues(insertTickId3, insertPayload3);
+      await dataStorage.clear();
+    };
+
+    it("should remove all variables in database", async () => {
+      await exec();
+
+      let data = await readAllDataFromTable(initialPayload.filePath, "data");
+
+      expect(data.length).toEqual(0);
+    });
+  });
+
+  describe("getXData", () => {
+    let dataStorage;
+    let initialPayload;
+    let insertTickId1;
+    let insertPayload1;
+    let insertTickId2;
+    let insertPayload2;
+    let insertTickId3;
+    let insertPayload3;
+    let insertTickId4;
+    let insertPayload4;
+    let insertTickId5;
+    let insertPayload5;
+    let xData;
+
+    beforeEach(() => {
+      initialPayload = {
+        filePath: path.join(dataStorageDirectory, "testFile.db"),
+        bufferSize: 20,
+        dataPointsId: ["dp1", "dp2", "dp3", "dp4", "dp5"]
+      };
+      insertTickId1 = 1000;
+      insertPayload1 = {
+        dp1: 1234,
+        dp2: 123.32,
+        dp3: 982,
+        dp4: 765,
+        dp5: 654
+      };
+      insertTickId2 = 2000;
+      insertPayload2 = {
+        dp1: 2234,
+        dp2: 2123.32,
+        dp3: 2982,
+        dp4: 2765,
+        dp5: 2654
+      };
+      insertTickId3 = 3000;
+      insertPayload3 = {
+        dp1: 31234,
+        dp2: 3123.32,
+        dp3: 3982,
+        dp4: 3765,
+        dp5: 3654
+      };
+      insertTickId4 = 4000;
+      insertPayload4 = {
+        dp1: 4234,
+        dp2: 4123.32,
+        dp3: 4982,
+        dp4: 4765,
+        dp5: 4654
+      };
+      insertTickId5 = 5000;
+      insertPayload5 = {
+        dp1: 51234,
+        dp2: 5123.32,
+        dp3: 5982,
+        dp4: 5765,
+        dp5: 5654
+      };
+      xData = 3;
+    });
+
+    let exec = async () => {
+      dataStorage = new DataStorage();
+      await dataStorage.init(initialPayload);
+      await dataStorage.insertValues(insertTickId1, insertPayload1);
+      await dataStorage.insertValues(insertTickId2, insertPayload2);
+      await dataStorage.insertValues(insertTickId3, insertPayload3);
+      await dataStorage.insertValues(insertTickId4, insertPayload4);
+      await dataStorage.insertValues(insertTickId5, insertPayload5);
+      return dataStorage.getXData(xData);
+    };
+
+    it("should return x data from database", async () => {
+      let result = await exec();
+
+      let expectedResult = {
+        [insertTickId5]: {
+          dp1: insertPayload5["dp1"],
+          dp2: insertPayload5["dp2"],
+          dp3: insertPayload5["dp3"],
+          dp4: insertPayload5["dp4"],
+          dp5: insertPayload5["dp5"]
+        },
+        [insertTickId4]: {
+          dp1: insertPayload4["dp1"],
+          dp2: insertPayload4["dp2"],
+          dp3: insertPayload4["dp3"],
+          dp4: insertPayload4["dp4"],
+          dp5: insertPayload4["dp5"]
+        },
+        [insertTickId3]: {
+          dp1: insertPayload3["dp1"],
+          dp2: insertPayload3["dp2"],
+          dp3: insertPayload3["dp3"],
+          dp4: insertPayload3["dp4"],
+          dp5: insertPayload3["dp5"]
+        }
+      };
+
+      expect(result).toEqual(expectedResult);
+    });
+
+    it("should return no data from if xData is 0", async () => {
+      xData = 0;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should return all data from database if x is greater than rows count", async () => {
+      xData = 10;
+      let result = await exec();
+
+      let expectedResult = {
+        [insertTickId5]: {
+          dp1: insertPayload5["dp1"],
+          dp2: insertPayload5["dp2"],
+          dp3: insertPayload5["dp3"],
+          dp4: insertPayload5["dp4"],
+          dp5: insertPayload5["dp5"]
+        },
+        [insertTickId4]: {
+          dp1: insertPayload4["dp1"],
+          dp2: insertPayload4["dp2"],
+          dp3: insertPayload4["dp3"],
+          dp4: insertPayload4["dp4"],
+          dp5: insertPayload4["dp5"]
+        },
+        [insertTickId3]: {
+          dp1: insertPayload3["dp1"],
+          dp2: insertPayload3["dp2"],
+          dp3: insertPayload3["dp3"],
+          dp4: insertPayload3["dp4"],
+          dp5: insertPayload3["dp5"]
+        },
+        [insertTickId2]: {
+          dp1: insertPayload2["dp1"],
+          dp2: insertPayload2["dp2"],
+          dp3: insertPayload2["dp3"],
+          dp4: insertPayload2["dp4"],
+          dp5: insertPayload2["dp5"]
+        },
+        [insertTickId1]: {
+          dp1: insertPayload1["dp1"],
+          dp2: insertPayload1["dp2"],
+          dp3: insertPayload1["dp3"],
+          dp4: insertPayload1["dp4"],
+          dp5: insertPayload1["dp5"]
+        }
+      };
+
+      expect(result).toEqual(expectedResult);
     });
   });
 });

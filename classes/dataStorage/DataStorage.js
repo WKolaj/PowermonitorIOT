@@ -282,6 +282,20 @@ class DataStorage {
   }
 
   /**
+   * @description Method for removing values from database
+   * @param {Array} tickIds tickIds to remove
+   */
+  _prepareRemoveQueryString(tickIds) {
+    let queryString = `DELETE FROM data WHERE date = ${tickIds[0]}`;
+
+    for (let i = 1; i < tickIds.length; i++) {
+      queryString += ` OR date = ${tickIds[i]}`;
+    }
+
+    return queryString;
+  }
+
+  /**
    * @description method for removing all data which number exceeds buffer size
    */
   async _removeOldData() {
@@ -289,7 +303,7 @@ class DataStorage {
 
     //Removing old values
     for (let i = 0; i < allTickIds.length - this.BufferSize; i++) {
-      await this.removeValues(allTickIds[i]);
+      await this.removeValue(allTickIds[i]);
     }
   }
 
@@ -339,10 +353,41 @@ class DataStorage {
    * @description Method for removing data from db
    * @param {number} tickId Tick id of operation
    */
-  async removeValues(tickId) {
+  async removeValue(tickId) {
+    return this.removeValues([tickId]);
+  }
+
+  /**
+   * @description Method for removing data from db
+   * @param {Array} tickIds Tick id of operation
+   */
+  async removeValues(tickIds) {
+    if (isObjectEmpty(tickIds) || !exists(tickIds)) return Promise.resolve();
+
     return new Promise((resolve, reject) => {
       try {
-        this.DB.run(`DELETE FROM data WHERE date = ${tickId}`, err => {
+        let queryString = this._prepareRemoveQueryString(tickIds);
+        this.DB.run(queryString, err => {
+          if (err) {
+            return reject(err);
+          }
+
+          return resolve(true);
+        });
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for removing all data from storage
+   */
+  async clear() {
+    return new Promise((resolve, reject) => {
+      try {
+        let queryString = "DELETE  FROM data";
+        this.DB.run(queryString, err => {
           if (err) {
             return reject(err);
           }
@@ -371,6 +416,34 @@ class DataStorage {
             return resolve({});
           }
         });
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for getting values from data storage
+   * @param {number} x max number of rows to gather
+   */
+  async getXData(x) {
+    if (x <= 0) return {};
+
+    return new Promise((resolve, reject) => {
+      try {
+        this.DB.all(
+          `SELECT * FROM data ORDER BY date DESC LIMIT ${x}`,
+          (err, rows) => {
+            if (err) {
+              return reject(err);
+            }
+            if (rows) {
+              return resolve(this._convertRowsToObject(rows));
+            } else {
+              return resolve({});
+            }
+          }
+        );
       } catch (err) {
         return reject(err);
       }
