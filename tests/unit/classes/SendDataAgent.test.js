@@ -1059,5 +1059,199 @@ describe("SendDataAgent", () => {
 
       expect(restData).toEqual(expectedRestData);
     });
+
+    it("should limit values to send to the number of sendDataLimit", async () => {
+      initialPayload.sendDataLimit = 5;
+      initialPayload.bufferSize = 10;
+
+      sendDataMockFn = jest.fn(async data => {
+        throw new Error("test error");
+      });
+
+      await exec();
+
+      //Only last 5 should be stored
+      for (let i = 2000; i <= 10000; i += 1000) {
+        await sendDataAgent.refresh(i, dataPayload);
+      }
+
+      let newSendDataMethod = jest.fn();
+
+      sendDataAgent._sendData = newSendDataMethod;
+
+      await sendDataAgent.refresh(11000, {});
+
+      expect(newSendDataMethod).toHaveBeenCalledTimes(3);
+
+      let expectData1 = {
+        [6000]: {
+          dp1: 101,
+          dp2: 102,
+          dp3: 103
+        },
+        [7000]: {
+          dp1: 101,
+          dp2: 102,
+          dp3: 103
+        },
+        [8000]: {
+          dp1: 101,
+          dp2: 102,
+          dp3: 103
+        },
+        [9000]: {
+          dp1: 101,
+          dp2: 102,
+          dp3: 103
+        },
+        [10000]: {
+          dp1: 101,
+          dp2: 102,
+          dp3: 103
+        }
+      };
+
+      expect(newSendDataMethod.mock.calls[0][0]).toEqual(expectData1);
+
+      let expectData2 = {
+        [6000]: {
+          dp4: 104,
+          dp5: 105
+        },
+        [7000]: {
+          dp4: 104,
+          dp5: 105
+        },
+        [8000]: {
+          dp4: 104,
+          dp5: 105
+        },
+        [9000]: {
+          dp4: 104,
+          dp5: 105
+        },
+        [10000]: {
+          dp4: 104,
+          dp5: 105
+        }
+      };
+
+      expect(newSendDataMethod.mock.calls[1][0]).toEqual(expectData2);
+
+      let expectData3 = {
+        [6000]: {
+          dp6: 106,
+          dp7: 107,
+          dp8: 108
+        },
+        [7000]: {
+          dp6: 106,
+          dp7: 107,
+          dp8: 108
+        },
+        [8000]: {
+          dp6: 106,
+          dp7: 107,
+          dp8: 108
+        },
+        [9000]: {
+          dp6: 106,
+          dp7: 107,
+          dp8: 108
+        },
+        [10000]: {
+          dp6: 106,
+          dp7: 107,
+          dp8: 108
+        }
+      };
+
+      expect(newSendDataMethod.mock.calls[2][0]).toEqual(expectData3);
+
+      //It should remove part of data which was sent
+
+      let restData1 = await sendDataAgent._getBufferedData();
+
+      let expectedRestData = {
+        [1]: {
+          [1000]: {
+            dp1: 101,
+            dp2: 102,
+            dp3: 103
+          },
+          [2000]: {
+            dp1: 101,
+            dp2: 102,
+            dp3: 103
+          },
+          [3000]: {
+            dp1: 101,
+            dp2: 102,
+            dp3: 103
+          },
+          [4000]: {
+            dp1: 101,
+            dp2: 102,
+            dp3: 103
+          },
+          [5000]: {
+            dp1: 101,
+            dp2: 102,
+            dp3: 103
+          }
+        },
+        [5]: {
+          [1000]: {
+            dp4: 104,
+            dp5: 105
+          },
+          [2000]: {
+            dp4: 104,
+            dp5: 105
+          },
+          [3000]: {
+            dp4: 104,
+            dp5: 105
+          },
+          [4000]: {
+            dp4: 104,
+            dp5: 105
+          },
+          [5000]: {
+            dp4: 104,
+            dp5: 105
+          }
+        },
+        [10]: {
+          [1000]: {
+            dp6: 106,
+            dp7: 107,
+            dp8: 108
+          },
+          [2000]: {
+            dp6: 106,
+            dp7: 107,
+            dp8: 108
+          },
+          [3000]: {
+            dp6: 106,
+            dp7: 107,
+            dp8: 108
+          },
+          [4000]: {
+            dp6: 106,
+            dp7: 107,
+            dp8: 108
+          },
+          [5000]: {
+            dp6: 106,
+            dp7: 107,
+            dp8: 108
+          }
+        }
+      };
+
+      expect(restData1).toEqual(expectedRestData);
+    });
   });
 });
