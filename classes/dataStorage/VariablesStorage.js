@@ -64,7 +64,18 @@ class VariablesStorage {
    * @param {*} variableId id of variable
    */
   async addVariable(timeSample, variableId) {
-    if (!exists(this.SampleTimeGroups[variableId]))
+    //Throwing if variable is already assigned for different timeSampleGroup
+    if (
+      exists(this.Variables[variableId]) &&
+      this.Variables[variableId] !== timeSample
+    )
+      throw new Error(
+        `Variable of id ${variableId} already exists for diffent timeSampleGroup: ${
+          this.Variables[variableId]
+        }`
+      );
+
+    if (!exists(this.SampleTimeGroups[timeSample]))
       await this.createDataStorage(timeSample);
 
     let dataStorage = this.SampleTimeGroups[timeSample];

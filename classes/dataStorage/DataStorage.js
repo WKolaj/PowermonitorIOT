@@ -299,7 +299,9 @@ class DataStorage {
    * @description method for removing all data which number exceeds buffer size
    */
   async _removeOldData() {
-    let allTickIds = Object.keys(await this.getData()).sort();
+    let allTickIds = Object.keys(await this.getData())
+      .map(key => parseInt(key))
+      .sort((a, b) => a - b);
 
     //Removing old values
     for (let i = 0; i < allTickIds.length - this.BufferSize; i++) {
