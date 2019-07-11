@@ -1,4 +1,5 @@
-const TestDataAgent = require("./classes/device/SpecialDevices/SendAgent/TestDataAgent");
+const MSDataAgent = require("./classes/device/SpecialDevices/SendAgent/MSDataAgent");
+const Sampler = require("./classes/sampler/Sampler");
 var stdin = process.stdin;
 
 // without this, we would only get streams once enter is pressed
@@ -11,49 +12,41 @@ stdin.resume();
 // i don't want binary, do you?
 stdin.setEncoding("utf8");
 
-let dataAgent = new TestDataAgent();
+let msAgent = new MSDataAgent();
+
+let boardingKey = {
+  content: {
+    baseUrl: "https://southgate.eu1.mindsphere.io",
+    iat:
+      "eyJraWQiOiJrZXktaWQtMSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJpc3MiOiJTQ0kiLCJzdWIiOiIzMGIzZGUzYzhmMTY0NzUzYjMwMTVjZjI1ZWQ4ZDJiZiIsImF1ZCI6IkFJQU0iLCJpYXQiOjE1NjI4MjE2MTcsIm5iZiI6MTU2MjgyMTYxNywiZXhwIjoxNTYzNDI2NDE3LCJqdGkiOiJmYWM5NDJjMi1iMWQ2LTQwMDctYmU0Ny1kZjU2MDBlNzY0ZTAiLCJzY29wZSI6IklBVCIsInRlbiI6ImludWNsZXVzIiwidGVuX2N0eCI6Im1haW4tdGVuYW50IiwiY2xpZW50X2NyZWRlbnRpYWxzX3Byb2ZpbGUiOlsiU0hBUkVEX1NFQ1JFVCJdLCJzY2hlbWFzIjpbInVybjpzaWVtZW5zOm1pbmRzcGhlcmU6djEiXX0.prDJMiZKt4CKUCKOaqo4rQ0TsQ7bLgKJcDPnVMsGmQKRuPv2kzmbdS25LkyY0M0giiqxa-WzzBpYt6DEZB_3vF9ui1rSKYxa6obsuvyNLyDyZBpdVAeJ_jkm2ppZi8Ajkf428U5d6wFNbWMcF-cS0YimqcTOmVQMTa3Iln4hsJbzdkhtn7AkSGaP4Zr3uMshjnWaddhixZM2cJe_lP-FvOzrLNUSNM9A9YRmR0kmBUO5DThVZ0elM43XokLPpfvVnki-ZRBneOtraAmvmNSStC3knGEIptDXrveB04l76dOPwPPCgqxQtx07ZqZGu0F9OfNo3gKLZnEZQwbuJubAOQ",
+    clientCredentialProfile: ["SHARED_SECRET"],
+    clientId: "30b3de3c8f164753b3015cf25ed8d2bf",
+    tenant: "inucleus"
+  },
+  expiration: "2019-07-18T05:06:57.000Z"
+};
+
+let payload = {
+  dirPath: "_projTest/msAgent",
+  boardingKey
+};
 
 let exec = async () => {
-  let payload = {
-    dirPath: "_projTest/123456"
-  };
+  await msAgent.init(payload);
 
-  await dataAgent.init(payload);
-  await dataAgent.initSendingMechanism();
+  await msAgent.addVariable(1, "dp1", "1562821701369");
+  await msAgent.addVariable(1, "dp2", "1562821687615");
+  await msAgent.addVariable(1, "dp3", "1562821666314");
 
-  let variable1 = "dp1";
-  let variable2 = "dp2";
-  let variable3 = "dp3";
-  let variable4 = "dp4";
-  let variable5 = "dp5";
-  let variable6 = "dp6";
-  let variable7 = "dp7";
-  let variable8 = "dp8";
-  let variable9 = "dp9";
-
-  await dataAgent.addVariable(1000, variable1);
-  await dataAgent.addVariable(1000, variable2);
-  await dataAgent.addVariable(1000, variable3);
-  await dataAgent.addVariable(2000, variable4);
-  await dataAgent.addVariable(2000, variable5);
-  await dataAgent.addVariable(2000, variable6);
-  await dataAgent.addVariable(3000, variable7);
-  await dataAgent.addVariable(3000, variable8);
-  await dataAgent.addVariable(3000, variable9);
+  await msAgent.initSendingMechanism();
 
   setInterval(() => {
     let dataToSend = {
       dp1: Date.now() / 1000,
       dp2: Date.now() / 2000,
-      dp3: Date.now() / 3000,
-      dp4: Date.now() / 4000,
-      dp5: Date.now() / 5000,
-      dp6: Date.now() / 6000,
-      dp7: Date.now() / 7000,
-      dp8: Date.now() / 8000,
-      dp9: Date.now() / 9000
+      dp3: Date.now() / 3000
     };
-    dataAgent.refresh(Date.now(), dataToSend);
+    msAgent.refresh(Sampler.convertDateToTickNumber(Date.now()), dataToSend);
   }, 1000);
 };
 

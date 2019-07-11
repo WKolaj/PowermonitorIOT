@@ -372,7 +372,7 @@ class Device {
       try {
         await this.archiveData(tickNumber, finalResult);
       } catch (err) {
-        logger.error(err);
+        logger.error(err.message, err);
       }
     }
   }
@@ -408,7 +408,7 @@ class Device {
             payloadToAppend[calculationElement.Id] = calculationElement;
         }
       } catch (err) {
-        logger.error(err);
+        logger.error(err.message, err);
       }
     }
 

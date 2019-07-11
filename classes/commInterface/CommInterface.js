@@ -51,7 +51,7 @@ class CommInterface {
           try {
             await this.createNewDevice(devicePayload);
           } catch (err) {
-            logger.error(err);
+            logger.error(err.message, err);
           }
         }
 
@@ -64,7 +64,7 @@ class CommInterface {
           try {
             await this.createNewDevice(devicePayload);
           } catch (err) {
-            logger.error(err);
+            logger.error(err.message, err);
           }
         }
       }

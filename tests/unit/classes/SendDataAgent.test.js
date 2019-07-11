@@ -131,6 +131,22 @@ describe("SendDataAgent", () => {
       expect(sendDataAgent.BufferSize).toEqual(100);
     });
 
+    it("should set readyToSend to true if it is defined as true in payload", async () => {
+      initialPayload.readyToSend = true;
+
+      await exec();
+
+      expect(sendDataAgent.ReadyToSend).toEqual(true);
+    });
+
+    it("should set readyToSend to false if it is not defined in payload", async () => {
+      initialPayload.readyToSend = undefined;
+
+      await exec();
+
+      expect(sendDataAgent.ReadyToSend).toEqual(false);
+    });
+
     it("should set sendDataLimit to 50 if there is no sendDataLimit is defined", async () => {
       initialPayload.sendDataLimit = undefined;
 
@@ -166,6 +182,7 @@ describe("SendDataAgent", () => {
       initialPayload = {
         bufferSize: 15,
         sendDataLimit: 20,
+        readyToSend: false,
         dirPath: sendDataAgentDirectory,
         sampleTimeGroups: [
           {
@@ -198,6 +215,7 @@ describe("SendDataAgent", () => {
       let expectedPayload = {
         bufferSize: 15,
         sendDataLimit: 20,
+        readyToSend: false,
         dirPath: sendDataAgentDirectory,
         sampleTimeGroups: [
           {
@@ -229,6 +247,7 @@ describe("SendDataAgent", () => {
       let expectedPayload = {
         bufferSize: 15,
         sendDataLimit: 20,
+        readyToSend: false,
         dirPath: sendDataAgentDirectory,
         sampleTimeGroups: [
           {
@@ -295,6 +314,7 @@ describe("SendDataAgent", () => {
       initialPayload = {
         bufferSize: 15,
         sendDataLimit: 20,
+        readyToSend: false,
         dirPath: sendDataAgentDirectory,
         sampleTimeGroups: [
           {
@@ -327,6 +347,7 @@ describe("SendDataAgent", () => {
       let expectedPayload = {
         bufferSize: 15,
         sendDataLimit: 20,
+        readyToSend: false,
         dirPath: sendDataAgentDirectory,
         sampleTimeGroups: [
           {

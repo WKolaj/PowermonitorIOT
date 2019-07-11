@@ -1,6 +1,9 @@
 # Test file
 test.js
 
+# Mindsphere dir
+.mc
+
 # Project files
 project
 project/project.json

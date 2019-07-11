@@ -159,7 +159,7 @@ class SpecialDevice extends Device {
     try {
       await this._refreshSpecialDevice(tickNumber);
     } catch (err) {
-      logger.error(err);
+      logger.error(err.message, err);
     }
   }
 
@@ -191,7 +191,7 @@ class SpecialDevice extends Device {
             payloadToAppend[variable.Id] = variable;
         }
       } catch (err) {
-        logger.error(err);
+        logger.error(err.message, err);
       }
     }
 

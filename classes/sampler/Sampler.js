@@ -246,6 +246,14 @@ class Sampler {
   }
 
   /**
+   * @description Converting tick number to date
+   * @param {number} tickNumber tick to be converted
+   */
+  static convertTickNumberToDate(tickNumber) {
+    return new Date(tickNumber * 1000);
+  }
+
+  /**
    * @description Converting time sample to TickId
    * @param {number} sampleTime Sample time
    */

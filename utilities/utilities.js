@@ -518,3 +518,7 @@ module.exports.getIpAdress = async function() {
 module.exports.exists = function(object) {
   return object !== null && object !== undefined;
 };
+
+module.exports.existsAndIsNotEmpty = function(object) {
+  return module.exports.exists(object) && !module.exports.isObjectEmpty(object);
+};

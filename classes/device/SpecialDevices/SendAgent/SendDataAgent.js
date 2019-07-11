@@ -47,12 +47,12 @@ class SendDataAgent {
     try {
       await this._saveDataToBuffer(tickId, data);
     } catch (err) {
-      logger.error(err);
+      logger.error(err.message, err);
     }
     try {
       await this._sendBufferedData();
     } catch (err) {
-      logger.error(err);
+      logger.error(err.message, err);
     }
   }
 
@@ -114,6 +114,7 @@ class SendDataAgent {
   async _initProperties(payload) {
     if (exists(payload.sendDataLimit))
       this._sendDataLimit = payload.sendDataLimit;
+    if (exists(payload.readyToSend)) this._readyToSend = payload.readyToSend;
   }
 
   async _initVariableStorage(payload) {
@@ -142,7 +143,8 @@ class SendDataAgent {
   _generatePayload() {
     return {
       ...this.ValueStorage.Payload,
-      sendDataLimit: 20
+      sendDataLimit: 20,
+      readyToSend: this.ReadyToSend
     };
   }
 
