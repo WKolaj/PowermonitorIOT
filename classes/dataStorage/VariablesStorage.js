@@ -18,6 +18,15 @@ class VariablesStorage {
     this._bufferSize = 10;
   }
 
+  async setBufferSize(newBufferSize) {
+    let allStorages = Object.values(this.SampleTimeGroups);
+    for (let storage of allStorages) {
+      await storage.setBufferSize(newBufferSize);
+    }
+
+    this._bufferSize = newBufferSize;
+  }
+
   get DirectoryPath() {
     return this._directoryPath;
   }

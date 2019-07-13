@@ -3,6 +3,7 @@ const Sampler = require("../sampler/Sampler");
 const logger = require("../../logger/logger");
 const MBDevice = require("../device/Modbus/MBDevice");
 const SpecialDevice = require("../device/SpecialDevices/SpecialDevice");
+const MindConnectDevice = require("../device/SpecialDevices/MindConnectDevice/MindConnectDevice");
 
 const PAC3200TCP = require("../device/Modbus/Meters/PAC3200TCP");
 const PAC2200TCP = require("../device/Modbus/Meters/PAC2200TCP");
@@ -317,6 +318,9 @@ class CommInterface {
       case "specialDevice": {
         return this._createSpecialDevice(payload);
       }
+      case "msAgent": {
+        return this._createMSAgent(payload);
+      }
       default: {
         return Promise.reject(
           new Error(`Given device type is not recognized: ${payload.type}`)
@@ -409,6 +413,25 @@ class CommInterface {
     return new Promise(async (resolve, reject) => {
       try {
         let newDevice = new SpecialDevice();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for creating MSAgent based on payload
+   * @param {object} payload
+   */
+  async _createMSAgent(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new MindConnectDevice();
         await newDevice.init(payload);
         this.Devices[newDevice.Id] = newDevice;
         this.Sampler.addDevice(newDevice);

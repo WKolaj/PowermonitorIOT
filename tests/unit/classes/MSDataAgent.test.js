@@ -4,6 +4,7 @@ const config = require("config");
 const path = require("path");
 const Sampler = require("../../../classes/sampler/Sampler");
 const { exists, isObjectEmpty } = require("../../../utilities/utilities");
+const DataStorage = require("../../../classes/dataStorage/DataStorage");
 
 let msDataAgentDirectory = "_projTest";
 let {
@@ -424,7 +425,7 @@ describe("MSDataAgent", () => {
       expect(msDataAgent.Payload).toEqual(expectedPayload);
     });
 
-    it("should not throw but not add new variable to DataAgent if varaible already exists", async () => {
+    it("should throw and not add new variable to DataAgent if varaible already exists", async () => {
       sampleTime = 10;
       variableId = "dp7";
 
@@ -437,7 +438,7 @@ describe("MSDataAgent", () => {
             return reject(err);
           }
         })
-      ).resolves.toBeDefined();
+      ).rejects.toBeDefined();
 
       expect(msDataAgent.Payload).toEqual(initialPayload);
     });
@@ -1542,7 +1543,7 @@ describe("MSDataAgent", () => {
 
       expect(restData).toEqual(expectedRestData);
 
-      await msDataAgent.initSendingMechanism();
+      await msDataAgent.startCommunication();
 
       dataPayload = {
         dp1: 201,
@@ -2099,7 +2100,7 @@ describe("MSDataAgent", () => {
     });
   });
 
-  describe("_loadNewBoardingKey", () => {
+  describe("_setBoardingKey", () => {
     let initialPayload;
     let msDataAgent;
     let boardingKey;
@@ -2149,7 +2150,7 @@ describe("MSDataAgent", () => {
     let exec = async () => {
       msDataAgent = new MSDataAgent();
       await msDataAgent.init(initialPayload);
-      await msDataAgent._loadNewBoardingKey(boardingKey);
+      await msDataAgent._setBoardingKey(boardingKey);
     };
 
     it("should load new boarding key to agent", async () => {
@@ -2186,7 +2187,7 @@ describe("MSDataAgent", () => {
     });
   });
 
-  describe("initSendingMechanism", () => {
+  describe("startCommunication", () => {
     let initialPayload;
     let msDataAgent;
     let board;
@@ -2238,8 +2239,8 @@ describe("MSDataAgent", () => {
     let exec = async () => {
       msDataAgent = new MSDataAgent();
       await msDataAgent.init(initialPayload);
-      if (board) await msDataAgent.setBoardingKey(boardingKey);
-      await msDataAgent.initSendingMechanism();
+      if (board) await msDataAgent._setBoardingKey(boardingKey);
+      await msDataAgent.startCommunication();
     };
 
     it("should create new MindConnectAgent with boarding key", async () => {
@@ -2386,6 +2387,782 @@ describe("MSDataAgent", () => {
         boardingKey: null,
         readyToSend: false
       });
+    });
+  });
+
+  describe("_getVariablesFromPayload", () => {
+    let payload;
+
+    beforeEach(() => {
+      payload = {
+        sampleTimeGroups: [
+          {
+            sampleTime: 10,
+            variableIds: ["variableId1", "variableId2", "variableId3"]
+          },
+          {
+            sampleTime: 20,
+            variableIds: ["variableId4", "variableId5", "variableId6"]
+          },
+          {
+            sampleTime: 30,
+            variableIds: ["variableId7", "variableId8", "variableId9"]
+          }
+        ],
+        variableNames: {
+          variableId1: "variableName1",
+          variableId2: "variableName2",
+          variableId3: "variableName3",
+          variableId4: "variableName4",
+          variableId5: "variableName5",
+          variableId6: "variableName6",
+          variableId7: "variableName7",
+          variableId8: "variableName8",
+          variableId9: "variableName9"
+        }
+      };
+    });
+
+    let exec = () => {
+      return MSDataAgent._getVariablesFromPayload(payload);
+    };
+
+    it("should convert variables from sampleGroups and VariableNames to one collection", () => {
+      let result = exec();
+
+      let expectedPayload = {};
+
+      for (let group of payload.sampleTimeGroups) {
+        let sampleTime = group.sampleTime;
+
+        for (let variableId of group.variableIds) {
+          let variableName = payload.variableNames[variableId];
+
+          let variablePayload = {
+            variableId,
+            sampleTime,
+            variableName
+          };
+
+          expectedPayload[variableId] = variablePayload;
+        }
+      }
+
+      expect(result).toEqual(expectedPayload);
+    });
+
+    it("should throw if there is variable in sampleGroups and it does not exist in VariableNames", () => {
+      payload.sampleTimeGroups[0].variableIds.push("additionalVariableId");
+      expect(() => {
+        exec();
+      }).toThrow();
+    });
+
+    it("should throw if there is variable in VariableNames and it does not exist in sampleGroups", () => {
+      payload.variableNames["additionalVariableId"] = "additionalVariableName";
+      expect(() => {
+        exec();
+      }).toThrow();
+    });
+
+    it("should return empty object if there are no variables in sampleTimeGroups and in VariableNames", async () => {
+      payload.sampleTimeGroups = {};
+      payload.variableNames = {};
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should throw if sampleTimeGroups in payload is not defined", async () => {
+      delete payload.sampleTimeGroups;
+
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if variableNames in payload is not defined", async () => {
+      delete payload.variableNames;
+
+      expect(() => exec()).toThrow();
+    });
+
+    it("should throw if variableNames and sampleTimeGroups are payload is not defined", async () => {
+      delete payload.variableNames;
+      delete payload.sampleTimeGroups;
+
+      expect(() => exec()).toThrow();
+    });
+  });
+
+  describe("editWithPayload", () => {
+    let initialPayload;
+    let editPayload;
+    let msDataAgent;
+    let initialBoard;
+    let boardingKey;
+    let initialMindConnectAgent;
+
+    beforeEach(() => {
+      initialPayload = {
+        bufferSize: 15,
+        sendDataLimit: 20,
+        dirPath: msDataAgentDirectory,
+        variableNames: {
+          dp1: "dpId1",
+          dp2: "dpId2",
+          dp3: "dpId3",
+          dp4: "dpId4",
+          dp5: "dpId5",
+          dp6: "dpId6",
+          dp7: "dpId7",
+          dp8: "dpId8"
+        },
+        sampleTimeGroups: [
+          {
+            sampleTime: 1,
+            variableIds: ["dp1", "dp2", "dp3"]
+          },
+          {
+            sampleTime: 5,
+            variableIds: ["dp4", "dp5"]
+          },
+          {
+            sampleTime: 10,
+            variableIds: ["dp6", "dp7", "dp8"]
+          }
+        ]
+      };
+      boardingKey = {
+        content: {
+          baseUrl: "https://southgate.eu1.mindsphere.io",
+          iat: "testIatvalue",
+          clientCredentialProfile: ["SHARED_SECRET"],
+          clientId: "testClientId",
+          tenant: "testTenant"
+        },
+        expiration: "2019-07-18T05:06:57.000Z"
+      };
+      initialBoard = true;
+
+      editPayload = {
+        bufferSize: 20,
+        sendDataLimit: 25,
+        readyToSend: false,
+        boardingKey: {
+          content: {
+            baseUrl: "https://southgate.eu1.mindsphere.io",
+            iat: "testIatvalue2",
+            clientCredentialProfile: ["SHARED_SECRET"],
+            clientId: "testClientId2",
+            tenant: "testTenant2"
+          },
+          expiration: "2019-07-18T05:06:58.000Z"
+        },
+        variableNames: {
+          dp3: "dpId3",
+          dp4: "dpId4",
+          dp5: "dpId5",
+          dp6: "dpId6",
+          dp7: "dpId7",
+          dp8: "dpId8",
+          dp9: "dpId9",
+          dp10: "dpId10"
+        },
+        sampleTimeGroups: [
+          {
+            sampleTime: 1,
+            variableIds: ["dp3"]
+          },
+          {
+            sampleTime: 5,
+            variableIds: ["dp5"]
+          },
+          {
+            sampleTime: 10,
+            variableIds: ["dp6", "dp7", "dp4"]
+          },
+          {
+            sampleTime: 15,
+            variableIds: ["dp8", "dp9"]
+          },
+          {
+            sampleTime: 20,
+            variableIds: ["dp10"]
+          }
+        ]
+      };
+    });
+
+    let exec = async () => {
+      msDataAgent = new MSDataAgent();
+      await msDataAgent.init(initialPayload);
+      if (initialBoard) await msDataAgent._setBoardingKey(boardingKey);
+      initialMindConnectAgent = msDataAgent.MindConnectAgent;
+      return msDataAgent.editWithPayload(editPayload);
+    };
+
+    it("should return edited dataAgent", async () => {
+      result = await exec();
+
+      expect(result).toEqual(msDataAgent);
+    });
+
+    it("should edit dataAgent according to given payload", async () => {
+      result = await exec();
+
+      let expectedPayload = {
+        ...editPayload,
+        dirPath: initialPayload.dirPath
+      };
+
+      expect(result.Payload).toEqual(expectedPayload);
+    });
+
+    it("should create new MindConnectAgent, board it and getConfig if readyToSend was false and now is true", async () => {
+      initialPayload.readyToSend = false;
+      editPayload.readyToSend = true;
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).not.toEqual(initialMindConnectAgent);
+
+      expect(msDataAgent.MindConnectAgent.OnBoard).toHaveBeenCalledTimes(1);
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    it("should create new MindConnectAgent, board it and getConfig if readyToSend was true and now is true", async () => {
+      initialPayload.readyToSend = false;
+      editPayload.readyToSend = true;
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).not.toEqual(initialMindConnectAgent);
+
+      expect(msDataAgent.MindConnectAgent.OnBoard).toHaveBeenCalledTimes(1);
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).toHaveBeenCalledTimes(1);
+    });
+
+    it("should create new MindConnectAgent, but not board it and not getConfig if readyToSend was false and now is false", async () => {
+      initialPayload.readyToSend = false;
+      editPayload.readyToSend = false;
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).not.toEqual(initialMindConnectAgent);
+
+      expect(msDataAgent.MindConnectAgent.OnBoard).not.toHaveBeenCalled();
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).not.toHaveBeenCalled();
+    });
+
+    it("should create new MindConnectAgent, but not board it and not getConfig if readyToSend was true and now is false", async () => {
+      initialPayload.readyToSend = true;
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload.readyToSend = false;
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).not.toEqual(initialMindConnectAgent);
+
+      expect(msDataAgent.MindConnectAgent.OnBoard).not.toHaveBeenCalled();
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).not.toHaveBeenCalled();
+    });
+
+    it("should create new MindConnectAgent, but not board it and set readToSend to false - if only boarding key was passed", async () => {
+      initialPayload.readyToSend = true;
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = {
+        boardingKey: editPayload.boardingKey
+      };
+
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).not.toEqual(initialMindConnectAgent);
+
+      expect(msDataAgent.MindConnectAgent.OnBoard).not.toHaveBeenCalled();
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).not.toHaveBeenCalled();
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should create new MindConnectAgent,  board it and set readToSend to true - if only readyToSend was set with true value", async () => {
+      initialPayload.readyToSend = false;
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = true;
+
+      editPayload = {
+        readyToSend: true
+      };
+
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).not.toEqual(initialMindConnectAgent);
+
+      expect(msDataAgent.MindConnectAgent.OnBoard).toHaveBeenCalledTimes(1);
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).toHaveBeenCalledTimes(1);
+      expect(msDataAgent.ReadyToSend).toEqual(true);
+    });
+
+    it("should set readToSend to false - if it was set to true before", async () => {
+      initialPayload.readyToSend = true;
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = {
+        readyToSend: false
+      };
+
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).toEqual(initialMindConnectAgent);
+
+      //Called once - while init
+      expect(msDataAgent.MindConnectAgent.OnBoard).toHaveBeenCalledTimes(1);
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).toHaveBeenCalledTimes(1);
+
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should not create new MindConnectAgent, not board and not get config again - if given boarding key is the same", async () => {
+      initialPayload.readyToSend = true;
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = {
+        boardingKey: boardingKey
+      };
+
+      result = await exec();
+
+      expect(msDataAgent.MindConnectAgent).toBeDefined();
+      expect(msDataAgent.MindConnectAgent).toEqual(initialMindConnectAgent);
+
+      //Called once while initializing
+      expect(msDataAgent.MindConnectAgent.OnBoard).toHaveBeenCalledTimes(1);
+      expect(
+        msDataAgent.MindConnectAgent.GetDataSourceConfiguration
+      ).toHaveBeenCalledTimes(1);
+
+      expect(msDataAgent.ReadyToSend).toEqual(true);
+    });
+
+    it("should add new variable to sampleTimeGroup and set readyToSend to false if new variable is given in editPayload", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableToAdd = {
+        variableId: "newTestDp",
+        variableName: "newTestDpName"
+      };
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+      editPayload.sampleTimeGroups[0] = {
+        ...initialPayload.sampleTimeGroups[0]
+      };
+      editPayload.sampleTimeGroups[0].variableIds = [
+        ...initialPayload.sampleTimeGroups[0].variableIds,
+        variableToAdd.variableId
+      ];
+
+      editPayload.variableNames = {
+        ...initialPayload.variableNames,
+        [variableToAdd.variableId]: variableToAdd.variableName
+      };
+
+      await exec();
+
+      let expectedVariableNames = {
+        ...initialPayload.variableNames,
+        [variableToAdd.variableId]: variableToAdd.variableName
+      };
+
+      expect(msDataAgent.Payload.variableNames).toEqual(expectedVariableNames);
+
+      let expectedSampleTimeGroups = [...initialPayload.sampleTimeGroups];
+      expectedSampleTimeGroups[0].variableIds.push(variableToAdd.variableId);
+
+      expect(msDataAgent.Payload.sampleTimeGroups).toEqual(
+        expectedSampleTimeGroups
+      );
+
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should add new variable to new sampleTimeGroup and set readyToSend to false if new variable is given in editPayload with new sampleTimeGroup", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableToAdd = {
+        variableId: "newTestDp",
+        variableName: "newTestDpName",
+        sampleTime: 99
+      };
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+      editPayload.sampleTimeGroups.push({
+        sampleTime: variableToAdd.sampleTime,
+        variableIds: [variableToAdd.variableId]
+      });
+
+      editPayload.variableNames = {
+        ...initialPayload.variableNames,
+        [variableToAdd.variableId]: variableToAdd.variableName
+      };
+
+      await exec();
+
+      let expectedVariableNames = {
+        ...initialPayload.variableNames,
+        [variableToAdd.variableId]: variableToAdd.variableName
+      };
+
+      expect(msDataAgent.Payload.variableNames).toEqual(expectedVariableNames);
+
+      let expectedSampleTimeGroups = [
+        ...initialPayload.sampleTimeGroups,
+        {
+          sampleTime: variableToAdd.sampleTime,
+          variableIds: [variableToAdd.variableId]
+        }
+      ];
+
+      expect(msDataAgent.Payload.sampleTimeGroups).toEqual(
+        expectedSampleTimeGroups
+      );
+
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should not edit variables and throw if there is a varaible in newVariables but there is no such variable in sampleTimeGroups", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableToAdd = {
+        variableId: "newTestDp",
+        variableName: "newTestDpName"
+      };
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+      editPayload.sampleTimeGroups[0] = {
+        ...initialPayload.sampleTimeGroups[0]
+      };
+      editPayload.sampleTimeGroups[0].variableIds = [
+        ...initialPayload.sampleTimeGroups[0].variableIds,
+        variableToAdd.variableId
+      ];
+
+      //Not adding new variables to name
+      editPayload.variableNames = {
+        ...initialPayload.variableNames
+      };
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      //Ready to send has to be equal to false - first stopping communication than setting new variables what throws
+      expect(msDataAgent.Payload).toEqual({
+        ...initialPayload,
+        readyToSend: false
+      });
+    });
+
+    it("should not edit variables and throw if there is a varaible in sampleTimeGroups but there is no such variable in newVariables", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableToAdd = {
+        variableId: "newTestDp",
+        variableName: "newTestDpName"
+      };
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+
+      editPayload.variableNames = {
+        ...initialPayload.variableNames,
+        [variableToAdd.variableId]: variableToAdd.variableName
+      };
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      //Ready to send has to be equal to false - first stopping communication than setting new variables what throws
+      expect(msDataAgent.Payload).toEqual({
+        ...initialPayload,
+        readyToSend: false
+      });
+    });
+
+    it("should edit variable name if it is defined in VariableNames with different name", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableToChange = {
+        variableId: "dp4",
+        variableName: "newTestDpName"
+      };
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+
+      editPayload.variableNames = {
+        ...initialPayload.variableNames
+      };
+
+      editPayload.variableNames[variableToChange.variableId] =
+        variableToChange.variableName;
+
+      await exec();
+
+      let expectedVariableNames = {
+        ...initialPayload.variableNames,
+        [variableToChange.variableId]: variableToChange.variableName
+      };
+
+      expect(msDataAgent.Payload.variableNames).toEqual(expectedVariableNames);
+
+      let expectedSampleTimeGroups = [...initialPayload.sampleTimeGroups];
+
+      expect(msDataAgent.Payload.sampleTimeGroups).toEqual(
+        expectedSampleTimeGroups
+      );
+
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should reaasign variable to different sampleTime group if it is given in payload", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableIdToChange = "dp4";
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+      editPayload.sampleTimeGroups[0] = {
+        ...initialPayload.sampleTimeGroups[0]
+      };
+      editPayload.sampleTimeGroups[0].variableIds = [
+        ...initialPayload.sampleTimeGroups[0].variableIds
+      ];
+      editPayload.sampleTimeGroups[0].variableIds.push(variableIdToChange);
+      editPayload.sampleTimeGroups[1] = {
+        ...initialPayload.sampleTimeGroups[1]
+      };
+      editPayload.sampleTimeGroups[1].variableIds = editPayload.sampleTimeGroups[1].variableIds.filter(
+        element => element !== variableIdToChange
+      );
+
+      editPayload.variableNames = {
+        ...initialPayload.variableNames
+      };
+
+      await exec();
+
+      let expectedVariableNames = {
+        ...initialPayload.variableNames
+      };
+
+      expect(msDataAgent.Payload.variableNames).toEqual(expectedVariableNames);
+
+      let expectedSampleTimeGroups = [...initialPayload.sampleTimeGroups];
+      expectedSampleTimeGroups[0].variableIds.push(variableIdToChange);
+      expectedSampleTimeGroups[1].variableIds = expectedSampleTimeGroups[1].variableIds.filter(
+        element => element !== variableIdToChange
+      );
+
+      expect(msDataAgent.Payload.sampleTimeGroups).toEqual(
+        expectedSampleTimeGroups
+      );
+
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should delete variable from sampleTimeGroup and set readyToSend to false if variable is not given in editPayload", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableIdToDelete = "dp4";
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+      editPayload.sampleTimeGroups[1] = {
+        ...initialPayload.sampleTimeGroups[1]
+      };
+      editPayload.sampleTimeGroups[1].variableIds = editPayload.sampleTimeGroups[1].variableIds.filter(
+        element => element !== variableIdToDelete
+      );
+
+      editPayload.variableNames = { ...initialPayload.variableNames };
+      delete editPayload.variableNames[variableIdToDelete];
+
+      await exec();
+
+      let expectedVariableNames = { ...initialPayload.variableNames };
+      delete expectedVariableNames[variableIdToDelete];
+
+      expect(msDataAgent.Payload.variableNames).toEqual(expectedVariableNames);
+
+      let expectedSampleTimeGroups = [...initialPayload.sampleTimeGroups];
+      expectedSampleTimeGroups[1].variableIds = expectedSampleTimeGroups[1].variableIds.filter(
+        element => element !== variableIdToDelete
+      );
+
+      expect(msDataAgent.Payload.sampleTimeGroups).toEqual(
+        expectedSampleTimeGroups
+      );
+
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should delete variables from sampleTimeGroup and leave sampleTimeGroup empty", async () => {
+      initialPayload.readyToSend = true;
+
+      let variableIdToDelete1 = "dp4";
+      let variableIdToDelete2 = "dp5";
+
+      //boarding while init - not after
+      initialPayload.boardingKey = boardingKey;
+      initialBoard = false;
+
+      editPayload = { sampleTimeGroups: [...initialPayload.sampleTimeGroups] };
+      editPayload.sampleTimeGroups[1] = {
+        ...initialPayload.sampleTimeGroups[1]
+      };
+      editPayload.sampleTimeGroups[1].variableIds = editPayload.sampleTimeGroups[1].variableIds.filter(
+        element =>
+          element !== variableIdToDelete1 && element !== variableIdToDelete2
+      );
+
+      editPayload.variableNames = { ...initialPayload.variableNames };
+      delete editPayload.variableNames[variableIdToDelete1];
+      delete editPayload.variableNames[variableIdToDelete2];
+
+      await exec();
+
+      let expectedVariableNames = { ...initialPayload.variableNames };
+      delete expectedVariableNames[variableIdToDelete1];
+      delete expectedVariableNames[variableIdToDelete2];
+
+      expect(msDataAgent.Payload.variableNames).toEqual(expectedVariableNames);
+
+      let expectedSampleTimeGroups = [...initialPayload.sampleTimeGroups];
+      expectedSampleTimeGroups[1].variableIds = expectedSampleTimeGroups[1].variableIds.filter(
+        element =>
+          element !== variableIdToDelete1 && element !== variableIdToDelete2
+      );
+
+      expect(msDataAgent.Payload.sampleTimeGroups).toEqual(
+        expectedSampleTimeGroups
+      );
+
+      expect(msDataAgent.ReadyToSend).toEqual(false);
+    });
+
+    it("should create database files for every new created sample time groups", async () => {
+      await exec();
+
+      for (let sampleTimeGroup of editPayload.sampleTimeGroups) {
+        let sampleTime = sampleTimeGroup.sampleTime;
+
+        let dataStorage = msDataAgent.ValueStorage.SampleTimeGroups[sampleTime];
+
+        expect(dataStorage).toBeDefined();
+
+        let filePath = dataStorage.FilePath;
+
+        expect(filePath).toBeDefined();
+
+        let dbFileExists = await checkIfFileExistsAsync(filePath);
+
+        expect(dbFileExists).toEqual(true);
+      }
+    });
+
+    it("should insert columns to storage database files for every added variable or varaible that changed its sampleTime groups, but not remove old columns", async () => {
+      await exec();
+
+      for (let sampleTimeGroup of editPayload.sampleTimeGroups) {
+        let sampleTime = sampleTimeGroup.sampleTime;
+
+        let dataStorage = msDataAgent.ValueStorage.SampleTimeGroups[sampleTime];
+
+        let filePath = dataStorage.FilePath;
+
+        for (let variableId of sampleTimeGroup.variableIds) {
+          let columnName = DataStorage.getColumnName(variableId);
+
+          let columnExists = await checkIfColumnExists(
+            filePath,
+            "data",
+            columnName,
+            "REAL"
+          );
+
+          expect(columnExists).toEqual(true);
+        }
+      }
     });
   });
 });

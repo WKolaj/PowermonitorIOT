@@ -68,7 +68,7 @@ let validateCreate = function(req) {
           return resolve("Given variable type is not recognized");
         }
       }
-    } else if (deviceType === "specialDevice") {
+    } else if (deviceType === "specialDevice" || deviceType === "msAgent") {
       switch (req.body.type) {
         case "sdVariable": {
           return resolve(await SDVariableValidator.create(req));
@@ -163,7 +163,7 @@ let validateEdit = function(req) {
           return resolve("Given variable type is not recognized");
         }
       }
-    } else if (deviceType === "specialDevice") {
+    } else if (deviceType === "specialDevice" || deviceType === "msAgent") {
       switch (variableType) {
         case "sdVariable": {
           return resolve(await SDVariableValidator.edit(req));

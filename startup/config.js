@@ -26,6 +26,7 @@ module.exports = async function() {
   throwIfConfigDoesNotExist("logging.error.path");
   throwIfConfigDoesNotExist("logging.error.maxsize");
   throwIfConfigDoesNotExist("logging.error.maxFiles");
+  throwIfConfigDoesNotExist("dataAgentDir");
 
   logger.info("app configuration files initialized");
 };

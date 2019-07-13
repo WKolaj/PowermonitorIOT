@@ -10,11 +10,23 @@ class SendDataAgent {
     this._sendDataLimit = 50;
   }
 
+  async setSendDatalLimit(newLimit) {
+    this._sendDataLimit = newLimit;
+  }
+
+  async setBuferSize(newLimit) {
+    this.ValueStorage.setBuferSize(newLimit);
+  }
+
   async _sendData(data) {
     throw new Error("should be override in child classes");
   }
 
-  async initSendingMechanism() {
+  async startCommunication() {
+    throw new Error("should be override in child classes");
+  }
+
+  async stopCommunication() {
     throw new Error("should be override in child classes");
   }
 
@@ -143,7 +155,7 @@ class SendDataAgent {
   _generatePayload() {
     return {
       ...this.ValueStorage.Payload,
-      sendDataLimit: 20,
+      sendDataLimit: this.SendDataLimit,
       readyToSend: this.ReadyToSend
     };
   }

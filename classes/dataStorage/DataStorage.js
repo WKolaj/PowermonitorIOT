@@ -12,6 +12,10 @@ class DataStorage {
     this._bufferSize = 10;
   }
 
+  async setBufferSize(newBufferSize) {
+    this._bufferSize = newBufferSize;
+  }
+
   /**
    * @description get column name based on dataPointId
    * @param {string} dataPointId id of datapoint

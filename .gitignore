@@ -4,6 +4,9 @@ test.js
 # Mindsphere dir
 .mc
 
+#data agents dir
+dataAgents
+
 # Project files
 project
 project/project.json

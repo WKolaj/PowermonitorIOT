@@ -3,6 +3,7 @@ const fs = require("fs");
 const User = require("../user/User");
 const mongoose = require("mongoose");
 const logger = require("../../logger/logger");
+const config = require("config");
 const {
   getCurrentAppVersion,
   clearDirectoryAsync,
@@ -33,6 +34,11 @@ class ProjectContentManager {
     this._deviceDirPath = path.join(
       this.ProjectAbsolutePath,
       ProjectContentManager._getDeviceDirName()
+    );
+
+    this._agentDirPath = path.join(
+      this.ProjectAbsolutePath,
+      config.get("dataAgentDir")
     );
 
     this._project = project;
@@ -97,6 +103,13 @@ class ProjectContentManager {
   }
 
   /**
+   * @description Absolute path to agent directory
+   */
+  get AgentDirPath() {
+    return this._agentDirPath;
+  }
+
+  /**
    * @description Method for checking if project directory exists
    */
   async _checkIfProjectDirExists() {
@@ -110,6 +123,20 @@ class ProjectContentManager {
     let dirExists = await this._checkIfProjectDirExists();
     if (!dirExists) {
       return createDirAsync(this.ProjectAbsolutePath);
+    }
+  }
+
+  /**
+   * @description Method for checking if agent directory exists
+   */
+  async _checkIfAgentDirExists() {
+    return checkIfDirectoryExistsAsync(this.AgentDirPath);
+  }
+
+  async _createAgentDirIfNotExists() {
+    let dirExists = await this._checkIfAgentDirExists();
+    if (!dirExists) {
+      return createDirAsync(this.AgentDirPath);
     }
   }
 
@@ -478,6 +505,7 @@ class ProjectContentManager {
   async createEmptyProject() {
     this._generateAndAssignNewPrivateKey();
     await this._createProjectDirIfNotExists();
+    await this._createAgentDirIfNotExists();
     await this.saveConfigFile();
     await this._createDeviceDirIfNotExists();
     await this._createDefaultUser();
