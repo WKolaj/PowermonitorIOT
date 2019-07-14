@@ -50,7 +50,6 @@ class MSDataAgent extends SendDataAgent {
 
   _convertDataToMSData(data) {
     let dataToReturn = [];
-
     let allTickNumbers = Object.keys(data);
 
     for (let tickNumber of allTickNumbers) {
@@ -65,20 +64,23 @@ class MSDataAgent extends SendDataAgent {
           if (existsAndIsNotEmpty(variableName)) {
             let variableValue = variablesObject[variableId];
 
-            //Assigning time stamp if not exist
-            if (!exists(MSPayloadObject.timestamp))
-              MSPayloadObject.timestamp = date.toISOString();
+            //Have to checkIt - in order not to send null if there is no value for given variable
+            if (exists(variableValue)) {
+              //Assigning time stamp if not exist
+              if (!exists(MSPayloadObject.timestamp))
+                MSPayloadObject.timestamp = date.toISOString();
 
-            //Creating values if not exist
-            if (!exists(MSPayloadObject.values)) MSPayloadObject.values = [];
+              //Creating values if not exist
+              if (!exists(MSPayloadObject.values)) MSPayloadObject.values = [];
 
-            let valueObject = {
-              dataPointId: variableName,
-              qualityCode: "0",
-              value: variableValue.toString()
-            };
+              let valueObject = {
+                dataPointId: variableName,
+                qualityCode: "0",
+                value: variableValue.toString()
+              };
 
-            MSPayloadObject.values.push(valueObject);
+              MSPayloadObject.values.push(valueObject);
+            }
           }
         }
       }
