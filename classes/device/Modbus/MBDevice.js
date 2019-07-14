@@ -492,7 +492,7 @@ class MBDevice extends Device {
       //Returing all refreshed variable Ids and values;
       return this.RequestGrouper.ConvertRequestsToIDValuePair(requestsToInvoke);
     } catch (err) {
-      logger.error(err.message, err);
+      logger.warn(err.message, err);
       return null;
     }
   }

@@ -64,7 +64,7 @@ class SendDataAgent {
     try {
       await this._sendBufferedData();
     } catch (err) {
-      logger.error(err.message, err);
+      logger.warn(err.message, err);
     }
   }
 

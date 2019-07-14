@@ -650,6 +650,20 @@ class Device {
   isSpecial() {
     return false;
   }
+
+  /**
+   * @description Method for generating payload to route response
+   */
+  _generateResponsePayload() {
+    return this._generatePayload();
+  }
+
+  /**
+   * @description Route response payload
+   */
+  get ResponsePayload() {
+    return this._generateResponsePayload();
+  }
 }
 
 module.exports = Device;

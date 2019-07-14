@@ -10,7 +10,7 @@ const _ = require("lodash");
 const validate = require("../middleware/validation/device");
 
 let generateDevicePayloadGeneral = device => {
-  let payloadToReturn = device.Payload;
+  let payloadToReturn = device.ResponsePayload;
   payloadToReturn.connected = device.Connected;
   payloadToReturn.variables = Object.keys(device.Variables);
   payloadToReturn.calculationElements = Object.keys(device.CalculationElements);
@@ -18,7 +18,7 @@ let generateDevicePayloadGeneral = device => {
 };
 
 let generateDevicePayloadDetailed = device => {
-  let payloadToReturn = device.Payload;
+  let payloadToReturn = device.ResponsePayload;
   payloadToReturn.connected = device.Connected;
   payloadToReturn.variables = Object.values(device.Variables).map(variable => {
     return {
