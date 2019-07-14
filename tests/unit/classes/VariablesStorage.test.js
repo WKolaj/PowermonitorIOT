@@ -49,10 +49,10 @@ describe("VariablesStorage", () => {
       expect(result.DirectoryPath).toBeNull();
     });
 
-    it("should create new variable storage and set bufferSize to 10", async () => {
+    it("should create new variable storage and set bufferSize to 100", async () => {
       let result = await exec();
 
-      expect(result.BufferSize).toEqual(10);
+      expect(result.BufferSize).toEqual(100);
     });
   });
 

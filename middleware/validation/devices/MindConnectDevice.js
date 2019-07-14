@@ -1,5 +1,6 @@
 const Joi = require("joi");
-const { exists } = require("../../../utilities/utilities");
+const Project = require("../../../classes/project/Project");
+const { exists, snooze } = require("../../../utilities/utilities");
 
 let boardingKeyContentSchema = Joi.object().keys({
   baseUrl: Joi.string()
@@ -25,7 +26,7 @@ let dataAgentEditSchema = Joi.object().keys({
   sendDataLimit: Joi.number()
     .integer()
     .min(1)
-    .max(100),
+    .max(50),
   readyToSend: Joi.bool(),
   boardingKey: boardingKeySchema,
   variableNames: Joi.object()
@@ -48,16 +49,7 @@ let specialDeviceEditSchema = Joi.object().keys({
   dataAgent: dataAgentEditSchema
 });
 
-let setDefaultValues = function(req) {
-  if (exists(req.body.dataAgent)) {
-    if (!exists(req.body.dataAgent.bufferSize))
-      req.body.dataAgent.bufferSize = 100;
-    if (!exists(req.body.dataAgent.sendDataLimit))
-      req.body.dataAgent.sendDataLimit = 5;
-    if (!exists(req.body.dataAgent.readyToSend))
-      req.body.dataAgent.readyToSend = false;
-  }
-};
+let setDefaultValues = function(req) {};
 
 let validateSampleTimeGroup = sampleTimeGroupPayload => {
   if (!exists(sampleTimeGroupPayload.sampleTime))
@@ -70,14 +62,17 @@ let validateSampleTimeGroup = sampleTimeGroupPayload => {
     return "variableIds should be defined!";
   if (!Array.isArray(sampleTimeGroupPayload.variableIds))
     return "variableIds should be an array of strings";
+  return;
 };
 
 let checkIfElementExists = async function(deviceId, elementId) {
   //There's no need to check if device exists - already resolving if device does not exists earlier in calcElement validation method
-
   //If there is no variableId of givenId
-  if (!(await Project.CurrentProject.doesElementExist(deviceId, elementId)))
-    return "Element of given id does not exist";
+  let elementExists = await Project.CurrentProject.doesElementExist(
+    deviceId,
+    elementId
+  );
+  if (!elementExists) return "Element of given id does not exist";
 
   //No errors - varaible exists so returning undefined;
   return;
@@ -88,7 +83,7 @@ let checkDataAgentVariables = async (deviceId, payload) => {
   for (let sampleTimeGroup of payload.sampleTimeGroups) {
     //validation every group
     let validationError = validateSampleTimeGroup(sampleTimeGroup);
-    if (validateEdit) return validationError;
+    if (validationError) return validationError;
 
     let sampleTime = sampleTimeGroup.sampleTime;
 
@@ -114,11 +109,13 @@ let checkDataAgentVariables = async (deviceId, payload) => {
     variablesFromSampleTimeGroups
   );
   let variableIdsFromVariableNames = Object.keys(variablesFromVariableNames);
+
   if (
     variableIdsFromSampleTimeGroups.length !==
     variableIdsFromVariableNames.length
-  )
+  ) {
     return "different lengths of variables collections";
+  }
 
   for (let variableId of variableIdsFromSampleTimeGroups) {
     let variableName = variablesFromVariableNames[variableId].variableName;
@@ -127,11 +124,9 @@ let checkDataAgentVariables = async (deviceId, payload) => {
   }
 
   //Checking if variables exists inside agent device
-  for (let variable of variablesFromSampleTimeGroups) {
-    let variableCheck = await checkIfElementExists(
-      deviceId,
-      variable.variableId
-    );
+  for (let variableId of variableIdsFromSampleTimeGroups) {
+    let variableCheck = await checkIfElementExists(deviceId, variableId);
+
     if (variableCheck) return variableCheck;
   }
 
@@ -156,7 +151,6 @@ let checkDataAgentConsistency = async (deviceId, dataAgentPayload) => {
     !exists(dataAgentPayload.variableNames)
   )
     return "sampleTimeGroups exists but variableNames not";
-
   let variablesConsistencyAlert = await checkDataAgentVariables(
     deviceId,
     dataAgentPayload
@@ -186,19 +180,19 @@ let validateCreate = function(req) {
  * @description Method for validate if element is valid while editing - return error message if object is not valid or undefined instead
  */
 let validateEdit = function(req) {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     Joi.validate(req.body, specialDeviceEditSchema, async (err, value) => {
       if (err) {
         return resolve(err.details[0].message);
       } else {
         //Checking dataAgent consistency
-        if (exists(req.body.dataAgent))
-          return resolve(
-            await checkDataAgentConsistency(
-              req.params.deviceId,
-              req.body.dataAgent
-            )
+        if (exists(req.body.dataAgent)) {
+          let consistencyCheck = await checkDataAgentConsistency(
+            req.params.id,
+            req.body.dataAgent
           );
+          if (consistencyCheck) return resolve(consistencyCheck);
+        }
         return resolve();
       }
     });

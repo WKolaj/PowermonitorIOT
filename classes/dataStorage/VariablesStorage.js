@@ -15,7 +15,7 @@ class VariablesStorage {
     this._sampleTimeGroups = {};
     this._variables = {};
     this._directoryPath = null;
-    this._bufferSize = 10;
+    this._bufferSize = 100;
   }
 
   async setBufferSize(newBufferSize) {

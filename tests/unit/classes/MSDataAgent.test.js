@@ -53,14 +53,14 @@ describe("MSDataAgent", () => {
       expect(result.ReadyToSend).toEqual(false);
     });
 
-    it("should set default sendDataLimit to 50", () => {
+    it("should set default sendDataLimit to 5", () => {
       let result = exec();
-      expect(result.SendDataLimit).toEqual(50);
+      expect(result.SendDataLimit).toEqual(5);
     });
 
-    it("should set default sendDataLimit to 50", () => {
+    it("should set default bufferSize to 100", () => {
       let result = exec();
-      expect(result.SendDataLimit).toEqual(50);
+      expect(result.BufferSize).toEqual(100);
     });
 
     it("should set boarding key to null", () => {
@@ -235,12 +235,12 @@ describe("MSDataAgent", () => {
       expect(msDataAgent.BufferSize).toEqual(100);
     });
 
-    it("should set sendDataLimit to 50 if there is no sendDataLimit is defined", async () => {
+    it("should set sendDataLimit to 5 if there is no sendDataLimit is defined", async () => {
       initialPayload.sendDataLimit = undefined;
 
       await exec();
 
-      expect(msDataAgent.SendDataLimit).toEqual(50);
+      expect(msDataAgent.SendDataLimit).toEqual(5);
     });
 
     it("should not throw and set VaraibleStorage if there are no sampleGroups defined", async () => {

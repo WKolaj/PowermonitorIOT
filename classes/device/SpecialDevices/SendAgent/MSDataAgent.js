@@ -167,8 +167,8 @@ class MSDataAgent extends SendDataAgent {
   async _setBoardingKey(boardingKey) {
     if (!existsAndIsNotEmpty(boardingKey)) return;
     this._validateBoardingKey(boardingKey);
-    this._agent = new MindConnectAgent(boardingKey);
     this._boardingKey = boardingKey;
+    this._agent = new MindConnectAgent(this._boardingKey);
   }
 
   _generatePayload() {

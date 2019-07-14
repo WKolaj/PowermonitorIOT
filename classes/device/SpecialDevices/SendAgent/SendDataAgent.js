@@ -7,7 +7,7 @@ class SendDataAgent {
     this._valueStorage = new ValueStorage();
     this._sendingBusy = false;
     this._readyToSend = false;
-    this._sendDataLimit = 50;
+    this._sendDataLimit = 5;
   }
 
   async setSendDatalLimit(newLimit) {

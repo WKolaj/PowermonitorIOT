@@ -110,10 +110,12 @@ class MindConnectDevice extends SpecialDevice {
    * @description Method for editing MindConnectDevice
    */
   async editWithPayload(payload) {
-    //Removing dir path from payload - in order to secure dirPatch change by route
-    if (exists(payload.dirPath)) delete payload.dirPath;
     await super.editWithPayload(payload);
-    await this.DataAgent.editWithPayload(payload.dataAgent);
+    if (exists(payload.dataAgent)) {
+      //Removing dir path from payload - in order to secure dirPatch change by route
+      if (exists(payload.dataAgent.dirPath)) delete payload.dataAgent.dirPath;
+      await this.DataAgent.editWithPayload(payload.dataAgent);
+    }
 
     return this;
   }
@@ -122,13 +124,18 @@ class MindConnectDevice extends SpecialDevice {
     let payload = this._generatePayload();
 
     //Filtering payload
-    if (exists(payload.dataAgent) && exists(payload.dataAgent.dirPath))
+    if (exists(payload.dataAgent) && exists(payload.dataAgent.dirPath)) {
+      payload.dataAgent = { ...payload.dataAgent };
       delete payload.dataAgent.dirPath;
+    }
     if (exists(payload.dataAgent) && exists(payload.dataAgent.boardingKey)) {
-      if (exists(payload.dataAgent.boardingKey.response))
-        delete payload.dataAgent.boardingKey.response;
-      if (exists(payload.dataAgent.boardingKey.dataSourceConfiguration))
-        delete payload.dataAgent.boardingKey.dataSourceConfiguration;
+      payload.dataAgent = {
+        ...payload.dataAgent,
+        boardingKey: {
+          content: payload.dataAgent.boardingKey.content,
+          expiration: payload.dataAgent.boardingKey.expiration
+        }
+      };
     }
     return payload;
   }
