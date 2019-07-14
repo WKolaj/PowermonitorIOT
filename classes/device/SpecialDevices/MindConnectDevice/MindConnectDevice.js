@@ -26,6 +26,8 @@ class MindConnectDevice extends SpecialDevice {
   }
 
   async init(payload) {
+    await this.createDataAgentDirIfNotExists();
+
     await super.init(payload);
 
     this._directoryPath = MindConnectDevice.generateDirectoryPath(this.Id);
@@ -40,6 +42,15 @@ class MindConnectDevice extends SpecialDevice {
     dataAgentInitPayload.dirPath = this.DirectoryPath;
 
     await this.initDataAgent(dataAgentInitPayload);
+  }
+
+  async createDataAgentDirIfNotExists() {
+    let mainDataAgentsDirPath = path.join(
+      config.get("projPath"),
+      config.get("dataAgentDir")
+    );
+    let dirExists = await checkIfDirectoryExistsAsync(mainDataAgentsDirPath);
+    if (!dirExists) await createDirAsync(mainDataAgentsDirPath);
   }
 
   async initDataAgent(payload) {
