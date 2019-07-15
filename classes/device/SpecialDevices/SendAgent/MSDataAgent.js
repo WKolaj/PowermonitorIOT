@@ -94,7 +94,7 @@ class MSDataAgent extends SendDataAgent {
   async _sendData(data) {
     if (isObjectEmpty(data)) return;
     let dataToSend = this._convertDataToMSData(data);
-    return retry(5, this.MindConnectAgent.BulkPostData(dataToSend));
+    return retry(5, () => this.MindConnectAgent.BulkPostData(dataToSend));
   }
 
   _checkPayload(payload) {
