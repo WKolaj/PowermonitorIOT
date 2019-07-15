@@ -1,5 +1,5 @@
 const SendDataAgent = require("./SendDataAgent");
-const { MindConnectAgent } = require("@mindconnect/mindconnect-nodejs");
+const { MindConnectAgent, retry } = require("@mindconnect/mindconnect-nodejs");
 const {
   exists,
   isObjectEmpty,
@@ -94,7 +94,7 @@ class MSDataAgent extends SendDataAgent {
   async _sendData(data) {
     if (isObjectEmpty(data)) return;
     let dataToSend = this._convertDataToMSData(data);
-    return this.MindConnectAgent.BulkPostData(dataToSend);
+    return retry(5, this.MindConnectAgent.BulkPostData(dataToSend));
   }
 
   _checkPayload(payload) {
