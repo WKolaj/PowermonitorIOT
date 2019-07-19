@@ -70,10 +70,10 @@ describe("auth route", () => {
 
   let boardingKey;
   let variableNames;
-  let readyToSend;
-  let sampleTimeGroups;
-  let sendDataLimit;
-  let bufferSize;
+  let sendingEnabled;
+  let sendFileLimit;
+  let sendingInterval;
+  let numberOfSendingRetries;
 
   let init = async () => {
     //Creating additional users
@@ -389,24 +389,10 @@ describe("auth route", () => {
     );
 
     msAgentVariable1MSName = "msVariable1";
-    msAgentVariable1SampleTimeGroup = 1;
 
     msAgentVariable2MSName = "msVariable2";
-    msAgentVariable2SampleTimeGroup = 1;
 
     msAgentVariable3MSName = "msVariable3";
-    msAgentVariable3SampleTimeGroup = 2;
-
-    sampleTimeGroups = [
-      {
-        sampleTime: msAgentVariable1SampleTimeGroup,
-        variableIds: [msAgentVariable1.Id, msAgentVariable2.Id]
-      },
-      {
-        sampleTime: msAgentVariable3SampleTimeGroup,
-        variableIds: [msAgentVariable3.Id]
-      }
-    ];
 
     variableNames = {
       [msAgentVariable1.Id]: msAgentVariable1MSName,
@@ -425,19 +411,20 @@ describe("auth route", () => {
       expiration: "2019-07-20T20:20:39.000Z"
     };
 
-    readyToSend = true;
+    sendingEnabled = true;
 
-    sendDataLimit = 25;
-    bufferSize = 35;
+    sendFileLimit = 7;
+    sendingInterval = 35;
+    numberOfSendingRetries = 3;
 
     let editPayload = {
       dataAgent: {
-        sampleTimeGroups,
         variableNames,
         boardingKey,
-        readyToSend,
-        sendDataLimit,
-        bufferSize
+        sendingEnabled,
+        sendFileLimit,
+        sendingInterval,
+        numberOfSendingRetries
       }
     };
 
@@ -505,12 +492,12 @@ describe("auth route", () => {
         type: msAgent.Type,
         connected: true,
         dataAgent: {
+          sendingEnabled,
+          sendFileLimit,
+          sendingInterval,
+          numberOfSendingRetries,
           boardingKey,
-          sampleTimeGroups,
-          readyToSend,
-          variableNames,
-          sendDataLimit,
-          bufferSize
+          variableNames
         }
       };
 
@@ -550,12 +537,12 @@ describe("auth route", () => {
         type: msAgent.Type,
         connected: true,
         dataAgent: {
+          sendingEnabled,
+          sendFileLimit,
+          sendingInterval,
+          numberOfSendingRetries,
           boardingKey,
-          sampleTimeGroups,
-          readyToSend,
-          variableNames,
-          sendDataLimit,
-          bufferSize
+          variableNames
         }
       };
 

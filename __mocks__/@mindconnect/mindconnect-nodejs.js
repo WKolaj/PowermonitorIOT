@@ -52,4 +52,19 @@ class MindConnectAgent {
   }
 }
 
+let retry = async (count, func) => {
+  let index = 0;
+
+  while (index < count) {
+    try {
+      await func();
+      return;
+    } catch (err) {
+      index++;
+      if (index >= count) throw err;
+    }
+  }
+};
+
 module.exports.MindConnectAgent = MindConnectAgent;
+module.exports.retry = retry;

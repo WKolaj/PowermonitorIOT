@@ -393,12 +393,11 @@ describe("auth route", () => {
         variables: [],
         calculationElements: [],
         dataAgent: {
-          boardingKey: null,
-          bufferSize: 100,
-          readyToSend: false,
-          sampleTimeGroups: [],
-          sendDataLimit: 5,
-          variableNames: {}
+          variableNames: {},
+          sendingEnabled: false,
+          sendFileLimit: 5,
+          sendingInterval: 60,
+          numberOfSendingRetries: 5
         }
       };
 

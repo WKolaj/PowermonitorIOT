@@ -1,5 +1,5 @@
 const SpecialDevice = require("../SpecialDevice");
-const MSDataAgent = require("../SendAgent/MSDataAgent");
+const MindConnectSenderAgent = require("../SenderAgents/MindConnectSenderAgent");
 const path = require("path");
 const config = require("config");
 const Sampler = require("../../../sampler/Sampler");
@@ -14,7 +14,7 @@ class MindConnectDevice extends SpecialDevice {
   constructor() {
     super();
 
-    this._dataAgent = new MSDataAgent();
+    this._dataAgent = new MindConnectSenderAgent();
   }
 
   get DirectoryPath() {
@@ -73,29 +73,37 @@ class MindConnectDevice extends SpecialDevice {
    * @param {number} tickNumber Tick number
    */
   async _refreshSpecialDevice(tickNumber) {
-    let valuesPayload = await this._generateValuesPayload(tickNumber);
-    if (
-      existsAndIsNotEmpty(valuesPayload) &&
-      existsAndIsNotEmpty(this.DataAgent) &&
-      this.DataAgent.ReadyToSend
-    )
-      await this.DataAgent.refresh(tickNumber, valuesPayload);
+    if (existsAndIsNotEmpty(this.DataAgent) && this.DataAgent.IsReadyToSend) {
+      let valuesPayload = await this._generateValuesPayload(tickNumber);
+
+      if (existsAndIsNotEmpty(valuesPayload.values)) {
+        await this.DataAgent.addToBuffer(valuesPayload);
+      }
+
+      await this.DataAgent.refresh(tickNumber);
+    }
   }
 
   async _generateValuesPayload(tickNumber) {
-    let valuesPayload = {};
+    let valuesPayload = { tickId: tickNumber, values: [] };
 
     let allVariables = Object.values(this.Variables);
     let allCalcElements = Object.values(this.CalculationElements);
 
     for (let variable of allVariables) {
       if (Sampler.doesTickIdMatchesTick(tickNumber, variable.TickId))
-        valuesPayload[variable.Id] = variable.Value;
+        valuesPayload.values.push({
+          id: variable.Id,
+          value: variable.Value
+        });
     }
 
     for (let calcElement of allCalcElements) {
       if (Sampler.doesTickIdMatchesTick(tickNumber, calcElement.TickId))
-        valuesPayload[calcElement.Id] = calcElement.Value;
+        valuesPayload.values.push({
+          id: calcElement.Id,
+          value: calcElement.Value
+        });
     }
 
     return valuesPayload;
@@ -107,14 +115,6 @@ class MindConnectDevice extends SpecialDevice {
       payload.dataAgent = this.DataAgent.Payload;
 
     return payload;
-  }
-
-  get BoardingKey() {
-    return this.DataAgent.BoardingKey;
-  }
-
-  get ReadyToSend() {
-    return this.DataAgent.ReadyToSend;
   }
 
   /**

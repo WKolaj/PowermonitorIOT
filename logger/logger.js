@@ -36,10 +36,10 @@ if (process.env.NODE_ENV === "production") {
   logger = {
     info: text => {},
     error: (text, errorDetails) => {
-      console.log(text);
+      console.log(errorDetails);
     },
     warn: (text, errorDetails) => {
-      console.log(text);
+      console.log(errorDetails);
     }
   };
 } else {
