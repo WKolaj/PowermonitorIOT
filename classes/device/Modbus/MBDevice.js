@@ -595,7 +595,7 @@ class MBDevice extends Device {
    * For MBDevice - it is ipAdress
    */
   getRefreshGroupId() {
-    return this.IPAdress;
+    return `${this.IPAdress}_${this.PortNumber}`;
   }
 }
 
