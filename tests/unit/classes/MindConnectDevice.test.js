@@ -2153,5 +2153,117 @@ describe("MindConnectDevice", () => {
 
       expect(allFilesInValuesDir).toEqual([]);
     });
+
+    it("Should not add value to Buffer if it is NaN", async () => {
+      var1Value1 = NaN;
+      var1Value2 = NaN;
+      var1Value3 = NaN;
+      await exec();
+
+      let expectedBufferContent = [];
+
+      //First tick is empty - only first variable matches and it is NaN
+
+      //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
+      //Calc element is also NaN - calculated based on varValue1
+      expectedBufferContent.push({
+        tickId: tickId2,
+        values: [
+          {
+            id: initialPayload.variables[1].id,
+            value: var2Value2
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should not add value to Buffer if it is null", async () => {
+      var1Value1 = null;
+      var1Value2 = null;
+      var1Value3 = null;
+      await exec();
+
+      let expectedBufferContent = [];
+
+      //First tick is empty - only first variable matches and it is NaN
+
+      //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
+      //Calc element is also NaN - calculated based on varValue1
+      expectedBufferContent.push({
+        tickId: tickId2,
+        values: [
+          {
+            id: initialPayload.variables[1].id,
+            value: var2Value2
+          },
+          {
+            id: initialPayload.calculationElements[0].id,
+            value: var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should not add value to Buffer if it is string", async () => {
+      var1Value1 = "testString1";
+      var1Value2 = "testString2";
+      var1Value3 = "testString3";
+      await exec();
+
+      let expectedBufferContent = [];
+
+      //First tick is empty - only first variable matches and it is NaN
+
+      //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
+      //Calc element is also NaN - calculated based on varValue1
+      expectedBufferContent.push({
+        tickId: tickId2,
+        values: [
+          {
+            id: initialPayload.variables[1].id,
+            value: var2Value2
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
   });
 });

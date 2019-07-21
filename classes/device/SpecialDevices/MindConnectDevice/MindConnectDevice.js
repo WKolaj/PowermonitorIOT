@@ -7,7 +7,8 @@ const {
   createDirAsync,
   existsAndIsNotEmpty,
   checkIfDirectoryExistsAsync,
-  exists
+  exists,
+  isCorrectValue
 } = require("../../../../utilities/utilities");
 
 class MindConnectDevice extends SpecialDevice {
@@ -89,19 +90,27 @@ class MindConnectDevice extends SpecialDevice {
     let allCalcElements = Object.values(this.CalculationElements);
 
     for (let variable of allVariables) {
-      if (Sampler.doesTickIdMatchesTick(tickNumber, variable.TickId))
-        valuesPayload.values.push({
-          id: variable.Id,
-          value: variable.Value
-        });
+      if (Sampler.doesTickIdMatchesTick(tickNumber, variable.TickId)) {
+        //Not adding value if it is not a number or boolean or invalid number - eg. NaN
+        if (isCorrectValue(variable.Value)) {
+          valuesPayload.values.push({
+            id: variable.Id,
+            value: variable.Value
+          });
+        }
+      }
     }
 
     for (let calcElement of allCalcElements) {
-      if (Sampler.doesTickIdMatchesTick(tickNumber, calcElement.TickId))
-        valuesPayload.values.push({
-          id: calcElement.Id,
-          value: calcElement.Value
-        });
+      if (Sampler.doesTickIdMatchesTick(tickNumber, calcElement.TickId)) {
+        //Not adding value if it is not a number or boolean or invalid number - eg. NaN
+        if (isCorrectValue(calcElement.Value)) {
+          valuesPayload.values.push({
+            id: calcElement.Id,
+            value: calcElement.Value
+          });
+        }
+      }
     }
 
     return valuesPayload;

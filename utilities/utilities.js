@@ -522,3 +522,14 @@ module.exports.exists = function(object) {
 module.exports.existsAndIsNotEmpty = function(object) {
   return module.exports.exists(object) && !module.exports.isObjectEmpty(object);
 };
+
+module.exports.isCorrectValue = function(value) {
+  if (!module.exports.exists(value)) return false;
+  if (!module.exports.isObjectEmpty(value)) return false;
+  //If value is Boolean it is still valid
+  if (value === true) return true;
+  if (value === false) return true;
+  if (isNaN(value)) return false;
+
+  return true;
+};
