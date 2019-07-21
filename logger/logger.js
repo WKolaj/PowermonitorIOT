@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === "production") {
       }),
       new transports.File({
         filename: config.get("logging.warning.path"),
-        level: "warning",
+        level: "warn",
         maxsize: config.get("logging.warning.maxsize"),
         maxFiles: config.get("logging.warning.maxFiles")
       }),
