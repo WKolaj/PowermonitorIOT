@@ -2,7 +2,8 @@ const config = require("config");
 const request = require("supertest");
 const {
   clearDirectoryAsync,
-  snooze
+  snooze,
+  existsAndIsNotEmpty
 } = require("../../../../../utilities/utilities");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
@@ -16,6 +17,7 @@ describe("auth route", () => {
   let server;
   let endpoint = "/api/devices/";
   let tokenHeader;
+  let adminToken;
 
   let visuUserBody;
   let operateUserBody;
@@ -29,11 +31,9 @@ describe("auth route", () => {
 
   let PAC3200TCPBody;
   let mbDeviceBody;
-  let msAgentBody;
 
   let pac3200TCP;
   let mbDevice;
-  let msAgent;
 
   let mbBooleanVariableBody;
   let mbFloatVariableBody;
@@ -44,9 +44,6 @@ describe("auth route", () => {
   let mbSwappedFloatVariableBody;
   let mbSwappedInt32VariableBody;
   let mbSwappedUInt32VariableBody;
-  let msAgentVariable1Body;
-  let msAgentVariable2Body;
-  let msAgentVariable3Body;
 
   let mbBooleanVariable;
   let mbFloatVariable;
@@ -57,23 +54,6 @@ describe("auth route", () => {
   let mbSwappedFloatVariable;
   let mbSwappedInt32Variable;
   let mbSwappedUInt32Variable;
-  let msAgentVariable1;
-  let msAgentVariable2;
-  let msAgentVariable3;
-
-  let msAgentVariable1MSName;
-  let msAgentVariable1SampleTimeGroup;
-  let msAgentVariable2MSName;
-  let msAgentVariable2SampleTimeGroup;
-  let msAgentVariable3MSName;
-  let msAgentVariable3ampleTimeGroup;
-
-  let boardingKey;
-  let variableNames;
-  let readyToSend;
-  let sampleTimeGroups;
-  let sendDataLimit;
-  let bufferSize;
 
   let init = async () => {
     //Creating additional users
@@ -102,7 +82,7 @@ describe("auth route", () => {
       lang: "pl"
     };
 
-    let adminToken = await (await Project.CurrentProject.getUser(
+    adminToken = await (await Project.CurrentProject.getUser(
       "admin"
     )).generateToken();
 
@@ -141,11 +121,6 @@ describe("auth route", () => {
       ipAdress: "192.168.100.34"
     };
 
-    msAgentBody = {
-      name: "mindConnectAgent",
-      type: "msAgent"
-    };
-
     let mbDeviceResult = await request(server)
       .post("/api/devices")
       .set(tokenHeader, adminToken)
@@ -154,16 +129,12 @@ describe("auth route", () => {
       .post("/api/devices")
       .set(tokenHeader, adminToken)
       .send(PAC3200TCPBody);
-    let msAgentResult = await request(server)
-      .post("/api/devices")
-      .set(tokenHeader, adminToken)
-      .send(msAgentBody);
 
     mbDevice = await Project.CurrentProject.getDevice(mbDeviceResult.body.id);
     pac3200TCP = await Project.CurrentProject.getDevice(
       pac3200TCPResult.body.id
     );
-    msAgent = await Project.CurrentProject.getDevice(msAgentResult.body.id);
+
     mbBooleanVariableBody = {
       type: "mbBoolean",
       name: "mbBooleanVariable",
@@ -336,115 +307,58 @@ describe("auth route", () => {
       mbDevice.Id,
       swappedUInt32Result.body.id
     );
+  };
 
-    msAgentVariable1Body = {
-      name: "variable1",
-      type: "sdVariable",
-      elementId: mbFloatVariable.Id,
-      elementDeviceId: mbDevice.Id
-    };
+  let createInitialMSAgent = async (
+    initialPayload,
+    variable1Payload,
+    variable2Payload,
+    variable3Payload,
+    initialDataAgentPayload,
+    variable1MSName,
+    variable2MSName,
+    variable3MSName
+  ) => {
+    let msAgentResult = await request(server)
+      .post("/api/devices")
+      .set(tokenHeader, adminToken)
+      .send(initialPayload);
 
-    msAgentVariable2Body = {
-      name: "variable2",
-      type: "sdVariable",
-      elementId: mbInt32Variable.Id,
-      elementDeviceId: mbDevice.Id
-    };
+    let msAgent = await Project.CurrentProject.getDevice(msAgentResult.body.id);
 
-    msAgentVariable3Body = {
-      name: "variable3",
-      type: "sdVariable",
-      elementId: mbInt16Variable.Id,
-      elementDeviceId: mbDevice.Id
-    };
-
-    let msAgentVariable1Result = await request(server)
+    let variable1Result = await request(server)
       .post(`/api/variables/${msAgent.Id}`)
       .set(tokenHeader, adminToken)
-      .send(msAgentVariable1Body);
+      .send(variable1Payload);
 
-    let msAgentVariable2Result = await request(server)
+    let variable2Result = await request(server)
       .post(`/api/variables/${msAgent.Id}`)
       .set(tokenHeader, adminToken)
-      .send(msAgentVariable2Body);
+      .send(variable2Payload);
 
-    let msAgentVariable3Result = await request(server)
+    let variable3Result = await request(server)
       .post(`/api/variables/${msAgent.Id}`)
       .set(tokenHeader, adminToken)
-      .send(msAgentVariable3Body);
+      .send(variable3Payload);
 
-    msAgentVariable1 = await Project.CurrentProject.getVariable(
-      msAgent.Id,
-      msAgentVariable1Result.body.id
-    );
+    if (existsAndIsNotEmpty(initialDataAgentPayload)) {
+      initialDataAgentPayload.variableNames = {
+        [variable1Result.body.id]: variable1MSName,
+        [variable2Result.body.id]: variable2MSName,
+        [variable3Result.body.id]: variable3MSName
+      };
 
-    msAgentVariable2 = await Project.CurrentProject.getVariable(
-      msAgent.Id,
-      msAgentVariable2Result.body.id
-    );
+      let agentEditPayload = {
+        dataAgent: initialDataAgentPayload
+      };
 
-    msAgentVariable3 = await Project.CurrentProject.getVariable(
-      msAgent.Id,
-      msAgentVariable3Result.body.id
-    );
+      await request(server)
+        .put(`/api/devices/${msAgent.Id}`)
+        .set(tokenHeader, adminToken)
+        .send(agentEditPayload);
+    }
 
-    msAgentVariable1MSName = "msVariable1";
-    msAgentVariable1SampleTimeGroup = 1;
-
-    msAgentVariable2MSName = "msVariable2";
-    msAgentVariable2SampleTimeGroup = 1;
-
-    msAgentVariable3MSName = "msVariable3";
-    msAgentVariable3SampleTimeGroup = 2;
-
-    sampleTimeGroups = [
-      {
-        sampleTime: msAgentVariable1SampleTimeGroup,
-        variableIds: [msAgentVariable1.Id, msAgentVariable2.Id]
-      },
-      {
-        sampleTime: msAgentVariable3SampleTimeGroup,
-        variableIds: [msAgentVariable3.Id]
-      }
-    ];
-
-    variableNames = {
-      [msAgentVariable1.Id]: msAgentVariable1MSName,
-      [msAgentVariable2.Id]: msAgentVariable2MSName,
-      [msAgentVariable3.Id]: msAgentVariable3MSName
-    };
-
-    boardingKey = {
-      content: {
-        baseUrl: "https://southgate.eu1.mindsphere.io",
-        iat: "testIat",
-        clientCredentialProfile: ["SHARED_SECRET"],
-        clientId: "testId",
-        tenant: "testTenant"
-      },
-      expiration: "2019-07-20T20:20:39.000Z"
-    };
-
-    readyToSend = false;
-
-    sendDataLimit = 25;
-    bufferSize = 35;
-
-    let editPayload = {
-      dataAgent: {
-        sampleTimeGroups,
-        variableNames,
-        boardingKey,
-        readyToSend,
-        sendDataLimit,
-        bufferSize
-      }
-    };
-
-    let result = await request(server)
-      .put(`/api/devices/${msAgent.Id}`)
-      .set(tokenHeader, adminToken)
-      .send(editPayload);
+    return msAgent;
   };
 
   beforeEach(async () => {
@@ -475,15 +389,73 @@ describe("auth route", () => {
 
   describe("PUT /:deviceId", () => {
     let token;
+    let msAgent;
     let deviceId;
+    let initPayload;
+    let initDataAgentPayload;
+    let variable1Payload;
+    let variable2Payload;
+    let variable3Payload;
+    let initialVariable1MSName;
+    let initialVariable2MSName;
+    let initialVariable3MSName;
     let editPayload;
     let oldMindConnectAgent;
+    let initialDevicePayload;
 
     beforeEach(async () => {
       await init();
-      oldMindConnectAgent = msAgent.DataAgent.MindConnectAgent;
+
+      initPayload = {
+        name: "testMSAgent",
+        type: "msAgent"
+      };
+
+      initDataAgentPayload = {
+        sendingEnabled: false,
+        sendingInterval: 100,
+        sendFileLimit: 10,
+        boardingKey: {
+          content: {
+            baseUrl: "https://southgate.eu1.mindsphere.io",
+            iat: "testIatvalue",
+            clientCredentialProfile: ["SHARED_SECRET"],
+            clientId: "testClientId",
+            tenant: "testTenant"
+          },
+          expiration: "2019-07-18T05:06:57.000Z"
+        },
+        numberOfSendingRetries: 7
+      };
+
+      variable1Payload = {
+        name: "variable1",
+        type: "sdVariable",
+        elementId: mbFloatVariable.Id,
+        elementDeviceId: mbDevice.Id
+      };
+
+      variable2Payload = {
+        name: "variable2",
+        type: "sdVariable",
+        elementId: mbInt32Variable.Id,
+        elementDeviceId: mbDevice.Id
+      };
+
+      variable3Payload = {
+        name: "variable3",
+        type: "sdVariable",
+        elementId: mbInt16Variable.Id,
+        elementDeviceId: mbDevice.Id
+      };
+
+      initialVariable1MSName = "msVar1";
+      initialVariable2MSName = "msVar2";
+      initialVariable3MSName = "msVar3";
+
       token = await dataAdmin.generateToken();
-      deviceId = msAgent.Id;
+
+      //VARIABLES ARE FAKE! - only for payload testing
       editPayload = {
         name: "msAgentEdited",
         dataAgent: {
@@ -497,48 +469,37 @@ describe("auth route", () => {
             },
             expiration: "2019-07-20T20:21:39.000Z"
           },
-          sampleTimeGroups: [
-            {
-              sampleTime: 10,
-              variableIds: [msAgentVariable1.Id]
-            },
-            {
-              sampleTime: 20,
-              variableIds: [msAgentVariable2.Id]
-            },
-            {
-              sampleTime: 30,
-              variableIds: [msAgentVariable3.Id]
-            }
-          ],
-          sendDataLimit: 33,
-          bufferSize: 34,
-          readyToSend: true,
+          sendingEnabled: true,
+          sendingInterval: 101,
+          sendFileLimit: 4,
+          numberOfSendingRetries: 6,
           variableNames: {
-            [msAgentVariable1.Id]: "testAgentVariableEdited1",
-            [msAgentVariable2.Id]: "testAgentVariableEdited2",
-            [msAgentVariable3.Id]: "testAgentVariableEdited3"
+            testId1: "testAgentVariableEdited1",
+            testId2: "testAgentVariableEdited2",
+            testId3: "testAgentVariableEdited3"
           }
         }
       };
     });
 
-    let createEmptyMSAgent = async () => {
-      msAgentBody = {
-        name: "mindConnectAgent2",
-        type: "msAgent"
-      };
-      let msAgentResult = await request(server)
-        .post("/api/devices")
-        .set(tokenHeader, await dataAdmin.generateToken())
-        .send(msAgentBody);
-
-      msAgent = await Project.CurrentProject.getDevice(msAgentResult.body.id);
-      oldMindConnectAgent = msAgent.DataAgent.MindConnectAgent;
-      deviceId = msAgent.Id;
-    };
-
     let exec = async () => {
+      msAgent = await createInitialMSAgent(
+        initPayload,
+        variable1Payload,
+        variable2Payload,
+        variable3Payload,
+        initDataAgentPayload,
+        initialVariable1MSName,
+        initialVariable2MSName,
+        initialVariable3MSName
+      );
+
+      oldMindConnectAgent = msAgent.DataAgent.MindConnectAgent;
+
+      initialDevicePayload = msAgent.Payload;
+
+      deviceId = msAgent.Id;
+
       if (token) {
         return request(server)
           .put(`${endpoint}/${deviceId}`)
@@ -558,12 +519,6 @@ describe("auth route", () => {
         ...editPayload.dataAgent
       };
 
-      //mechanisms does not delete old sampleTimeGroups
-      expecetedAgent.sampleTimeGroups = [
-        { sampleTime: 1, variableIds: [] },
-        { sampleTime: 2, variableIds: [] },
-        ...editPayload.dataAgent.sampleTimeGroups
-      ];
       let expectedPayload = {
         id: msAgent.Id,
         name: msAgent.Name,
@@ -589,10 +544,405 @@ describe("auth route", () => {
           name: variable.Name
         };
       });
-
       expect(result.status).toEqual(200);
 
       expect(result.body).toEqual(expectedPayload);
+    });
+
+    it("should edit msAgent based on given payload", async () => {
+      let result = await exec();
+
+      let expecetedAgent = {
+        ...editPayload.dataAgent,
+        dirPath: msAgent.DataAgent.DirectoryPath
+      };
+
+      let expectedPayload = {
+        id: msAgent.Id,
+        name: msAgent.Name,
+        type: msAgent.Type,
+        dataAgent: expecetedAgent
+      };
+
+      expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      )).map(calcElement => {
+        return calcElement.Payload;
+      });
+
+      expectedPayload.variables = (await Project.CurrentProject.getAllVariables(
+        deviceId
+      )).map(variable => {
+        return variable.Payload;
+      });
+
+      expect(msAgent.Payload).toEqual(expectedPayload);
+    });
+
+    it("should return 400 and not edit anything if id is given inside payload", async () => {
+      editPayload.id = "fakeId";
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if name is shorter than 3", async () => {
+      editPayload.name = "2";
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if name is longer than 100", async () => {
+      editPayload.name = new Array(101 + 1).join("a").toString();
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 200 but not edit anything if dataAgent is empty", async () => {
+      editPayload = {
+        dataAgent: {}
+      };
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if sendFileLimit is smaller than 1", async () => {
+      editPayload = {
+        ...editPayload,
+        dataAgent: {
+          ...editPayload.dataAgent,
+          sendFileLimit: 0
+        }
+      };
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if sendFileLimit is higher than 10", async () => {
+      editPayload = {
+        ...editPayload,
+        dataAgent: {
+          ...editPayload.dataAgent,
+          sendFileLimit: 11
+        }
+      };
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if sendingInterval is smaller than 10", async () => {
+      editPayload = {
+        ...editPayload,
+        dataAgent: {
+          ...editPayload.dataAgent,
+          sendingInterval: 9
+        }
+      };
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if sendingInterval is higher than 10 000", async () => {
+      editPayload = {
+        ...editPayload,
+        dataAgent: {
+          ...editPayload.dataAgent,
+          sendingInterval: 10001
+        }
+      };
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if numberOfSendingRetries is smaller than 1", async () => {
+      editPayload = {
+        ...editPayload,
+        dataAgent: {
+          ...editPayload.dataAgent,
+          numberOfSendingRetries: 0
+        }
+      };
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if numberOfSendingRetries is higher than 10", async () => {
+      editPayload = {
+        dataAgent: {
+          numberOfSendingRetries: 11
+        }
+      };
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if variableNames contain faulty name", async () => {
+      //Not edit device for the first time
+      editPayload = {};
+      await exec();
+
+      let secondEditPayloadWithFaultyName = {
+        name: "newEditName",
+        dataAgent: {
+          boardingKey: {
+            content: {
+              baseUrl: "https://southgate.eu1.mindsphere.io2",
+              iat: "testIat3",
+              clientCredentialProfile: ["SHARED_SECRET"],
+              clientId: "testId3",
+              tenant: "testTenant3"
+            },
+            expiration: "2019-07-21T20:21:39.000Z"
+          },
+          sendingEnabled: true,
+          sendingInterval: 99,
+          sendFileLimit: 3,
+          numberOfSendingRetries: 4,
+          variableNames: "falutyNames"
+        }
+      };
+
+      let result = await request(server)
+        .put(`${endpoint}/${deviceId}`)
+        .set(tokenHeader, token)
+        .send(secondEditPayloadWithFaultyName);
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if variableName is shorter than 3", async () => {
+      //Not edit device for the first time
+      editPayload = {};
+      await exec();
+
+      let secondEditPayloadWithFaultyName = {
+        name: "newEditName",
+        dataAgent: {
+          boardingKey: {
+            content: {
+              baseUrl: "https://southgate.eu1.mindsphere.io2",
+              iat: "testIat3",
+              clientCredentialProfile: ["SHARED_SECRET"],
+              clientId: "testId3",
+              tenant: "testTenant3"
+            },
+            expiration: "2019-07-21T20:21:39.000Z"
+          },
+          sendingEnabled: true,
+          sendingInterval: 99,
+          sendFileLimit: 3,
+          numberOfSendingRetries: 4,
+          variableNames: {
+            editId1: "2"
+          }
+        }
+      };
+
+      let result = await request(server)
+        .put(`${endpoint}/${deviceId}`)
+        .set(tokenHeader, token)
+        .send(secondEditPayloadWithFaultyName);
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if variableName is longer than 100", async () => {
+      //Not edit device for the first time
+      editPayload = {};
+      await exec();
+
+      let secondEditPayloadWithFaultyName = {
+        name: "newEditName",
+        dataAgent: {
+          boardingKey: {
+            content: {
+              baseUrl: "https://southgate.eu1.mindsphere.io2",
+              iat: "testIat3",
+              clientCredentialProfile: ["SHARED_SECRET"],
+              clientId: "testId3",
+              tenant: "testTenant3"
+            },
+            expiration: "2019-07-21T20:21:39.000Z"
+          },
+          sendingEnabled: true,
+          sendingInterval: 99,
+          sendFileLimit: 3,
+          numberOfSendingRetries: 4,
+          variableNames: {
+            editId1: new Array(101 + 1).join("a").toString()
+          }
+        }
+      };
+
+      let result = await request(server)
+        .put(`${endpoint}/${deviceId}`)
+        .set(tokenHeader, token)
+        .send(secondEditPayloadWithFaultyName);
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if variableId is shorter than 3", async () => {
+      //Not edit device for the first time
+      editPayload = {};
+      await exec();
+
+      let secondEditPayloadWithFaultyName = {
+        name: "newEditName",
+        dataAgent: {
+          boardingKey: {
+            content: {
+              baseUrl: "https://southgate.eu1.mindsphere.io2",
+              iat: "testIat3",
+              clientCredentialProfile: ["SHARED_SECRET"],
+              clientId: "testId3",
+              tenant: "testTenant3"
+            },
+            expiration: "2019-07-21T20:21:39.000Z"
+          },
+          sendingEnabled: true,
+          sendingInterval: 99,
+          sendFileLimit: 3,
+          numberOfSendingRetries: 4,
+          variableNames: {
+            "2": "testVariable"
+          }
+        }
+      };
+
+      let result = await request(server)
+        .put(`${endpoint}/${deviceId}`)
+        .set(tokenHeader, token)
+        .send(secondEditPayloadWithFaultyName);
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if variableId is longer than 100", async () => {
+      //Not edit device for the first time
+      editPayload = {};
+      await exec();
+
+      let secondEditPayloadWithFaultyName = {
+        name: "newEditName",
+        dataAgent: {
+          boardingKey: {
+            content: {
+              baseUrl: "https://southgate.eu1.mindsphere.io2",
+              iat: "testIat3",
+              clientCredentialProfile: ["SHARED_SECRET"],
+              clientId: "testId3",
+              tenant: "testTenant3"
+            },
+            expiration: "2019-07-21T20:21:39.000Z"
+          },
+          sendingEnabled: true,
+          sendingInterval: 99,
+          sendFileLimit: 3,
+          numberOfSendingRetries: 4,
+          variableNames: {
+            [new Array(101 + 1).join("a").toString()]: "testVariable"
+          }
+        }
+      };
+
+      let result = await request(server)
+        .put(`${endpoint}/${deviceId}`)
+        .set(tokenHeader, token)
+        .send(secondEditPayloadWithFaultyName);
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if boarding key was undefined before but sendingEnabled is true", async () => {
+      initDataAgentPayload.boardingKey = undefined;
+      initDataAgentPayload.sendingEnabled = false;
+
+      //Not edit device for the first time
+      editPayload = {
+        sendingEnabled: true
+      };
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if boarding key is undefined but sendingEnabled is true in edit payload", async () => {
+      initDataAgentPayload.sendingEnabled = false;
+
+      //Not edit device for the first time
+      editPayload = {
+        boardingKey: undefined,
+        sendingEnabled: true
+      };
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 200 and and set sendingEnabled to false if boarding key changes but sendingEnabled is true in edit payload but was true before", async () => {
+      initDataAgentPayload.sendingEnabled = true;
+
+      //Not edit device for the first time
+      editPayload = {
+        dataAgent: {
+          boardingKey: editPayload.dataAgent.boardingKey
+        }
+      };
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(msAgent.DataAgent.BoardingKey).toEqual(
+        editPayload.dataAgent.boardingKey
+      );
+      expect(msAgent.DataAgent.SendingEnabled).toEqual(false);
     });
 
     it("should call onBoard and getConfig if readyToSend was false and now it is true", async () => {
@@ -615,7 +965,7 @@ describe("auth route", () => {
     });
 
     it("should not recreate MindConnectAgent with new boarding key and readyToSend are not  defined in payload", async () => {
-      delete editPayload.dataAgent.readyToSend;
+      delete editPayload.dataAgent.sendingEnabled;
       delete editPayload.dataAgent.boardingKey;
 
       await exec();
@@ -623,8 +973,9 @@ describe("auth route", () => {
       expect(msAgent.DataAgent.MindConnectAgent).toEqual(oldMindConnectAgent);
     });
 
-    it("should create new boarding key, but not start communication if only boarding key was passed (when msAgent is empty)", async () => {
-      await createEmptyMSAgent();
+    it("should create new boarding key, but not start communication if only boarding key was passed", async () => {
+      initDataAgentPayload = undefined;
+
       editPayload = {
         dataAgent: {
           boardingKey: editPayload.dataAgent.boardingKey
@@ -641,14 +992,11 @@ describe("auth route", () => {
       expect(
         msAgent.DataAgent.MindConnectAgent.GetDataSourceConfiguration
       ).not.toHaveBeenCalled();
-      expect(msAgent.DataAgent.ReadyToSend).toEqual(false);
+      expect(msAgent.DataAgent.SendingEnabled).toEqual(false);
     });
 
     it("should not edit anything and return 200 if editPayload is empty", async () => {
-      await createEmptyMSAgent();
       editPayload = {};
-
-      let initialPayload = msAgent.Payload;
 
       let result = await exec();
 
@@ -656,47 +1004,43 @@ describe("auth route", () => {
 
       let afterPayload = msAgent.Payload;
 
-      expect(initialPayload).toEqual(afterPayload);
+      expect(initialDevicePayload).toEqual(afterPayload);
     });
 
     it("should not edit anything and return 200 if editPayload.dataAgent is empty", async () => {
-      await createEmptyMSAgent();
+      initDataAgentPayload = undefined;
       editPayload = {
         dataAgent: {}
       };
 
-      let initialPayload = msAgent.Payload;
-
       let result = await exec();
 
       expect(result.status).toEqual(200);
 
       let afterPayload = msAgent.Payload;
 
-      expect(initialPayload).toEqual(afterPayload);
+      expect(initialDevicePayload).toEqual(afterPayload);
     });
 
     it("should not edit dirPath and return 400 if dirPath is defined in payload", async () => {
-      await createEmptyMSAgent();
+      initDataAgentPayload = undefined;
       editPayload = {
         dataAgent: {
           dirPath: "fakeDirPath"
         }
       };
 
-      let initialPayload = msAgent.Payload;
-
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
       let afterPayload = msAgent.Payload;
 
-      expect(initialPayload).toEqual(afterPayload);
+      expect(initialDevicePayload).toEqual(afterPayload);
     });
 
     it("should not edit dirPath and return 400 if dirPath is defined in payload", async () => {
-      await createEmptyMSAgent();
+      initDataAgentPayload = undefined;
 
       editPayload = {
         dataAgent: {
@@ -704,192 +1048,17 @@ describe("auth route", () => {
         }
       };
 
-      let initialPayload = msAgent.Payload;
-
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
       let afterPayload = msAgent.Payload;
 
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if only variableNames are defined in dataAgent payload", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          variableNames: editPayload.dataAgent.variableNames
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if only sampleTimeGroups are defined in dataAgent payload", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          sampleTimeGroups: editPayload.dataAgent.sampleTimeGroups
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if variableNames have more variables than sampleTimeGroups", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          variableNames: {
-            ...editPayload.dataAgent.variableNames,
-            fakeVariable: "fakeName"
-          },
-          sampleTimeGroups: editPayload.dataAgent.sampleTimeGroups
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if sampleTimeGroups have more variables than variableNames", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          variableNames: editPayload.dataAgent.variableNames,
-          sampleTimeGroups: [...editPayload.dataAgent.sampleTimeGroups]
-        }
-      };
-      editPayload.dataAgent.sampleTimeGroups[0].variableIds.push(
-        "fakeVariable"
-      );
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if there is variable in variableNames and sampleTimeGroup that does not exists in device", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          variableNames: {
-            ...editPayload.dataAgent.variableNames,
-            fakeVariable: "fakeName"
-          },
-          sampleTimeGroups: [...editPayload.dataAgent.sampleTimeGroups]
-        }
-      };
-      editPayload.dataAgent.sampleTimeGroups[0].variableIds.push(
-        "fakeVariable"
-      );
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-      expect(result.text).toEqual("Element of given id does not exist");
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if sampleTimeGroups is defined and variableName not", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          sampleTimeGroups: []
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if variableNames is defined and sampleTimeGroups not", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          variableNames: {}
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if on of payload of sampleTimeGroup is invalid", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          variableNames: {
-            ...editPayload.dataAgent.variableNames
-          },
-          sampleTimeGroups: [...editPayload.dataAgent.sampleTimeGroups]
-        }
-      };
-      editPayload.dataAgent.sampleTimeGroups[0] = "fakeSampleTimeGroup";
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
+      expect(initialDevicePayload).toEqual(afterPayload);
     });
 
     it("should not edit anything and return 400 if on of boardingKey is null", async () => {
+      initDataAgentPayload = undefined;
       editPayload = {
         ...editPayload,
         dataAgent: {
@@ -898,18 +1067,17 @@ describe("auth route", () => {
         }
       };
 
-      let initialPayload = msAgent.Payload;
-
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
       let afterPayload = msAgent.Payload;
 
-      expect(initialPayload).toEqual(afterPayload);
+      expect(initialDevicePayload).toEqual(afterPayload);
     });
 
     it("should not edit anything and return 400 if boardingKey is invalid", async () => {
+      initDataAgentPayload = undefined;
       editPayload = {
         ...editPayload,
         dataAgent: {
@@ -920,195 +1088,47 @@ describe("auth route", () => {
         }
       };
 
-      let initialPayload = msAgent.Payload;
-
       let result = await exec();
 
       expect(result.status).toEqual(400);
 
       let afterPayload = msAgent.Payload;
 
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if sendDataLimit is less than 0", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          sendDataLimit: -1
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if sendDataLimit is equal than 0", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          sendDataLimit: 0
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if sendDataLimit is greater than 50", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          sendDataLimit: 51
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if bufferSize is smaller than 0", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          bufferSize: -1
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if bufferSize is equal 0", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          bufferSize: 0
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if bufferSize is greater than 10000", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          bufferSize: 10001
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if bufferSize is greater than 10000", async () => {
-      editPayload = {
-        ...editPayload,
-        dataAgent: {
-          ...editPayload.dataAgent,
-          bufferSize: 10001
-        }
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if name is shorter than 3", async () => {
-      editPayload = {
-        ...editPayload,
-        name: "ab"
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
-    });
-
-    it("should not edit anything and return 400 if name is longer than 100", async () => {
-      editPayload = {
-        ...editPayload,
-        name: new Array(101 + 1).join("a").toString()
-      };
-
-      let initialPayload = msAgent.Payload;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(400);
-
-      let afterPayload = msAgent.Payload;
-
-      expect(initialPayload).toEqual(afterPayload);
+      expect(initialDevicePayload).toEqual(afterPayload);
     });
 
     it("should return code 404 and if there is no device of given id", async () => {
-      deviceId = "4321";
+      //Not edit device for the first time
+      editPayload = {};
+      await exec();
 
-      let result = await exec();
+      let secondEditPayloadWithFaultyName = {
+        name: "newEditName",
+        dataAgent: {
+          boardingKey: {
+            content: {
+              baseUrl: "https://southgate.eu1.mindsphere.io2",
+              iat: "testIat3",
+              clientCredentialProfile: ["SHARED_SECRET"],
+              clientId: "testId3",
+              tenant: "testTenant3"
+            },
+            expiration: "2019-07-21T20:21:39.000Z"
+          },
+          sendingEnabled: true,
+          sendingInterval: 99,
+          sendFileLimit: 3,
+          numberOfSendingRetries: 4,
+          variableNames: {
+            editId1: "testDevice"
+          }
+        }
+      };
+
+      let result = await request(server)
+        .put(`${endpoint}/fakeDeviceId`)
+        .set(tokenHeader, token)
+        .send(secondEditPayloadWithFaultyName);
 
       expect(result.status).toEqual(404);
       expect(result.text).toMatch(`Device of given id does not exist`);

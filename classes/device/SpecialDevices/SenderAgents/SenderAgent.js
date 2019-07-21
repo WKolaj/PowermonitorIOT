@@ -12,6 +12,7 @@ const {
 const path = require("path");
 const logger = require("../../../../logger/logger");
 const Sampler = require("../../../sampler/Sampler");
+const mongoose = require("mongoose");
 
 class SenderAgent {
   constructor() {
@@ -134,7 +135,7 @@ class SenderAgent {
   }
 
   _generateBufferFileName() {
-    return `${Date.now()}.json`;
+    return `${mongoose.Types.ObjectId().toHexString()}.json`;
   }
 
   async _saveDataToFile(data) {

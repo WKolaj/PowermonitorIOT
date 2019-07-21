@@ -1,8 +1,6 @@
 const Joi = require("joi");
 const Project = require("../../../classes/project/Project");
-const { exists, snooze } = require("../../../utilities/utilities");
-
-//TODO - check class and write test for class (refreshing mechanism MUST BE checked) and for api endpoints
+const { exists, existsAndIsNotEmpty } = require("../../../utilities/utilities");
 
 let boardingKeyContentSchema = Joi.object().keys({
   baseUrl: Joi.string()
@@ -24,7 +22,7 @@ let dataAgentEditSchema = Joi.object().keys({
   sendFileLimit: Joi.number()
     .integer()
     .min(1)
-    .max(50),
+    .max(10),
   sendingInterval: Joi.number()
     .integer()
     .min(10)
@@ -76,11 +74,11 @@ let validateVariableNamePair = valueNamePair => {
 
 let checkVariableNames = async variableNames => {
   if (!exists(variableNames)) return "variableNames should be defined";
-
   for (let varaibleId of Object.keys(variableNames)) {
+    let variableName = variableNames[varaibleId];
     let pair = {
       id: varaibleId,
-      name: variableNames[variableNames]
+      name: variableName
     };
 
     let error = await validateVariableNamePair(pair);
@@ -89,6 +87,18 @@ let checkVariableNames = async variableNames => {
 };
 
 let setDefaultValues = function(req) {};
+
+let checkEnableSettings = async payload => {
+  if (!exists(payload.dataAgent)) return;
+
+  if (
+    exists(payload.sendingEnabled) &&
+    payload.sendingEnabled &&
+    !existsAndIsNotEmpty(payload.boardingKey)
+  ) {
+    return "Boarding key cannot be empty if sendingEnabled is set to true!";
+  }
+};
 
 /**
  * @description Method for validate if element is valid while creating - return error message if object is not valid or undefined instead
@@ -115,15 +125,19 @@ let validateEdit = function(req) {
       if (err) {
         return resolve(err.details[0].message);
       } else {
-        //Checking variable names
-        if (
-          exists(req.body.dataAgent) &&
-          exists(req.body.dataAgent.variableNames)
-        ) {
-          let variableNamesCheck = await checkVariableNames(
-            req.body.dataAgent.variableNames
-          );
-          if (variableNamesCheck) return resolve(variableNamesCheck);
+        if (exists(req.body.dataAgent)) {
+          //Checking variable names
+          if (exists(req.body.dataAgent.variableNames)) {
+            let variableNamesCheck = await checkVariableNames(
+              req.body.dataAgent.variableNames
+            );
+            if (variableNamesCheck) return resolve(variableNamesCheck);
+          }
+          //Checking if sending Enabled can be set to true
+          if (exists(req.body.dataAgent.sendingEnabled)) {
+            let sendingEnabledCheck = await checkEnableSettings(req.body);
+            if (sendingEnabledCheck) return resolve(sendingEnabledCheck);
+          }
         }
         return resolve();
       }

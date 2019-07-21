@@ -63,9 +63,7 @@ class MindConnectDevice extends SpecialDevice {
   }
 
   static generateDirectoryPath(id) {
-    return path.resolve(
-      path.join(config.get("projPath"), config.get("dataAgentDir"), id)
-    );
+    return path.join(config.get("projPath"), config.get("dataAgentDir"), id);
   }
 
   /**
