@@ -1,4 +1,4 @@
-const EventStorage = require("../../../classes/EventBuffer/EventStorage");
+const EventStorage = require("../../../classes/EventStorage/EventStorage");
 const sqlite3 = require("sqlite3");
 const config = require("config");
 const path = require("path");
@@ -2034,6 +2034,725 @@ describe("EventBuffer", () => {
       expect(buffer.Content).toEqual(expectedContent);
 
       //Database file will not exist
+    });
+
+    it("should insert new propert values if buffer Size changes to bigger size", async () => {
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 4, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 }
+      ];
+
+      await exec();
+
+      buffer.changeBufferSize(4);
+
+      let content4 = [
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 },
+        { tickId: now + 7, value: 1007 },
+        { tickId: now + 8, value: 1008 }
+      ];
+
+      let invokeResult4 = await buffer.refreshEvents(content4);
+
+      let expectedContent = {
+        [5]: {
+          value: content4[0].value,
+          tickId: content4[0].tickId,
+          eventId: 5
+        },
+        [6]: {
+          value: content4[1].value,
+          tickId: content4[1].tickId,
+          eventId: 6
+        },
+        [7]: {
+          value: content4[2].value,
+          tickId: content4[2].tickId,
+          eventId: 7
+        },
+        [8]: {
+          value: content4[3].value,
+          tickId: content4[3].tickId,
+          eventId: 8
+        }
+      };
+
+      expect(buffer.Content).toEqual(expectedContent);
+
+      expect(invokeResult4).toEqual([
+        {
+          value: content4[2].value,
+          tickId: content4[2].tickId,
+          eventId: 7
+        },
+        {
+          value: content4[3].value,
+          tickId: content4[3].tickId,
+          eventId: 8
+        }
+      ]);
+
+      let databaseContent = await readAllDataFromTable(
+        eventBufferFilePath,
+        "data"
+      );
+
+      let expectedDBContent = [
+        {
+          eventId: 1,
+          tickId: content1[0].tickId,
+          value: content1[0].value
+        },
+        {
+          eventId: 2,
+          tickId: content1[1].tickId,
+          value: content1[1].value
+        },
+        {
+          eventId: 3,
+          tickId: content1[2].tickId,
+          value: content1[2].value
+        },
+        {
+          eventId: 4,
+          tickId: content2[2].tickId,
+          value: content2[2].value
+        },
+        {
+          eventId: 5,
+          tickId: content3[1].tickId,
+          value: content3[1].value
+        },
+        {
+          eventId: 6,
+          tickId: content3[2].tickId,
+          value: content3[2].value
+        },
+        {
+          eventId: 7,
+          tickId: content4[2].tickId,
+          value: content4[2].value
+        },
+        {
+          eventId: 8,
+          tickId: content4[3].tickId,
+          value: content4[3].value
+        }
+      ];
+
+      expect(databaseContent).toEqual(expectedDBContent);
+    });
+
+    it("should insert new propert values if buffer Size changes to smaller size", async () => {
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 4, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 }
+      ];
+
+      await exec();
+
+      buffer.changeBufferSize(2);
+
+      let content4 = [
+        { tickId: now + 6, value: 1006 },
+        { tickId: now + 7, value: 1007 }
+      ];
+
+      let invokeResult4 = await buffer.refreshEvents(content4);
+
+      let expectedContent = {
+        [6]: {
+          value: content4[0].value,
+          tickId: content4[0].tickId,
+          eventId: 6
+        },
+        [7]: {
+          value: content4[1].value,
+          tickId: content4[1].tickId,
+          eventId: 7
+        }
+      };
+
+      expect(buffer.Content).toEqual(expectedContent);
+
+      expect(invokeResult4).toEqual([
+        {
+          value: content4[1].value,
+          tickId: content4[1].tickId,
+          eventId: 7
+        }
+      ]);
+
+      let databaseContent = await readAllDataFromTable(
+        eventBufferFilePath,
+        "data"
+      );
+
+      let expectedDBContent = [
+        {
+          eventId: 1,
+          tickId: content1[0].tickId,
+          value: content1[0].value
+        },
+        {
+          eventId: 2,
+          tickId: content1[1].tickId,
+          value: content1[1].value
+        },
+        {
+          eventId: 3,
+          tickId: content1[2].tickId,
+          value: content1[2].value
+        },
+        {
+          eventId: 4,
+          tickId: content2[2].tickId,
+          value: content2[2].value
+        },
+        {
+          eventId: 5,
+          tickId: content3[1].tickId,
+          value: content3[1].value
+        },
+        {
+          eventId: 6,
+          tickId: content3[2].tickId,
+          value: content3[2].value
+        },
+        {
+          eventId: 7,
+          tickId: content4[1].tickId,
+          value: content4[1].value
+        }
+      ];
+
+      expect(databaseContent).toEqual(expectedDBContent);
+    });
+  });
+
+  describe("changeBuffer", () => {
+    let buffer;
+    let initBuffer;
+    let bufferSize;
+    let newBufferSize;
+    let bufferContentBefore;
+
+    let content1;
+    let content2;
+    let content3;
+
+    beforeEach(() => {
+      initBuffer = true;
+      bufferSize = 3;
+      initialLastEventId = null;
+      insertDataIntoDBThrows = false;
+
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 4, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 }
+      ];
+
+      newBufferSize = 5;
+    });
+
+    let exec = async () => {
+      buffer = new EventStorage();
+      if (initBuffer) await buffer.init(eventBufferFilePath, bufferSize);
+
+      if (existsAndIsNotEmpty(content1))
+        invokeResult1 = await buffer.refreshEvents(content1);
+      if (existsAndIsNotEmpty(content2))
+        invokeResult2 = await buffer.refreshEvents(content2);
+      if (existsAndIsNotEmpty(content3))
+        invokeResult3 = await buffer.refreshEvents(content3);
+      bufferContentBefore = { ...buffer.Content };
+
+      return buffer.changeBufferSize(newBufferSize);
+    };
+
+    it("should edit buffer size according to given number", async () => {
+      await exec();
+
+      expect(buffer.BufferSize).toEqual(newBufferSize);
+    });
+
+    it("should not throw and edit buffer size if buffer content is empty", async () => {
+      content1 = null;
+      content2 = null;
+      content3 = null;
+
+      await exec();
+
+      expect(buffer.BufferSize).toEqual(newBufferSize);
+    });
+
+    it("should not throw and edit buffer size if buffer is not initialzied", async () => {
+      initBuffer = false;
+      content1 = null;
+      content2 = null;
+      content3 = null;
+
+      await exec();
+
+      expect(buffer.BufferSize).toEqual(newBufferSize);
+    });
+    it("should not throw and edit buffer size and do not edit buffer content if buffer is lesser than new buffer size", async () => {
+      await exec();
+
+      expect(buffer.Content).toEqual(bufferContentBefore);
+    });
+
+    it("should not throw and edit buffer size and clear last content of buffer if buffer is greater than new buffer size", async () => {
+      newBufferSize = 2;
+
+      await exec();
+
+      expect(buffer.Content).not.toEqual(bufferContentBefore);
+
+      let now = content1[0].tickId - 1;
+
+      let expectedBufferContent = {
+        "5": { eventId: 5, tickId: now + 5, value: 1005 },
+        "6": { eventId: 6, tickId: now + 6, value: 1006 }
+      };
+
+      expect(buffer.Content).toEqual(expectedBufferContent);
+    });
+  });
+
+  describe("getEvent", () => {
+    let buffer;
+    let initBuffer;
+    let bufferSize;
+
+    let content1;
+    let content2;
+    let content3;
+
+    let tickId;
+
+    beforeEach(() => {
+      initBuffer = true;
+      bufferSize = 3;
+
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 4, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 }
+      ];
+
+      tickId = now + 2;
+    });
+
+    let exec = async () => {
+      buffer = new EventStorage();
+      if (initBuffer) await buffer.init(eventBufferFilePath, bufferSize);
+
+      if (existsAndIsNotEmpty(content1))
+        invokeResult1 = await buffer.refreshEvents(content1);
+      if (existsAndIsNotEmpty(content2))
+        invokeResult2 = await buffer.refreshEvents(content2);
+      if (existsAndIsNotEmpty(content3))
+        invokeResult3 = await buffer.refreshEvents(content3);
+
+      return buffer.getEvent(tickId);
+    };
+
+    it("should return last event of given tickId - if it exists", async () => {
+      let result = await exec();
+
+      expect(result).toEqual({
+        [tickId]: 1002
+      });
+    });
+
+    it("should return last event  - if tick id is greater than last tickId in database", async () => {
+      tickId = content3[2].tickId + 1;
+      let result = await exec();
+
+      expect(result).toEqual({
+        [content3[2].tickId]: 1006
+      });
+    });
+
+    it("should return last event samller than given tickId if element of given tickId doest not exist", async () => {
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1002 },
+        { tickId: now + 5, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 3, value: 1002 },
+        { tickId: now + 5, value: 1003 },
+        { tickId: now + 7, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 7, value: 1004 },
+        { tickId: now + 9, value: 1005 },
+        { tickId: now + 11, value: 1006 }
+      ];
+
+      tickId = now + 6;
+
+      let result = await exec();
+
+      expect(result).toEqual({
+        [content2[1].tickId]: 1003
+      });
+    });
+
+    it("should return empty object tickId is lesser than smallest tickId in database", async () => {
+      tickId = 1000;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should return empty object if there is no data in database", async () => {
+      content1 = null;
+      content2 = null;
+      content3 = null;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should return first event that was insterted in db if there are more events of the same tickId", async () => {
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 5, value: 1002 },
+        { tickId: now + 5, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 5, value: 1002 },
+        { tickId: now + 5, value: 1003 },
+        { tickId: now + 5, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 5, value: 1004 },
+        { tickId: now + 9, value: 1005 },
+        { tickId: now + 11, value: 1006 }
+      ];
+
+      tickId = now + 5;
+
+      let result = await exec();
+
+      expect(result).toEqual({
+        [content3[0].tickId]: 1002
+      });
+    });
+
+    it("should throw if event storage is not initialized", async () => {
+      initBuffer = false;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should not set busy to true", async () => {
+      await exec();
+
+      expect(buffer.Busy).toEqual(false);
+    });
+  });
+
+  describe("getEvents", () => {
+    let buffer;
+    let initBuffer;
+    let bufferSize;
+
+    let content1;
+    let content2;
+    let content3;
+
+    let startTickId;
+    let stopTickId;
+
+    beforeEach(() => {
+      initBuffer = true;
+      bufferSize = 3;
+
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 4, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 }
+      ];
+
+      startTickId = now + 2;
+      stopTickId = now + 4;
+    });
+
+    let exec = async () => {
+      buffer = new EventStorage();
+      if (initBuffer) await buffer.init(eventBufferFilePath, bufferSize);
+
+      if (existsAndIsNotEmpty(content1))
+        invokeResult1 = await buffer.refreshEvents(content1);
+      if (existsAndIsNotEmpty(content2))
+        invokeResult2 = await buffer.refreshEvents(content2);
+      if (existsAndIsNotEmpty(content3))
+        invokeResult3 = await buffer.refreshEvents(content3);
+
+      return buffer.getEvents(startTickId, stopTickId);
+    };
+
+    it("should return all events between startTickId and stopTickId", async () => {
+      let result = await exec();
+
+      expect(result).toEqual([
+        {
+          [content2[2].tickId]: 1004
+        },
+        {
+          [content2[1].tickId]: 1003
+        },
+        {
+          [content2[0].tickId]: 1002
+        }
+      ]);
+    });
+
+    it("should return only one tickId if only one meets requriements", async () => {
+      startTickId = content2[1].tickId;
+      stopTickId = content2[1].tickId;
+
+      let result = await exec();
+
+      expect(result).toEqual([
+        {
+          [content2[1].tickId]: 1003
+        }
+      ]);
+    });
+
+    it("should return empty object if none of elements meet requriements", async () => {
+      startTickId = content2[1].tickId + 1000;
+      stopTickId = content2[1].tickId + 1001;
+
+      let result = await exec();
+
+      expect(result).toEqual([]);
+    });
+
+    it("should return empty object if stopId is lesset than startId", async () => {
+      startTickId = content2[1].tickId + 2;
+      stopTickId = content2[1].tickId + 1;
+
+      let result = await exec();
+
+      expect(result).toEqual([]);
+    });
+
+    it("should return valid objects if more than one event has the same tickId", async () => {
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 2, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 2, value: 1003 },
+        { tickId: now + 2, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 2, value: 1004 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 }
+      ];
+
+      startTickId = now + 2;
+      stopTickId = now + 4;
+      let result = await exec();
+
+      expect(result).toEqual([
+        {
+          [now + 2]: 1002
+        },
+        {
+          [now + 2]: 1003
+        },
+        {
+          [now + 2]: 1004
+        }
+      ]);
+    });
+
+    it("should throw if event storage is not initialized", async () => {
+      initBuffer = false;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should not set busy to true", async () => {
+      await exec();
+
+      expect(buffer.Busy).toEqual(false);
+    });
+  });
+
+  describe("getLastEvent", () => {
+    let buffer;
+    let initBuffer;
+    let bufferSize;
+
+    let content1;
+    let content2;
+    let content3;
+
+    beforeEach(() => {
+      initBuffer = true;
+      bufferSize = 3;
+
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 }
+      ];
+      content2 = [
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 4, value: 1004 }
+      ];
+      content3 = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 6, value: 1006 }
+      ];
+    });
+
+    let exec = async () => {
+      buffer = new EventStorage();
+      if (initBuffer) await buffer.init(eventBufferFilePath, bufferSize);
+
+      if (existsAndIsNotEmpty(content1))
+        invokeResult1 = await buffer.refreshEvents(content1);
+      if (existsAndIsNotEmpty(content2))
+        invokeResult2 = await buffer.refreshEvents(content2);
+      if (existsAndIsNotEmpty(content3))
+        invokeResult3 = await buffer.refreshEvents(content3);
+
+      return buffer.getLastEvent();
+    };
+
+    it("should return last event", async () => {
+      let result = await exec();
+
+      let now = content1[0].tickId - 1;
+
+      expect(result).toEqual({ [now + 6]: 1006 });
+    });
+
+    it("should return empty object if there is not content", async () => {
+      content1 = null;
+      content2 = null;
+      content3 = null;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
+    });
+
+    it("should return empty object if buffer is not initialized", async () => {
+      initBuffer = false;
+      content1 = null;
+      content2 = null;
+      content3 = null;
+
+      let result = await exec();
+
+      expect(result).toEqual({});
     });
   });
 });

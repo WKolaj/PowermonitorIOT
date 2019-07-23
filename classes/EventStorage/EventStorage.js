@@ -100,6 +100,26 @@ class EventStorage {
     return this._db;
   }
 
+  changeBufferSize(newSize) {
+    if (newSize >= this.BufferSize) {
+      this._bufferSize = newSize;
+    } else {
+      //newBufferSize is smaller than before - removing values from content
+
+      let allEventIds = Object.keys(this.Content).sort(
+        (a, b) => parseInt(a) - parseInt(b)
+      );
+
+      let numberOfEventsToDelete = allEventIds.length - newSize;
+
+      for (let i = 0; i < numberOfEventsToDelete; i++) {
+        delete this.Content[allEventIds[i]];
+      }
+
+      this._bufferSize = newSize;
+    }
+  }
+
   _checkIfInitialized() {
     if (!this.Initialized) throw new Error("EventBuffer is not initialized!");
   }
@@ -282,6 +302,81 @@ class EventStorage {
       this._busy = false;
       throw err;
     }
+  }
+
+  async getLastEvent() {
+    if (!existsAndIsNotEmpty(this.Content)) return {};
+
+    let allEventIds = Object.keys(this.Content).sort(
+      (a, b) => parseInt(b) - parseInt(a)
+    );
+
+    return {
+      [this.Content[allEventIds[0]].tickId]: this.Content[allEventIds[0]].value
+    };
+  }
+
+  /**
+   * @description Method for getting events from database
+   * @param {*} tickId tickId of event to check
+   */
+  async getEvent(tickId) {
+    return new Promise((resolve, reject) => {
+      try {
+        this._checkIfInitialized();
+
+        this.DB.get(
+          `SELECT eventId, value, tickId  FROM data WHERE tickId <= ${tickId} ORDER BY tickId DESC LIMIT 1`,
+          (err, row) => {
+            if (err) {
+              return reject(err);
+            }
+
+            if (row) {
+              return resolve({ [row.tickId]: row.value });
+            } else {
+              return resolve({});
+            }
+          }
+        );
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for getting several events from database
+   * @param {number} fromTickId Begin tickId
+   * @param {number} toTickId End tickId
+   */
+  async getEvents(fromTickId, toTickId) {
+    return new Promise((resolve, reject) => {
+      try {
+        this._checkIfInitialized();
+        this.DB.all(
+          `SELECT eventId, value, tickId  FROM data WHERE tickId <= ${toTickId} AND tickId >= ${fromTickId} ORDER BY tickId DESC`,
+          (err, rows) => {
+            if (err) {
+              return reject(err);
+            }
+            if (rows) {
+              return resolve(
+                rows
+                  .filter(row => row.value !== null)
+                  .map(row => {
+                    return { [row.tickId]: row.value };
+                  })
+              );
+            } else {
+              return resolve({});
+            }
+          }
+        );
+      } catch (err) {
+        return reject(err);
+      }
+    });
   }
 }
 
