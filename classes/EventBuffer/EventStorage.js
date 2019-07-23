@@ -1,7 +1,12 @@
 const sqlite3 = require("sqlite3");
-const { exists, isObjectEmpty, snooze } = require("../../utilities/utilities");
+const {
+  exists,
+  isObjectEmpty,
+  existsAndIsNotEmpty,
+  snooze
+} = require("../../utilities/utilities");
 
-class EventBuffer {
+class EventStorage {
   constructor() {
     this._filePath = null;
     this._db = null;
@@ -9,6 +14,7 @@ class EventBuffer {
     this._lastEventId = 0;
     this._busy = false;
     this._initialized = false;
+    this._bufferSize = 10;
   }
 
   /**
@@ -40,9 +46,10 @@ class EventBuffer {
    * @description Method for initializing event buffer
    * @param {string} filePath Database file path for event buffer
    */
-  async init(filePath) {
+  async init(filePath, bufferSize) {
     this._initialized = false;
     this._busy = true;
+    this._bufferSize = bufferSize;
 
     try {
       await this._createDatabaseIfNotExists(filePath);
@@ -85,6 +92,10 @@ class EventBuffer {
     return this._bufferContent;
   }
 
+  get BufferSize() {
+    return this._bufferSize;
+  }
+
   get DB() {
     return this._db;
   }
@@ -108,36 +119,45 @@ class EventBuffer {
     return "INSERT INTO data(eventId,tickId,value) VALUES (?,?,?);";
   }
 
+  async _checkAndRemoveEventsFromBuffer() {
+    if (!existsAndIsNotEmpty(this.Content)) return;
+
+    let allEventIds = Object.keys(this.Content).sort(
+      (a, b) => parseInt(a) - parseInt(b)
+    );
+
+    let numberOfElementsToRemove = allEventIds.length - this.BufferSize;
+
+    if (numberOfElementsToRemove > 0) {
+      for (let i = 0; i < numberOfElementsToRemove; i++) {
+        delete this.Content[allEventIds[i]];
+      }
+    }
+  }
+
   /**
    * @description Method for adding event to buffer
    * @param {number} tickId tickId of event
    * @param {number} value value of event
    */
-  async addEvent(tickId, value) {
+  async _addEvent(tickId, value) {
     //value of event must be larger than 0 !!
     if (value <= 0) return;
 
-    this._checkIfInitialized();
-    this._checkIfBusy();
-    this._busy = true;
+    let eventId = this._generateNewEventId();
+    let eventPayload = {
+      eventId,
+      tickId,
+      value
+    };
 
-    try {
-      let eventId = this._generateNewEventId();
-      let eventPayload = {
-        eventId,
-        tickId,
-        value
-      };
+    let valueInserted = await this._insertValueIntoDB(eventId, tickId, value);
 
-      let valueInserted = await this._insertValueIntoDB(eventId, tickId, value);
+    if (valueInserted) this.Content[eventId] = eventPayload;
 
-      if (valueInserted) this.Content[eventId] = eventPayload;
+    await this._checkAndRemoveEventsFromBuffer();
 
-      this._busy = false;
-    } catch (err) {
-      this._busy = false;
-      throw err;
-    }
+    return eventPayload;
   }
 
   /**
@@ -196,21 +216,73 @@ class EventBuffer {
   async _getEventFromDB() {
     return new Promise((resolve, reject) => {
       try {
-        this.DB.all(`SELECT * FROM data ORDER BY eventId DESC`, (err, rows) => {
-          if (err) {
-            return reject(err);
+        this.DB.all(
+          `SELECT * FROM data ORDER BY eventId DESC LIMIT ${this.BufferSize}`,
+          (err, rows) => {
+            if (err) {
+              return reject(err);
+            }
+            if (rows) {
+              return resolve(this._convertRowsToEvents(rows));
+            } else {
+              return resolve({});
+            }
           }
-          if (rows) {
-            return resolve(this._convertRowsToEvents(rows));
-          } else {
-            return resolve({});
-          }
-        });
+        );
       } catch (err) {
         return reject(err);
       }
     });
   }
+
+  async refreshEvents(newContent) {
+    this._checkIfInitialized();
+    this._checkIfBusy();
+    if (!existsAndIsNotEmpty(newContent)) return;
+
+    this._busy = true;
+
+    try {
+      let contentValues = Object.values(this.Content);
+      let newContentValues = Object.values(newContent);
+
+      if (newContentValues.length !== this.BufferSize)
+        throw new Error(
+          "Length of new content cannot be different than bufferSize"
+        );
+
+      let contentValuesToAdd = [];
+
+      for (let newContentValue of newContentValues) {
+        let contentValueAlreadyExists = contentValues.some(
+          contentValue =>
+            contentValue.tickId === newContentValue.tickId &&
+            contentValue.value === newContentValue.value
+        );
+
+        if (!contentValueAlreadyExists)
+          contentValuesToAdd.push(newContentValue);
+      }
+
+      let contentsToReturn = [];
+
+      for (let contentValue of contentValuesToAdd) {
+        let newContentValue = await this._addEvent(
+          contentValue.tickId,
+          contentValue.value
+        );
+        if (existsAndIsNotEmpty(newContentValue))
+          contentsToReturn.push(newContentValue);
+      }
+
+      this._busy = false;
+
+      return contentsToReturn;
+    } catch (err) {
+      this._busy = false;
+      throw err;
+    }
+  }
 }
 
-module.exports = EventBuffer;
+module.exports = EventStorage;
