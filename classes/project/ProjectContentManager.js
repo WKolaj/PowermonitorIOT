@@ -41,6 +41,11 @@ class ProjectContentManager {
       config.get("dataAgentDir")
     );
 
+    this._eventLogDir = path.join(
+      this.ProjectAbsolutePath,
+      config.get("eventElementsDir")
+    );
+
     this._project = project;
   }
 
@@ -110,6 +115,13 @@ class ProjectContentManager {
   }
 
   /**
+   * @description Absolute path to event logs directory
+   */
+  get EventLogDirPath() {
+    return this._eventLogDir;
+  }
+
+  /**
    * @description Method for checking if project directory exists
    */
   async _checkIfProjectDirExists() {
@@ -137,6 +149,20 @@ class ProjectContentManager {
     let dirExists = await this._checkIfAgentDirExists();
     if (!dirExists) {
       return createDirAsync(this.AgentDirPath);
+    }
+  }
+
+  /**
+   * @description Method for checking if agent directory exists
+   */
+  async _checkIfEventLogDirExists() {
+    return checkIfDirectoryExistsAsync(this.EventLogDirPath);
+  }
+
+  async _createEventLogDirIfNotExists() {
+    let dirExists = await this._checkIfEventLogDirExists();
+    if (!dirExists) {
+      return createDirAsync(this.EventLogDirPath);
     }
   }
 
@@ -506,6 +532,7 @@ class ProjectContentManager {
     this._generateAndAssignNewPrivateKey();
     await this._createProjectDirIfNotExists();
     await this._createAgentDirIfNotExists();
+    await this._createEventLogDirIfNotExists();
     await this.saveConfigFile();
     await this._createDeviceDirIfNotExists();
     await this._createDefaultUser();

@@ -2,6 +2,7 @@
   "db1Path": "database/db1",
   "db2Path": "database/db2",
   "dataAgentDir": "dataAgents",
+  "eventElementsDir": "eventLogs",
   "projPath": "project",
   "tokenHeader": "x-auth-token",
   "networkInterfaceName": "eth0",

@@ -11,7 +11,6 @@ let {
   checkIfColumnExists,
   checkIfFileExistsAsync,
   createDatabaseFile,
-  createDatabaseTable,
   createDatabaseColumn,
   readAllDataFromTable,
   exists,
@@ -19,7 +18,24 @@ let {
   snooze
 } = require("../../../utilities/utilities");
 
-describe("EventBuffer", () => {
+let createDatabaseTable = function(dbFile, tableName) {
+  return new Promise(async (resolve, reject) => {
+    let db = new sqlite3.Database(dbFile);
+
+    db.run(
+      `CREATE TABLE IF NOT EXISTS ${tableName} (eventId INTEGER, PRIMARY KEY(eventId) );`,
+      err => {
+        if (err) {
+          return reject(err);
+        }
+
+        return resolve(true);
+      }
+    );
+  });
+};
+
+describe("EventStorage", () => {
   let eventBufferFilePath;
   beforeEach(async () => {
     await clearDirectoryAsync(eventBufferDirectory);
@@ -194,12 +210,6 @@ describe("EventBuffer", () => {
       await createDatabaseColumn(
         eventBufferFilePath,
         "data",
-        "eventId",
-        "INTEGER"
-      );
-      await createDatabaseColumn(
-        eventBufferFilePath,
-        "data",
         "value",
         "INTEGER"
       );
@@ -318,12 +328,6 @@ describe("EventBuffer", () => {
       await createDatabaseColumn(
         eventBufferFilePath,
         "data",
-        "eventId",
-        "INTEGER"
-      );
-      await createDatabaseColumn(
-        eventBufferFilePath,
-        "data",
         "value",
         "INTEGER"
       );
@@ -412,12 +416,6 @@ describe("EventBuffer", () => {
       await createDatabaseColumn(
         eventBufferFilePath,
         "data",
-        "eventId",
-        "INTEGER"
-      );
-      await createDatabaseColumn(
-        eventBufferFilePath,
-        "data",
         "value",
         "INTEGER"
       );
@@ -496,12 +494,6 @@ describe("EventBuffer", () => {
       await createDatabaseColumn(
         eventBufferFilePath,
         "data",
-        "eventId",
-        "INTEGER"
-      );
-      await createDatabaseColumn(
-        eventBufferFilePath,
-        "data",
         "value",
         "INTEGER"
       );
@@ -569,12 +561,6 @@ describe("EventBuffer", () => {
 
       await createDatabaseTable(eventBufferFilePath, "data");
 
-      await createDatabaseColumn(
-        eventBufferFilePath,
-        "data",
-        "eventId",
-        "INTEGER"
-      );
       await createDatabaseColumn(
         eventBufferFilePath,
         "data",
@@ -673,12 +659,6 @@ describe("EventBuffer", () => {
 
       await createDatabaseTable(eventBufferFilePath, "data");
 
-      await createDatabaseColumn(
-        eventBufferFilePath,
-        "data",
-        "eventId",
-        "INTEGER"
-      );
       await createDatabaseColumn(
         eventBufferFilePath,
         "data",
@@ -1082,19 +1062,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 4, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: 1004 }
       ];
     });
 
@@ -1120,8 +1100,8 @@ describe("EventBuffer", () => {
 
       let expectedContent = {
         [6]: {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 6
         },
         [5]: {
@@ -1130,8 +1110,8 @@ describe("EventBuffer", () => {
           eventId: 5
         },
         [4]: {
-          value: content3[0].value,
-          tickId: content3[0].tickId,
+          value: content3[2].value,
+          tickId: content3[2].tickId,
           eventId: 4
         }
       };
@@ -1150,8 +1130,8 @@ describe("EventBuffer", () => {
       let expectedContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: content1[2].tickId,
+          value: content1[2].value
         },
         {
           eventId: 2,
@@ -1160,13 +1140,13 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: content1[0].tickId,
+          value: content1[0].value
         },
         {
           eventId: 4,
-          tickId: content2[2].tickId,
-          value: content2[2].value
+          tickId: content2[0].tickId,
+          value: content2[0].value
         },
         {
           eventId: 5,
@@ -1175,8 +1155,8 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 6,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: content3[0].tickId,
+          value: content3[0].value
         }
       ];
 
@@ -1188,8 +1168,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult1).toEqual([
         {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[2].value,
+          tickId: content1[2].tickId,
           eventId: 1
         },
         {
@@ -1198,16 +1178,16 @@ describe("EventBuffer", () => {
           eventId: 2
         },
         {
-          value: content1[2].value,
-          tickId: content1[2].tickId,
+          value: content1[0].value,
+          tickId: content1[0].tickId,
           eventId: 3
         }
       ]);
 
       expect(invokeResult2).toEqual([
         {
-          value: content2[2].value,
-          tickId: content2[2].tickId,
+          value: content2[0].value,
+          tickId: content2[0].tickId,
           eventId: 4
         }
       ]);
@@ -1219,8 +1199,8 @@ describe("EventBuffer", () => {
           eventId: 5
         },
         {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 6
         }
       ]);
@@ -1230,27 +1210,27 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 6, value: 1006 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 6, value: 1006 }
       ];
 
       await exec();
 
       let expectedContent = {
         [4]: {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 4
         },
         [6]: {
@@ -1259,8 +1239,8 @@ describe("EventBuffer", () => {
           eventId: 6
         },
         [5]: {
-          value: content3[0].value,
-          tickId: content3[0].tickId,
+          value: content3[2].value,
+          tickId: content3[2].tickId,
           eventId: 5
         }
       };
@@ -1275,8 +1255,8 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: content1[2].tickId,
+          value: content1[2].value
         },
         {
           eventId: 2,
@@ -1285,18 +1265,18 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: content1[0].tickId,
+          value: content1[0].value
         },
         {
           eventId: 4,
-          tickId: content2[2].tickId,
-          value: content2[2].value
+          tickId: content2[0].tickId,
+          value: content2[0].value
         },
         {
           eventId: 5,
-          tickId: content3[0].tickId,
-          value: content3[0].value
+          tickId: content3[2].tickId,
+          value: content3[2].value
         },
         {
           eventId: 6,
@@ -1309,8 +1289,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult1).toEqual([
         {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[2].value,
+          tickId: content1[2].tickId,
           eventId: 1
         },
         {
@@ -1319,24 +1299,24 @@ describe("EventBuffer", () => {
           eventId: 2
         },
         {
-          value: content1[2].value,
-          tickId: content1[2].tickId,
+          value: content1[0].value,
+          tickId: content1[0].tickId,
           eventId: 3
         }
       ]);
 
       expect(invokeResult2).toEqual([
         {
-          value: content2[2].value,
-          tickId: content2[2].tickId,
+          value: content2[0].value,
+          tickId: content2[0].tickId,
           eventId: 4
         }
       ]);
 
       expect(invokeResult3).toEqual([
         {
-          value: content3[0].value,
-          tickId: content3[0].tickId,
+          value: content3[2].value,
+          tickId: content3[2].tickId,
           eventId: 5
         },
         {
@@ -1351,19 +1331,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 0 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 0 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: -1 },
         { tickId: now + 3, value: 0 },
-        { tickId: now + 4, value: -1 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 4, value: -1 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: -1 }
       ];
 
       await exec();
@@ -1380,8 +1360,8 @@ describe("EventBuffer", () => {
           eventId: 3
         },
         [4]: {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 4
         }
       };
@@ -1396,8 +1376,8 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: content1[2].tickId,
+          value: content1[2].value
         },
         {
           eventId: 2,
@@ -1411,8 +1391,8 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 4,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: content3[0].tickId,
+          value: content3[0].value
         }
       ];
 
@@ -1420,8 +1400,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult1).toEqual([
         {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[2].value,
+          tickId: content1[2].tickId,
           eventId: 1
         },
         {
@@ -1440,8 +1420,8 @@ describe("EventBuffer", () => {
           eventId: 3
         },
         {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 4
         }
       ]);
@@ -1451,23 +1431,23 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [];
       content3 = [
-        { tickId: now + 4, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: 1004 }
       ];
 
       await exec();
 
       let expectedContent = {
         [6]: {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 6
         },
         [5]: {
@@ -1476,8 +1456,8 @@ describe("EventBuffer", () => {
           eventId: 5
         },
         [4]: {
-          value: content3[0].value,
-          tickId: content3[0].tickId,
+          value: content3[2].value,
+          tickId: content3[2].tickId,
           eventId: 4
         }
       };
@@ -1492,8 +1472,8 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: content1[2].tickId,
+          value: content1[2].value
         },
         {
           eventId: 2,
@@ -1502,13 +1482,13 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: content1[0].tickId,
+          value: content1[0].value
         },
         {
           eventId: 4,
-          tickId: content3[0].tickId,
-          value: content3[0].value
+          tickId: content3[2].tickId,
+          value: content3[2].value
         },
         {
           eventId: 5,
@@ -1517,8 +1497,8 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 6,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: content3[0].tickId,
+          value: content3[0].value
         }
       ];
 
@@ -1526,8 +1506,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult1).toEqual([
         {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[2].value,
+          tickId: content1[2].tickId,
           eventId: 1
         },
         {
@@ -1536,8 +1516,8 @@ describe("EventBuffer", () => {
           eventId: 2
         },
         {
-          value: content1[2].value,
-          tickId: content1[2].tickId,
+          value: content1[0].value,
+          tickId: content1[0].tickId,
           eventId: 3
         }
       ]);
@@ -1546,8 +1526,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult3).toEqual([
         {
-          value: content3[0].value,
-          tickId: content3[0].tickId,
+          value: content3[2].value,
+          tickId: content3[2].tickId,
           eventId: 4
         },
         {
@@ -1556,8 +1536,8 @@ describe("EventBuffer", () => {
           eventId: 5
         },
         {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 6
         }
       ]);
@@ -1569,17 +1549,17 @@ describe("EventBuffer", () => {
       bufferSize = 2;
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
-        { tickId: now + 2, value: 1002 }
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 4, value: 1004 },
-        { tickId: now + 5, value: 1005 }
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 4, value: 1004 }
       ];
 
       await expect(
@@ -1595,13 +1575,13 @@ describe("EventBuffer", () => {
 
       let expectedContent = {
         [2]: {
-          value: content1[1].value,
-          tickId: content1[1].tickId,
+          value: content1[0].value,
+          tickId: content1[0].tickId,
           eventId: 2
         },
         [1]: {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[1].value,
+          tickId: content1[1].tickId,
           eventId: 1
         }
       };
@@ -1616,13 +1596,13 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: content1[1].tickId,
+          value: content1[1].value
         },
         {
           eventId: 2,
-          tickId: content1[1].tickId,
-          value: content1[1].value
+          tickId: content1[0].tickId,
+          value: content1[0].value
         }
       ];
 
@@ -1630,13 +1610,13 @@ describe("EventBuffer", () => {
 
       expect(invokeResult1).toEqual([
         {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[1].value,
+          tickId: content1[1].tickId,
           eventId: 1
         },
         {
-          value: content1[1].value,
-          tickId: content1[1].tickId,
+          value: content1[0].value,
+          tickId: content1[0].tickId,
           eventId: 2
         }
       ]);
@@ -1646,27 +1626,27 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content3 = [
-        { tickId: now + 4, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: 1004 }
       ];
 
       await exec();
 
       let expectedContent = {
         [6]: {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 6
         },
         [5]: {
@@ -1675,8 +1655,8 @@ describe("EventBuffer", () => {
           eventId: 5
         },
         [4]: {
-          value: content3[0].value,
-          tickId: content3[0].tickId,
+          value: content3[2].value,
+          tickId: content3[2].tickId,
           eventId: 4
         }
       };
@@ -1691,8 +1671,8 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: content1[2].tickId,
+          value: content1[2].value
         },
         {
           eventId: 2,
@@ -1701,13 +1681,13 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: content1[0].tickId,
+          value: content1[0].value
         },
         {
           eventId: 4,
-          tickId: content3[0].tickId,
-          value: content3[0].value
+          tickId: content3[2].tickId,
+          value: content3[2].value
         },
         {
           eventId: 5,
@@ -1716,8 +1696,8 @@ describe("EventBuffer", () => {
         },
         {
           eventId: 6,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: content3[0].tickId,
+          value: content3[0].value
         }
       ];
 
@@ -1725,8 +1705,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult1).toEqual([
         {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[2].value,
+          tickId: content1[2].tickId,
           eventId: 1
         },
         {
@@ -1735,8 +1715,8 @@ describe("EventBuffer", () => {
           eventId: 2
         },
         {
-          value: content1[2].value,
-          tickId: content1[2].tickId,
+          value: content1[0].value,
+          tickId: content1[0].tickId,
           eventId: 3
         }
       ]);
@@ -1745,8 +1725,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult3).toEqual([
         {
-          value: content3[0].value,
-          tickId: content3[0].tickId,
+          value: content3[2].value,
+          tickId: content3[2].tickId,
           eventId: 4
         },
         {
@@ -1755,8 +1735,8 @@ describe("EventBuffer", () => {
           eventId: 5
         },
         {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 6
         }
       ]);
@@ -1766,38 +1746,38 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 2, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1003 },
+        { tickId: now + 5, value: 1005 },
         { tickId: now + 2, value: 1004 },
-        { tickId: now + 5, value: 1005 }
+        { tickId: now + 2, value: 1003 }
       ];
       content3 = [
-        { tickId: now + 2, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 2, value: 1004 }
       ];
 
       await exec();
 
       let expectedContent = {
-        [6]: {
+        [4]: {
           value: content3[2].value,
           tickId: content3[2].tickId,
-          eventId: 6
+          eventId: 4
         },
         [5]: {
           value: content3[1].value,
           tickId: content3[1].tickId,
           eventId: 5
         },
-        [4]: {
+        [6]: {
           value: content3[0].value,
           tickId: content3[0].tickId,
-          eventId: 4
+          eventId: 6
         }
       };
 
@@ -1811,33 +1791,33 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: now + 1,
+          value: 1001
         },
         {
           eventId: 2,
-          tickId: content1[1].tickId,
-          value: content1[1].value
+          tickId: now + 2,
+          value: 1002
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: now + 2,
+          value: 1003
         },
         {
           eventId: 4,
-          tickId: content3[0].tickId,
-          value: content3[0].value
+          tickId: now + 2,
+          value: 1004
         },
         {
           eventId: 5,
-          tickId: content3[1].tickId,
-          value: content3[1].value
+          tickId: now + 5,
+          value: 1005
         },
         {
           eventId: 6,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: now + 6,
+          value: 1006
         }
       ];
 
@@ -1845,8 +1825,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult1).toEqual([
         {
-          value: content1[0].value,
-          tickId: content1[0].tickId,
+          value: content1[2].value,
+          tickId: content1[2].tickId,
           eventId: 1
         },
         {
@@ -1855,8 +1835,8 @@ describe("EventBuffer", () => {
           eventId: 2
         },
         {
-          value: content1[2].value,
-          tickId: content1[2].tickId,
+          value: content1[0].value,
+          tickId: content1[0].tickId,
           eventId: 3
         }
       ]);
@@ -1868,16 +1848,16 @@ describe("EventBuffer", () => {
           eventId: 4
         },
         {
-          value: content2[2].value,
-          tickId: content2[2].tickId,
+          value: content2[0].value,
+          tickId: content2[0].tickId,
           eventId: 5
         }
       ]);
 
       expect(invokeResult3).toEqual([
         {
-          value: content3[2].value,
-          tickId: content3[2].tickId,
+          value: content3[0].value,
+          tickId: content3[0].tickId,
           eventId: 6
         }
       ]);
@@ -1909,17 +1889,17 @@ describe("EventBuffer", () => {
     it("should throw and not insert value if two methods attempts to insert data in parallel", async () => {
       await exec();
 
-      let now = content1[0].tickId - 1;
+      let now = content1[2].tickId - 1;
 
       let content4 = [
-        { tickId: now + 5, value: 1005 },
+        { tickId: now + 7, value: 1007 },
         { tickId: now + 6, value: 1006 },
-        { tickId: now + 7, value: 1007 }
+        { tickId: now + 5, value: 1005 }
       ];
       let content5 = [
-        { tickId: now + 6, value: 1006 },
+        { tickId: now + 8, value: 1008 },
         { tickId: now + 7, value: 1007 },
-        { tickId: now + 8, value: 1008 }
+        { tickId: now + 6, value: 1006 }
       ];
 
       let result = await Promise.all([
@@ -1947,20 +1927,20 @@ describe("EventBuffer", () => {
       expect(result[1]).toBeDefined();
 
       let expectedContent = {
-        [7]: {
-          value: content4[2].value,
-          tickId: content4[2].tickId,
-          eventId: 7
-        },
         [6]: {
           value: content4[1].value,
           tickId: content4[1].tickId,
           eventId: 6
         },
         [5]: {
+          value: content4[2].value,
+          tickId: content4[2].tickId,
+          eventId: 5
+        },
+        [7]: {
           value: content4[0].value,
           tickId: content4[0].tickId,
-          eventId: 5
+          eventId: 7
         }
       };
 
@@ -1974,38 +1954,38 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: now + 1,
+          value: 1001
         },
         {
           eventId: 2,
-          tickId: content1[1].tickId,
-          value: content1[1].value
+          tickId: now + 2,
+          value: 1002
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: now + 3,
+          value: 1003
         },
         {
           eventId: 4,
-          tickId: content2[2].tickId,
-          value: content2[2].value
+          tickId: now + 4,
+          value: 1004
         },
         {
           eventId: 5,
-          tickId: content3[1].tickId,
-          value: content3[1].value
+          tickId: now + 5,
+          value: 1005
         },
         {
           eventId: 6,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: now + 6,
+          value: 1006
         },
         {
           eventId: 7,
-          tickId: content4[2].tickId,
-          value: content4[2].value
+          tickId: now + 7,
+          value: 1007
         }
       ];
 
@@ -2040,19 +2020,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 4, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: 1004 }
       ];
 
       await exec();
@@ -2060,34 +2040,34 @@ describe("EventBuffer", () => {
       buffer.changeBufferSize(4);
 
       let content4 = [
-        { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 },
+        { tickId: now + 8, value: 1008 },
         { tickId: now + 7, value: 1007 },
-        { tickId: now + 8, value: 1008 }
+        { tickId: now + 6, value: 1006 },
+        { tickId: now + 5, value: 1005 }
       ];
 
       let invokeResult4 = await buffer.refreshEvents(content4);
 
       let expectedContent = {
-        [5]: {
+        [8]: {
           value: content4[0].value,
           tickId: content4[0].tickId,
-          eventId: 5
-        },
-        [6]: {
-          value: content4[1].value,
-          tickId: content4[1].tickId,
-          eventId: 6
+          eventId: 8
         },
         [7]: {
-          value: content4[2].value,
-          tickId: content4[2].tickId,
+          value: content4[1].value,
+          tickId: content4[1].tickId,
           eventId: 7
         },
-        [8]: {
+        [6]: {
+          value: content4[2].value,
+          tickId: content4[2].tickId,
+          eventId: 6
+        },
+        [5]: {
           value: content4[3].value,
           tickId: content4[3].tickId,
-          eventId: 8
+          eventId: 5
         }
       };
 
@@ -2095,13 +2075,13 @@ describe("EventBuffer", () => {
 
       expect(invokeResult4).toEqual([
         {
-          value: content4[2].value,
-          tickId: content4[2].tickId,
+          value: content4[1].value,
+          tickId: content4[1].tickId,
           eventId: 7
         },
         {
-          value: content4[3].value,
-          tickId: content4[3].tickId,
+          value: content4[0].value,
+          tickId: content4[0].tickId,
           eventId: 8
         }
       ]);
@@ -2114,43 +2094,43 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: now + 1,
+          value: 1001
         },
         {
           eventId: 2,
-          tickId: content1[1].tickId,
-          value: content1[1].value
+          tickId: now + 2,
+          value: 1002
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: now + 3,
+          value: 1003
         },
         {
           eventId: 4,
-          tickId: content2[2].tickId,
-          value: content2[2].value
+          tickId: now + 4,
+          value: 1004
         },
         {
           eventId: 5,
-          tickId: content3[1].tickId,
-          value: content3[1].value
+          tickId: now + 5,
+          value: 1005
         },
         {
           eventId: 6,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: now + 6,
+          value: 1006
         },
         {
           eventId: 7,
-          tickId: content4[2].tickId,
-          value: content4[2].value
+          tickId: now + 7,
+          value: 1007
         },
         {
           eventId: 8,
-          tickId: content4[3].tickId,
-          value: content4[3].value
+          tickId: now + 8,
+          value: 1008
         }
       ];
 
@@ -2161,19 +2141,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 4, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: 1004 }
       ];
 
       await exec();
@@ -2181,22 +2161,22 @@ describe("EventBuffer", () => {
       buffer.changeBufferSize(2);
 
       let content4 = [
-        { tickId: now + 6, value: 1006 },
-        { tickId: now + 7, value: 1007 }
+        { tickId: now + 7, value: 1007 },
+        { tickId: now + 6, value: 1006 }
       ];
 
       let invokeResult4 = await buffer.refreshEvents(content4);
 
       let expectedContent = {
-        [6]: {
+        [7]: {
           value: content4[0].value,
           tickId: content4[0].tickId,
-          eventId: 6
+          eventId: 7
         },
-        [7]: {
+        [6]: {
           value: content4[1].value,
           tickId: content4[1].tickId,
-          eventId: 7
+          eventId: 6
         }
       };
 
@@ -2204,8 +2184,8 @@ describe("EventBuffer", () => {
 
       expect(invokeResult4).toEqual([
         {
-          value: content4[1].value,
-          tickId: content4[1].tickId,
+          value: content4[0].value,
+          tickId: content4[0].tickId,
           eventId: 7
         }
       ]);
@@ -2218,38 +2198,38 @@ describe("EventBuffer", () => {
       let expectedDBContent = [
         {
           eventId: 1,
-          tickId: content1[0].tickId,
-          value: content1[0].value
+          tickId: now + 1,
+          value: 1001
         },
         {
           eventId: 2,
-          tickId: content1[1].tickId,
-          value: content1[1].value
+          tickId: now + 2,
+          value: 1002
         },
         {
           eventId: 3,
-          tickId: content1[2].tickId,
-          value: content1[2].value
+          tickId: now + 3,
+          value: 1003
         },
         {
           eventId: 4,
-          tickId: content2[2].tickId,
-          value: content2[2].value
+          tickId: now + 4,
+          value: 1004
         },
         {
           eventId: 5,
-          tickId: content3[1].tickId,
-          value: content3[1].value
+          tickId: now + 5,
+          value: 1005
         },
         {
           eventId: 6,
-          tickId: content3[2].tickId,
-          value: content3[2].value
+          tickId: now + 6,
+          value: 1006
         },
         {
           eventId: 7,
-          tickId: content4[1].tickId,
-          value: content4[1].value
+          tickId: now + 7,
+          value: 1007
         }
       ];
 
@@ -2277,19 +2257,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 4, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: 1004 }
       ];
 
       newBufferSize = 5;
@@ -2349,7 +2329,7 @@ describe("EventBuffer", () => {
 
       expect(buffer.Content).not.toEqual(bufferContentBefore);
 
-      let now = content1[0].tickId - 1;
+      let now = content1[2].tickId - 1;
 
       let expectedBufferContent = {
         "5": { eventId: 5, tickId: now + 5, value: 1005 },
@@ -2378,19 +2358,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 4, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 4, value: 1004 }
       ];
 
       tickId = now + 2;
@@ -2419,11 +2399,11 @@ describe("EventBuffer", () => {
     });
 
     it("should return last event  - if tick id is greater than last tickId in database", async () => {
-      tickId = content3[2].tickId + 1;
+      tickId = content3[0].tickId + 1;
       let result = await exec();
 
       expect(result).toEqual({
-        [content3[2].tickId]: 1006
+        [content3[0].tickId]: 1006
       });
     });
 
@@ -2477,19 +2457,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 5, value: 1003 },
         { tickId: now + 5, value: 1002 },
-        { tickId: now + 5, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 5, value: 1002 },
+        { tickId: now + 5, value: 1004 },
         { tickId: now + 5, value: 1003 },
-        { tickId: now + 5, value: 1004 }
+        { tickId: now + 5, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 5, value: 1004 },
+        { tickId: now + 11, value: 1006 },
         { tickId: now + 9, value: 1005 },
-        { tickId: now + 11, value: 1006 }
+        { tickId: now + 5, value: 1004 }
       ];
 
       tickId = now + 5;
@@ -2497,7 +2477,7 @@ describe("EventBuffer", () => {
       let result = await exec();
 
       expect(result).toEqual({
-        [content3[0].tickId]: 1002
+        [content1[1].tickId]: 1002
       });
     });
 
@@ -2626,19 +2606,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 2, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 2, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 2, value: 1004 },
         { tickId: now + 2, value: 1003 },
-        { tickId: now + 2, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
-        { tickId: now + 2, value: 1004 },
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 2, value: 1004 }
       ];
 
       startTickId = now + 2;
@@ -2696,19 +2676,19 @@ describe("EventBuffer", () => {
       let now = Date.now();
 
       content1 = [
-        { tickId: now + 1, value: 1001 },
+        { tickId: now + 3, value: 1003 },
         { tickId: now + 2, value: 1002 },
-        { tickId: now + 3, value: 1003 }
+        { tickId: now + 1, value: 1001 }
       ];
       content2 = [
-        { tickId: now + 2, value: 1002 },
+        { tickId: now + 4, value: 1004 },
         { tickId: now + 3, value: 1003 },
-        { tickId: now + 4, value: 1004 }
+        { tickId: now + 2, value: 1002 }
       ];
       content3 = [
+        { tickId: now + 6, value: 1006 },
         { tickId: now + 4, value: 1004 },
-        { tickId: now + 5, value: 1005 },
-        { tickId: now + 6, value: 1006 }
+        { tickId: now + 5, value: 1005 }
       ];
     });
 
@@ -2729,22 +2709,20 @@ describe("EventBuffer", () => {
     it("should return last event", async () => {
       let result = await exec();
 
-      let now = content1[0].tickId - 1;
-
-      expect(result).toEqual({ [now + 6]: 1006 });
+      expect(result).toEqual(1006);
     });
 
-    it("should return empty object if there is not content", async () => {
+    it("should return null if there is not content", async () => {
       content1 = null;
       content2 = null;
       content3 = null;
 
       let result = await exec();
 
-      expect(result).toEqual({});
+      expect(result).toEqual(null);
     });
 
-    it("should return empty object if buffer is not initialized", async () => {
+    it("should return null if buffer is not initialized", async () => {
       initBuffer = false;
       content1 = null;
       content2 = null;
@@ -2752,7 +2730,83 @@ describe("EventBuffer", () => {
 
       let result = await exec();
 
-      expect(result).toEqual({});
+      expect(result).toEqual(null);
+    });
+  });
+
+  describe("getLastEventTick", () => {
+    let buffer;
+    let initBuffer;
+    let bufferSize;
+
+    let content1;
+    let content2;
+    let content3;
+
+    beforeEach(() => {
+      initBuffer = true;
+      bufferSize = 3;
+
+      let now = Date.now();
+
+      content1 = [
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 1, value: 1001 }
+      ];
+      content2 = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 2, value: 1002 }
+      ];
+      content3 = [
+        { tickId: now + 6, value: 1006 },
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 5, value: 1005 }
+      ];
+    });
+
+    let exec = async () => {
+      buffer = new EventStorage();
+      if (initBuffer) await buffer.init(eventBufferFilePath, bufferSize);
+
+      if (existsAndIsNotEmpty(content1))
+        invokeResult1 = await buffer.refreshEvents(content1);
+      if (existsAndIsNotEmpty(content2))
+        invokeResult2 = await buffer.refreshEvents(content2);
+      if (existsAndIsNotEmpty(content3))
+        invokeResult3 = await buffer.refreshEvents(content3);
+
+      return buffer.getLastEventTick();
+    };
+
+    it("should return last event", async () => {
+      let result = await exec();
+
+      let now = content1[2].tickId - 1;
+
+      expect(result).toEqual(now + 6);
+    });
+
+    it("should return null if there is not content", async () => {
+      content1 = null;
+      content2 = null;
+      content3 = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(null);
+    });
+
+    it("should return null if buffer is not initialized", async () => {
+      initBuffer = false;
+      content1 = null;
+      content2 = null;
+      content3 = null;
+
+      let result = await exec();
+
+      expect(result).toEqual(null);
     });
   });
 });

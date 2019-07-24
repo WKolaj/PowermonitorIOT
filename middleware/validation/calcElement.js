@@ -4,6 +4,7 @@ const FactorElementValidator = require("./calcElements/FactorElement");
 const AverageElementValidator = require("./calcElements/AverageElement");
 const IncreaseElementValidator = require("./calcElements/IncreaseElement");
 const SumElementValidator = require("./calcElements/SumElement");
+const EventLogElementValidator = require("./calcElements/EventLogElement");
 
 /**
  * @description Method for validate if element is valid while creating - return error message if object is not valid or undefined instead
@@ -39,6 +40,9 @@ let validateCreate = function(req) {
         }
         case "sumElement": {
           return resolve(await SumElementValidator.create(req));
+        }
+        case "eventLogElement": {
+          return resolve(await EventLogElementValidator.create(req));
         }
         default: {
           return resolve("Given calculation element type is not recognized");
@@ -105,6 +109,9 @@ let validateEdit = function(req) {
         }
         case "sumElement": {
           return resolve(await SumElementValidator.edit(req));
+        }
+        case "eventLogElement": {
+          return resolve(await EventLogElementValidator.edit(req));
         }
         default: {
           return resolve("Given calculation element type is not recognized");

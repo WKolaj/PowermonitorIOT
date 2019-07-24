@@ -1,4 +1,5 @@
 const Device = require("../../../classes/device/Device");
+const Element = require("../../../classes/element/Element");
 const config = require("config");
 const path = require("path");
 
@@ -1187,17 +1188,21 @@ describe("Device", () => {
     });
 
     let exec = async () => {
+      payload = { name: name };
+      device = new Device();
+
       variable = {
         Id: variableId,
         Type: variableType,
         ValueType: variableValueType,
         Archived: variableArchived,
         Value: archiveValue,
-        ArchiveTickId: archiveSampleTime
+        ArchiveTickId: archiveSampleTime,
+        getValueFromDB: Element.prototype.getValueFromDB,
+        getValuesFromDB: Element.prototype.getValuesFromDB,
+        Device: device
       };
 
-      payload = { name: name };
-      device = new Device();
       await device.init(payload);
       await device.addVariable(variable);
 

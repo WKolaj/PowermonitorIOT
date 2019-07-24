@@ -5,6 +5,7 @@ const SumElement = require("../calculationElement/SumElement");
 const FactorElement = require("../calculationElement/FactorElement");
 const AverageElement = require("../calculationElement/AverageElement");
 const IncreaseElement = require("../calculationElement/IncreaseElement");
+const EventLogElement = require("../calculationElement/EventLogElement");
 const Sampler = require("../../classes/sampler/Sampler");
 const logger = require("../../logger/logger");
 
@@ -257,12 +258,29 @@ class Device {
       case "increaseElement": {
         return this._createIncreaseElement(payload);
       }
+      case "eventLogElement": {
+        return this._createEventLogElement(payload);
+      }
       default: {
         throw new Error(
           `Given calculation element is not recognized: ${payload.type}`
         );
       }
     }
+  }
+
+  /**
+   * @description Method for creating calculaction element
+   * @param {object} payload payload to create calculation element
+   */
+  async _createEventLogElement(payload) {
+    if (!payload.name)
+      throw new Error("Calculation element name in payload is not defined");
+
+    let calculationElementToAdd = new EventLogElement(this);
+    await calculationElementToAdd.init(payload);
+    await this.addCalculationElement(calculationElementToAdd);
+    return calculationElementToAdd;
   }
 
   /**
@@ -517,17 +535,19 @@ class Device {
   async getVariableValueFromDB(variableId, date) {
     if (!variableId in this.Variables)
       throw new Error(`There is no variable of given id: ${variableId}`);
-    return this.ArchiveManager.doesVariableIdExists(variableId)
-      ? this.ArchiveManager.getValue(date, variableId)
-      : Promise.resolve(undefined);
+
+    return this.Variables[variableId].getValueFromDB(variableId, date);
   }
 
   async getVariableValuesFromDB(variableId, fromDate, endDate) {
     if (!variableId in this.Variables)
       throw new Error(`There is no variable of given id: ${variableId}`);
-    return this.ArchiveManager.doesVariableIdExists(variableId)
-      ? this.ArchiveManager.getValues(variableId, fromDate, endDate)
-      : Promise.resolve(undefined);
+
+    return this.Variables[variableId].getValuesFromDB(
+      variableId,
+      fromDate,
+      endDate
+    );
   }
 
   async getCalculationElementValueFromDB(calculationElementId, date) {
@@ -535,11 +555,10 @@ class Device {
       throw new Error(
         `There is no calculation element of given id: ${calculationElementId}`
       );
-    return this.ArchiveManager.doesCalculationElementIdExists(
-      calculationElementId
-    )
-      ? this.ArchiveManager.getValue(date, calculationElementId)
-      : Promise.resolve(undefined);
+    return this.CalculationElements[calculationElementId].getValueFromDB(
+      calculationElementId,
+      date
+    );
   }
 
   async getCalculationElementValuesFromDB(
@@ -551,11 +570,11 @@ class Device {
       throw new Error(
         `There is no calculation element of given id: ${calculationElementId}`
       );
-    return this.ArchiveManager.doesCalculationElementIdExists(
-      calculationElementId
-    )
-      ? this.ArchiveManager.getValues(calculationElementId, fromDate, endDate)
-      : Promise.resolve(undefined);
+    return this.CalculationElements[calculationElementId].getValuesFromDB(
+      calculationElementId,
+      fromDate,
+      endDate
+    );
   }
 
   /**
@@ -589,7 +608,7 @@ class Device {
    * @param {string} elementId id of variable or calculation element
    * @param {number} date
    */
-  getValueOfElementFromDB(elementId, date) {
+  async getValueOfElementFromDB(elementId, date) {
     //Checking if there is a variable of given id or element of given id
     let variable = this.Variables[elementId];
     let element = this.CalculationElements[elementId];
@@ -608,7 +627,7 @@ class Device {
    * @param {number} fromDate
    * @param {number} toDate
    */
-  getValuesOfElementFromDB(elementId, fromDate, toDate) {
+  async getValuesOfElementFromDB(elementId, fromDate, toDate) {
     //Checking if there is a variable of given id or element of given id
     let variable = this.Variables[elementId];
     let element = this.CalculationElements[elementId];

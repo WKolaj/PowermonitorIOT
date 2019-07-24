@@ -235,6 +235,18 @@ class Element {
   get ValueType() {
     return this._getValueType();
   }
+
+  async getValueFromDB(variableId, date) {
+    return this.Device.ArchiveManager.doesElementIdExists(variableId)
+      ? this.Device.ArchiveManager.getValue(date, variableId)
+      : Promise.resolve(undefined);
+  }
+
+  async getValuesFromDB(variableId, fromDate, endDate) {
+    return this.Device.ArchiveManager.doesElementIdExists(variableId)
+      ? this.Device.ArchiveManager.getValues(variableId, fromDate, endDate)
+      : Promise.resolve(undefined);
+  }
 }
 
 module.exports = Element;

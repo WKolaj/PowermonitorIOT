@@ -50,7 +50,6 @@ class EventStorage {
     this._initialized = false;
     this._busy = true;
     this._bufferSize = bufferSize;
-
     try {
       await this._createDatabaseIfNotExists(filePath);
       this._filePath = filePath;
@@ -265,7 +264,6 @@ class EventStorage {
     try {
       let contentValues = Object.values(this.Content);
       let newContentValues = Object.values(newContent);
-
       if (newContentValues.length !== this.BufferSize)
         throw new Error(
           "Length of new content cannot be different than bufferSize"
@@ -276,8 +274,9 @@ class EventStorage {
       for (let newContentValue of newContentValues) {
         let contentValueAlreadyExists = contentValues.some(
           contentValue =>
-            contentValue.tickId === newContentValue.tickId &&
-            contentValue.value === newContentValue.value
+            parseInt(contentValue.tickId) ===
+              parseInt(newContentValue.tickId) &&
+            parseInt(contentValue.value) === parseInt(newContentValue.value)
         );
 
         if (!contentValueAlreadyExists)
@@ -286,7 +285,10 @@ class EventStorage {
 
       let contentsToReturn = [];
 
-      for (let contentValue of contentValuesToAdd) {
+      //New values should be inserted in opposite order - first one is last one
+
+      for (let i = contentValuesToAdd.length - 1; i >= 0; i--) {
+        let contentValue = contentValuesToAdd[i];
         let newContentValue = await this._addEvent(
           contentValue.tickId,
           contentValue.value
@@ -304,16 +306,24 @@ class EventStorage {
     }
   }
 
-  async getLastEvent() {
-    if (!existsAndIsNotEmpty(this.Content)) return {};
+  getLastEvent() {
+    if (!existsAndIsNotEmpty(this.Content)) return null;
 
     let allEventIds = Object.keys(this.Content).sort(
       (a, b) => parseInt(b) - parseInt(a)
     );
 
-    return {
-      [this.Content[allEventIds[0]].tickId]: this.Content[allEventIds[0]].value
-    };
+    return this.Content[allEventIds[0]].value;
+  }
+
+  getLastEventTick() {
+    if (!existsAndIsNotEmpty(this.Content)) return null;
+
+    let allEventIds = Object.keys(this.Content).sort(
+      (a, b) => parseInt(b) - parseInt(a)
+    );
+
+    return this.Content[allEventIds[0]].tickId;
   }
 
   /**

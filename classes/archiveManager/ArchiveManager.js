@@ -179,6 +179,16 @@ class ArchiveManager {
   }
 
   /**
+   * @description Method for checking if element is already added to manager
+   * @param {string} elementId id of element
+   */
+  doesElementIdExists(elementId) {
+    return (
+      this.doesVariableIdExists(elementId) ||
+      this.doesCalculationElementIdExists(elementId)
+    );
+  }
+  /**
    * @description Method for adding variable to manager
    * @param {object} variable variable to add
    */
