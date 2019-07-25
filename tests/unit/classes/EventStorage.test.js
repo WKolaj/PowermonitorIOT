@@ -485,7 +485,7 @@ describe("EventStorage", () => {
       expect(buffer.Content).toEqual(expectedPayload);
     });
 
-    it("should last event id to the max value of all eventIds", async () => {
+    it("should set last event id to the max value of all eventIds", async () => {
       //creating initial databaseFile
       await createDatabaseFile(eventBufferFilePath);
 
@@ -2316,6 +2316,7 @@ describe("EventStorage", () => {
 
       expect(buffer.BufferSize).toEqual(newBufferSize);
     });
+
     it("should not throw and edit buffer size and do not edit buffer content if buffer is lesser than new buffer size", async () => {
       await exec();
 

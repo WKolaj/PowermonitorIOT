@@ -1203,14 +1203,14 @@ describe("EventLogElement", () => {
         }
       };
 
-      valueVar1Value = 1003;
-      tickVar1Value = now + 3;
-      valueVar2Value = 1004;
-      tickVar2Value = now + 4;
-      valueVar3Value = 1005;
-      tickVar3Value = now + 5;
-      valueVar4Value = 1006;
-      tickVar4Value = now + 6;
+      valueVar1Value = 1006;
+      tickVar1Value = now + 6;
+      valueVar2Value = 1005;
+      tickVar2Value = now + 5;
+      valueVar3Value = 1004;
+      tickVar3Value = now + 4;
+      valueVar4Value = 1003;
+      tickVar4Value = now + 3;
     });
 
     let exec = async () => {
@@ -1318,23 +1318,23 @@ describe("EventLogElement", () => {
       let expectedPayload = {
         [3]: {
           eventId: 3,
-          tickId: tickVar1Value,
-          value: valueVar1Value
+          tickId: tickVar4Value,
+          value: valueVar4Value
         },
         [4]: {
           eventId: 4,
-          tickId: tickVar2Value,
-          value: valueVar2Value
-        },
-        [6]: {
-          eventId: 6,
           tickId: tickVar3Value,
           value: valueVar3Value
         },
         [5]: {
           eventId: 5,
-          tickId: tickVar4Value,
-          value: valueVar4Value
+          tickId: tickVar2Value,
+          value: valueVar2Value
+        },
+        [6]: {
+          eventId: 6,
+          tickId: tickVar1Value,
+          value: valueVar1Value
         }
       };
 
@@ -1374,13 +1374,13 @@ describe("EventLogElement", () => {
         },
         {
           eventId: 5,
-          tickId: now + 6,
-          value: 1006
+          tickId: now + 5,
+          value: 1005
         },
         {
           eventId: 6,
-          tickId: now + 5,
-          value: 1005
+          tickId: now + 6,
+          value: 1006
         }
       ];
 
@@ -1393,13 +1393,13 @@ describe("EventLogElement", () => {
       let expectedPayload = [
         {
           eventId: 5,
-          tickId: tickVar4Value,
-          value: payload.eventDescriptions[valueVar4Value]
+          tickId: tickVar2Value,
+          value: payload.eventDescriptions[valueVar2Value]
         },
         {
           eventId: 6,
-          tickId: tickVar3Value,
-          value: payload.eventDescriptions[valueVar3Value]
+          tickId: tickVar1Value,
+          value: payload.eventDescriptions[valueVar1Value]
         }
       ];
 
@@ -1407,14 +1407,14 @@ describe("EventLogElement", () => {
     });
 
     it("should set new events in Content according to new varaible values - if all values are new", async () => {
-      valueVar1Value = 1005;
-      tickVar1Value = now + 5;
-      valueVar2Value = 1006;
-      tickVar2Value = now + 6;
-      valueVar3Value = 1007;
-      tickVar3Value = now + 7;
-      valueVar4Value = 1008;
-      tickVar4Value = now + 8;
+      valueVar1Value = 1008;
+      tickVar1Value = now + 8;
+      valueVar2Value = 1007;
+      tickVar2Value = now + 7;
+      valueVar3Value = 1006;
+      tickVar3Value = now + 6;
+      valueVar4Value = 1005;
+      tickVar4Value = now + 5;
 
       let result = await exec();
 
@@ -1548,7 +1548,7 @@ describe("EventLogElement", () => {
     });
 
     it("should set new events in Content according to new varaible values and avoid value equal to 0", async () => {
-      valueVar3Value = 0;
+      valueVar2Value = 0;
 
       let result = await exec();
 
@@ -1560,18 +1560,18 @@ describe("EventLogElement", () => {
         },
         [3]: {
           eventId: 3,
-          tickId: tickVar1Value,
-          value: valueVar1Value
+          tickId: tickVar4Value,
+          value: valueVar4Value
         },
         [4]: {
           eventId: 4,
-          tickId: tickVar2Value,
-          value: valueVar2Value
+          tickId: tickVar3Value,
+          value: valueVar3Value
         },
         [5]: {
           eventId: 5,
-          tickId: tickVar4Value,
-          value: valueVar4Value
+          tickId: tickVar1Value,
+          value: valueVar1Value
         }
       };
 
@@ -1579,7 +1579,7 @@ describe("EventLogElement", () => {
     });
 
     it("should append database with new values in buffer and avoid value equal to 0", async () => {
-      valueVar3Value = 0;
+      valueVar2Value = 0;
 
       await exec();
 
@@ -1622,15 +1622,15 @@ describe("EventLogElement", () => {
     });
 
     it("should return new values and avoid value equal to 0", async () => {
-      valueVar3Value = 0;
+      valueVar2Value = 0;
 
       let result = await exec();
 
       let expectedPayload = [
         {
           eventId: 5,
-          tickId: tickVar4Value,
-          value: payload.eventDescriptions[valueVar4Value]
+          tickId: tickVar1Value,
+          value: payload.eventDescriptions[valueVar1Value]
         }
       ];
 
@@ -1683,23 +1683,23 @@ describe("EventLogElement", () => {
       let expectedPayload = [
         {
           eventId: 1,
-          tickId: now + 6,
-          value: 1006
+          tickId: now + 3,
+          value: 1003
         },
         {
           eventId: 2,
-          tickId: now + 5,
-          value: 1005
-        },
-        {
-          eventId: 3,
           tickId: now + 4,
           value: 1004
         },
         {
+          eventId: 3,
+          tickId: now + 5,
+          value: 1005
+        },
+        {
           eventId: 4,
-          tickId: now + 3,
-          value: 1003
+          tickId: now + 6,
+          value: 1006
         }
       ];
 
@@ -1714,23 +1714,23 @@ describe("EventLogElement", () => {
       let expectedPayload = [
         {
           eventId: 1,
-          tickId: now + 6,
-          value: "event 6"
+          tickId: now + 3,
+          value: "event 3"
         },
         {
           eventId: 2,
-          tickId: now + 5,
-          value: "event 5"
-        },
-        {
-          eventId: 3,
           tickId: now + 4,
           value: "event 4"
         },
         {
+          eventId: 3,
+          tickId: now + 5,
+          value: "event 5"
+        },
+        {
           eventId: 4,
-          tickId: now + 3,
-          value: "event 3"
+          tickId: now + 6,
+          value: "event 6"
         }
       ];
 
@@ -1780,18 +1780,18 @@ describe("EventLogElement", () => {
       let expectedPayload = [
         {
           eventId: 1,
-          tickId: now + 6,
-          value: 1006
+          tickId: now + 3,
+          value: 1003
         },
         {
           eventId: 2,
-          tickId: now + 5,
-          value: 1005
+          tickId: now + 4,
+          value: 1004
         },
         {
           eventId: 3,
-          tickId: now + 3,
-          value: 1003
+          tickId: now + 6,
+          value: 1006
         }
       ];
 
@@ -1807,18 +1807,18 @@ describe("EventLogElement", () => {
       let expectedPayload = [
         {
           eventId: 1,
-          tickId: now + 6,
-          value: "event 6"
+          tickId: now + 3,
+          value: "event 3"
         },
         {
           eventId: 2,
-          tickId: now + 5,
-          value: "event 5"
+          tickId: now + 4,
+          value: "event 4"
         },
         {
           eventId: 3,
-          tickId: now + 3,
-          value: "event 3"
+          tickId: now + 6,
+          value: "event 6"
         }
       ];
 
@@ -1826,20 +1826,20 @@ describe("EventLogElement", () => {
     });
 
     it("should return new values - and not set description for events where there are no description assigned", async () => {
-      valueVar3Value = 987654321;
+      valueVar1Value = 987654321;
 
       let result = await exec();
 
       let expectedPayload = [
         {
           eventId: 5,
-          tickId: tickVar4Value,
-          value: payload.eventDescriptions[valueVar4Value]
+          tickId: tickVar2Value,
+          value: payload.eventDescriptions[valueVar2Value]
         },
         {
           eventId: 6,
-          tickId: tickVar3Value,
-          value: valueVar3Value
+          tickId: tickVar1Value,
+          value: valueVar1Value
         }
       ];
 
