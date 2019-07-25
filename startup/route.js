@@ -6,6 +6,7 @@ const devices = require("../routes/devices");
 const variables = require("../routes/variables");
 const calcElements = require("../routes/calcElements");
 const values = require("../routes/values");
+const events = require("../routes/events");
 const info = require("../routes/info");
 const ipConfig = require("../routes/ipConfig");
 const error = require("../middleware/error");
@@ -29,6 +30,9 @@ module.exports = async function(app) {
   logger.info("CalcElements route initialized");
 
   app.use("/api/values", values);
+  logger.info("Values route initialized");
+
+  app.use("/api/events", events);
   logger.info("Values route initialized");
 
   app.use("/api/info", info);

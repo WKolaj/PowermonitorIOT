@@ -124,9 +124,7 @@ class EventLogElement extends CalculationElement {
   }
 
   get LastEventTickId() {
-    return this._convertEventFromStorageToEventWithDescription({
-      value: this.EventStorage.getLastEvent()
-    }).tickId;
+    return this.EventStorage.getLastEventTick();
   }
 
   /**logVariables

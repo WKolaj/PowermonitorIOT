@@ -9,22 +9,7 @@ const Project = require("../classes/project/Project");
 const _ = require("lodash");
 const validate = require("../middleware/validation/event");
 const Sampler = require("../classes/sampler/Sampler");
-
-let generateEventPayloadGeneralFromElement = element => {
-  return element.LastEvent;
-};
-
-let generateEventPayloadDetailedFromElement = element => {
-  return {
-    [element.LastEventId]: element.LastEvent
-  };
-};
-
-let generateEventPayloadDetailedFromValueObject = valueObject => {
-  if (valueObject === {} || valueObject === undefined || valueObject === null)
-    return undefined;
-  return valueObject;
-};
+let { getCurrentProject, exists } = require("../utilities/utilities");
 
 //Method for validation if given query params - timeStamp, timeRangeStart, timeRangeStop are valid or not
 let validateTick = tick => {
@@ -39,48 +24,6 @@ let validateTick = tick => {
   return;
 };
 
-router.get("/:deviceId", [auth, canVisualizeData], async (req, res) => {
-  if (!req.params.deviceId)
-    return res.status(400).send("Invalid request - deviceId cannot be empty");
-
-  if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
-    return res.status(404).send("There is no device od given id");
-
-  let payloadToReturn = {};
-
-  let allElements = await Project.CurrentProject.getAllCalcElements(
-    req.params.deviceId
-  );
-
-  let allVariables = await Project.CurrentProject.getAllVariables(
-    req.params.deviceId
-  );
-
-  for (let element of allElements) {
-    if (
-      validate.allowedElementTypes.some(
-        allowedType => allowedType === element.Type
-      )
-    )
-      payloadToReturn[element.Id] = generateEventPayloadGeneralFromElement(
-        element
-      );
-  }
-
-  for (let variable of allVariables) {
-    if (
-      validate.allowedElementTypes.some(
-        allowedType => allowedType === variable.Type
-      )
-    )
-      payloadToReturn[variable.Id] = generateEventPayloadGeneralFromElement(
-        variable
-      );
-  }
-
-  return res.status(200).send(payloadToReturn);
-});
-
 router.get(
   "/:deviceId/:elementId",
   [auth, canVisualizeData, validate.get],
@@ -89,22 +32,27 @@ router.get(
     if (!req.params.deviceId)
       return res.status(400).send("Invalid request - deviceId cannot be empty");
 
-    if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
+    if (!(await getCurrentProject().doesDeviceExist(req.params.deviceId)))
       return res.status(404).send("There is no device od given id");
 
     //Checking if element exists
     if (
-      !(await Project.CurrentProject.doesElementExist(
+      !(await getCurrentProject().doesElementExist(
         req.params.deviceId,
         req.params.elementId
       ))
     )
       return res.status(404).send("There is no element od given id");
 
-    let element = await Project.CurrentProject.getElement(
+    let element = await getCurrentProject().getElement(
       req.params.deviceId,
       req.params.elementId
     );
+
+    if (!validate.allowedElementTypes.some(el => el === element.Type))
+      return res
+        .status(400)
+        .send(`Element type of ${element.Type} does not have events!`);
 
     //Getting single value from database
     if (req.query.timestamp !== undefined) {
@@ -112,17 +60,12 @@ router.get(
       let result = validateTick(req.query.timestamp);
       if (result) return res.status(400).send(result);
 
-      let valueObject = await Project.CurrentProject.getValueBasedOnDate(
-        req.params.deviceId,
+      let eventObject = await element.getEventFromDB(
         req.params.elementId,
         req.query.timestamp
       );
 
-      let payloadToReturn = generateEventPayloadDetailedFromValueObject(
-        valueObject
-      );
-
-      return res.status(200).send(payloadToReturn);
+      return res.status(200).send(eventObject);
     }
 
     //Getting range of values from database
@@ -135,69 +78,28 @@ router.get(
       let result2 = validateTick(req.query.timeRangeStop);
       if (result2) return res.status(400).send(result2);
 
-      //Or logic - in order to check if req is valid even if only one is given
-      let allValueObjects = await Project.CurrentProject.getValuesBasedOnDate(
-        req.params.deviceId,
+      let eventObjects = await element.getEventsFromDB(
         req.params.elementId,
         req.query.timeRangeStart,
         req.query.timeRangeStop
       );
 
-      if (allValueObjects === undefined || allValueObjects === []) {
+      if (eventObjects === undefined || eventObjects === []) {
         return res.status(200).send({});
       }
 
-      let payloadToReturn = {};
-
-      for (let valueObject of allValueObjects) {
-        if (valueObject !== {}) {
-          let tickId = Object.keys(valueObject)[0];
-          let value = Object.values(valueObject)[0];
-          payloadToReturn[tickId] = value;
-        }
-      }
-
-      return res.status(200).send(payloadToReturn);
+      return res.status(200).send(eventObjects);
     }
 
     //Getting actual value
     else {
-      let payloadToReturn = generateEventPayloadDetailedFromElement(element);
+      if (!exists(element.LastEvent)) return res.status(200).send({});
+
+      let payloadToReturn = {
+        [element.LastEventTickId]: element.LastEvent
+      };
       return res.status(200).send(payloadToReturn);
     }
-  }
-);
-
-router.put(
-  "/:deviceId/:elementId",
-  [auth, canOperateData, validate.edit],
-  async (req, res) => {
-    //Checking if device exists
-    if (!req.params.deviceId)
-      return res.status(400).send("Invalid request - deviceId cannot be empty");
-
-    if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
-      return res.status(404).send("There is no device od given id");
-
-    //Checking if element exists
-    if (
-      !(await Project.CurrentProject.doesElementExist(
-        req.params.deviceId,
-        req.params.elementId
-      ))
-    )
-      return res.status(404).send("There is no element od given id");
-
-    let element = await Project.CurrentProject.getElement(
-      req.params.deviceId,
-      req.params.elementId
-    );
-
-    element.ValueTickId = Sampler.convertDateToTickNumber(Date.now());
-    element.Value = req.body.value;
-
-    let payloadToReturn = generateEventPayloadDetailedFromElement(element);
-    res.status(200).send(payloadToReturn);
   }
 );
 
