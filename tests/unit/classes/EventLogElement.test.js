@@ -905,7 +905,7 @@ describe("EventLogElement", () => {
     });
   });
 
-  describe("get Value", () => {
+  describe("get LastEvent", () => {
     let device;
     let eventLog;
     let payload;
@@ -1038,20 +1038,20 @@ describe("EventLogElement", () => {
 
       await eventLog.init(payload);
 
-      return eventLog.Value;
+      return eventLog.LastEvent;
     };
 
     it("should return last event value with description - if description exists", async () => {
       payload.eventDescriptions["1004"] = "event number 1004";
       await exec();
 
-      expect(eventLog.Value).toEqual("event number 1004");
+      expect(eventLog.LastEvent).toEqual("event number 1004");
     });
 
     it("should return last event value without description - if description does not exist", async () => {
       await exec();
 
-      expect(eventLog.Value).toEqual(1004);
+      expect(eventLog.LastEvent).toEqual(1004);
     });
 
     it("should return null if there are no values in content", async () => {
@@ -1059,7 +1059,7 @@ describe("EventLogElement", () => {
 
       await exec();
 
-      expect(eventLog.Value).toEqual(null);
+      expect(eventLog.LastEvent).toEqual(null);
     });
   });
 
@@ -1969,7 +1969,7 @@ describe("EventLogElement", () => {
     });
   });
 
-  describe("getValueFromDB", () => {
+  describe("getEventFromDB", () => {
     let device;
     let eventLog;
     let payload;
@@ -2117,7 +2117,7 @@ describe("EventLogElement", () => {
 
       await eventLog._refreshEventStorage();
 
-      return eventLog.getValueFromDB(payload.id, tickId);
+      return eventLog.getEventFromDB(payload.id, tickId);
     };
 
     it("should return value converted to description together with tickId", async () => {
@@ -2147,7 +2147,7 @@ describe("EventLogElement", () => {
     });
   });
 
-  describe("getValuesFromDB", () => {
+  describe("getEventsFromDB", () => {
     let device;
     let eventLog;
     let payload;
@@ -2297,7 +2297,7 @@ describe("EventLogElement", () => {
 
       await eventLog._refreshEventStorage();
 
-      return eventLog.getValuesFromDB(payload.id, fromTickId, toTickId);
+      return eventLog.getEventsFromDB(payload.id, fromTickId, toTickId);
     };
 
     it("should return values converted to description together with tickId", async () => {

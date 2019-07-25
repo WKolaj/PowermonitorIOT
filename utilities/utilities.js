@@ -224,6 +224,10 @@ module.exports.createDatabaseFile = function(dbFile) {
   let db = new sqlite3.Database(dbFile);
 };
 
+module.exports.getCurrentProject = function() {
+  return require("../classes/project/Project").CurrentProject;
+};
+
 /**
  * @description Method for creating table in database
  * @param {object} dbFile database object

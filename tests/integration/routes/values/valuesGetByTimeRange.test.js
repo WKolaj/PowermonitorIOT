@@ -57,11 +57,13 @@ describe("variables route", () => {
   let factorElementBody;
   let increaseElementBody;
   let sumElementBody;
+  let eventLogBody;
 
   let averageElement;
   let factorElement;
   let increaseElement;
   let sumElement;
+  let eventLog;
 
   let init = async () => {
     //Creating additional users
@@ -371,6 +373,18 @@ describe("variables route", () => {
       ]
     };
 
+    eventLogBody = {
+      type: "eventLogElement",
+      name: "eventLog",
+      logVariables: [
+        {
+          tickVarId: mbInt16Variable.Id,
+          valueVarId: mbInt32Variable.Id
+        }
+      ],
+      eventDescriptions: {}
+    };
+
     let averageElementResult = await request(server)
       .post(`/api/calcElements/${mbDevice.Id}`)
       .set(tokenHeader, adminToken)
@@ -391,6 +405,11 @@ describe("variables route", () => {
       .set(tokenHeader, adminToken)
       .send(sumElementBody);
 
+    let eventLogResult = await request(server)
+      .post(`/api/calcElements/${mbDevice.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(eventLogBody);
+
     averageElement = await Project.CurrentProject.getCalcElement(
       mbDevice.Id,
       averageElementResult.body.id
@@ -409,6 +428,11 @@ describe("variables route", () => {
     sumElement = await Project.CurrentProject.getCalcElement(
       mbDevice.Id,
       sumElementResult.body.id
+    );
+
+    eventLog = await Project.CurrentProject.getCalcElement(
+      mbDevice.Id,
+      eventLogResult.body.id
     );
   };
 
@@ -927,6 +951,17 @@ describe("variables route", () => {
 
       expect(result.status).toEqual(403);
       expect(result.text).toMatch(`Access forbidden`);
+    });
+
+    it("should return code 400 if given id is id of eventLog", async () => {
+      variableId = eventLog.Id;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(
+        `Element of type eventLogElement does not have values`
+      );
     });
   });
 });

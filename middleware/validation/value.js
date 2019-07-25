@@ -1,7 +1,9 @@
 const Joi = require("joi");
 const validationMiddleware = require("../validation.js");
 const User = require("../../classes/user/User");
-const Project = require("../../classes/project/Project");
+const { getCurrentProject } = require("../../utilities/utilities");
+
+let blockedElementTypes = ["eventLogElement"];
 
 let generateSchema = variableType => {
   switch (variableType) {
@@ -133,19 +135,19 @@ let validateEdit = function(req) {
     //Getting variable to edit
 
     //If there is no device - resolving undefined in order to return 404 later
-    if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
+    if (!(await getCurrentProject().doesDeviceExist(req.params.deviceId)))
       return resolve();
 
     //If there is no element - resolving undefined in order to return 404 later
     if (
-      !(await Project.CurrentProject.doesElementExist(
+      !(await getCurrentProject().doesElementExist(
         req.params.deviceId,
         req.params.elementId
       ))
     )
       return resolve();
 
-    let element = await Project.CurrentProject.getElement(
+    let element = await getCurrentProject().getElement(
       req.params.deviceId,
       req.params.elementId
     );
@@ -179,5 +181,46 @@ let validateEdit = function(req) {
   });
 };
 
+let validateGet = function(req) {
+  return new Promise(async (resolve, reject) => {
+    //Checking parameters
+    if (!req.params.deviceId) return resolve("deviceId has to be defined!");
+    if (!req.params.elementId) return resolve("variableId has to be defined!");
+
+    //Getting variable to edit
+
+    //If there is no device - resolving undefined in order to return 404 later
+    if (!(await getCurrentProject().doesDeviceExist(req.params.deviceId)))
+      return resolve();
+
+    //If there is no element - resolving undefined in order to return 404 later
+    if (
+      !(await getCurrentProject().doesElementExist(
+        req.params.deviceId,
+        req.params.elementId
+      ))
+    )
+      return resolve();
+
+    let element = await getCurrentProject().getElement(
+      req.params.deviceId,
+      req.params.elementId
+    );
+
+    if (
+      blockedElementTypes.some(
+        blockedElement => blockedElement === element.Type
+      )
+    )
+      return resolve(`Element of type ${element.Type} does not have values!`);
+
+    return resolve();
+  });
+};
+
 //Validator for edition
 module.exports.edit = validationMiddleware(validateEdit);
+
+module.exports.get = validationMiddleware(validateGet);
+
+module.exports.blockedElementTypes = blockedElementTypes;

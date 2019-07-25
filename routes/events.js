@@ -7,20 +7,20 @@ const canVisualizeData = require("../middleware/authCanVisualize");
 const canOperateData = require("../middleware/authCanOperate");
 const Project = require("../classes/project/Project");
 const _ = require("lodash");
-const validate = require("../middleware/validation/value");
+const validate = require("../middleware/validation/event");
 const Sampler = require("../classes/sampler/Sampler");
 
-let generateValuePayloadGeneralFromElement = element => {
-  return element.Value;
+let generateEventPayloadGeneralFromElement = element => {
+  return element.LastEvent;
 };
 
-let generateValuePayloadDetailedFromElement = element => {
+let generateEventPayloadDetailedFromElement = element => {
   return {
-    [element.ValueTickId]: element.Value
+    [element.LastEventId]: element.LastEvent
   };
 };
 
-let generateValuePayloadDetailedFromValueObject = valueObject => {
+let generateEventPayloadDetailedFromValueObject = valueObject => {
   if (valueObject === {} || valueObject === undefined || valueObject === null)
     return undefined;
   return valueObject;
@@ -58,22 +58,22 @@ router.get("/:deviceId", [auth, canVisualizeData], async (req, res) => {
 
   for (let element of allElements) {
     if (
-      !validate.blockedElementTypes.some(
-        blockedElement => blockedElement === element.Type
+      validate.allowedElementTypes.some(
+        allowedType => allowedType === element.Type
       )
     )
-      payloadToReturn[element.Id] = generateValuePayloadGeneralFromElement(
+      payloadToReturn[element.Id] = generateEventPayloadGeneralFromElement(
         element
       );
   }
 
   for (let variable of allVariables) {
     if (
-      !validate.blockedElementTypes.some(
-        blockedElement => blockedElement === variable.Type
+      validate.allowedElementTypes.some(
+        allowedType => allowedType === variable.Type
       )
     )
-      payloadToReturn[variable.Id] = generateValuePayloadGeneralFromElement(
+      payloadToReturn[variable.Id] = generateEventPayloadGeneralFromElement(
         variable
       );
   }
@@ -118,7 +118,7 @@ router.get(
         req.query.timestamp
       );
 
-      let payloadToReturn = generateValuePayloadDetailedFromValueObject(
+      let payloadToReturn = generateEventPayloadDetailedFromValueObject(
         valueObject
       );
 
@@ -162,7 +162,7 @@ router.get(
 
     //Getting actual value
     else {
-      let payloadToReturn = generateValuePayloadDetailedFromElement(element);
+      let payloadToReturn = generateEventPayloadDetailedFromElement(element);
       return res.status(200).send(payloadToReturn);
     }
   }
@@ -196,7 +196,7 @@ router.put(
     element.ValueTickId = Sampler.convertDateToTickNumber(Date.now());
     element.Value = req.body.value;
 
-    let payloadToReturn = generateValuePayloadDetailedFromElement(element);
+    let payloadToReturn = generateEventPayloadDetailedFromElement(element);
     res.status(200).send(payloadToReturn);
   }
 );

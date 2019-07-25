@@ -7,14 +7,14 @@ const {
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
 
-describe("variables route", () => {
+describe("calcElements route", () => {
   //Database directory should be cleared'
   let Project;
   let db1Path;
   let db2Path;
   let projPath;
   let server;
-  let endpoint = "/api/values/";
+  let endpoint = "/api/calcElements/";
   let tokenHeader;
 
   let visuUserBody;
@@ -193,7 +193,7 @@ describe("variables route", () => {
     };
 
     mbFloatVariableBody = {
-      type: "mbFloat",
+      type: "mbUInt32",
       name: "mbFloatVariable",
       archived: false,
       offset: 50,
@@ -279,7 +279,7 @@ describe("variables route", () => {
       booleanResult.body.id
     );
 
-    mbByteArrayVariable = await Project.CurrentProject.getVariable(
+    byteArrayResult = await Project.CurrentProject.getVariable(
       mbDevice.Id,
       byteArrayResult.body.id
     );
@@ -371,18 +371,6 @@ describe("variables route", () => {
       ]
     };
 
-    eventLogBody = {
-      type: "eventLogElement",
-      name: "eventLog",
-      logVariables: [
-        {
-          tickVarId: mbInt16Variable.Id,
-          valueVarId: mbInt32Variable.Id
-        }
-      ],
-      eventDescriptions: {}
-    };
-
     let averageElementResult = await request(server)
       .post(`/api/calcElements/${mbDevice.Id}`)
       .set(tokenHeader, adminToken)
@@ -403,11 +391,6 @@ describe("variables route", () => {
       .set(tokenHeader, adminToken)
       .send(sumElementBody);
 
-    let eventLogResult = await request(server)
-      .post(`/api/calcElements/${mbDevice.Id}`)
-      .set(tokenHeader, adminToken)
-      .send(eventLogBody);
-
     averageElement = await Project.CurrentProject.getCalcElement(
       mbDevice.Id,
       averageElementResult.body.id
@@ -426,11 +409,6 @@ describe("variables route", () => {
     sumElement = await Project.CurrentProject.getCalcElement(
       mbDevice.Id,
       sumElementResult.body.id
-    );
-
-    eventLog = await Project.CurrentProject.getCalcElement(
-      mbDevice.Id,
-      eventLogResult.body.id
     );
   };
 
@@ -460,161 +438,196 @@ describe("variables route", () => {
     await server.close();
   });
 
-  describe("GET /:deviceId/:variableId?timestamp", () => {
+  describe("CREATE /:deviceId", () => {
     let token;
     let deviceId;
-    let variableId;
-    let variablePayload;
-    let variable;
-    let value1;
-    let value2;
-    let value3;
-    let value4;
-    let value5;
-    let tickId1;
-    let tickId2;
-    let tickId3;
-    let tickId4;
-    let tickId5;
-    let currentValue;
-    let currentTickId;
-    let timestamp;
+    let calcElementBody;
 
     beforeEach(async () => {
       await init();
-      token = await visuUser.generateToken();
+      token = await dataAdmin.generateToken();
       deviceId = mbDevice.Id;
-      currentValue = 123.321;
-      currentTickId = 600;
-      value1 = 10;
-      value2 = 20;
-      value3 = 30;
-      value4 = 40;
-      value5 = 50;
-      tickId1 = 100;
-      tickId2 = 200;
-      tickId3 = 300;
-      tickId4 = 400;
-      tickId5 = 500;
-
-      variablePayload = {
-        type: "mbFloat",
-        name: "test variable",
-        archived: true,
-        offset: 100,
-        fCode: 3
+      calcElementBody = {
+        type: "eventLogElement",
+        name: "event log",
+        logVariables: [
+          {
+            tickVarId: mbInt16Variable.Id,
+            valueVarId: mbInt32Variable.Id
+          },
+          {
+            tickVarId: mbSwappedInt32Variable.Id,
+            valueVarId: mbSwappedUInt32Variable.Id
+          }
+        ],
+        eventDescriptions: {
+          "1": "event number 1",
+          "2": "event number 2",
+          "3": "event number 3",
+          "4": "event number 4"
+        }
       };
-
-      let adminToken = await dataAdmin.generateToken();
-
-      let result = await request(server)
-        .post(`/api/variables/${deviceId}`)
-        .set(tokenHeader, adminToken)
-        .send(variablePayload);
-
-      variable = await Project.CurrentProject.getVariable(
-        deviceId,
-        result.body.id
-      );
-      variableId = variable.Id;
-
-      //Assignning current value to variable
-      variable.Value = currentValue;
-      variable.ValueTickId = currentTickId;
-      timestamp = tickId3;
     });
 
     let exec = async () => {
-      if (value1 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId1, {
-          [variable.Id]: value1
-        });
-      if (value2 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId2, {
-          [variable.Id]: value2
-        });
-      if (value3 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId3, {
-          [variable.Id]: value3
-        });
-      if (value4 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId4, {
-          [variable.Id]: value4
-        });
-      if (value5 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId5, {
-          [variable.Id]: value5
-        });
-
       if (token) {
         return request(server)
-          .get(`${endpoint}/${deviceId}/${variableId}?timestamp=${timestamp}`)
+          .post(`${endpoint}/${deviceId}`)
           .set(tokenHeader, token)
-          .send();
+          .send(calcElementBody);
       } else {
         return request(server)
-          .get(`${endpoint}/${deviceId}/${variableId}?timestamp=${timestamp}`)
-          .send();
+          .post(`${endpoint}/${deviceId}`)
+          .send(calcElementBody);
       }
     };
 
-    it("should return code 200 and valid payload contaning variable  value from database associated with given timestamp", async () => {
+    it("should create new calcElement based on given payload", async () => {
+      let elementsCountBefore = (await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      )).length;
+
       let result = await exec();
 
-      expect(result.status).toEqual(200);
+      let elementsCountAfter = (await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      )).length;
 
-      let expectedPayload = { [tickId3]: value3 };
+      expect(elementsCountBefore + 1).toEqual(elementsCountAfter);
 
-      expect(result.body).toEqual(expectedPayload);
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
+
+      let variables = newElement.Variables.map(variableObject => {
+        return {
+          tickVarId: variableObject.tick.Id,
+          valueVarId: variableObject.value.Id
+        };
+      });
+
+      let expectedPayload = {
+        type: newElement.Type,
+        name: newElement.Name,
+        logVariables: variables,
+        eventDescriptions: newElement.Descriptions
+      };
+
+      expect(expectedPayload).toEqual(calcElementBody);
     });
 
-    it("should return code 200 and valid payload contaning variable  value from database with the last value in db if there is no such tickId in database", async () => {
-      //getting still value3 - cause time stamp is between tickId4 and tickId3
-      timestamp = tickId3 + (tickId4 - tickId3) / 2;
-
+    it("should set archive to false by default", async () => {
       let result = await exec();
 
-      expect(result.status).toEqual(200);
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
 
-      let expectedPayload = { [tickId3]: value3 };
-
-      expect(result.body).toEqual(expectedPayload);
+      expect(newElement.Archived).toEqual(false);
     });
 
-    it("should return code 200 and valid payload contaning variable last value from database if tickId is longer than accessible in database", async () => {
-      timestamp = 9999999999;
+    it("should set archive to false even if archive is set to true", async () => {
+      calcElementBody.archived = true;
 
       let result = await exec();
 
-      expect(result.status).toEqual(200);
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
 
-      let expectedPayload = { [tickId5]: value5 };
-
-      expect(result.body).toEqual(expectedPayload);
+      expect(newElement.Archived).toEqual(false);
     });
 
-    it("should return code 200 and valid payload contaning empty object if tickId is smaller than first tick in database", async () => {
-      timestamp = 10;
-
+    it("should set sampleTime to 1 by default", async () => {
       let result = await exec();
 
-      expect(result.status).toEqual(200);
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
 
-      let expectedPayload = {};
-
-      expect(result.body).toEqual(expectedPayload);
+      expect(newElement.SampleTime).toEqual(1);
     });
 
-    it("should return code 200 and valid payload contaning empty object if variable is not archived", async () => {
-      variableId = mbFloatVariable.Id;
+    it("should set sampleTime to 1 even if sampleTime is set to 2", async () => {
+      calcElementBody.sampleTime = 2;
 
+      let result = await exec();
+
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
+
+      expect(newElement.SampleTime).toEqual(1);
+    });
+
+    it("should set archiveSampleTime to 1 by default", async () => {
+      let result = await exec();
+
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
+
+      expect(newElement.ArchiveSampleTime).toEqual(1);
+    });
+
+    it("should set archiveSampleTime to 1 even if archiveSampleTime is set to 2", async () => {
+      calcElementBody.archiveSampleTime = 2;
+
+      let result = await exec();
+
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
+
+      expect(newElement.ArchiveSampleTime).toEqual(1);
+    });
+
+    it("should set unit to empty string by default", async () => {
+      let result = await exec();
+
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
+
+      expect(newElement.Unit).toEqual("");
+    });
+
+    it("should set unit to emptyString even if unit is set to ABC", async () => {
+      calcElementBody.unit = "ABC";
+
+      let result = await exec();
+
+      let newElement = await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      );
+
+      expect(newElement.Unit).toEqual("");
+    });
+
+    it("should return code 200 and payload of created calcElement", async () => {
       let result = await exec();
 
       expect(result.status).toEqual(200);
 
-      let expectedPayload = {};
+      let newElementPayload = (await Project.CurrentProject.getCalcElement(
+        deviceId,
+        result.body.id
+      )).Payload;
 
-      expect(result.body).toEqual(expectedPayload);
+      expect(result.body).toEqual({
+        ...newElementPayload,
+        value: null,
+        valueTickId: 0
+      });
     });
 
     it("should return code 404 if there is no device of given id", async () => {
@@ -626,15 +639,6 @@ describe("variables route", () => {
       expect(result.text).toMatch(`There is no device`);
     });
 
-    it("should return code 404 if there is no variable of given id", async () => {
-      variableId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no element`);
-    });
-
     it("should return code 401 if there is no user logged in", async () => {
       token = undefined;
 
@@ -644,202 +648,8 @@ describe("variables route", () => {
       expect(result.text).toMatch(`Access denied. No token provided`);
     });
 
-    it("should return code 403 if user does not have visu rights", async () => {
-      token = await operateUser.generateToken();
-
-      let result = await exec();
-
-      expect(result.status).toEqual(403);
-      expect(result.text).toMatch(`Access forbidden`);
-    });
-  });
-
-  describe("GET /:deviceId/:calcElementId?timestamp", () => {
-    let token;
-    let deviceId;
-    let variableId;
-    let variablePayload;
-    let variable;
-    let value1;
-    let value2;
-    let value3;
-    let value4;
-    let value5;
-    let tickId1;
-    let tickId2;
-    let tickId3;
-    let tickId4;
-    let tickId5;
-    let currentValue;
-    let currentTickId;
-    let timestamp;
-
-    beforeEach(async () => {
-      await init();
+    it("should return code 403 if user does not have dataAdmin rights", async () => {
       token = await visuUser.generateToken();
-      deviceId = mbDevice.Id;
-      currentValue = 123.321;
-      currentTickId = 600;
-      value1 = 10;
-      value2 = 20;
-      value3 = 30;
-      value4 = 40;
-      value5 = 50;
-      tickId1 = 100;
-      tickId2 = 200;
-      tickId3 = 300;
-      tickId4 = 400;
-      tickId5 = 500;
-
-      variablePayload = {
-        type: "factorElement",
-        name: "test calcElement",
-        archived: true,
-        factor: 2,
-        variableId: mbFloatVariable.Id
-      };
-
-      let adminToken = await dataAdmin.generateToken();
-
-      let result = await request(server)
-        .post(`/api/calcElements/${deviceId}`)
-        .set(tokenHeader, adminToken)
-        .send(variablePayload);
-
-      variable = await Project.CurrentProject.getCalcElement(
-        deviceId,
-        result.body.id
-      );
-      variableId = variable.Id;
-
-      //Assignning current value to variable
-      variable.Value = currentValue;
-      variable.ValueTickId = currentTickId;
-      timestamp = tickId3;
-    });
-
-    let exec = async () => {
-      if (value1 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId1, {
-          [variable.Id]: value1
-        });
-      if (value2 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId2, {
-          [variable.Id]: value2
-        });
-      if (value3 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId3, {
-          [variable.Id]: value3
-        });
-      if (value4 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId4, {
-          [variable.Id]: value4
-        });
-      if (value5 !== undefined)
-        await variable.Device.ArchiveManager.insertValues(tickId5, {
-          [variable.Id]: value5
-        });
-
-      if (token) {
-        return request(server)
-          .get(`${endpoint}/${deviceId}/${variableId}?timestamp=${timestamp}`)
-          .set(tokenHeader, token)
-          .send();
-      } else {
-        return request(server)
-          .get(`${endpoint}/${deviceId}/${variableId}?timestamp=${timestamp}`)
-          .send();
-      }
-    };
-
-    it("should return code 200 and valid payload contaning calcElement  value from database associated with given timestamp", async () => {
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let expectedPayload = { [tickId3]: value3 };
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 200 and valid payload contaning calcElement  value from database with the last value in db if there is no such tickId in database", async () => {
-      //getting still value3 - cause time stamp is between tickId4 and tickId3
-      timestamp = tickId3 + (tickId4 - tickId3) / 2;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let expectedPayload = { [tickId3]: value3 };
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 200 and valid payload contaning calcElement last value from database if tickId is longer than accessible in database", async () => {
-      timestamp = 9999999999;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let expectedPayload = { [tickId5]: value5 };
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 200 and valid payload contaning empty object if tickId is smaller than first tick in database", async () => {
-      timestamp = 10;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let expectedPayload = {};
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 200 and valid payload contaning empty object if calcElement is not archived", async () => {
-      variableId = factorElement.Id;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(200);
-
-      let expectedPayload = {};
-
-      expect(result.body).toEqual(expectedPayload);
-    });
-
-    it("should return code 404 if there is no device of given id", async () => {
-      deviceId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no device`);
-    });
-
-    it("should return code 404 if there is no calcElement of given id", async () => {
-      variableId = "4321";
-
-      let result = await exec();
-
-      expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no element`);
-    });
-
-    it("should return code 401 if there is no user logged in", async () => {
-      token = undefined;
-
-      let result = await exec();
-
-      expect(result.status).toEqual(401);
-      expect(result.text).toMatch(`Access denied. No token provided`);
-    });
-
-    it("should return code 403 if user does not have visu rights", async () => {
-      token = await operateUser.generateToken();
 
       let result = await exec();
 
@@ -847,15 +657,72 @@ describe("variables route", () => {
       expect(result.text).toMatch(`Access forbidden`);
     });
 
-    it("should return code 400 if given id is id of eventLog", async () => {
-      variableId = eventLog.Id;
+    it("should return code 400 and do not create element if name is shorter than 3", async () => {
+      calcElementBody.name = "ab";
+
+      let elementsBefore = await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      );
 
       let result = await exec();
 
+      let elementsAfter = await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      );
+
+      expect(elementsBefore).toEqual(elementsAfter);
       expect(result.status).toEqual(400);
-      expect(result.text).toMatch(
-        `Element of type eventLogElement does not have values`
+    });
+
+    it("should return code 400 and do not create element if name is longer than 100", async () => {
+      calcElementBody.name = new Array(101 + 1).join("a");
+
+      let elementsBefore = await Project.CurrentProject.getAllCalcElements(
+        deviceId
       );
+
+      let result = await exec();
+
+      let elementsAfter = await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      );
+
+      expect(elementsBefore).toEqual(elementsAfter);
+      expect(result.status).toEqual(400);
+    });
+
+    it("should return code 400 and do not create element if variable for one of events TickIds in payload does not exist", async () => {
+      calcElementBody.logVariables[0].tickVarId = "fakeTickId";
+
+      let elementsBefore = await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      );
+
+      let result = await exec();
+
+      let elementsAfter = await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      );
+
+      expect(elementsBefore).toEqual(elementsAfter);
+      expect(result.status).toEqual(400);
+    });
+
+    it("should return code 400 and do not create element if variable for one of events ValueIds in payload does not exist", async () => {
+      calcElementBody.logVariables[0].valueVarId = "valueVarId";
+
+      let elementsBefore = await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      );
+
+      let result = await exec();
+
+      let elementsAfter = await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      );
+
+      expect(elementsBefore).toEqual(elementsAfter);
+      expect(result.status).toEqual(400);
     });
   });
 });

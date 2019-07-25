@@ -21,7 +21,7 @@ let EventLogElementCreateSchema = Joi.object().keys({
     .required(),
   archived: Joi.boolean().required(),
   logVariables: Joi.array().required(),
-  eventDescriptions: Joi.array().required(),
+  eventDescriptions: Joi.object().required(),
   archiveSampleTime: Joi.number()
     .integer()
     .min(1)
@@ -44,7 +44,7 @@ let EventLogElementEditSchema = Joi.object().keys({
   archived: Joi.boolean(),
   variables: Joi.array(),
   logVariables: Joi.array(),
-  eventDescriptions: Joi.array(),
+  eventDescriptions: Joi.object(),
   archiveSampleTime: Joi.number()
     .integer()
     .min(1)
@@ -57,14 +57,24 @@ let checkVariableLogArray = async function(deviceId, variableArray) {
       return "tickVariId inside variableLog array objects cannot be undefined!";
     if (varObject.valueVarId === undefined)
       return "valueVarId inside variableLog array objects cannot be undefined!";
-    if (typeof tickVarId !== "string")
+    if (typeof varObject.tickVarId !== "string")
       return "tickVariId variables has to be a string!";
-    if (typeof valueVarId !== "string")
+    if (typeof varObject.tickVarId !== "string")
       return "valueVarId variables has to be a string!";
-    if (!(await Project.CurrentProject.doesVariableExist(deviceId, tickVarId)))
+    if (
+      !(await Project.CurrentProject.doesVariableExist(
+        deviceId,
+        varObject.tickVarId
+      ))
+    )
       return "variable of id tickVarId does not exist!";
 
-    if (!(await Project.CurrentProject.doesVariableExist(deviceId, valueVarId)))
+    if (
+      !(await Project.CurrentProject.doesVariableExist(
+        deviceId,
+        varObject.valueVarId
+      ))
+    )
       return "variable of id valueVarId does not exist!";
 
     //Everything is valid - returning undefined

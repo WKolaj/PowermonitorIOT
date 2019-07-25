@@ -114,9 +114,19 @@ class EventLogElement extends CalculationElement {
    * @description Method for getting value of calculation element
    */
   _getValue() {
+    return null;
+  }
+
+  get LastEvent() {
     return this._convertEventFromStorageToEventWithDescription({
       value: this.EventStorage.getLastEvent()
     }).value;
+  }
+
+  get LastEventTickId() {
+    return this._convertEventFromStorageToEventWithDescription({
+      value: this.EventStorage.getLastEvent()
+    }).tickId;
   }
 
   /**logVariables
@@ -225,7 +235,7 @@ class EventLogElement extends CalculationElement {
   /**
    * @description Overrwriting method for getting archive value
    */
-  async getValueFromDB(variableId, date) {
+  async getEventFromDB(variableId, date) {
     if (this.EventStorage.Initialized) {
       let eventObject = await this.EventStorage.getEvent(date);
 
@@ -249,7 +259,7 @@ class EventLogElement extends CalculationElement {
   /**
    * @description Overrwriting method for getting archive values
    */
-  async getValuesFromDB(variableId, fromDate, endDate) {
+  async getEventsFromDB(variableId, fromDate, endDate) {
     if (this.EventStorage.Initialized) {
       let events = await this.EventStorage.getEvents(fromDate, endDate);
 
