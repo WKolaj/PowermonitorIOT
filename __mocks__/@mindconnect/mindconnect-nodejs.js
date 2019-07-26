@@ -9,6 +9,8 @@ class MindConnectAgent {
 
     this.BulkPostData = jest.fn(async (dataToSend, validation) => {});
 
+    this.PostEvent = jest.fn(async event => {});
+
     this.IsOnBoarded = jest.fn(() => {
       return this._onBoarded;
     });

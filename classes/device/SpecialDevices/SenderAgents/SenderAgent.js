@@ -13,6 +13,7 @@ const path = require("path");
 const logger = require("../../../../logger/logger");
 const Sampler = require("../../../sampler/Sampler");
 const mongoose = require("mongoose");
+const EventStorage = require("../../../EventStorage/EventStorage");
 
 class SenderAgent {
   constructor() {
@@ -22,6 +23,9 @@ class SenderAgent {
     this._sendFileLimit = 5;
     this._sendingInterval = 60;
     this._dirPath = null;
+    this._events = [];
+    this._eventVariables = [];
+    this._eventsContent = [];
   }
 
   static _getValueDirName() {
@@ -30,6 +34,18 @@ class SenderAgent {
 
   static _getEventsDirName() {
     return "events";
+  }
+
+  get Events() {
+    return this._events;
+  }
+
+  get EventContent() {
+    return this._eventsContent;
+  }
+
+  get EventVariables() {
+    return this._eventVariables;
   }
 
   get Buffer() {
