@@ -8,7 +8,8 @@ const {
   existsAndIsNotEmpty,
   checkIfDirectoryExistsAsync,
   exists,
-  isCorrectValue
+  isCorrectValue,
+  getCurrentProject
 } = require("../../../../utilities/utilities");
 
 class MindConnectDevice extends SpecialDevice {
@@ -16,6 +17,11 @@ class MindConnectDevice extends SpecialDevice {
     super();
 
     this._dataAgent = new MindConnectSenderAgent();
+    this._eventVariables = [];
+  }
+
+  get EventVariables() {
+    return this._eventVariables;
   }
 
   get DirectoryPath() {
@@ -40,6 +46,13 @@ class MindConnectDevice extends SpecialDevice {
     if (exists(payload.dataAgent))
       dataAgentInitPayload = { ...payload.dataAgent };
 
+    if (exists(payload.eventVariables)) {
+      await this._initEventVariables(payload.eventVariables);
+      dataAgentInitPayload.eventBufferSize = this.EventVariables.length;
+    } else {
+      dataAgentInitPayload.eventBufferSize = 0;
+    }
+
     dataAgentInitPayload.dirPath = this.DirectoryPath;
 
     await this.initDataAgent(dataAgentInitPayload);
@@ -58,6 +71,35 @@ class MindConnectDevice extends SpecialDevice {
     await this.DataAgent.init(payload);
   }
 
+  async _initEventVariables(variablesPayload) {
+    if (existsAndIsNotEmpty(variablesPayload)) {
+      for (let variablePayload of variablesPayload) {
+        let tickDevId = variablePayload.tickDevId;
+        let tickVarId = variablePayload.tickVarId;
+        let valueVarId = variablePayload.valueVarId;
+        let valueDevId = variablePayload.valueDevId;
+
+        if (
+          exists(tickDevId) &&
+          exists(tickVarId) &&
+          exists(valueDevId) &&
+          exists(valueVarId)
+        ) {
+          let tickVar = await getCurrentProject().getElement(
+            tickDevId,
+            tickVarId
+          );
+          let valueVar = await getCurrentProject().getElement(
+            valueDevId,
+            valueVarId
+          );
+
+          this.EventVariables.push({ tick: tickVar, value: valueVar });
+        }
+      }
+    }
+  }
+
   async createDirectoryIfNotExists(directory) {
     let dirExists = await checkIfDirectoryExistsAsync(directory);
     if (!dirExists) await createDirAsync(directory);
@@ -65,6 +107,19 @@ class MindConnectDevice extends SpecialDevice {
 
   static generateDirectoryPath(id) {
     return path.join(config.get("projPath"), config.get("dataAgentDir"), id);
+  }
+
+  _generateEventPayloadFromVariables() {
+    let eventPayload = [];
+
+    for (let variableObject of this.EventVariables) {
+      eventPayload.push({
+        tickId: variableObject.tick.Value,
+        value: variableObject.value.Value
+      });
+    }
+
+    return eventPayload;
   }
 
   /**
@@ -80,6 +135,12 @@ class MindConnectDevice extends SpecialDevice {
       }
 
       await this.DataAgent.refresh(tickNumber);
+
+      let eventsPayload = await this._generateEventPayloadFromVariables();
+
+      if (existsAndIsNotEmpty(eventsPayload)) {
+        await this.DataAgent.refreshEvents(eventsPayload);
+      }
     }
   }
 
@@ -121,6 +182,15 @@ class MindConnectDevice extends SpecialDevice {
     if (existsAndIsNotEmpty(this.DataAgent))
       payload.dataAgent = this.DataAgent.Payload;
 
+    payload.eventVariables = this.EventVariables.map(varPair => {
+      return {
+        tickDevId: varPair.tick.Device.Id,
+        tickVarId: varPair.tick.Id,
+        valueDevId: varPair.value.Device.Id,
+        valueVarId: varPair.value.Id
+      };
+    });
+
     return payload;
   }
 
@@ -129,13 +199,56 @@ class MindConnectDevice extends SpecialDevice {
    */
   async editWithPayload(payload) {
     await super.editWithPayload(payload);
+
+    if (exists(payload.eventVariables))
+      await this._editEventVariables(payload.eventVariables);
+
     if (exists(payload.dataAgent)) {
       //Removing dir path from payload - in order to secure dirPatch change by route
       if (exists(payload.dataAgent.dirPath)) delete payload.dataAgent.dirPath;
+
+      //Deleting eventBufferSize from payload - it should be always calculated based on current variables count
+      if (exists(payload.dataAgent.eventBufferSize))
+        delete payload.dataAgent.eventBufferSize;
+
       await this.DataAgent.editWithPayload(payload.dataAgent);
     }
 
     return this;
+  }
+
+  async _editEventVariables(variablesPayload) {
+    this._eventVariables = [];
+
+    if (existsAndIsNotEmpty(variablesPayload)) {
+      for (let variablePayload of variablesPayload) {
+        let tickDevId = variablePayload.tickDevId;
+        let tickVarId = variablePayload.tickVarId;
+        let valueVarId = variablePayload.valueVarId;
+        let valueDevId = variablePayload.valueDevId;
+
+        if (
+          exists(tickDevId) &&
+          exists(tickVarId) &&
+          exists(valueDevId) &&
+          exists(valueVarId)
+        ) {
+          let tickVar = await getCurrentProject().getElement(
+            tickDevId,
+            tickVarId
+          );
+          let valueVar = await getCurrentProject().getElement(
+            valueDevId,
+            valueVarId
+          );
+
+          this.EventVariables.push({ tick: tickVar, value: valueVar });
+        }
+      }
+    }
+
+    //Event variables changed - also event buffer size should be adjusted
+    this.DataAgent.changeBufferSize(this.EventVariables.length);
   }
 
   _generateResponsePayload() {
@@ -145,6 +258,14 @@ class MindConnectDevice extends SpecialDevice {
     if (exists(payload.dataAgent) && exists(payload.dataAgent.dirPath)) {
       payload.dataAgent = { ...payload.dataAgent };
       delete payload.dataAgent.dirPath;
+    }
+
+    if (
+      exists(payload.dataAgent) &&
+      exists(payload.dataAgent.eventBufferSize)
+    ) {
+      payload.dataAgent = { ...payload.dataAgent };
+      delete payload.dataAgent.eventBufferSize;
     }
     if (exists(payload.dataAgent) && exists(payload.dataAgent.boardingKey)) {
       payload.dataAgent = {

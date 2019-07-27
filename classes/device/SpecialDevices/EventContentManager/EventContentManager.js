@@ -217,7 +217,8 @@ class EventContentManager {
         contentsToReturn.push(newContentValue);
     }
 
-    await this._saveContentToFile();
+    //Saving only when buffer changed - there is something to return
+    if (contentsToReturn.length > 0) await this._saveContentToFile();
 
     return contentsToReturn;
   }

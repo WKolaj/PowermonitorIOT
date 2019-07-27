@@ -13,7 +13,7 @@ const path = require("path");
 const logger = require("../../../../logger/logger");
 const Sampler = require("../../../sampler/Sampler");
 const mongoose = require("mongoose");
-const EventStorage = require("../../../EventStorage/EventStorage");
+const EventContentManager = require("../EventContentManager/EventContentManager");
 
 class SenderAgent {
   constructor() {
@@ -21,11 +21,12 @@ class SenderAgent {
     this._isWritingFile = false;
     this._sendingEnabled = false;
     this._sendFileLimit = 5;
+    this._sendEventLimit = 5;
     this._sendingInterval = 60;
     this._dirPath = null;
-    this._events = [];
-    this._eventVariables = [];
-    this._eventsContent = [];
+    this._events = {};
+    this._eventContentManager = new EventContentManager();
+    this._isWritingEvent = false;
   }
 
   static _getValueDirName() {
@@ -36,16 +37,19 @@ class SenderAgent {
     return "events";
   }
 
+  static _getEventsManagerFileName() {
+    return "eventContentManager.json";
+  }
+
+  /**
+   * @description Collection of possible events - descriptions, values, severity etc..
+   */
   get Events() {
     return this._events;
   }
 
-  get EventContent() {
-    return this._eventsContent;
-  }
-
-  get EventVariables() {
-    return this._eventVariables;
+  get EventContentManager() {
+    return this._eventContentManager;
   }
 
   get Buffer() {
@@ -56,12 +60,24 @@ class SenderAgent {
     return this._isWritingFile;
   }
 
+  get IsWritingEvent() {
+    return this._isWritingEvent;
+  }
+
   get SendingEnabled() {
     return this._sendingEnabled;
   }
 
   get SendFileLimit() {
     return this._sendFileLimit;
+  }
+
+  get EventBufferSize() {
+    return this.EventContentManager.BufferSize;
+  }
+
+  get SendEventLimit() {
+    return this._sendEventLimit;
   }
 
   get SendingInterval() {
@@ -84,8 +100,38 @@ class SenderAgent {
       : null;
   }
 
+  get EventManagerFilePath() {
+    return exists(this.DirectoryPath)
+      ? path.join(this.DirectoryPath, SenderAgent._getEventsManagerFileName())
+      : null;
+  }
+
   async _sendData(data) {
     throw new Error("should be override in child classes");
+  }
+
+  async _sendEvent(eventTickId, eventPayload) {
+    throw new Error("should be override in child classes");
+  }
+
+  async _getEventDetails(eventValue) {
+    return this.Events[eventValue];
+  }
+
+  async _sendEventBasedOnValue(eventTickId, eventValue) {
+    let eventPayload = await this._getEventDetails(eventValue);
+
+    if (!existsAndIsNotEmpty(eventPayload))
+      return logger.warn(
+        `Event of value ${eventValue} and tick ${eventTickId} has not been send - unrecognized value`
+      );
+
+    try {
+      await this._sendEvent(eventTickId, eventPayload);
+    } catch (err) {
+      await this._saveEventToFile(eventTickId, eventPayload);
+      logger.warn(err, err.message);
+    }
   }
 
   async enableSendingData() {
@@ -154,6 +200,10 @@ class SenderAgent {
     return `${mongoose.Types.ObjectId().toHexString()}.json`;
   }
 
+  _generateEventFileName() {
+    return `${mongoose.Types.ObjectId().toHexString()}.json`;
+  }
+
   async _saveDataToFile(data) {
     try {
       this._isWritingFile = true;
@@ -171,6 +221,23 @@ class SenderAgent {
     }
   }
 
+  async _saveEventToFile(tickId, data) {
+    try {
+      this._isWritingEvent = true;
+      let fileName = this._generateEventFileName();
+      if (!exists(this.EventsDirectoryPath))
+        throw new Error("Event path is empty");
+
+      let filePath = path.join(this.EventsDirectoryPath, fileName);
+      await writeFileAsync(filePath, JSON.stringify({ [tickId]: data }));
+
+      this._isWritingEvent = false;
+    } catch (err) {
+      this._isWritingEvent = false;
+      logger.error(err.message, err);
+    }
+  }
+
   async _getDataFromVariables(bufferContent) {
     throw new Error("should be override in child classes");
   }
@@ -180,6 +247,16 @@ class SenderAgent {
 
     if (exists(dataToSend)) {
       await this._sendData(dataToSend);
+    }
+  }
+
+  async _checkAndSendCurrentEvents(bufferContent) {
+    //Getting new events based on buffer content
+    let newEvents = await this.EventContentManager.refreshEvents(bufferContent);
+    if (existsAndIsNotEmpty(newEvents)) {
+      for (let event of newEvents) {
+        await this._sendEventBasedOnValue(event.tickId, event.value);
+      }
     }
   }
 
@@ -213,7 +290,46 @@ class SenderAgent {
         sendFileCount++;
       }
     } catch (err) {
-      logger.warn(err);
+      logger.warn(err, err.message);
+    }
+  }
+
+  async _sendBufferedEvents() {
+    //Do no send data if new file is being written
+    if (this.IsWritingEvent) {
+      logger.info("Cannot send event - sender busy wrtting");
+      return;
+    }
+
+    try {
+      let filesPath = await this._getAllBufferEventFilesPath();
+
+      let sendEventCount = 0;
+
+      for (let filePath of filesPath) {
+        //Ending sending if send file count is already achieved
+        if (sendEventCount >= this.SendEventLimit) return;
+
+        let fileContent = await readFileAsync(filePath);
+
+        //Sending file if content exists
+        if (exists(fileContent)) {
+          let jsonContent = JSON.parse(fileContent);
+
+          if (existsAndIsNotEmpty(jsonContent)) {
+            let tickId = Object.keys(jsonContent)[0];
+            if (exists(tickId))
+              await this._sendEvent(tickId, jsonContent[tickId]);
+          }
+        }
+
+        //Removing file after sent
+        await unlinkAnsync(filePath);
+
+        sendEventCount++;
+      }
+    } catch (err) {
+      logger.warn(err, err.message);
     }
   }
 
@@ -223,15 +339,36 @@ class SenderAgent {
 
     let dataToSend = await this._getDataFromVariables(this.Buffer);
 
-    try {
-      //Sending data only if sending is enabled
-      if (!this.SendingEnabled) return;
+    //Sending data only if sending is enabled
+    if (!this.SendingEnabled) return;
 
+    try {
       await this._sendCurrentData(dataToSend);
       await this._sendBufferedData();
     } catch (err) {
       //There was an error while sending data - save it to new file
       await this._saveDataToFile(dataToSend);
+      logger.warn(err, err.message);
+    }
+
+    //Every minute send buffered events that has not been send
+    try {
+      await this._sendBufferedEvents();
+    } catch (err) {
+      logger.warn(err, err.message);
+    }
+  }
+
+  async refreshEvents(bufferContent) {
+    if (!existsAndIsNotEmpty(bufferContent)) return;
+
+    //Sending data only if sending is enabled
+    if (!this.SendingEnabled) return;
+
+    try {
+      //Sending only current events - buffered are being send every refresh
+      await this._checkAndSendCurrentEvents(bufferContent);
+    } catch (err) {
       logger.warn(err, err.message);
     }
   }
@@ -241,6 +378,13 @@ class SenderAgent {
     if (isObjectEmpty(allFiles)) return [];
 
     return allFiles.map(file => path.join(this.ValuesDirectoryPath, file));
+  }
+
+  async _getAllBufferEventFilesPath() {
+    let allFiles = await readDirAsync(this.EventsDirectoryPath);
+    if (isObjectEmpty(allFiles)) return [];
+
+    return allFiles.map(file => path.join(this.EventsDirectoryPath, file));
   }
 
   _checkPayload(payload) {
@@ -265,10 +409,26 @@ class SenderAgent {
 
     if (exists(payload.sendFileLimit))
       this._sendFileLimit = payload.sendFileLimit;
+    if (exists(payload.sendEventLimit))
+      this._sendEventLimit = payload.sendEventLimit;
     if (exists(payload.sendingInterval))
       this._sendingInterval = payload.sendingInterval;
+
+    if (exists(payload.eventDescriptions))
+      this._events = payload.eventDescriptions;
     if (exists(payload.sendingEnabled) && payload.sendingEnabled)
       await this.enableSendingData();
+  }
+
+  async _initEventContentManager(payload) {
+    if (!exists(this.EventManagerFilePath))
+      throw new Error("Event manager file path does not exists!");
+
+    let bufferSize = exists(payload.eventBufferSize)
+      ? payload.eventBufferSize
+      : 10;
+
+    await this.EventContentManager.init(this.EventManagerFilePath, bufferSize);
   }
 
   /**
@@ -278,6 +438,7 @@ class SenderAgent {
   async init(payload) {
     this._checkPayload(payload);
     await this._initProperties(payload);
+    await this._initEventContentManager(payload);
   }
 
   _generatePayload() {
@@ -285,8 +446,15 @@ class SenderAgent {
       dirPath: this._dirPath,
       sendingEnabled: this._sendingEnabled,
       sendFileLimit: this._sendFileLimit,
-      sendingInterval: this._sendingInterval
+      sendEventLimit: this._sendEventLimit,
+      sendingInterval: this._sendingInterval,
+      eventDescriptions: this._events,
+      eventBufferSize: this.EventBufferSize
     };
+  }
+
+  async changeBufferSize(newBufferSize) {
+    await this.EventContentManager.changeBufferSize(newBufferSize);
   }
 
   /**
@@ -297,6 +465,12 @@ class SenderAgent {
       this._sendFileLimit = payload.sendFileLimit;
     if (exists(payload.sendingInterval))
       this._sendingInterval = payload.sendingInterval;
+    if (exists(payload.eventDescriptions))
+      this._events = payload.eventDescriptions;
+    if (exists(payload.sendEventLimit))
+      this._sendEventLimit = payload.sendEventLimit;
+    if (exists(payload.eventBufferSize))
+      await this.changeBufferSize(payload.eventBufferSize);
     if (exists(payload.sendingEnabled)) {
       if (payload.sendingEnabled && !this.SendingEnabled)
         await this.enableSendingData();

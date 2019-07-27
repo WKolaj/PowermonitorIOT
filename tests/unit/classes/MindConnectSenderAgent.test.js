@@ -9,11 +9,15 @@ const {
 } = require("../../../utilities/utilities");
 
 let senderAgentDirectory = "_projTest";
+let eventBufferFilePath = "_projTest/eventContentManager.json";
 let {
   clearDirectoryAsync,
   checkIfTableExists,
   checkIfColumnExists,
   checkIfFileExistsAsync,
+  checkIfDirectoryExistsAsync,
+  writeFileAsync,
+  existsAndIsNotEmpty,
   createDatabaseFile,
   createDatabaseTable,
   createDatabaseColumn,
@@ -86,6 +90,31 @@ describe("MindConnectSenderAgent", () => {
       let result = exec();
       expect(result.NumberOfSendingRetries).toEqual(5);
     });
+
+    it("should set isWritingEvent enabled to false", () => {
+      let result = exec();
+      expect(result.IsWritingEvent).toBeFalsy();
+    });
+
+    it("should set EventBufferSize to 10", () => {
+      let result = exec();
+      expect(result.EventBufferSize).toEqual(10);
+    });
+
+    it("should set SendEventLimit to 5", () => {
+      let result = exec();
+      expect(result.SendEventLimit).toEqual(5);
+    });
+
+    it("should set Events to {}", () => {
+      let result = exec();
+      expect(result.Events).toEqual({});
+    });
+
+    it("should create EventContentManager", () => {
+      let result = exec();
+      expect(result.EventContentManager).toBeDefined();
+    });
   });
 
   describe("init", () => {
@@ -114,6 +143,65 @@ describe("MindConnectSenderAgent", () => {
           varId2: "msName2",
           varId3: "msName3",
           varId4: "msName4"
+        },
+        sendFileLimit: 10,
+        sendEventLimit: 10,
+        eventBufferSize: 3,
+        eventDescriptions: {
+          "1001": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz1",
+            severity: 20,
+            timestamp: "testTimeStamp1",
+            description: "event 1"
+          },
+          "1002": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz2",
+            severity: 30,
+            timestamp: "testTimeStamp2",
+            description: "event 2"
+          },
+          "1003": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz3",
+            severity: 40,
+            timestamp: "testTimeStamp3",
+            description: "event 3"
+          },
+          "1004": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz4",
+            severity: 40,
+            timestamp: "testTimeStamp4",
+            description: "event 4"
+          },
+          "1005": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz5",
+            severity: 40,
+            timestamp: "testTimeStamp5",
+            description: "event 5"
+          },
+          "1006": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz6",
+            severity: 40,
+            timestamp: "testTimeStamp6",
+            description: "event 6"
+          }
         }
       };
     });
@@ -267,6 +355,234 @@ describe("MindConnectSenderAgent", () => {
         ...initialPayload,
         sendingInterval: 60
       });
+    });
+
+    it("should not throw and set eventBufferSize to 10 if it is not provided", async () => {
+      initialPayload.eventBufferSize = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(senderDevice.Payload).toEqual({
+        ...initialPayload,
+        eventBufferSize: 10
+      });
+    });
+
+    it("should not throw and set eventDescriptions to {} if it is not provided", async () => {
+      initialPayload.eventDescriptions = undefined;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(senderDevice.Payload).toEqual({
+        ...initialPayload,
+        eventDescriptions: {}
+      });
+    });
+
+    it("should create values dir and events dir if they not exists", async () => {
+      await exec();
+
+      let valueDirPath = path.join(initialPayload.dirPath, "values");
+      let eventDirPath = path.join(initialPayload.dirPath, "events");
+
+      let valueDirExists = await checkIfDirectoryExistsAsync(valueDirPath);
+      expect(valueDirExists).toBeTruthy();
+
+      let eventDirExists = await checkIfDirectoryExistsAsync(eventDirPath);
+      expect(eventDirExists).toBeTruthy();
+    });
+
+    it("should not throw if values and events dir already exist", async () => {
+      let valueDirPath = path.join(initialPayload.dirPath, "values");
+      let eventDirPath = path.join(initialPayload.dirPath, "events");
+
+      await createDirAsync(valueDirPath);
+      await createDirAsync(eventDirPath);
+
+      await exec();
+
+      let valueDirExists = await checkIfDirectoryExistsAsync(valueDirPath);
+      expect(valueDirExists).toBeTruthy();
+
+      let eventDirExists = await checkIfDirectoryExistsAsync(eventDirPath);
+      expect(eventDirExists).toBeTruthy();
+    });
+
+    it("should set EventManagerFilePath", async () => {
+      await exec();
+
+      expect(senderDevice.EventManagerFilePath).toEqual(eventBufferFilePath);
+    });
+
+    it("should not add any file to event dir", async () => {
+      await exec();
+
+      let allFiles = await readDirAsync(
+        path.join(senderAgentDirectory, "events")
+      );
+
+      expect(allFiles).toEqual([]);
+    });
+
+    it("EventContentManager - should set Content to {} if content file does not exist", async () => {
+      await exec();
+
+      expect(senderDevice.EventContentManager.Content).toEqual({});
+    });
+
+    it("EventContentManager - should set Content according to file if it exists", async () => {
+      let fileContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, value: 10003 }
+      };
+
+      await writeFileAsync(eventBufferFilePath, JSON.stringify(fileContent));
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.Content).toEqual(fileContent);
+    });
+
+    it("EventContentManager - should set Content to {} if is empty", async () => {
+      await writeFileAsync(eventBufferFilePath, "");
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.Content).toEqual({});
+    });
+
+    it("EventContentManager - should set Content according to file if it exists - even if file content is shorter than buffer size", async () => {
+      initialPayload.eventBufferSize = 5;
+
+      let fileContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, value: 10003 }
+      };
+
+      await writeFileAsync(eventBufferFilePath, JSON.stringify(fileContent));
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.Content).toEqual(fileContent);
+    });
+
+    it("EventContentManager - should set Content according to file if it exists - even if file content is longer than buffer size - cut appriopriate number of events", async () => {
+      bufferSize = 3;
+
+      let fileContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12347, eventId: 3, value: 10004 },
+        "4": { tickId: 12347, eventId: 4, value: 10005 }
+      };
+
+      await writeFileAsync(eventBufferFilePath, JSON.stringify(fileContent));
+
+      await exec();
+
+      let expectedContent = {
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12347, eventId: 3, value: 10004 },
+        "4": { tickId: 12347, eventId: 4, value: 10005 }
+      };
+
+      expect(senderDevice.EventContentManager.Content).toEqual(expectedContent);
+    });
+
+    it("EventContentManager - should set initialized to true after initialization", async () => {
+      await exec();
+
+      expect(senderDevice.EventContentManager.Initialized).toEqual(true);
+    });
+
+    it("EventContentManager - should set busy to false after initialization - if there is a file", async () => {
+      let fileContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 }
+      };
+
+      await writeFileAsync(eventBufferFilePath, JSON.stringify(fileContent));
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.Busy).toEqual(false);
+    });
+
+    it("EventContentManager - should set busy to false after initialization - if there is a empty file", async () => {
+      await writeFileAsync(eventBufferFilePath, "");
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.Busy).toEqual(false);
+    });
+
+    it("EventContentManager - should set busy to false after initialization - if there is no file", async () => {
+      await exec();
+
+      expect(senderDevice.EventContentManager.Busy).toEqual(false);
+    });
+
+    it("EventContentManager - should set busy to false and initialized to false if reading file throws", async () => {
+      await writeFileAsync(
+        eventBufferFilePath,
+        JSON.stringify("corrupted Payload")
+      );
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(senderDevice.EventContentManager.Initialized).toEqual(false);
+      expect(senderDevice.EventContentManager.Busy).toEqual(false);
+    });
+
+    it("EventContentManager - should set eventLastTickId to 0 - if there is no file", async () => {
+      await exec();
+
+      expect(senderDevice.EventContentManager.LastEventId).toEqual(0);
+    });
+
+    it("EventContentManager - should set eventLastTickId to max number - file exists", async () => {
+      let fileContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 }
+      };
+
+      await writeFileAsync(eventBufferFilePath, JSON.stringify(fileContent));
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.LastEventId).toEqual(2);
     });
   });
 
@@ -847,12 +1163,16 @@ describe("MindConnectSenderAgent", () => {
     let bufferContent2;
     let bufferContent3;
     let setSendDataToThrow;
+    let setSendEventToThrow;
     let setIsWritingToTrue;
+    let setIsWritingEventToTrue;
     let tickId;
 
     beforeEach(async () => {
+      setIsWritingEventToTrue = false;
       setIsWritingToTrue = false;
       setSendDataToThrow = false;
+      setSendEventToThrow = false;
       tickId = 1563524800;
       initialPayload = {
         dirPath: senderAgentDirectory,
@@ -917,8 +1237,13 @@ describe("MindConnectSenderAgent", () => {
       senderDevice.addToBuffer(bufferContent2);
       senderDevice.addToBuffer(bufferContent3);
       if (setIsWritingToTrue) senderDevice._isWritingFile = true;
+      if (setIsWritingEventToTrue) senderDevice._isWritingEvent = true;
       if (setSendDataToThrow)
         senderDevice.MindConnectAgent.BulkPostData = jest.fn(() => {
+          throw new Error("test Error");
+        });
+      if (setSendEventToThrow)
+        senderDevice.MindConnectAgent.PostEvent = jest.fn(() => {
           throw new Error("test Error");
         });
       await senderDevice.refresh(tickId);
@@ -1287,6 +1612,33 @@ describe("MindConnectSenderAgent", () => {
         JSON.stringify(mockFile3Content)
       );
 
+      //Creating mock buffered files
+      //Creating mock buffered files
+      let mockEvent1Content = {
+        "12345": { name: "fake event 1" }
+      };
+      let mockEvent2Content = {
+        "12346": { name: "fake event 2" }
+      };
+      let mockEvent3Content = {
+        "12347": { name: "fake event 3" }
+      };
+
+      await createDirAsync(path.join(initialPayload.dirPath, "events"));
+
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile1.json"),
+        JSON.stringify(mockEvent1Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile2.json"),
+        JSON.stringify(mockEvent2Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile3.json"),
+        JSON.stringify(mockEvent3Content)
+      );
+
       await exec();
 
       //Should not be called
@@ -1334,6 +1686,19 @@ describe("MindConnectSenderAgent", () => {
       let jsonContent3 = JSON.parse(content3);
 
       expect(jsonContent3).toEqual(mockFile3Content);
+
+      expect(senderDevice.MindConnectAgent.PostEvent).not.toHaveBeenCalled();
+
+      //All files should have been deleted
+      let allFilesFromEventsDir = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromEventsDir).toEqual([
+        "testFile1.json",
+        "testFile2.json",
+        "testFile3.json"
+      ]);
     });
 
     it("should do nothing - if tickId does not match SendingInterval", async () => {
@@ -1642,11 +2007,413 @@ describe("MindConnectSenderAgent", () => {
 
       expect(jsonContent3).toEqual(mockFile3Content);
     });
+
+    it("should send all events from buffered files and delte them after sending  - if sendEvent does not throw", async () => {
+      //Creating mock buffered files
+      let mockEvent1Content = {
+        "12345": {
+          source: "app1",
+          description: "fake event 1",
+          severity: 20 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent2Content = {
+        "12346": {
+          source: "app2",
+          description: "fake event 2",
+          severity: 30 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent3Content = {
+        "12347": {
+          source: "app3",
+          description: "fake event 3",
+          severity: 40 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+
+      let expectedEvent1 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app1",
+        severity: 20,
+        timestamp: new Date(12345000).toISOString(),
+        description: "fake event 1"
+      };
+
+      let expectedEvent2 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app2",
+        severity: 30,
+        timestamp: new Date(12346000).toISOString(),
+        description: "fake event 2"
+      };
+
+      let expectedEvent3 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app3",
+        severity: 40,
+        timestamp: new Date(12347000).toISOString(),
+        description: "fake event 3"
+      };
+
+      await createDirAsync(path.join(initialPayload.dirPath, "events"));
+
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile1.json"),
+        JSON.stringify(mockEvent1Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile2.json"),
+        JSON.stringify(mockEvent2Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile3.json"),
+        JSON.stringify(mockEvent3Content)
+      );
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(3);
+
+      //Data from files
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual(
+        expectedEvent1
+      );
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[1][0]).toEqual(
+        expectedEvent2
+      );
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[2][0]).toEqual(
+        expectedEvent3
+      );
+
+      //All files should have been deleted
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should send all events from buffered files and delte them after sending  - if sendData throws", async () => {
+      sendDataMock = jest.fn(dataToSend => {
+        throw new Error("Test error");
+      });
+
+      //Creating mock buffered files
+      //Creating mock buffered files
+      let mockEvent1Content = {
+        "12345": {
+          source: "app1",
+          description: "fake event 1",
+          severity: 20 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent2Content = {
+        "12346": {
+          source: "app2",
+          description: "fake event 2",
+          severity: 30 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent3Content = {
+        "12347": {
+          source: "app3",
+          description: "fake event 3",
+          severity: 40 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+
+      let expectedEvent1 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app1",
+        severity: 20,
+        timestamp: new Date(12345000).toISOString(),
+        description: "fake event 1"
+      };
+
+      let expectedEvent2 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app2",
+        severity: 30,
+        timestamp: new Date(12346000).toISOString(),
+        description: "fake event 2"
+      };
+
+      let expectedEvent3 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app3",
+        severity: 40,
+        timestamp: new Date(12347000).toISOString(),
+        description: "fake event 3"
+      };
+
+      await createDirAsync(path.join(initialPayload.dirPath, "events"));
+
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile1.json"),
+        JSON.stringify(mockEvent1Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile2.json"),
+        JSON.stringify(mockEvent2Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile3.json"),
+        JSON.stringify(mockEvent3Content)
+      );
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(3);
+
+      //Data from files
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual(
+        expectedEvent1
+      );
+
+      //Data from files
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[1][0]).toEqual(
+        expectedEvent2
+      );
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[2][0]).toEqual(
+        expectedEvent3
+      );
+
+      //All files should have been deleted
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should not send all events from buffered files and not delte them after sending  - if sendEvent throws", async () => {
+      setSendEventToThrow = true;
+      //Creating mock buffered files
+      let mockEvent1Content = {
+        "12345": {
+          source: "app1",
+          description: "fake event 1",
+          severity: 20 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent2Content = {
+        "12346": {
+          source: "app2",
+          description: "fake event 2",
+          severity: 30 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent3Content = {
+        "12347": {
+          source: "app3",
+          description: "fake event 3",
+          severity: 40 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+
+      await createDirAsync(path.join(initialPayload.dirPath, "events"));
+
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile1.json"),
+        JSON.stringify(mockEvent1Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile2.json"),
+        JSON.stringify(mockEvent2Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile3.json"),
+        JSON.stringify(mockEvent3Content)
+      );
+
+      await exec();
+
+      //Called first time - and retry numberOfSendingRetries time
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(
+        initialPayload.numberOfSendingRetries
+      );
+
+      //All files should have been deleted
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([
+        "testFile1.json",
+        "testFile2.json",
+        "testFile3.json"
+      ]);
+    });
+
+    it("should not send all events from buffered files and not delte them after sending  - if writingEvent is set to true", async () => {
+      setIsWritingEventToTrue = true;
+      //Creating mock buffered files
+      let mockEvent1Content = {
+        "12345": {
+          source: "app1",
+          description: "fake event 1",
+          severity: 20 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent2Content = {
+        "12346": {
+          source: "app2",
+          description: "fake event 2",
+          severity: 30 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent3Content = {
+        "12347": {
+          source: "app3",
+          description: "fake event 3",
+          severity: 40 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+
+      await createDirAsync(path.join(initialPayload.dirPath, "events"));
+
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile1.json"),
+        JSON.stringify(mockEvent1Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile2.json"),
+        JSON.stringify(mockEvent2Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile3.json"),
+        JSON.stringify(mockEvent3Content)
+      );
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).not.toHaveBeenCalled();
+
+      //All files should have been deleted
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([
+        "testFile1.json",
+        "testFile2.json",
+        "testFile3.json"
+      ]);
+    });
+
+    it("should send only number of events less than limit number", async () => {
+      initialPayload.sendEventLimit = 2;
+
+      //Creating mock buffered files
+      let mockEvent1Content = {
+        "12345": {
+          source: "app1",
+          description: "fake event 1",
+          severity: 20 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent2Content = {
+        "12346": {
+          source: "app2",
+          description: "fake event 2",
+          severity: 30 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+      let mockEvent3Content = {
+        "12347": {
+          source: "app3",
+          description: "fake event 3",
+          severity: 40 // 0-99 : 20:error, 30:warning, 40: information
+        }
+      };
+
+      let expectedEvent1 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app1",
+        severity: 20,
+        timestamp: new Date(12345000).toISOString(),
+        description: "fake event 1"
+      };
+
+      let expectedEvent2 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app2",
+        severity: 30,
+        timestamp: new Date(12346000).toISOString(),
+        description: "fake event 2"
+      };
+
+      let expectedEvent3 = {
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "app3",
+        severity: 40,
+        timestamp: new Date(12347000).toISOString(),
+        description: "fake event 3"
+      };
+
+      await createDirAsync(path.join(initialPayload.dirPath, "events"));
+
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile1.json"),
+        JSON.stringify(mockEvent1Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile2.json"),
+        JSON.stringify(mockEvent2Content)
+      );
+      await createFileAsync(
+        path.join(initialPayload.dirPath, "events", "testFile3.json"),
+        JSON.stringify(mockEvent3Content)
+      );
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(2);
+
+      //Data from files
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual(
+        expectedEvent1
+      );
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[1][0]).toEqual(
+        expectedEvent2
+      );
+
+      //All files should have been deleted
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual(["testFile3.json"]);
+    });
   });
 
   describe("editWithPayload", () => {
     let senderDevice;
     let initialPayload;
+    let initialEventContent;
     let editPayload;
     let oldMSAgent;
 
@@ -1672,7 +2439,44 @@ describe("MindConnectSenderAgent", () => {
           varId2: "msName2",
           varId3: "msName3",
           varId4: "msName4"
+        },
+        sendEventLimit: 11,
+        eventBufferSize: 3,
+        eventDescriptions: {
+          "1": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz1",
+            severity: 20,
+            timestamp: "testTimeStamp1",
+            description: "event 1"
+          },
+          "2": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz2",
+            severity: 30,
+            timestamp: "testTimeStamp2",
+            description: "event 2"
+          },
+          "3": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz3",
+            severity: 40,
+            timestamp: "testTimeStamp3",
+            description: "event 3"
+          }
         }
+      };
+
+      initialEventContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 }
       };
 
       editPayload = {
@@ -1695,11 +2499,46 @@ describe("MindConnectSenderAgent", () => {
           varId3: "msName4",
           varId3: "msName5",
           varId4: "msName6"
+        },
+        sendEventLimit: 12,
+        eventBufferSize: 5,
+        eventDescriptions: {
+          "2": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz2",
+            severity: 30,
+            timestamp: "testTimeStamp2",
+            description: "event 2"
+          },
+          "3": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz3",
+            severity: 40,
+            timestamp: "testTimeStamp3",
+            description: "event 3"
+          },
+          "4": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz4",
+            severity: 20,
+            timestamp: "testTimeStamp4",
+            description: "event 4"
+          }
         }
       };
     });
 
     let exec = async () => {
+      await writeFileAsync(
+        eventBufferFilePath,
+        JSON.stringify(initialEventContent)
+      );
       senderDevice = new MindConnectSenderAgent();
       await senderDevice.init(initialPayload);
 
@@ -1865,6 +2704,615 @@ describe("MindConnectSenderAgent", () => {
       ).rejects.toBeDefined();
 
       expect(senderDevice.Payload).toEqual(initialPayload);
+    });
+
+    it("EventContentManager - should set new buffer size if buffer size is larger ", async () => {
+      await exec();
+
+      expect(senderDevice.EventContentManager.BufferSize).toEqual(
+        editPayload.eventBufferSize
+      );
+    });
+
+    it("EventContentManager - should set new buffer size if buffer size is smaller ", async () => {
+      initialPayload.eventBufferSize = 5;
+      initialEventContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12348, eventId: 3, value: 10004 },
+        "4": { tickId: 12349, eventId: 4, value: 10005 }
+      };
+
+      editPayload.eventBufferSize = 3;
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.BufferSize).toEqual(3);
+    });
+
+    it("EventContentManager - should not change buffer content ", async () => {
+      await exec();
+
+      expect(senderDevice.EventContentManager.Content).toEqual(
+        initialEventContent
+      );
+    });
+
+    it("EventContentManager - should cut buffer content if new size is smaller than previous one", async () => {
+      initialPayload.eventBufferSize = 5;
+      initialEventContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12348, eventId: 3, value: 10004 },
+        "4": { tickId: 12349, eventId: 4, value: 10005 }
+      };
+
+      editPayload.eventBufferSize = 3;
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.Content).toEqual({
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12348, eventId: 3, value: 10004 },
+        "4": { tickId: 12349, eventId: 4, value: 10005 }
+      });
+    });
+
+    it("EventContentManager - should cut buffer content and save it to file if new size is smaller than previous one", async () => {
+      initialPayload.eventBufferSize = 5;
+      initialEventContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12348, eventId: 3, value: 10004 },
+        "4": { tickId: 12349, eventId: 4, value: 10005 }
+      };
+
+      editPayload.eventBufferSize = 3;
+
+      await exec();
+
+      let fileContent = JSON.parse(await readFileAsync(eventBufferFilePath));
+
+      expect(fileContent).toEqual({
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12348, eventId: 3, value: 10004 },
+        "4": { tickId: 12349, eventId: 4, value: 10005 }
+      });
+    });
+
+    it("EventContentManager - should set busy to false after cutting", async () => {
+      initialPayload.eventBufferSize = 5;
+      initialEventContent = {
+        "0": { tickId: 12345, eventId: 0, value: 10001 },
+        "1": { tickId: 12346, eventId: 1, value: 10002 },
+        "2": { tickId: 12347, eventId: 2, value: 10003 },
+        "3": { tickId: 12348, eventId: 3, value: 10004 },
+        "4": { tickId: 12349, eventId: 4, value: 10005 }
+      };
+
+      editPayload.eventBufferSize = 3;
+
+      await exec();
+
+      expect(senderDevice.EventContentManager.Busy).toEqual(false);
+    });
+  });
+
+  describe("refreshEvents", () => {
+    let senderDevice;
+    let initialPayload;
+    let initialEventManagerContent;
+    let newEventContent;
+    let setSendEventMockToThrow;
+    let setIsWritingEventToTrue;
+    let now;
+
+    beforeEach(async () => {
+      setSendEventMockToThrow = false;
+      now = Math.round(Date.now() / 1000);
+      setIsWritingEventToTrue = false;
+      tickId = 100;
+      onSendingDisabledMockFn = jest.fn();
+      onSendingEnabledMockFn = jest.fn();
+      initialPayload = {
+        dirPath: senderAgentDirectory,
+        sendingEnabled: true,
+        sendingInterval: 100,
+        sendFileLimit: 10,
+        boardingKey: {
+          content: {
+            baseUrl: "https://southgate.eu1.mindsphere.io",
+            iat: "testIatvalue",
+            clientCredentialProfile: ["SHARED_SECRET"],
+            clientId: "testClientId",
+            tenant: "testTenant"
+          },
+          expiration: "2019-07-18T05:06:57.000Z"
+        },
+        numberOfSendingRetries: 15,
+        variableNames: {
+          varId1: "msName1",
+          varId2: "msName2",
+          varId3: "msName3",
+          varId4: "msName4"
+        },
+        sendEventLimit: 10,
+        eventBufferSize: 3,
+        eventDescriptions: {
+          "1001": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz1",
+            severity: 20,
+            timestamp: "testTimeStamp1",
+            description: "event 1"
+          },
+          "1002": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz2",
+            severity: 30,
+            timestamp: "testTimeStamp2",
+            description: "event 2"
+          },
+          "1003": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz3",
+            severity: 40,
+            timestamp: "testTimeStamp3",
+            description: "event 3"
+          },
+          "1004": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz4",
+            severity: 40,
+            timestamp: "testTimeStamp4",
+            description: "event 4"
+          },
+          "1005": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz5",
+            severity: 40,
+            timestamp: "testTimeStamp5",
+            description: "event 5"
+          },
+          "1006": {
+            entityId: "clientId",
+            sourceType: "Event",
+            sourceId: "application",
+            source: "Meowz6",
+            severity: 40,
+            timestamp: "testTimeStamp6",
+            description: "event 6"
+          }
+        }
+      };
+
+      initialEventManagerContent = {
+        [now + 3]: { tickId: now + 3, value: 1003 },
+        [now + 2]: { tickId: now + 2, value: 1002 },
+        [now + 1]: { tickId: now + 1, value: 1001 }
+      };
+
+      newEventContent = [
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 3, value: 1003 }
+      ];
+
+      sendEventMock = jest.fn();
+    });
+
+    let exec = async () => {
+      if (existsAndIsNotEmpty(initialEventManagerContent))
+        await writeFileAsync(
+          eventBufferFilePath,
+          JSON.stringify(initialEventManagerContent)
+        );
+
+      senderDevice = new MindConnectSenderAgent();
+
+      await senderDevice.init(initialPayload);
+
+      if (setSendEventMockToThrow)
+        senderDevice.MindConnectAgent.PostEvent = jest.fn(() => {
+          throw new Error("test error");
+        });
+
+      if (setIsWritingEventToTrue) senderDevice._isWritingEvent = true;
+      return senderDevice.refreshEvents(newEventContent);
+    };
+
+    it("should call sendEvent for every new event - if 2 new events are inside newContent", async () => {
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(2);
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz4",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 4)).toISOString(),
+        description: "event 4"
+      });
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[1][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz5",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 5)).toISOString(),
+        description: "event 5"
+      });
+    });
+
+    it("should not create any files if sending event does not throw - if 2 new events are inside newContent", async () => {
+      await exec();
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should create files containt events if sending event throw - if 2 new events are inside newContent", async () => {
+      setSendEventMockToThrow = true;
+
+      await exec();
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath.length).toEqual(2);
+
+      let fileContent1 = JSON.parse(
+        await readFileAsync(
+          path.join(
+            senderDevice.EventsDirectoryPath,
+            allFilesFromDeviceDirPath[0]
+          )
+        )
+      );
+      expect(Object.keys(fileContent1).length).toEqual(1);
+      let key1 = Object.keys(fileContent1)[0];
+      let value1 = fileContent1[key1];
+      expect(key1).toEqual((now + 4).toString());
+      expect(value1).toEqual(initialPayload.eventDescriptions["1004"]);
+
+      let fileContent2 = JSON.parse(
+        await readFileAsync(
+          path.join(
+            senderDevice.EventsDirectoryPath,
+            allFilesFromDeviceDirPath[1]
+          )
+        )
+      );
+      expect(Object.keys(fileContent2).length).toEqual(1);
+      let key2 = Object.keys(fileContent2)[0];
+      let value2 = fileContent2[key2];
+      expect(key2).toEqual((now + 5).toString());
+      expect(value2).toEqual(initialPayload.eventDescriptions["1005"]);
+
+      //Set writing should be set to false after everything
+      expect(senderDevice.IsWritingEvent).toEqual(false);
+    });
+
+    it("should not call sendEvent for every new event - if all new events are the same as before", async () => {
+      newEventContent = [
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 1, value: 1001 }
+      ];
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).not.toHaveBeenCalled();
+    });
+
+    it("should not create any files - if all new events are the same as before", async () => {
+      newEventContent = [
+        { tickId: now + 3, value: 1003 },
+        { tickId: now + 2, value: 1002 },
+        { tickId: now + 1, value: 1001 }
+      ];
+
+      await exec();
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should not call sendEvent if there is no description for given event value", async () => {
+      delete initialPayload.eventDescriptions["1004"];
+      delete initialPayload.eventDescriptions["1005"];
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).not.toHaveBeenCalled();
+    });
+
+    it("should not call sendEvent if event payload is corrupted - but send rest if it exists for them", async () => {
+      newEventContent[1] = "fakeEvent";
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz5",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 5)).toISOString(),
+        description: "event 5"
+      });
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should not call sendEvent if event value is equal to 0", async () => {
+      initialPayload.eventDescriptions["0"] = "fake event description";
+
+      newEventContent[1] = { tickId: now + 4, value: 0 };
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz5",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 5)).toISOString(),
+        description: "event 5"
+      });
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should not call sendEvent if event value is less than 0", async () => {
+      initialPayload.eventDescriptions["0"] = "fake event description";
+
+      newEventContent[1] = { tickId: now + 4, value: -1 };
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz5",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 5)).toISOString(),
+        description: "event 5"
+      });
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should not call sendEvent if there is no description for given event value - but send rest if it exists for them", async () => {
+      delete initialPayload.eventDescriptions["1004"];
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(1);
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz5",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 5)).toISOString(),
+        description: "event 5"
+      });
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should call sendEvent for every new event - if new event count is greater than content - but still the same as buffer size", async () => {
+      initialPayload.eventBufferSize = 4;
+
+      newEventContent = [
+        { tickId: now + 6, value: 1006 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 3, value: 1003 }
+      ];
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).toHaveBeenCalledTimes(3);
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[0][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz4",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 4)).toISOString(),
+        description: "event 4"
+      });
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[1][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz5",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 5)).toISOString(),
+        description: "event 5"
+      });
+
+      expect(senderDevice.MindConnectAgent.PostEvent.mock.calls[2][0]).toEqual({
+        entityId: initialPayload.boardingKey.content.clientId,
+        sourceType: "Event",
+        sourceId: "application",
+        source: "Meowz6",
+        severity: 40,
+        timestamp: new Date(1000 * (now + 6)).toISOString(),
+        description: "event 6"
+      });
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should not create any files if sending event does not throw - if 2 new events are inside newContent", async () => {
+      initialPayload.eventBufferSize = 4;
+
+      newEventContent = [
+        { tickId: now + 6, value: 1006 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 3, value: 1003 }
+      ];
+
+      await exec();
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should create files containt events if sending event throw - if 2 new events are inside newContent", async () => {
+      setSendEventMockToThrow = true;
+
+      initialPayload.eventBufferSize = 4;
+
+      newEventContent = [
+        { tickId: now + 6, value: 1006 },
+        { tickId: now + 5, value: 1005 },
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 3, value: 1003 }
+      ];
+
+      await exec();
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath.length).toEqual(3);
+
+      let fileContent1 = JSON.parse(
+        await readFileAsync(
+          path.join(
+            senderDevice.EventsDirectoryPath,
+            allFilesFromDeviceDirPath[0]
+          )
+        )
+      );
+      expect(Object.keys(fileContent1).length).toEqual(1);
+      let key1 = Object.keys(fileContent1)[0];
+      let value1 = fileContent1[key1];
+      expect(key1).toEqual((now + 4).toString());
+      expect(value1).toEqual(initialPayload.eventDescriptions["1004"]);
+
+      let fileContent2 = JSON.parse(
+        await readFileAsync(
+          path.join(
+            senderDevice.EventsDirectoryPath,
+            allFilesFromDeviceDirPath[1]
+          )
+        )
+      );
+      expect(Object.keys(fileContent2).length).toEqual(1);
+      let key2 = Object.keys(fileContent2)[0];
+      let value2 = fileContent2[key2];
+      expect(key2).toEqual((now + 5).toString());
+      expect(value2).toEqual(initialPayload.eventDescriptions["1005"]);
+
+      let fileContent3 = JSON.parse(
+        await readFileAsync(
+          path.join(
+            senderDevice.EventsDirectoryPath,
+            allFilesFromDeviceDirPath[2]
+          )
+        )
+      );
+      expect(Object.keys(fileContent3).length).toEqual(1);
+      let key3 = Object.keys(fileContent3)[0];
+      let value3 = fileContent3[key3];
+      expect(key3).toEqual((now + 6).toString());
+      expect(value3).toEqual(initialPayload.eventDescriptions["1006"]);
+
+      //Set writing should be set to false after everything
+      expect(senderDevice.IsWritingEvent).toEqual(false);
+    });
+
+    it("should not call sendEvent if new event content is shorter than buffer size", async () => {
+      newEventContent = [
+        { tickId: now + 4, value: 1004 },
+        { tickId: now + 3, value: 1003 }
+      ];
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).not.toHaveBeenCalled();
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
+    });
+
+    it("should not call sendEvent and create new file if sending enabled is set to false", async () => {
+      initialPayload.sendingEnabled = false;
+
+      await exec();
+
+      expect(senderDevice.MindConnectAgent.PostEvent).not.toHaveBeenCalled();
+
+      let allFilesFromDeviceDirPath = await readDirAsync(
+        senderDevice.EventsDirectoryPath
+      );
+
+      expect(allFilesFromDeviceDirPath).toEqual([]);
     });
   });
 });

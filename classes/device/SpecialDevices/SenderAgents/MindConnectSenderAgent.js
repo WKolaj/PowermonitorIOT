@@ -61,6 +61,13 @@ class MindConnectSenderAgent extends SenderAgent {
     return super.refresh(tickId);
   }
 
+  async refreshEvents(bufferContent) {
+    //Overriding refresh in order to cancel refreshing if mindconnect agent is not ready to send data
+    if (!this.IsReadyToSend) return;
+
+    return super.refreshEvents(bufferContent);
+  }
+
   async onSendingDataEnabled() {
     if (!exists(this.BoardingKey))
       throw new Error(
@@ -187,6 +194,33 @@ class MindConnectSenderAgent extends SenderAgent {
       this._variableNames = payload.variableNames;
 
     return super.editWithPayload(payload);
+  }
+
+  _generateEventPayload(eventTickId, eventPayload) {
+    let eventToReturn = { ...eventPayload };
+    eventToReturn.entityId = this.BoardingKey.content.clientId;
+    eventToReturn.sourceType = "Event";
+    eventToReturn.sourceId = "application";
+    eventToReturn.timestamp = Sampler.convertTickNumberToDate(
+      eventTickId
+    ).toISOString();
+
+    if (!exists(eventToReturn.source)) eventToReturn.source = "PowermonitorIOT";
+    if (!exists(eventToReturn.severity)) eventToReturn.severity = 20;
+    if (!exists(eventToReturn.description))
+      eventToReturn.description = "Empty event";
+
+    return eventToReturn;
+  }
+
+  async _sendEvent(eventTickId, eventPayload) {
+    if (!this.IsReadyToSend) return;
+
+    let payloadToSend = this._generateEventPayload(eventTickId, eventPayload);
+
+    await retry(this.NumberOfSendingRetries, () =>
+      this.MindConnectAgent.PostEvent(payloadToSend)
+    );
   }
 }
 
