@@ -101,20 +101,20 @@ let validateEventVariablePair = variablePair => {
       let project = getCurrentProject();
 
       let tickDevExists = await project.doesDeviceExist(variablePair.tickDevId);
-      if (!exists(tickDevExists))
+      if (!tickDevExists)
         return resolve(`There is no device of id ${variablePair.tickDevId}`);
 
       let valueDevExists = await project.doesDeviceExist(
         variablePair.valueDevId
       );
-      if (!exists(valueDevExists))
+      if (!valueDevExists)
         return resolve(`There is no device of id ${variablePair.valueDevId}`);
 
       let tickVarExists = await project.doesElementExist(
         variablePair.tickDevId,
         variablePair.tickVarId
       );
-      if (!exists(tickVarExists))
+      if (!tickVarExists)
         return resolve(
           `There is no element of id ${variablePair.tickVarId} in device ${
             variablePair.tickDevId
@@ -125,7 +125,7 @@ let validateEventVariablePair = variablePair => {
         variablePair.valueDevId,
         variablePair.valueVarId
       );
-      if (!exists(valueVarExists))
+      if (!valueVarExists)
         return resolve(
           `There is no element of id ${variablePair.valueVarId} in device ${
             variablePair.valueDevId
@@ -235,6 +235,7 @@ let validateEdit = function(req) {
             let variableNamesCheck = await checkVariableNames(
               req.body.dataAgent.variableNames
             );
+            if (variableNamesCheck) return resolve(variableNamesCheck);
           }
 
           //Checking if sending Enabled can be set to true
@@ -243,22 +244,25 @@ let validateEdit = function(req) {
             if (sendingEnabledCheck) return resolve(sendingEnabledCheck);
           }
 
-          //Checking event variables
-          if (exists(req.body.eventVariables)) {
-            for (let variablePair of req.body.eventVariables) {
-              let varaiblePairCheck = await validateEventVariablePair(
-                variablePair
-              );
-              if (varaiblePairCheck) return resolve(varaiblePairCheck);
-            }
-          }
-
           //Checking event descriptions
-          if (exists(req.body.eventDescriptions)) {
-            let eventDescriptionsCheck = validateEventDescriptionObject;
+          if (exists(req.body.dataAgent.eventDescriptions)) {
+            let eventDescriptionsCheck = await validateEventDescriptionObject(
+              req.body.dataAgent.eventDescriptions
+            );
             if (eventDescriptionsCheck) return resolve(eventDescriptionsCheck);
           }
         }
+
+        //Checking event variables
+        if (exists(req.body.eventVariables)) {
+          for (let variablePair of req.body.eventVariables) {
+            let varaiblePairCheck = await validateEventVariablePair(
+              variablePair
+            );
+            if (varaiblePairCheck) return resolve(varaiblePairCheck);
+          }
+        }
+
         return resolve();
       }
     });

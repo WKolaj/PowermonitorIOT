@@ -466,7 +466,7 @@ class SenderAgent {
     if (exists(payload.sendingInterval))
       this._sendingInterval = payload.sendingInterval;
     if (exists(payload.eventDescriptions))
-      this._events = payload.eventDescriptions;
+      this._events = { ...payload.eventDescriptions };
     if (exists(payload.sendEventLimit))
       this._sendEventLimit = payload.sendEventLimit;
     if (exists(payload.eventBufferSize))

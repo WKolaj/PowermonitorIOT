@@ -3,7 +3,8 @@ const request = require("supertest");
 const {
   clearDirectoryAsync,
   snooze,
-  existsAndIsNotEmpty
+  existsAndIsNotEmpty,
+  exists
 } = require("../../../../../utilities/utilities");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
@@ -317,7 +318,8 @@ describe("auth route", () => {
     initialDataAgentPayload,
     variable1MSName,
     variable2MSName,
-    variable3MSName
+    variable3MSName,
+    initialEventVariables
   ) => {
     let msAgentResult = await request(server)
       .post("/api/devices")
@@ -352,10 +354,17 @@ describe("auth route", () => {
         dataAgent: initialDataAgentPayload
       };
 
-      await request(server)
+      let result = await request(server)
         .put(`/api/devices/${msAgent.Id}`)
         .set(tokenHeader, adminToken)
         .send(agentEditPayload);
+    }
+
+    if (exists(initialEventVariables)) {
+      let result = await request(server)
+        .put(`/api/devices/${msAgent.Id}`)
+        .set(tokenHeader, adminToken)
+        .send({ eventVariables: initialEventVariables });
     }
 
     return msAgent;
@@ -402,6 +411,7 @@ describe("auth route", () => {
     let editPayload;
     let oldMindConnectAgent;
     let initialDevicePayload;
+    let initialEventVariables;
 
     beforeEach(async () => {
       await init();
@@ -415,6 +425,7 @@ describe("auth route", () => {
         sendingEnabled: false,
         sendingInterval: 100,
         sendFileLimit: 10,
+        sendEventLimit: 9,
         boardingKey: {
           content: {
             baseUrl: "https://southgate.eu1.mindsphere.io",
@@ -425,8 +436,70 @@ describe("auth route", () => {
           },
           expiration: "2019-07-18T05:06:57.000Z"
         },
-        numberOfSendingRetries: 7
+        numberOfSendingRetries: 7,
+        eventDescriptions: {
+          "1001": {
+            source: "testSource1",
+            severity: 20,
+            description: "test event 1"
+          },
+          "1002": {
+            source: "testSource2",
+            severity: 20,
+            description: "test event 2"
+          },
+          "1003": {
+            source: "testSource3",
+            severity: 20,
+            description: "test event 3"
+          },
+          "1004": {
+            source: "testSource4",
+            severity: 20,
+            description: "test event 4"
+          },
+          "1005": {
+            source: "testSource5",
+            severity: 20,
+            description: "test event 5"
+          },
+          "1006": {
+            source: "testSource6",
+            severity: 20,
+            description: "test event 6"
+          },
+          "1007": {
+            source: "testSource7",
+            severity: 20,
+            description: "test event 7"
+          },
+          "1008": {
+            source: "testSource8",
+            severity: 20,
+            description: "test event 8"
+          },
+          "1009": {
+            source: "testSource9",
+            severity: 20,
+            description: "test event 9"
+          }
+        }
       };
+
+      initialEventVariables = [
+        {
+          tickDevId: mbDevice.Id,
+          valueDevId: mbDevice.Id,
+          tickVarId: mbInt16Variable.Id,
+          valueVarId: mbUInt16Variable.Id
+        },
+        {
+          tickDevId: mbDevice.Id,
+          valueDevId: mbDevice.Id,
+          tickVarId: mbInt32Variable.Id,
+          valueVarId: mbUInt32Variable.Id
+        }
+      ];
 
       variable1Payload = {
         name: "variable1",
@@ -472,13 +545,76 @@ describe("auth route", () => {
           sendingEnabled: true,
           sendingInterval: 101,
           sendFileLimit: 4,
+          sendEventLimit: 7,
           numberOfSendingRetries: 6,
           variableNames: {
             testId1: "testAgentVariableEdited1",
             testId2: "testAgentVariableEdited2",
             testId3: "testAgentVariableEdited3"
+          },
+          eventDescriptions: {
+            "1002": {
+              source: "testSource2",
+              severity: 20,
+              description: "test event 2"
+            },
+            "1003": {
+              source: "testSource3",
+              severity: 20,
+              description: "test event 3"
+            },
+            "1004": {
+              source: "testSource4",
+              severity: 20,
+              description: "test event 4"
+            },
+            "1005": {
+              source: "testSource5",
+              severity: 20,
+              description: "test event 5"
+            },
+            "1006": {
+              source: "testSource6",
+              severity: 20,
+              description: "test event 6"
+            },
+            "1007": {
+              source: "testSource7",
+              severity: 20,
+              description: "test event 7"
+            },
+            "1008": {
+              source: "testSource8",
+              severity: 20,
+              description: "test event 8"
+            },
+            "1010": {
+              source: "testSource10",
+              severity: 20,
+              description: "test event 10"
+            }
           }
-        }
+        },
+        eventVariables: [
+          {
+            tickDevId: mbDevice.Id,
+            valueDevId: mbDevice.Id,
+            tickVarId: mbInt32Variable.Id,
+            valueVarId: mbUInt32Variable.Id
+          },
+          {
+            tickDevId: mbDevice.Id,
+            valueDevId: mbDevice.Id,
+            tickVarId: mbSwappedInt32Variable.Id,
+            valueVarId: mbSwappedUInt32Variable.Id
+          },
+          {
+            tickDevId: mbDevice.Id,
+            valueDevId: mbDevice.Id,
+            tickVarId: mbFloatVariable.Id,
+            valueVarId: mbSwappedFloatVariable.Id
+          }
+        ]
       };
     });
 
@@ -491,7 +627,8 @@ describe("auth route", () => {
         initDataAgentPayload,
         initialVariable1MSName,
         initialVariable2MSName,
-        initialVariable3MSName
+        initialVariable3MSName,
+        initialEventVariables
       );
 
       oldMindConnectAgent = msAgent.DataAgent.MindConnectAgent;
@@ -524,6 +661,7 @@ describe("auth route", () => {
         name: msAgent.Name,
         type: msAgent.Type,
         connected: true,
+        eventVariables: editPayload.eventVariables,
         dataAgent: expecetedAgent
       };
 
@@ -554,6 +692,7 @@ describe("auth route", () => {
 
       let expecetedAgent = {
         ...editPayload.dataAgent,
+        eventBufferSize: editPayload.eventVariables.length,
         dirPath: msAgent.DataAgent.DirectoryPath
       };
 
@@ -561,7 +700,8 @@ describe("auth route", () => {
         id: msAgent.Id,
         name: msAgent.Name,
         type: msAgent.Type,
-        dataAgent: expecetedAgent
+        dataAgent: expecetedAgent,
+        eventVariables: editPayload.eventVariables
       };
 
       expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(
@@ -1150,6 +1290,275 @@ describe("auth route", () => {
 
       expect(result.status).toEqual(403);
       expect(result.text).toMatch(`Access forbidden`);
+    });
+
+    it("should return 400 and not edit anything if event variables is not an array", async () => {
+      editPayload.eventVariables = {};
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of event variables does not have tickVarId", async () => {
+      editPayload.eventVariables[1].tickVarId = undefined;
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of event variables does not have valueVarId", async () => {
+      editPayload.eventVariables[1].valueVarId = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of event variables does not have tickDevId", async () => {
+      editPayload.eventVariables[1].tickDevId = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of event variables does not have valueDevId", async () => {
+      editPayload.eventVariables[1].valueDevId = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if there is no varaible of tickVarId", async () => {
+      editPayload.eventVariables[1].tickVarId = "fakeVarId";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if there is no varaible of valueVarId", async () => {
+      editPayload.eventVariables[1].valueVarId = "fakeVarId";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if there is no device of tickDevId", async () => {
+      editPayload.eventVariables[1].tickDevId = "fakeVarId";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if there is no device of valueDevId", async () => {
+      editPayload.eventVariables[1].valueDevId = "fakeVarId";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 200 and clear all event variables if eventVariables is empty array", async () => {
+      editPayload = { eventVariables: [] };
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+      editPayload;
+
+      let expectedPayload = {
+        ...initialDevicePayload,
+        dataAgent: {
+          ...initialDevicePayload.dataAgent,
+          eventBufferSize: 0
+        },
+        eventVariables: []
+      };
+
+      expect(msAgent.Payload).toEqual(expectedPayload);
+    });
+
+    it("should return 400 and not edit anything if one of description key is not an integer", async () => {
+      editPayload.dataAgent.eventDescriptions["abcd"] = {
+        source: "testSourceX",
+        severity: 20,
+        description: "test event X"
+      };
+
+      await snooze(100);
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if there is no source in event description", async () => {
+      editPayload.dataAgent.eventDescriptions[9001] = {
+        source: "testSourceX",
+        severity: 20
+      };
+
+      await snooze(100);
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if there is no severity", async () => {
+      editPayload.dataAgent.eventDescriptions[9001] = {
+        source: "testSourceX",
+        description: "test event X"
+      };
+
+      await snooze(100);
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if there is no description", async () => {
+      editPayload.dataAgent.eventDescriptions[9001] = {
+        source: "testSourceX",
+        severity: 20
+      };
+
+      await snooze(100);
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if severity has invalid value", async () => {
+      editPayload.dataAgent.eventDescriptions[9001] = {
+        source: "testSourceX",
+        severity: 99,
+        description: "test event X"
+      };
+
+      await snooze(100);
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if eventBufferSize is inside dataAgentPayload", async () => {
+      editPayload.dataAgent.eventBufferSize = 10;
+
+      await snooze(100);
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 200 and clear all event descriptions if event descriptions is empty object", async () => {
+      editPayload = { dataAgent: { eventDescriptions: {} } };
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let expectedPayload = {
+        ...initialDevicePayload,
+        dataAgent: {
+          ...initialDevicePayload.dataAgent,
+          eventDescriptions: {}
+        }
+      };
+
+      expect(msAgent.Payload).toEqual(expectedPayload);
+    });
+
+    it("should return 200 and do not edit event descriptions if it is not defined in payload", async () => {
+      delete editPayload.dataAgent.eventDescriptions;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let expectedPayload = {
+        ...initialDevicePayload,
+        ...editPayload,
+        dataAgent: {
+          ...initialDevicePayload.dataAgent,
+          ...editPayload.dataAgent,
+          eventBufferSize: editPayload.eventVariables.length,
+          eventDescriptions: initDataAgentPayload.eventDescriptions
+        }
+      };
+
+      await snooze(100);
+
+      expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      )).map(calcElement => calcElement.Payload);
+
+      expectedPayload.variables = (await Project.CurrentProject.getAllVariables(
+        deviceId
+      )).map(variable => variable.Payload);
+
+      expect(msAgent.Payload).toEqual(expectedPayload);
+    });
+
+    it("should return 200 and do not edit event variables if it is not defined in payload", async () => {
+      delete editPayload.eventVariables;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let expectedPayload = {
+        ...initialDevicePayload,
+        ...editPayload,
+        dataAgent: {
+          ...initialDevicePayload.dataAgent,
+          ...editPayload.dataAgent
+        },
+        eventVariables: initialEventVariables
+      };
+
+      expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      )).map(calcElement => calcElement.Payload);
+
+      expectedPayload.variables = (await Project.CurrentProject.getAllVariables(
+        deviceId
+      )).map(variable => variable.Payload);
+
+      expect(msAgent.Payload).toEqual(expectedPayload);
     });
   });
 });

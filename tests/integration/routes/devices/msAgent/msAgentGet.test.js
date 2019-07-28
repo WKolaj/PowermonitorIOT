@@ -74,6 +74,9 @@ describe("auth route", () => {
   let sendFileLimit;
   let sendingInterval;
   let numberOfSendingRetries;
+  let sendEventLimit;
+  let eventDescriptions;
+  let eventVariables;
 
   let init = async () => {
     //Creating additional users
@@ -414,8 +417,77 @@ describe("auth route", () => {
     sendingEnabled = true;
 
     sendFileLimit = 7;
+    sendEventLimit = 8;
     sendingInterval = 35;
     numberOfSendingRetries = 3;
+    eventDescriptions = {
+      "1001": {
+        source: "testSource1",
+        severity: 20,
+        description: "test event 1"
+      },
+      "1002": {
+        source: "testSource2",
+        severity: 20,
+        description: "test event 2"
+      },
+      "1003": {
+        source: "testSource3",
+        severity: 20,
+        description: "test event 3"
+      },
+      "1004": {
+        source: "testSource4",
+        severity: 20,
+        description: "test event 4"
+      },
+      "1005": {
+        source: "testSource5",
+        severity: 20,
+        description: "test event 5"
+      },
+      "1006": {
+        source: "testSource6",
+        severity: 20,
+        description: "test event 6"
+      },
+      "1007": {
+        source: "testSource7",
+        severity: 20,
+        description: "test event 7"
+      },
+      "1008": {
+        source: "testSource8",
+        severity: 20,
+        description: "test event 8"
+      },
+      "1009": {
+        source: "testSource9",
+        severity: 20,
+        description: "test event 9"
+      }
+    };
+
+    eventVariables = [
+      {
+        tickDevId: mbDevice.Id,
+        valueDevId: mbDevice.Id,
+        tickVarId: mbInt16Variable.Id,
+        valueVarId: mbUInt16Variable.Id
+      },
+      {
+        tickDevId: mbDevice.Id,
+        valueDevId: mbDevice.Id,
+        tickVarId: mbInt32Variable.Id,
+        valueVarId: mbUInt32Variable.Id
+      },
+      {
+        tickDevId: mbDevice.Id,
+        valueDevId: mbDevice.Id,
+        tickVarId: mbSwappedInt32Variable.Id,
+        valueVarId: mbSwappedUInt32Variable.Id
+      }
+    ];
 
     let editPayload = {
       dataAgent: {
@@ -424,8 +496,11 @@ describe("auth route", () => {
         sendingEnabled,
         sendFileLimit,
         sendingInterval,
-        numberOfSendingRetries
-      }
+        numberOfSendingRetries,
+        sendEventLimit,
+        eventDescriptions
+      },
+      eventVariables
     };
 
     let result = await request(server)
@@ -497,8 +572,11 @@ describe("auth route", () => {
           sendingInterval,
           numberOfSendingRetries,
           boardingKey,
-          variableNames
-        }
+          variableNames,
+          sendEventLimit,
+          eventDescriptions
+        },
+        eventVariables
       };
 
       expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(
@@ -542,8 +620,11 @@ describe("auth route", () => {
           sendingInterval,
           numberOfSendingRetries,
           boardingKey,
-          variableNames
-        }
+          variableNames,
+          sendEventLimit,
+          eventDescriptions
+        },
+        eventVariables
       };
 
       expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(

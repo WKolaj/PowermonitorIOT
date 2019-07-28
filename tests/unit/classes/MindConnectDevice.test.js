@@ -294,7 +294,7 @@ let testPayload = JSON.stringify({
         offset: 1,
         length: 2,
         fCode: 3,
-        value: 1564251575,
+        value: 1564251578,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -309,7 +309,7 @@ let testPayload = JSON.stringify({
         offset: 3,
         length: 2,
         fCode: 3,
-        value: 1564251576,
+        value: 1564251577,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -324,7 +324,7 @@ let testPayload = JSON.stringify({
         offset: 5,
         length: 2,
         fCode: 3,
-        value: 1564251577,
+        value: 1564251576,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -339,7 +339,7 @@ let testPayload = JSON.stringify({
         offset: 7,
         length: 2,
         fCode: 3,
-        value: 1564251578,
+        value: 1564251575,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -354,7 +354,7 @@ let testPayload = JSON.stringify({
         offset: 9,
         length: 2,
         fCode: 3,
-        value: 1001,
+        value: 1004,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -369,7 +369,7 @@ let testPayload = JSON.stringify({
         offset: 11,
         length: 2,
         fCode: 3,
-        value: 1002,
+        value: 1003,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -384,7 +384,7 @@ let testPayload = JSON.stringify({
         offset: 13,
         length: 2,
         fCode: 3,
-        value: 1003,
+        value: 1002,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -399,7 +399,7 @@ let testPayload = JSON.stringify({
         offset: 15,
         length: 2,
         fCode: 3,
-        value: 1004,
+        value: 1001,
         type: "mbInt32",
         archived: false,
         getSingleFCode: 3,
@@ -2184,735 +2184,1692 @@ describe("MindConnectDevice", () => {
     });
   });
 
-  //TODO - TEST BELOW + TEST ROUTES!!!
-
-  // describe("refresh", () => {
-  //   let project;
-  //   let mindConnectDevice;
-  //   let initialPayload;
-  //   let msSendMethodThrows;
-
-  //   let invokeTick1;
-  //   let tickId1;
-  //   let var1Value1;
-  //   let var2Value1;
-  //   let var3Value1;
-
-  //   let invokeTick2;
-  //   let tickId2;
-  //   let var1Value2;
-  //   let var2Value2;
-  //   let var3Value2;
-
-  //   let invokeTick3;
-  //   let tickId3;
-  //   let var1Value3;
-  //   let var2Value3;
-  //   let var3Value3;
-
-  //   let variable1;
-  //   let variable2;
-  //   let variable3;
-
-  //   beforeEach(async () => {
-  //     msSendMethodThrows = false;
-
-  //     invokeTick1 = true;
-  //     tickId1 = 1563701011;
-  //     var1Value1 = 101.101;
-  //     var2Value1 = 201;
-  //     var3Value1 = 301.301;
-
-  //     invokeTick2 = true;
-  //     tickId2 = 1563701012;
-  //     var1Value2 = 102.102;
-  //     var2Value2 = 202;
-  //     var3Value2 = 302.302;
-
-  //     invokeTick3 = true;
-  //     tickId3 = 1563701013;
-  //     var1Value3 = 103.103;
-  //     var2Value3 = 203;
-  //     var3Value3 = 303.303;
-
-  //     await createInitialFiles();
-  //     project = new Project(projPath);
-  //     await project.initFromFiles();
-
-  //     initialPayload = {
-  //       id: "abcd1234",
-  //       name: "testMindConnectDevice",
-  //       type: "msAgent",
-  //       variables: [
-  //         {
-  //           name: "testVariable1",
-  //           id: "9001",
-  //           sampleTime: 1,
-  //           archived: false,
-  //           unit: "U1",
-  //           archiveSampleTime: 5,
-  //           elementDeviceId: "1235",
-  //           elementId: "0006",
-  //           type: "sdVariable"
-  //         },
-  //         {
-  //           name: "testVariable2",
-  //           id: "9002",
-  //           sampleTime: 2,
-  //           archived: false,
-  //           unit: "U2",
-  //           archiveSampleTime: 3,
-  //           elementDeviceId: "1234",
-  //           elementId: "0002",
-  //           type: "sdVariable"
-  //         },
-  //         {
-  //           name: "testVariable3",
-  //           id: "9003",
-  //           sampleTime: 3,
-  //           archived: false,
-  //           unit: "U3",
-  //           archiveSampleTime: 1,
-  //           elementDeviceId: "1234",
-  //           elementId: "0003",
-  //           type: "sdVariable"
-  //         }
-  //       ],
-  //       calculationElements: [
-  //         {
-  //           id: "9101",
-  //           name: "testSumElement",
-  //           type: "sumElement",
-  //           archived: false,
-  //           unit: "U4",
-  //           sampleTime: 2,
-  //           archiveSampleTime: 2,
-  //           variables: [
-  //             {
-  //               id: "9001",
-  //               factor: 1
-  //             },
-  //             {
-  //               id: "9002",
-  //               factor: 2
-  //             },
-  //             {
-  //               id: "9003",
-  //               factor: 3
-  //             }
-  //           ]
-  //         }
-  //       ],
-  //       dataAgent: {
-  //         sendingEnabled: true,
-  //         sendingInterval: 60,
-  //         sendFileLimit: 10,
-  //         boardingKey: {
-  //           content: {
-  //             baseUrl: "https://southgate.eu1.mindsphere.io",
-  //             iat: "testIatvalue",
-  //             clientCredentialProfile: ["SHARED_SECRET"],
-  //             clientId: "testClientId",
-  //             tenant: "testTenant"
-  //           },
-  //           expiration: "2019-07-18T05:06:57.000Z"
-  //         },
-  //         numberOfSendingRetries: 5,
-  //         variableNames: {
-  //           9001: "msName1",
-  //           9002: "msName2",
-  //           9003: "msName3",
-  //           9101: "msName4"
-  //         }
-  //       }
-  //     };
-  //   });
-
-  //   let exec = async () => {
-  //     mindConnectDevice = new MindConnectDevice();
-  //     await mindConnectDevice.init(initialPayload);
-  //     if (msSendMethodThrows)
-  //       mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData = jest.fn(
-  //         async () => {
-  //           await snooze(100);
-  //           throw new Error("testError");
-  //         }
-  //       );
-
-  //     variable1 = await project.getVariable(
-  //       initialPayload.variables[0].elementDeviceId,
-  //       initialPayload.variables[0].elementId
-  //     );
-  //     variable2 = await project.getVariable(
-  //       initialPayload.variables[1].elementDeviceId,
-  //       initialPayload.variables[1].elementId
-  //     );
-  //     variable3 = await project.getVariable(
-  //       initialPayload.variables[2].elementDeviceId,
-  //       initialPayload.variables[2].elementId
-  //     );
-
-  //     if (invokeTick1) {
-  //       variable1.Value = var1Value1;
-  //       variable2.Value = var2Value1;
-  //       variable3.Value = var3Value1;
-  //       await mindConnectDevice.refresh(tickId1);
-  //     }
-
-  //     if (invokeTick2) {
-  //       variable1.Value = var1Value2;
-  //       variable2.Value = var2Value2;
-  //       variable3.Value = var3Value2;
-  //       await mindConnectDevice.refresh(tickId2);
-  //     }
-
-  //     if (invokeTick3) {
-  //       variable1.Value = var1Value3;
-  //       variable2.Value = var2Value3;
-  //       variable3.Value = var3Value3;
-  //       await mindConnectDevice.refresh(tickId3);
-  //     }
-  //   };
-
-  //   it("Should add every varaible to Buffer if they corresponds to given tick", async () => {
-  //     await exec();
-
-  //     let expectedBufferContent = [];
-  //     //For first tick 1563701011 suits only variable 1 - sampleTime 1
-  //     expectedBufferContent.push({
-  //       tickId: tickId1,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[0].id,
-  //           value: var1Value1
-  //         }
-  //       ]
-  //     });
-
-  //     //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
-  //     expectedBufferContent.push({
-  //       tickId: tickId2,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[0].id,
-  //           value: var1Value2
-  //         },
-  //         {
-  //           id: initialPayload.variables[1].id,
-  //           value: var2Value2
-  //         },
-  //         {
-  //           id: initialPayload.calculationElements[0].id,
-  //           value: var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3
-  //         }
-  //       ]
-  //     });
-
-  //     //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
-  //     expectedBufferContent.push({
-  //       tickId: tickId3,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[0].id,
-  //           value: var1Value3
-  //         },
-  //         {
-  //           id: initialPayload.variables[2].id,
-  //           value: var3Value3
-  //         }
-  //       ]
-  //     });
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-  //   });
-
-  //   it("Should not add anything to buffer if sendingEnabled is set to false", async () => {
-  //     initialPayload.dataAgent.sendingEnabled = false;
-
-  //     await exec();
-
-  //     let expectedBufferContent = [];
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-  //   });
-
-  //   it("Should not add anything to buffer if no values corresponds to tickIds", async () => {
-  //     //No tick ids corresponds to values 123, 124, 125 or 126
-  //     initialPayload.variables[0].sampleTime = 123;
-  //     initialPayload.variables[1].sampleTime = 124;
-  //     initialPayload.variables[2].sampleTime = 125;
-  //     initialPayload.calculationElements[0].sampleTime = 126;
-
-  //     await exec();
-
-  //     let expectedBufferContent = [];
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-  //   });
-
-  //   it("Should send buffer content and clear it when tickId correpsonds to sendingInterval", async () => {
-  //     initialPayload.dataAgent.sendingInterval = 2;
-
-  //     await exec();
-
-  //     //On tickId data is being send and buffer cleared - only values of tick3 should be stored inside it;
-
-  //     let expectedBufferContent = [];
-
-  //     //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
-  //     expectedBufferContent.push({
-  //       tickId: tickId3,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[0].id,
-  //           value: var1Value3
-  //         },
-  //         {
-  //           id: initialPayload.variables[2].id,
-  //           value: var3Value3
-  //         }
-  //       ]
-  //     });
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-
-  //     //Rest of data should be converted to Mindsphere format and send via MindConnectAgent
-  //     let tickId1Payload = {
-  //       timestamp: new Date(tickId1 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value1.toString()
-  //         }
-  //       ]
-  //     };
-
-  //     let tickId2Payload = {
-  //       timestamp: new Date(tickId2 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value2.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[1].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var2Value2.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.calculationElements[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: (var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3).toString()
-  //         }
-  //       ]
-  //     };
-
-  //     let expectedSendPayload = [tickId1Payload, tickId2Payload];
-
-  //     expect(
-  //       mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData
-  //     ).toHaveBeenCalledTimes(1);
-  //     expect(
-  //       mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData.mock
-  //         .calls[0][0]
-  //     ).toEqual(expectedSendPayload);
-  //   });
-
-  //   it("Should not send buffer content but clear it and save it to file when tickId correpsonds to sendingInterval and sending method throws", async () => {
-  //     initialPayload.dataAgent.sendingInterval = 2;
-  //     msSendMethodThrows = true;
-
-  //     await exec();
-
-  //     //On tickId data is being send and buffer cleared - only values of tick3 should be stored inside it;
-
-  //     let expectedBufferContent = [];
-
-  //     //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
-  //     expectedBufferContent.push({
-  //       tickId: tickId3,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[0].id,
-  //           value: var1Value3
-  //         },
-  //         {
-  //           id: initialPayload.variables[2].id,
-  //           value: var3Value3
-  //         }
-  //       ]
-  //     });
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-
-  //     //Rest of data should be converted to Mindsphere format and send via MindConnectAgent
-  //     let tickId1Payload = {
-  //       timestamp: new Date(tickId1 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value1.toString()
-  //         }
-  //       ]
-  //     };
-
-  //     let tickId2Payload = {
-  //       timestamp: new Date(tickId2 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value2.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[1].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var2Value2.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.calculationElements[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: (var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3).toString()
-  //         }
-  //       ]
-  //     };
-
-  //     let expectedSendPayload = [tickId1Payload, tickId2Payload];
-
-  //     //Sending data with given payload but it throws - called five times (retrying mechanism)
-  //     expect(
-  //       mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData
-  //     ).toHaveBeenCalledTimes(5);
-  //     expect(
-  //       mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData.mock
-  //         .calls[0][0]
-  //     ).toEqual(expectedSendPayload);
-
-  //     //Checking fileBuffer
-
-  //     let allFilesInValuesDir = await readDirAsync(
-  //       path.join(projPath, "dataAgents", initialPayload.id, "values")
-  //     );
-
-  //     expect(allFilesInValuesDir.length).toEqual(1);
-
-  //     let fileContent = JSON.parse(
-  //       await readFileAsync(
-  //         path.join(
-  //           projPath,
-  //           "dataAgents",
-  //           initialPayload.id,
-  //           "values",
-  //           allFilesInValuesDir[0]
-  //         )
-  //       )
-  //     );
-
-  //     expect(fileContent).toEqual(expectedSendPayload);
-  //   });
-
-  //   it("Should send all buffered files if they exists - and tickId corresponds to sendingInterval", async () => {
-  //     initialPayload.dataAgent.sendingInterval = 2;
-  //     msSendMethodThrows = true;
-
-  //     await exec();
-
-  //     let oldBulkPostDataMock =
-  //       mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData;
-  //     //Generating new refresh without throwing error
-  //     mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData = jest.fn();
-
-  //     let var1Value4 = 104.104;
-  //     let var2Value4 = 204;
-  //     let var3Value4 = 304.304;
-  //     let tickId4 = tickId3 + 1;
-
-  //     variable1.Value = var1Value4;
-  //     variable2.Value = var2Value4;
-  //     variable3.Value = var3Value4;
-  //     await mindConnectDevice.refresh(tickId4);
-
-  //     //No data should be stored in buffer - everything send
-  //     let expectedBufferContent = [];
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-
-  //     //Rest of data should be converted to Mindsphere format and send via MindConnectAgent
-  //     let tickId1Payload = {
-  //       timestamp: new Date(tickId1 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value1.toString()
-  //         }
-  //       ]
-  //     };
-
-  //     let tickId2Payload = {
-  //       timestamp: new Date(tickId2 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value2.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[1].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var2Value2.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.calculationElements[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: (var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3).toString()
-  //         }
-  //       ]
-  //     };
-
-  //     let tickId3Payload = {
-  //       timestamp: new Date(tickId3 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value3.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[2].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var3Value3.toString()
-  //         }
-  //       ]
-  //     };
-
-  //     let tickId4Payload = {
-  //       timestamp: new Date(tickId4 * 1000).toISOString(),
-  //       values: [
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var1Value4.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.variables[1].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: var2Value4.toString()
-  //         },
-  //         {
-  //           dataPointId:
-  //             initialPayload.dataAgent.variableNames[
-  //               initialPayload.calculationElements[0].id
-  //             ],
-  //           qualityCode: "0",
-  //           value: (var1Value4 * 1 + var2Value4 * 2 + var3Value4 * 3).toString()
-  //         }
-  //       ]
-  //     };
-
-  //     //All data should have been send to Mindsphere
-
-  //     //array containg expected bulkPostData call arguments
-  //     //First - Fifth time - 5 x try to send tickId1 and tick2 - but they throws
-  //     //Sixth time - try to send rest of buffer - tickId3 and tick4,
-  //     //Seventh - send buffered data inside file
-
-  //     let expectedCalls = [
-  //       [tickId1Payload, tickId2Payload],
-  //       [tickId1Payload, tickId2Payload],
-  //       [tickId1Payload, tickId2Payload],
-  //       [tickId1Payload, tickId2Payload],
-  //       [tickId1Payload, tickId2Payload],
-  //       [tickId3Payload, tickId4Payload],
-  //       [tickId1Payload, tickId2Payload]
-  //     ];
-
-  //     expect(oldBulkPostDataMock).toHaveBeenCalledTimes(5);
-  //     expect(
-  //       mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData
-  //     ).toHaveBeenCalledTimes(2);
-
-  //     for (let i = 0; i < 5; i++) {
-  //       expect(oldBulkPostDataMock.mock.calls[i][0]).toEqual(expectedCalls[i]);
-  //     }
-
-  //     for (let i = 0; i < 2; i++) {
-  //       expect(
-  //         mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData.mock.calls[
-  //           i
-  //         ][0]
-  //       ).toEqual(expectedCalls[5 + i]);
-  //     }
-
-  //     //There should be no file left inside values dir
-  //     let allFilesInValuesDir = await readDirAsync(
-  //       path.join(projPath, "dataAgents", initialPayload.id, "values")
-  //     );
-
-  //     expect(allFilesInValuesDir).toEqual([]);
-  //   });
-
-  //   it("Should not add value to Buffer if it is NaN", async () => {
-  //     var1Value1 = NaN;
-  //     var1Value2 = NaN;
-  //     var1Value3 = NaN;
-  //     await exec();
-
-  //     let expectedBufferContent = [];
-
-  //     //First tick is empty - only first variable matches and it is NaN
-
-  //     //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
-  //     //Calc element is also NaN - calculated based on varValue1
-  //     expectedBufferContent.push({
-  //       tickId: tickId2,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[1].id,
-  //           value: var2Value2
-  //         }
-  //       ]
-  //     });
-
-  //     //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
-  //     expectedBufferContent.push({
-  //       tickId: tickId3,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[2].id,
-  //           value: var3Value3
-  //         }
-  //       ]
-  //     });
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-  //   });
-
-  //   it("Should not add value to Buffer if it is null", async () => {
-  //     var1Value1 = null;
-  //     var1Value2 = null;
-  //     var1Value3 = null;
-  //     await exec();
-
-  //     let expectedBufferContent = [];
-
-  //     //First tick is empty - only first variable matches and it is NaN
-
-  //     //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
-  //     //Calc element is also NaN - calculated based on varValue1
-  //     expectedBufferContent.push({
-  //       tickId: tickId2,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[1].id,
-  //           value: var2Value2
-  //         },
-  //         {
-  //           id: initialPayload.calculationElements[0].id,
-  //           value: var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3
-  //         }
-  //       ]
-  //     });
-
-  //     //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
-  //     expectedBufferContent.push({
-  //       tickId: tickId3,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[2].id,
-  //           value: var3Value3
-  //         }
-  //       ]
-  //     });
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-  //   });
-
-  //   it("Should not add value to Buffer if it is string", async () => {
-  //     var1Value1 = "testString1";
-  //     var1Value2 = "testString2";
-  //     var1Value3 = "testString3";
-  //     await exec();
-
-  //     let expectedBufferContent = [];
-
-  //     //First tick is empty - only first variable matches and it is NaN
-
-  //     //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
-  //     //Calc element is also NaN - calculated based on varValue1
-  //     expectedBufferContent.push({
-  //       tickId: tickId2,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[1].id,
-  //           value: var2Value2
-  //         }
-  //       ]
-  //     });
-
-  //     //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
-  //     expectedBufferContent.push({
-  //       tickId: tickId3,
-  //       values: [
-  //         {
-  //           id: initialPayload.variables[2].id,
-  //           value: var3Value3
-  //         }
-  //       ]
-  //     });
-
-  //     expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
-  //   });
-  // });
+  describe("refresh", () => {
+    let project;
+    let mindConnectDevice;
+    let initialPayload;
+    let msSendMethodThrows;
+    let msPostEventMethodThrows;
+
+    let invokeTick1;
+    let tickId1;
+    let var1Value1;
+    let var2Value1;
+    let var3Value1;
+
+    let invokeTick2;
+    let tickId2;
+    let var1Value2;
+    let var2Value2;
+    let var3Value2;
+
+    let invokeTick3;
+    let tickId3;
+    let var1Value3;
+    let var2Value3;
+    let var3Value3;
+
+    let variable1;
+    let variable2;
+    let variable3;
+
+    let eventVar1Tick;
+    let eventVar2Tick;
+    let eventVar3Tick;
+    let eventVar4Tick;
+    let eventVar1Value;
+    let eventVar2Value;
+    let eventVar3Value;
+    let eventVar4Value;
+
+    let eventVar1Value1;
+    let eventVar1Value2;
+    let eventVar1Value3;
+    let eventVar1Tick1;
+    let eventVar1Tick2;
+    let eventVar1Tick3;
+
+    let eventVar2Value1;
+    let eventVar2Value2;
+    let eventVar2Value3;
+    let eventVar2Tick1;
+    let eventVar2Tick2;
+    let eventVar2Tick3;
+
+    let eventVar3Value1;
+    let eventVar3Value2;
+    let eventVar3Value3;
+    let eventVar3Tick1;
+    let eventVar3Tick2;
+    let eventVar3Tick3;
+
+    let eventVar4Value1;
+    let eventVar4Value2;
+    let eventVar4Value3;
+    let eventVar4Tick1;
+    let eventVar4Tick2;
+    let eventVar4Tick3;
+
+    let eventDirPath;
+
+    beforeEach(async () => {
+      msSendMethodThrows = false;
+      msPostEventMethodThrows = false;
+
+      invokeTick1 = true;
+      tickId1 = 1563701011;
+      var1Value1 = 101.101;
+      var2Value1 = 201;
+      var3Value1 = 301.301;
+
+      invokeTick2 = true;
+      tickId2 = 1563701012;
+      var1Value2 = 102.102;
+      var2Value2 = 202;
+      var3Value2 = 302.302;
+
+      invokeTick3 = true;
+      tickId3 = 1563701013;
+      var1Value3 = 103.103;
+      var2Value3 = 203;
+      var3Value3 = 303.303;
+
+      await createInitialFiles();
+      project = new Project(projPath);
+      await project.initFromFiles();
+
+      initialPayload = {
+        id: "abcd1234",
+        name: "testMindConnectDevice",
+        type: "msAgent",
+        variables: [
+          {
+            name: "testVariable1",
+            id: "9001",
+            sampleTime: 1,
+            archived: false,
+            unit: "U1",
+            archiveSampleTime: 5,
+            elementDeviceId: "1235",
+            elementId: "0006",
+            type: "sdVariable"
+          },
+          {
+            name: "testVariable2",
+            id: "9002",
+            sampleTime: 2,
+            archived: false,
+            unit: "U2",
+            archiveSampleTime: 3,
+            elementDeviceId: "1234",
+            elementId: "0002",
+            type: "sdVariable"
+          },
+          {
+            name: "testVariable3",
+            id: "9003",
+            sampleTime: 3,
+            archived: false,
+            unit: "U3",
+            archiveSampleTime: 1,
+            elementDeviceId: "1234",
+            elementId: "0003",
+            type: "sdVariable"
+          }
+        ],
+        calculationElements: [
+          {
+            id: "9101",
+            name: "testSumElement",
+            type: "sumElement",
+            archived: false,
+            unit: "U4",
+            sampleTime: 2,
+            archiveSampleTime: 2,
+            variables: [
+              {
+                id: "9001",
+                factor: 1
+              },
+              {
+                id: "9002",
+                factor: 2
+              },
+              {
+                id: "9003",
+                factor: 3
+              }
+            ]
+          }
+        ],
+        dataAgent: {
+          sendingEnabled: true,
+          sendingInterval: 60,
+          sendFileLimit: 10,
+          boardingKey: {
+            content: {
+              baseUrl: "https://southgate.eu1.mindsphere.io",
+              iat: "testIatvalue",
+              clientCredentialProfile: ["SHARED_SECRET"],
+              clientId: "testClientId",
+              tenant: "testTenant"
+            },
+            expiration: "2019-07-18T05:06:57.000Z"
+          },
+          numberOfSendingRetries: 5,
+          variableNames: {
+            9001: "msName1",
+            9002: "msName2",
+            9003: "msName3",
+            9101: "msName4"
+          },
+          sendEventLimit: 10,
+          eventDescriptions: {
+            "1001": {
+              source: "testSource1",
+              severity: 20,
+              description: "test event 1"
+            },
+            "1002": {
+              source: "testSource2",
+              severity: 20,
+              description: "test event 2"
+            },
+            "1003": {
+              source: "testSource3",
+              severity: 20,
+              description: "test event 3"
+            },
+            "1004": {
+              source: "testSource4",
+              severity: 20,
+              description: "test event 4"
+            },
+            "1005": {
+              source: "testSource5",
+              severity: 20,
+              description: "test event 5"
+            },
+            "1006": {
+              source: "testSource6",
+              severity: 20,
+              description: "test event 6"
+            },
+            "1007": {
+              source: "testSource7",
+              severity: 20,
+              description: "test event 7"
+            },
+            "1008": {
+              source: "testSource8",
+              severity: 20,
+              description: "test event 8"
+            },
+            "1009": {
+              source: "testSource9",
+              severity: 20,
+              description: "test event 9"
+            },
+            "1010": {
+              source: "testSource10",
+              severity: 20,
+              description: "test event 10"
+            }
+          }
+        },
+        eventVariables: [
+          {
+            tickDevId: "1237",
+            valueDevId: "1237",
+            tickVarId: "0101",
+            valueVarId: "0105"
+          },
+          {
+            tickDevId: "1237",
+            valueDevId: "1237",
+            tickVarId: "0102",
+            valueVarId: "0106"
+          },
+          {
+            tickDevId: "1237",
+            valueDevId: "1237",
+            tickVarId: "0103",
+            valueVarId: "0107"
+          },
+          {
+            tickDevId: "1237",
+            valueDevId: "1237",
+            tickVarId: "0104",
+            valueVarId: "0108"
+          }
+        ]
+      };
+
+      eventVar1Tick1 = 1564251578;
+      eventVar2Tick1 = 1564251577;
+      eventVar3Tick1 = 1564251576;
+      eventVar4Tick1 = 1564251575;
+      eventVar1Value1 = 1004;
+      eventVar2Value1 = 1003;
+      eventVar3Value1 = 1002;
+      eventVar4Value1 = 1001;
+
+      eventVar1Tick2 = 1564251580;
+      eventVar2Tick2 = 1564251579;
+      eventVar3Tick2 = 1564251578;
+      eventVar4Tick2 = 1564251577;
+      eventVar1Value2 = 1006;
+      eventVar2Value2 = 1005;
+      eventVar3Value2 = 1004;
+      eventVar4Value2 = 1003;
+
+      eventVar1Tick3 = 1564251584;
+      eventVar2Tick3 = 1564251583;
+      eventVar3Tick3 = 1564251582;
+      eventVar4Tick3 = 1564251581;
+      eventVar1Value3 = 1010;
+      eventVar2Value3 = 1009;
+      eventVar3Value3 = 1008;
+      eventVar4Value3 = 1007;
+
+      eventVar1Tick = await project.getVariable("1237", "0101");
+      eventVar2Tick = await project.getVariable("1237", "0102");
+      eventVar3Tick = await project.getVariable("1237", "0103");
+      eventVar4Tick = await project.getVariable("1237", "0104");
+
+      eventVar1Value = await project.getVariable("1237", "0105");
+      eventVar2Value = await project.getVariable("1237", "0106");
+      eventVar3Value = await project.getVariable("1237", "0107");
+      eventVar4Value = await project.getVariable("1237", "0108");
+    });
+
+    let exec = async () => {
+      mindConnectDevice = new MindConnectDevice();
+      await mindConnectDevice.init(initialPayload);
+
+      eventDirPath = path.join(
+        projPath,
+        "dataAgents",
+        `${mindConnectDevice.Id}`,
+        "events"
+      );
+
+      if (msSendMethodThrows)
+        mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData = jest.fn(
+          async () => {
+            await snooze(10);
+            throw new Error("testError");
+          }
+        );
+
+      if (msPostEventMethodThrows)
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent = jest.fn(
+          async () => {
+            await snooze(10);
+            throw new Error("testError");
+          }
+        );
+
+      variable1 = await project.getVariable(
+        initialPayload.variables[0].elementDeviceId,
+        initialPayload.variables[0].elementId
+      );
+      variable2 = await project.getVariable(
+        initialPayload.variables[1].elementDeviceId,
+        initialPayload.variables[1].elementId
+      );
+      variable3 = await project.getVariable(
+        initialPayload.variables[2].elementDeviceId,
+        initialPayload.variables[2].elementId
+      );
+
+      if (invokeTick1) {
+        variable1.Value = var1Value1;
+        variable2.Value = var2Value1;
+        variable3.Value = var3Value1;
+
+        eventVar1Tick.Value = eventVar1Tick1;
+        eventVar2Tick.Value = eventVar2Tick1;
+        eventVar3Tick.Value = eventVar3Tick1;
+        eventVar4Tick.Value = eventVar4Tick1;
+
+        eventVar1Value.Value = eventVar1Value1;
+        eventVar2Value.Value = eventVar2Value1;
+        eventVar3Value.Value = eventVar3Value1;
+        eventVar4Value.Value = eventVar4Value1;
+
+        await mindConnectDevice.refresh(tickId1);
+      }
+
+      if (invokeTick2) {
+        variable1.Value = var1Value2;
+        variable2.Value = var2Value2;
+        variable3.Value = var3Value2;
+
+        eventVar1Tick.Value = eventVar1Tick2;
+        eventVar2Tick.Value = eventVar2Tick2;
+        eventVar3Tick.Value = eventVar3Tick2;
+        eventVar4Tick.Value = eventVar4Tick2;
+
+        eventVar1Value.Value = eventVar1Value2;
+        eventVar2Value.Value = eventVar2Value2;
+        eventVar3Value.Value = eventVar3Value2;
+        eventVar4Value.Value = eventVar4Value2;
+
+        await mindConnectDevice.refresh(tickId2);
+      }
+
+      if (invokeTick3) {
+        variable1.Value = var1Value3;
+        variable2.Value = var2Value3;
+
+        eventVar1Tick.Value = eventVar1Tick3;
+        eventVar2Tick.Value = eventVar2Tick3;
+        eventVar3Tick.Value = eventVar3Tick3;
+        eventVar4Tick.Value = eventVar4Tick3;
+
+        eventVar1Value.Value = eventVar1Value3;
+        eventVar2Value.Value = eventVar2Value3;
+        eventVar3Value.Value = eventVar3Value3;
+        eventVar4Value.Value = eventVar4Value3;
+
+        variable3.Value = var3Value3;
+        await mindConnectDevice.refresh(tickId3);
+      }
+    };
+
+    it("Should add every varaible to Buffer if they corresponds to given tick", async () => {
+      await exec();
+
+      let expectedBufferContent = [];
+      //For first tick 1563701011 suits only variable 1 - sampleTime 1
+      expectedBufferContent.push({
+        tickId: tickId1,
+        values: [
+          {
+            id: initialPayload.variables[0].id,
+            value: var1Value1
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
+      expectedBufferContent.push({
+        tickId: tickId2,
+        values: [
+          {
+            id: initialPayload.variables[0].id,
+            value: var1Value2
+          },
+          {
+            id: initialPayload.variables[1].id,
+            value: var2Value2
+          },
+          {
+            id: initialPayload.calculationElements[0].id,
+            value: var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[0].id,
+            value: var1Value3
+          },
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should not add anything to buffer if sendingEnabled is set to false", async () => {
+      initialPayload.dataAgent.sendingEnabled = false;
+
+      await exec();
+
+      let expectedBufferContent = [];
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should not add anything to buffer if no values corresponds to tickIds", async () => {
+      //No tick ids corresponds to values 123, 124, 125 or 126
+      initialPayload.variables[0].sampleTime = 123;
+      initialPayload.variables[1].sampleTime = 124;
+      initialPayload.variables[2].sampleTime = 125;
+      initialPayload.calculationElements[0].sampleTime = 126;
+
+      await exec();
+
+      let expectedBufferContent = [];
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should send buffer content and clear it when tickId correpsonds to sendingInterval", async () => {
+      initialPayload.dataAgent.sendingInterval = 2;
+
+      await exec();
+
+      //On tickId data is being send and buffer cleared - only values of tick3 should be stored inside it;
+
+      let expectedBufferContent = [];
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[0].id,
+            value: var1Value3
+          },
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+
+      //Rest of data should be converted to Mindsphere format and send via MindConnectAgent
+      let tickId1Payload = {
+        timestamp: new Date(tickId1 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value1.toString()
+          }
+        ]
+      };
+
+      let tickId2Payload = {
+        timestamp: new Date(tickId2 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value2.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[1].id
+              ],
+            qualityCode: "0",
+            value: var2Value2.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.calculationElements[0].id
+              ],
+            qualityCode: "0",
+            value: (var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3).toString()
+          }
+        ]
+      };
+
+      let expectedSendPayload = [tickId1Payload, tickId2Payload];
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData.mock
+          .calls[0][0]
+      ).toEqual(expectedSendPayload);
+    });
+
+    it("Should not send buffer content but clear it and save it to file when tickId correpsonds to sendingInterval and sending method throws", async () => {
+      initialPayload.dataAgent.sendingInterval = 2;
+      msSendMethodThrows = true;
+
+      await exec();
+
+      //On tickId data is being send and buffer cleared - only values of tick3 should be stored inside it;
+
+      let expectedBufferContent = [];
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[0].id,
+            value: var1Value3
+          },
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+
+      //Rest of data should be converted to Mindsphere format and send via MindConnectAgent
+      let tickId1Payload = {
+        timestamp: new Date(tickId1 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value1.toString()
+          }
+        ]
+      };
+
+      let tickId2Payload = {
+        timestamp: new Date(tickId2 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value2.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[1].id
+              ],
+            qualityCode: "0",
+            value: var2Value2.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.calculationElements[0].id
+              ],
+            qualityCode: "0",
+            value: (var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3).toString()
+          }
+        ]
+      };
+
+      let expectedSendPayload = [tickId1Payload, tickId2Payload];
+
+      //Sending data with given payload but it throws - called five times (retrying mechanism)
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData
+      ).toHaveBeenCalledTimes(5);
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData.mock
+          .calls[0][0]
+      ).toEqual(expectedSendPayload);
+
+      //Checking fileBuffer
+
+      let allFilesInValuesDir = await readDirAsync(
+        path.join(projPath, "dataAgents", initialPayload.id, "values")
+      );
+
+      expect(allFilesInValuesDir.length).toEqual(1);
+
+      let fileContent = JSON.parse(
+        await readFileAsync(
+          path.join(
+            projPath,
+            "dataAgents",
+            initialPayload.id,
+            "values",
+            allFilesInValuesDir[0]
+          )
+        )
+      );
+
+      expect(fileContent).toEqual(expectedSendPayload);
+    });
+
+    it("Should send all buffered files if they exists - and tickId corresponds to sendingInterval", async () => {
+      initialPayload.dataAgent.sendingInterval = 2;
+      msSendMethodThrows = true;
+
+      await exec();
+
+      let oldBulkPostDataMock =
+        mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData;
+      //Generating new refresh without throwing error
+      mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData = jest.fn();
+
+      let var1Value4 = 104.104;
+      let var2Value4 = 204;
+      let var3Value4 = 304.304;
+      let tickId4 = tickId3 + 1;
+
+      variable1.Value = var1Value4;
+      variable2.Value = var2Value4;
+      variable3.Value = var3Value4;
+      await mindConnectDevice.refresh(tickId4);
+
+      //No data should be stored in buffer - everything send
+      let expectedBufferContent = [];
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+
+      //Rest of data should be converted to Mindsphere format and send via MindConnectAgent
+      let tickId1Payload = {
+        timestamp: new Date(tickId1 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value1.toString()
+          }
+        ]
+      };
+
+      let tickId2Payload = {
+        timestamp: new Date(tickId2 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value2.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[1].id
+              ],
+            qualityCode: "0",
+            value: var2Value2.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.calculationElements[0].id
+              ],
+            qualityCode: "0",
+            value: (var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3).toString()
+          }
+        ]
+      };
+
+      let tickId3Payload = {
+        timestamp: new Date(tickId3 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value3.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[2].id
+              ],
+            qualityCode: "0",
+            value: var3Value3.toString()
+          }
+        ]
+      };
+
+      let tickId4Payload = {
+        timestamp: new Date(tickId4 * 1000).toISOString(),
+        values: [
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[0].id
+              ],
+            qualityCode: "0",
+            value: var1Value4.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.variables[1].id
+              ],
+            qualityCode: "0",
+            value: var2Value4.toString()
+          },
+          {
+            dataPointId:
+              initialPayload.dataAgent.variableNames[
+                initialPayload.calculationElements[0].id
+              ],
+            qualityCode: "0",
+            value: (var1Value4 * 1 + var2Value4 * 2 + var3Value4 * 3).toString()
+          }
+        ]
+      };
+
+      //All data should have been send to Mindsphere
+
+      //array containg expected bulkPostData call arguments
+      //First - Fifth time - 5 x try to send tickId1 and tick2 - but they throws
+      //Sixth time - try to send rest of buffer - tickId3 and tick4,
+      //Seventh - send buffered data inside file
+
+      let expectedCalls = [
+        [tickId1Payload, tickId2Payload],
+        [tickId1Payload, tickId2Payload],
+        [tickId1Payload, tickId2Payload],
+        [tickId1Payload, tickId2Payload],
+        [tickId1Payload, tickId2Payload],
+        [tickId3Payload, tickId4Payload],
+        [tickId1Payload, tickId2Payload]
+      ];
+
+      expect(oldBulkPostDataMock).toHaveBeenCalledTimes(5);
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData
+      ).toHaveBeenCalledTimes(2);
+
+      for (let i = 0; i < 5; i++) {
+        expect(oldBulkPostDataMock.mock.calls[i][0]).toEqual(expectedCalls[i]);
+      }
+
+      for (let i = 0; i < 2; i++) {
+        expect(
+          mindConnectDevice.DataAgent.MindConnectAgent.BulkPostData.mock.calls[
+            i
+          ][0]
+        ).toEqual(expectedCalls[5 + i]);
+      }
+
+      //There should be no file left inside values dir
+      let allFilesInValuesDir = await readDirAsync(
+        path.join(projPath, "dataAgents", initialPayload.id, "values")
+      );
+
+      expect(allFilesInValuesDir).toEqual([]);
+    });
+
+    it("Should not add value to Buffer if it is NaN", async () => {
+      var1Value1 = NaN;
+      var1Value2 = NaN;
+      var1Value3 = NaN;
+      await exec();
+
+      let expectedBufferContent = [];
+
+      //First tick is empty - only first variable matches and it is NaN
+
+      //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
+      //Calc element is also NaN - calculated based on varValue1
+      expectedBufferContent.push({
+        tickId: tickId2,
+        values: [
+          {
+            id: initialPayload.variables[1].id,
+            value: var2Value2
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should not add value to Buffer if it is null", async () => {
+      var1Value1 = null;
+      var1Value2 = null;
+      var1Value3 = null;
+      await exec();
+
+      let expectedBufferContent = [];
+
+      //First tick is empty - only first variable matches and it is NaN
+
+      //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
+      //Calc element is also NaN - calculated based on varValue1
+      expectedBufferContent.push({
+        tickId: tickId2,
+        values: [
+          {
+            id: initialPayload.variables[1].id,
+            value: var2Value2
+          },
+          {
+            id: initialPayload.calculationElements[0].id,
+            value: var1Value2 * 1 + var2Value2 * 2 + var3Value2 * 3
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should not add value to Buffer if it is string", async () => {
+      var1Value1 = "testString1";
+      var1Value2 = "testString2";
+      var1Value3 = "testString3";
+      await exec();
+
+      let expectedBufferContent = [];
+
+      //First tick is empty - only first variable matches and it is NaN
+
+      //For first tick 1563701011 suits only variable 1 and 2 and calcElement 2 - sampleTime 1, 2, 2
+      //Calc element is also NaN - calculated based on varValue1
+      expectedBufferContent.push({
+        tickId: tickId2,
+        values: [
+          {
+            id: initialPayload.variables[1].id,
+            value: var2Value2
+          }
+        ]
+      });
+
+      //For first tick 1563701011 suits only variable 1 and 3 - sampleTime 1, 3
+      expectedBufferContent.push({
+        tickId: tickId3,
+        values: [
+          {
+            id: initialPayload.variables[2].id,
+            value: var3Value3
+          }
+        ]
+      });
+
+      expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
+    });
+
+    it("Should call postEvent for every new incoming event", async () => {
+      await exec();
+
+      let expectedPayload1 = {
+        ...initialPayload.dataAgent.eventDescriptions[1001],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251575000).toISOString()
+      };
+      let expectedPayload2 = {
+        ...initialPayload.dataAgent.eventDescriptions[1002],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251576000).toISOString()
+      };
+      let expectedPayload3 = {
+        ...initialPayload.dataAgent.eventDescriptions[1003],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251577000).toISOString()
+      };
+      let expectedPayload4 = {
+        ...initialPayload.dataAgent.eventDescriptions[1004],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251578000).toISOString()
+      };
+      let expectedPayload5 = {
+        ...initialPayload.dataAgent.eventDescriptions[1005],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251579000).toISOString()
+      };
+      let expectedPayload6 = {
+        ...initialPayload.dataAgent.eventDescriptions[1006],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251580000).toISOString()
+      };
+      let expectedPayload7 = {
+        ...initialPayload.dataAgent.eventDescriptions[1007],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251581000).toISOString()
+      };
+      let expectedPayload8 = {
+        ...initialPayload.dataAgent.eventDescriptions[1008],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251582000).toISOString()
+      };
+      let expectedPayload9 = {
+        ...initialPayload.dataAgent.eventDescriptions[1009],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251583000).toISOString()
+      };
+      let expectedPayload10 = {
+        ...initialPayload.dataAgent.eventDescriptions[1010],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251584000).toISOString()
+      };
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent
+      ).toHaveBeenCalledTimes(10);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[0][0]
+      ).toEqual(expectedPayload1);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[1][0]
+      ).toEqual(expectedPayload2);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[2][0]
+      ).toEqual(expectedPayload3);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[3][0]
+      ).toEqual(expectedPayload4);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[4][0]
+      ).toEqual(expectedPayload5);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[5][0]
+      ).toEqual(expectedPayload6);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[6][0]
+      ).toEqual(expectedPayload7);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[7][0]
+      ).toEqual(expectedPayload8);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[8][0]
+      ).toEqual(expectedPayload9);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[9][0]
+      ).toEqual(expectedPayload10);
+    });
+
+    it("Should call numberOfRetries time postEvent if it throws and than save event to files", async () => {
+      msPostEventMethodThrows = true;
+
+      await exec();
+
+      let expectedPayload1 = {
+        1564251575: {
+          ...initialPayload.dataAgent.eventDescriptions[1001]
+        }
+      };
+
+      let expectedPayload2 = {
+        1564251576: {
+          ...initialPayload.dataAgent.eventDescriptions[1002]
+        }
+      };
+      let expectedPayload3 = {
+        1564251577: {
+          ...initialPayload.dataAgent.eventDescriptions[1003]
+        }
+      };
+      let expectedPayload4 = {
+        1564251578: {
+          ...initialPayload.dataAgent.eventDescriptions[1004]
+        }
+      };
+      let expectedPayload5 = {
+        1564251579: {
+          ...initialPayload.dataAgent.eventDescriptions[1005]
+        }
+      };
+      let expectedPayload6 = {
+        1564251580: {
+          ...initialPayload.dataAgent.eventDescriptions[1006]
+        }
+      };
+      let expectedPayload7 = {
+        1564251581: {
+          ...initialPayload.dataAgent.eventDescriptions[1007]
+        }
+      };
+      let expectedPayload8 = {
+        1564251582: {
+          ...initialPayload.dataAgent.eventDescriptions[1008]
+        }
+      };
+      let expectedPayload9 = {
+        1564251583: {
+          ...initialPayload.dataAgent.eventDescriptions[1009]
+        }
+      };
+      let expectedPayload10 = {
+        1564251584: {
+          ...initialPayload.dataAgent.eventDescriptions[1010]
+        }
+      };
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent
+      ).toHaveBeenCalledTimes(
+        10 * initialPayload.dataAgent.numberOfSendingRetries
+      );
+
+      let allFilePaths = (await readDirAsync(eventDirPath)).map(fileName =>
+        path.join(eventDirPath, fileName)
+      );
+
+      expect(allFilePaths.length).toEqual(10);
+
+      let file0Content = JSON.parse(await readFileAsync(allFilePaths[0]));
+      expect(file0Content).toEqual(expectedPayload1);
+
+      let file1Content = JSON.parse(await readFileAsync(allFilePaths[1]));
+      expect(file1Content).toEqual(expectedPayload2);
+
+      let file2Content = JSON.parse(await readFileAsync(allFilePaths[2]));
+      expect(file2Content).toEqual(expectedPayload3);
+
+      let file3Content = JSON.parse(await readFileAsync(allFilePaths[3]));
+      expect(file3Content).toEqual(expectedPayload4);
+
+      let file4Content = JSON.parse(await readFileAsync(allFilePaths[4]));
+      expect(file4Content).toEqual(expectedPayload5);
+
+      let file5Content = JSON.parse(await readFileAsync(allFilePaths[5]));
+      expect(file5Content).toEqual(expectedPayload6);
+
+      let file6Content = JSON.parse(await readFileAsync(allFilePaths[6]));
+      expect(file6Content).toEqual(expectedPayload7);
+
+      let file7Content = JSON.parse(await readFileAsync(allFilePaths[7]));
+      expect(file7Content).toEqual(expectedPayload8);
+
+      let file8Content = JSON.parse(await readFileAsync(allFilePaths[8]));
+      expect(file8Content).toEqual(expectedPayload9);
+
+      let file9Content = JSON.parse(await readFileAsync(allFilePaths[9]));
+      expect(file9Content).toEqual(expectedPayload10);
+    });
+
+    it("Should send event files if tick id of refresh meets sendingInterval", async () => {
+      //Creating initial event files
+
+      await createDirAsync(path.join(projPath, "dataAgents"));
+
+      await createDirAsync(
+        path.join(projPath, "dataAgents", initialPayload.id)
+      );
+
+      let eventsDirPath = path.join(
+        projPath,
+        "dataAgents",
+        initialPayload.id,
+        "events"
+      );
+
+      await createDirAsync(eventsDirPath);
+
+      let event1Payload = {
+        "1563700000": {
+          source: "testSource01",
+          severity: 20,
+          description: "test event 01"
+        }
+      };
+
+      let event2Payload = {
+        "1563700001": {
+          source: "testSource02",
+          severity: 20,
+          description: "test event 02"
+        }
+      };
+
+      let event3Payload = {
+        "1563700003": {
+          source: "testSource03",
+          severity: 20,
+          description: "test event 03"
+        }
+      };
+
+      await createFileAsync(
+        path.join(eventDirPath, "1.json"),
+        JSON.stringify(event1Payload)
+      );
+
+      await createFileAsync(
+        path.join(eventDirPath, "2.json"),
+        JSON.stringify(event2Payload)
+      );
+
+      await createFileAsync(
+        path.join(eventDirPath, "3.json"),
+        JSON.stringify(event3Payload)
+      );
+
+      tickId3 = 1563701040;
+
+      await exec();
+
+      let expectedPayload1 = {
+        ...initialPayload.dataAgent.eventDescriptions[1001],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251575000).toISOString()
+      };
+      let expectedPayload2 = {
+        ...initialPayload.dataAgent.eventDescriptions[1002],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251576000).toISOString()
+      };
+      let expectedPayload3 = {
+        ...initialPayload.dataAgent.eventDescriptions[1003],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251577000).toISOString()
+      };
+      let expectedPayload4 = {
+        ...initialPayload.dataAgent.eventDescriptions[1004],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251578000).toISOString()
+      };
+      let expectedPayload5 = {
+        ...initialPayload.dataAgent.eventDescriptions[1005],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251579000).toISOString()
+      };
+      let expectedPayload6 = {
+        ...initialPayload.dataAgent.eventDescriptions[1006],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251580000).toISOString()
+      };
+      //Old events are often send before new ones
+
+      let expectedPayload7 = {
+        ...Object.values(event1Payload)[0],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(
+          parseInt(Object.keys(event1Payload)[0]) * 1000
+        ).toISOString()
+      };
+      let expectedPayload8 = {
+        ...Object.values(event2Payload)[0],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(
+          parseInt(Object.keys(event2Payload)[0]) * 1000
+        ).toISOString()
+      };
+      let expectedPayload9 = {
+        ...Object.values(event3Payload)[0],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(
+          parseInt(Object.keys(event3Payload)[0]) * 1000
+        ).toISOString()
+      };
+      let expectedPayload10 = {
+        ...initialPayload.dataAgent.eventDescriptions[1007],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251581000).toISOString()
+      };
+      let expectedPayload11 = {
+        ...initialPayload.dataAgent.eventDescriptions[1008],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251582000).toISOString()
+      };
+      let expectedPayload12 = {
+        ...initialPayload.dataAgent.eventDescriptions[1009],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251583000).toISOString()
+      };
+      let expectedPayload13 = {
+        ...initialPayload.dataAgent.eventDescriptions[1010],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251584000).toISOString()
+      };
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent
+      ).toHaveBeenCalledTimes(13);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[0][0]
+      ).toEqual(expectedPayload1);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[1][0]
+      ).toEqual(expectedPayload2);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[2][0]
+      ).toEqual(expectedPayload3);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[3][0]
+      ).toEqual(expectedPayload4);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[4][0]
+      ).toEqual(expectedPayload5);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[5][0]
+      ).toEqual(expectedPayload6);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[6][0]
+      ).toEqual(expectedPayload7);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[7][0]
+      ).toEqual(expectedPayload8);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[8][0]
+      ).toEqual(expectedPayload9);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[9][0]
+      ).toEqual(expectedPayload10);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[10][0]
+      ).toEqual(expectedPayload11);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[11][0]
+      ).toEqual(expectedPayload12);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[12][0]
+      ).toEqual(expectedPayload13);
+
+      //All file should have been deleted
+      let allFiles = await readDirAsync(eventDirPath);
+
+      expect(allFiles).toEqual([]);
+    });
+
+    it("Should not send event files if tick id of refresh does not meet sendingInterval", async () => {
+      //Creating initial event files
+
+      await createDirAsync(path.join(projPath, "dataAgents"));
+
+      await createDirAsync(
+        path.join(projPath, "dataAgents", initialPayload.id)
+      );
+
+      let eventsDirPath = path.join(
+        projPath,
+        "dataAgents",
+        initialPayload.id,
+        "events"
+      );
+
+      await createDirAsync(eventsDirPath);
+
+      let event1Payload = {
+        "1563700000": {
+          source: "testSource01",
+          severity: 20,
+          description: "test event 01"
+        }
+      };
+
+      let event2Payload = {
+        "1563700001": {
+          source: "testSource02",
+          severity: 20,
+          description: "test event 02"
+        }
+      };
+
+      let event3Payload = {
+        "1563700003": {
+          source: "testSource03",
+          severity: 20,
+          description: "test event 03"
+        }
+      };
+
+      await createFileAsync(
+        path.join(eventDirPath, "1.json"),
+        JSON.stringify(event1Payload)
+      );
+
+      await createFileAsync(
+        path.join(eventDirPath, "2.json"),
+        JSON.stringify(event2Payload)
+      );
+
+      await createFileAsync(
+        path.join(eventDirPath, "3.json"),
+        JSON.stringify(event3Payload)
+      );
+
+      await exec();
+
+      let expectedPayload1 = {
+        ...initialPayload.dataAgent.eventDescriptions[1001],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251575000).toISOString()
+      };
+      let expectedPayload2 = {
+        ...initialPayload.dataAgent.eventDescriptions[1002],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251576000).toISOString()
+      };
+      let expectedPayload3 = {
+        ...initialPayload.dataAgent.eventDescriptions[1003],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251577000).toISOString()
+      };
+      let expectedPayload4 = {
+        ...initialPayload.dataAgent.eventDescriptions[1004],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251578000).toISOString()
+      };
+      let expectedPayload5 = {
+        ...initialPayload.dataAgent.eventDescriptions[1005],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251579000).toISOString()
+      };
+      let expectedPayload6 = {
+        ...initialPayload.dataAgent.eventDescriptions[1006],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251580000).toISOString()
+      };
+      let expectedPayload7 = {
+        ...initialPayload.dataAgent.eventDescriptions[1007],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251581000).toISOString()
+      };
+      let expectedPayload8 = {
+        ...initialPayload.dataAgent.eventDescriptions[1008],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251582000).toISOString()
+      };
+      let expectedPayload9 = {
+        ...initialPayload.dataAgent.eventDescriptions[1009],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251583000).toISOString()
+      };
+      let expectedPayload10 = {
+        ...initialPayload.dataAgent.eventDescriptions[1010],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251584000).toISOString()
+      };
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent
+      ).toHaveBeenCalledTimes(10);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[0][0]
+      ).toEqual(expectedPayload1);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[1][0]
+      ).toEqual(expectedPayload2);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[2][0]
+      ).toEqual(expectedPayload3);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[3][0]
+      ).toEqual(expectedPayload4);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[4][0]
+      ).toEqual(expectedPayload5);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[5][0]
+      ).toEqual(expectedPayload6);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[6][0]
+      ).toEqual(expectedPayload7);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[7][0]
+      ).toEqual(expectedPayload8);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[8][0]
+      ).toEqual(expectedPayload9);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[9][0]
+      ).toEqual(expectedPayload10);
+
+      //File should not have been deleted
+      let allFiles = await readDirAsync(eventDirPath);
+
+      expect(allFiles).toEqual(["1.json", "2.json", "3.json"]);
+    });
+
+    it("Should not call send event files or create fiiles if new variable values does not change", async () => {
+      //Creating initial event files
+      
+      eventVar1Tick1 = 1564251578;
+      eventVar2Tick1 = 1564251577;
+      eventVar3Tick1 = 1564251576;
+      eventVar4Tick1 = 1564251575;
+      eventVar1Value1 = 1004;
+      eventVar2Value1 = 1003;
+      eventVar3Value1 = 1002;
+      eventVar4Value1 = 1001;
+
+      //Second is the same as first - only third changes
+
+      eventVar1Tick2 = 1564251578;
+      eventVar2Tick2 = 1564251577;
+      eventVar3Tick2 = 1564251576;
+      eventVar4Tick2 = 1564251575;
+      eventVar1Value2 = 1004;
+      eventVar2Value2 = 1003;
+      eventVar3Value2 = 1002;
+      eventVar4Value2 = 1001;
+
+      eventVar1Tick3 = 1564251584;
+      eventVar2Tick3 = 1564251583;
+      eventVar3Tick3 = 1564251582;
+      eventVar4Tick3 = 1564251581;
+      eventVar1Value3 = 1010;
+      eventVar2Value3 = 1009;
+      eventVar3Value3 = 1008;
+      eventVar4Value3 = 1007;
+
+
+      await exec();
+
+      let expectedPayload1 = {
+        ...initialPayload.dataAgent.eventDescriptions[1001],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251575000).toISOString()
+      };
+      let expectedPayload2 = {
+        ...initialPayload.dataAgent.eventDescriptions[1002],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251576000).toISOString()
+      };
+      let expectedPayload3 = {
+        ...initialPayload.dataAgent.eventDescriptions[1003],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251577000).toISOString()
+      };
+      let expectedPayload4 = {
+        ...initialPayload.dataAgent.eventDescriptions[1004],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251578000).toISOString()
+      };
+      
+      let expectedPayload5 = {
+        ...initialPayload.dataAgent.eventDescriptions[1007],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251581000).toISOString()
+      };
+      let expectedPayload6 = {
+        ...initialPayload.dataAgent.eventDescriptions[1008],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251582000).toISOString()
+      };
+      let expectedPayload7 = {
+        ...initialPayload.dataAgent.eventDescriptions[1009],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251583000).toISOString()
+      };
+      let expectedPayload8 = {
+        ...initialPayload.dataAgent.eventDescriptions[1010],
+        entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)
+        sourceType: "Event",
+        sourceId: "application",
+        timestamp: new Date(1564251584000).toISOString()
+      };
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent
+      ).toHaveBeenCalledTimes(8);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[0][0]
+      ).toEqual(expectedPayload1);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[1][0]
+      ).toEqual(expectedPayload2);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[2][0]
+      ).toEqual(expectedPayload3);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[3][0]
+      ).toEqual(expectedPayload4);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[4][0]
+      ).toEqual(expectedPayload5);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[5][0]
+      ).toEqual(expectedPayload6);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[6][0]
+      ).toEqual(expectedPayload7);
+
+      expect(
+        mindConnectDevice.DataAgent.MindConnectAgent.PostEvent.mock.calls[7][0]
+      ).toEqual(expectedPayload8);
+
+      //There should be no files
+      let allFiles = await readDirAsync(eventDirPath);
+
+      expect(allFiles).toEqual([]);
+    });
+  });
 });

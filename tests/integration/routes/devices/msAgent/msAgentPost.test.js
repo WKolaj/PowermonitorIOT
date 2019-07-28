@@ -393,12 +393,15 @@ describe("auth route", () => {
         variables: [],
         calculationElements: [],
         dataAgent: {
+          sendEventLimit: 5,
           variableNames: {},
           sendingEnabled: false,
           sendFileLimit: 5,
           sendingInterval: 60,
-          numberOfSendingRetries: 5
-        }
+          numberOfSendingRetries: 5,
+          eventDescriptions: {}
+        },
+        eventVariables: []
       };
 
       expect(result.body).toEqual(expectedPayload);
