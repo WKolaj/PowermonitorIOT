@@ -6,6 +6,7 @@ const FactorElement = require("../calculationElement/FactorElement");
 const AverageElement = require("../calculationElement/AverageElement");
 const IncreaseElement = require("../calculationElement/IncreaseElement");
 const EventLogElement = require("../calculationElement/EventLogElement");
+const ValueFromByteArray = require("../calculationElement/ValueFromByteArray");
 const Sampler = require("../../classes/sampler/Sampler");
 const logger = require("../../logger/logger");
 
@@ -261,6 +262,9 @@ class Device {
       case "eventLogElement": {
         return this._createEventLogElement(payload);
       }
+      case "valueFromByteArray": {
+        return this._createValueFromByteArrayElement(payload);
+      }
       default: {
         throw new Error(
           `Given calculation element is not recognized: ${payload.type}`
@@ -334,6 +338,20 @@ class Device {
       throw new Error("Calculation element name in payload is not defined");
 
     let calculationElementToAdd = new IncreaseElement(this);
+    await calculationElementToAdd.init(payload);
+    await this.addCalculationElement(calculationElementToAdd);
+    return calculationElementToAdd;
+  }
+
+  /**
+   * @description Method for creating valueFromByteArray
+   * @param {object} payload payload to create valueFromByteArray
+   */
+  async _createValueFromByteArrayElement(payload) {
+    if (!payload.name)
+      throw new Error("Calculation element name in payload is not defined");
+
+    let calculationElementToAdd = new ValueFromByteArray(this);
     await calculationElementToAdd.init(payload);
     await this.addCalculationElement(calculationElementToAdd);
     return calculationElementToAdd;
