@@ -2,40 +2,12 @@ const S7Variable = require("./S7Variable");
 
 //Converting register array to ByteArray
 const s7DataToByteArray = function(mbData) {
-  let int16Array = new Uint16Array(mbData.length);
-
-  for (let i in mbData) {
-    int16Array[i] = mbData[i];
-  }
-
-  let dataBuffer = new Uint8Array(int16Array.buffer);
-
-  let bytes = [];
-
-  for (let i in dataBuffer) {
-    bytes[i] = dataBuffer[i];
-  }
-
-  return bytes;
+  return [...mbData];
 };
 
 //Converting ByteArray to register array
 const byteArrayToS7Data = function(byteArray) {
-  let int8Array = new Uint8Array(byteArray.length);
-
-  for (let i in byteArray) {
-    int8Array[i] = byteArray[i];
-  }
-
-  let dataBuffer = new Uint16Array(int8Array.buffer);
-
-  let data = [];
-
-  for (let i in dataBuffer) {
-    data[i] = dataBuffer[i];
-  }
-
-  return data;
+  return [...byteArray];
 };
 
 class S7ByteArrayVariable extends S7Variable {
@@ -182,7 +154,7 @@ class S7ByteArrayVariable extends S7Variable {
 
       //new value should be:
       //[0 0 0 ... 0] < with new length
-      for (let i = 0; i < payload.length * 2; i++) {
+      for (let i = 0; i < payload.length; i++) {
         valueOfReset.push(0);
       }
 

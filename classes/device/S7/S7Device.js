@@ -3,6 +3,12 @@ const Sampler = require("../../sampler/Sampler");
 const S7Driver = require("../../driver/S7/S7Driver");
 const S7RequestGrouper = require("../../driver/S7/S7RequestGrouper");
 const S7Int16Variable = require("../../variable/S7/S7Int16Variable");
+const S7UInt16Variable = require("../../variable/S7/S7UInt16Variable");
+const S7UInt8Variable = require("../../variable/S7/S7UInt8Variable");
+const S7Int8Variable = require("../../variable/S7/S7Int8Variable");
+const S7UInt32Variable = require("../../variable/S7/S7UInt32Variable");
+const S7Int32Variable = require("../../variable/S7/S7Int32Variable");
+const S7FloatVariable = require("../../variable/S7/S7FloatVariable");
 const S7ByteArrayVariable = require("../../variable/S7/S7ByteArrayVariable");
 const logger = require("../../../logger/logger");
 const { exists } = require("../../../utilities/utilities");
@@ -179,6 +185,24 @@ class S7Device extends Device {
       case "s7Int16": {
         return this._createInt16Variable(payload);
       }
+      case "s7UInt16": {
+        return this._createUInt16Variable(payload);
+      }
+      case "s7Int32": {
+        return this._createInt32Variable(payload);
+      }
+      case "s7UInt32": {
+        return this._createUInt32Variable(payload);
+      }
+      case "s7UInt8": {
+        return this._createUInt8Variable(payload);
+      }
+      case "s7Int8": {
+        return this._createInt8Variable(payload);
+      }
+      case "s7Float": {
+        return this._createFloatVariable(payload);
+      }
       default: {
         throw new Error(
           `Given variable type is not recognized: ${payload.type}`
@@ -219,7 +243,7 @@ class S7Device extends Device {
   }
 
   /**
-   * @description Method for creating byteArray variable
+   * @description Method for creating Int16 variable
    * @param {*} payload Payload of edition
    */
   async _createInt16Variable(payload) {
@@ -233,6 +257,26 @@ class S7Device extends Device {
       throw new Error("variable areaType in payload is not defined");
 
     let variableToAdd = new S7Int16Variable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating UInt16 variable
+   * @param {*} payload Payload of edition
+   */
+  async _createUInt16Variable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.areaType))
+      throw new Error("variable areaType in payload is not defined");
+
+    let variableToAdd = new S7UInt16Variable(this);
     await variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
@@ -255,6 +299,106 @@ class S7Device extends Device {
       throw new Error("variable length in payload is not defined");
 
     let variableToAdd = new S7ByteArrayVariable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating UInt8 variable
+   * @param {*} payload Payload of edition
+   */
+  async _createUInt8Variable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.areaType))
+      throw new Error("variable areaType in payload is not defined");
+
+    let variableToAdd = new S7UInt8Variable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating Int8 variable
+   * @param {*} payload Payload of edition
+   */
+  async _createInt8Variable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.areaType))
+      throw new Error("variable areaType in payload is not defined");
+
+    let variableToAdd = new S7Int8Variable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating Int32 variable
+   * @param {*} payload Payload of edition
+   */
+  async _createInt32Variable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.areaType))
+      throw new Error("variable areaType in payload is not defined");
+
+    let variableToAdd = new S7Int32Variable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating UInt32 variable
+   * @param {*} payload Payload of edition
+   */
+  async _createUInt32Variable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.areaType))
+      throw new Error("variable areaType in payload is not defined");
+
+    let variableToAdd = new S7UInt32Variable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating Float variable
+   * @param {*} payload Payload of edition
+   */
+  async _createFloatVariable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.areaType))
+      throw new Error("variable areaType in payload is not defined");
+
+    let variableToAdd = new S7FloatVariable(this);
     await variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
@@ -300,7 +444,7 @@ class S7Device extends Device {
       //Returing all refreshed variable Ids and values;
       return this.RequestGrouper.ConvertRequestsToIDValuePair(requestsToInvoke);
     } catch (err) {
-      logger.warn(err.message, err);
+      logger.warn(err, err.message);
       return null;
     }
   }
@@ -349,7 +493,10 @@ class S7Device extends Device {
     await super.editWithPayload(payload);
 
     let changeAssociatedWithMBDriver =
-      payload.ipAdress || payload.timeout || payload.rack || payload.slot;
+      exists(payload.ipAdress) ||
+      exists(payload.timeout) ||
+      exists(payload.rack) ||
+      exists(payload.slot);
 
     //Reconnecting only if device is Active and change is associated with modbus driver
     let shouldBeReconnected = this.IsActive && changeAssociatedWithMBDriver;

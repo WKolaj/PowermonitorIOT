@@ -1,7 +1,7 @@
 const S7Variable = require("./S7Variable");
 
 //Converting register array to Int16
-const s7DataToInt16 = function(data) {
+const s7DataToUInt16 = function(data) {
   var buf = new ArrayBuffer(2);
 
   var view = new DataView(buf);
@@ -9,20 +9,20 @@ const s7DataToInt16 = function(data) {
   view.setUint8(0, data[0]);
   view.setUint8(1, data[1]);
 
-  return view.getInt16(0);
+  return view.getUint16(0);
 };
 
 //Converting Int16 to register array
-const int16ToS7Data = function(intValue) {
+const uint16ToS7Data = function(intValue) {
   //Split int16 into bytes
-  let int16Array = new Int16Array(1);
+  let int16Array = new Uint16Array(1);
   int16Array[0] = intValue;
   let bytes = new Int8Array(int16Array.buffer);
 
   return [bytes[1], bytes[0]];
 };
 
-class S7Int16Variable extends S7Variable {
+class S7UInt16Variable extends S7Variable {
   /**
    * @description Modbus Int16 variable
    * @param {Object} device Device associated with variable
@@ -45,7 +45,7 @@ class S7Int16Variable extends S7Variable {
    * @description Method for generating type name that represents variable
    */
   _getTypeName() {
-    return "s7Int16";
+    return "s7UInt16";
   }
 
   /**
@@ -53,7 +53,7 @@ class S7Int16Variable extends S7Variable {
    * @param {Array} data array of UInt16 representing data
    */
   _convertDataToValue(data) {
-    return s7DataToInt16(data);
+    return s7DataToUInt16(data);
   }
 
   /**
@@ -61,7 +61,7 @@ class S7Int16Variable extends S7Variable {
    * @param {number} value value  to be converted
    */
   _convertValueToData(value) {
-    return int16ToS7Data(value);
+    return uint16ToS7Data(value);
   }
 
   /**
@@ -82,4 +82,4 @@ class S7Int16Variable extends S7Variable {
   }
 }
 
-module.exports = S7Int16Variable;
+module.exports = S7UInt16Variable;

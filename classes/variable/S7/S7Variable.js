@@ -1,5 +1,6 @@
 const Variable = require("../Variable");
 const S7Request = require("../../driver/S7/S7Request");
+const Sampler = require("../../sampler/Sampler");
 const { exists } = require("../../../utilities/utilities");
 
 class S7Variable extends Variable {
@@ -287,6 +288,8 @@ class S7Variable extends Variable {
     }
     if (payload.value !== undefined) {
       this.Value = payload.value;
+      //new valueTickId should be set
+      this.ValueTickId = Sampler.convertDateToTickNumber(Date.now());
     }
     if (changesAssociatedWithRequest) {
       this._getSingleRequest = new S7Request(

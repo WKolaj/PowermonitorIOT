@@ -150,7 +150,6 @@ class S7Driver {
             return reject(err);
           }
         }
-
         this._busy = false;
         return resolve(data);
       } else {
@@ -222,12 +221,14 @@ class S7Driver {
 
         //Data has been read successfuly - resolve promise
 
+        let arrayData = exists(data) ? [...data] : data;
+
+        console.log(data);
+
         //Clear timeout and resolve promise
         clearTimeout(handle);
 
-        //Converting buffer to array - if array exists
-        if (exists(data)) return resolve([...data]);
-        else return resolve(data);
+        return resolve(arrayData);
       } catch (err) {
         //An error occured durring reading
         //Clear timeout and reject promise
@@ -271,7 +272,7 @@ class S7Driver {
         return reject(new Error("Writing data timeout error..."));
       }, this._timeout);
 
-      let bufferedValue = Buffer.alloc(value.length, value);
+      let bufferedValue = Buffer.from(value);
 
       try {
         switch (areaType) {
