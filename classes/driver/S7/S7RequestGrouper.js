@@ -6,7 +6,7 @@ class S7RequestGrouper {
    * @param {object} s7Device S7 device
    * @param {number} maxRequestLength maximum length of S7 request
    */
-  constructor(s7Device, maxRequestLength = 100) {
+  constructor(s7Device, maxRequestLength = 1000) {
     if (!s7Device) throw new Error("s7Device cannot be empty");
 
     this._s7Device = s7Device;

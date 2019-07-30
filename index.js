@@ -221,6 +221,22 @@ let exec = async () => {
 
     let var13 = await device.createVariable(variable13Payload);
 
+    for (let i = 0; i < 1000; i++) {
+      let variablePayload = {
+        name: "testVariable" + (14 + i),
+        sampleTime: 1,
+        archived: false,
+        unit: "",
+        type: "s7UInt16",
+        areaType: "DB",
+        write: false,
+        dbNumber: 7,
+        offset: 38 + i * 2
+      };
+
+      await device.createVariable(variablePayload);
+    }
+
     setInterval(async () => {
       try {
         let tick = Math.round(Date.now() / 1000);
