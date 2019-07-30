@@ -1,6 +1,5 @@
-const Project = require("./classes/project/Project");
-const MSDataAgent = require("./classes/device/SpecialDevices/SendAgent/MSDataAgent");
-const Sampler = require("./classes/sampler/Sampler");
+const S7Device = require("./classes/device/S7/S7Device");
+const MBDevice = require("./classes/device/Modbus/MBDevice");
 var stdin = process.stdin;
 
 // without this, we would only get streams once enter is pressed
@@ -13,91 +12,206 @@ stdin.resume();
 // i don't want binary, do you?
 stdin.setEncoding("utf8");
 
-let payload = {
-  id: "5d2846fdeff8722f4b96c4f0",
-  name: "myAgent",
-  calculationElements: [],
-  variables: [
-    {
-      id: "5d2846fdeff8722f4b96c4f1",
-      name: "PAC4200 - voltage L1-N",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      archiveSampleTime: 1,
-      type: "sdVariable",
-      elementDeviceId: "5d283cb95d1680263b003587",
-      elementId: "5d283cb95d1680263b00354c",
-      value: 0
-    },
-    {
-      id: "5d2846fdeff8722f4b96c4f2",
-      name: "PAC4200 - current L1-N",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      archiveSampleTime: 1,
-      type: "sdVariable",
-      elementDeviceId: "5d283cb95d1680263b003587",
-      elementId: "5d283cb95d1680263b003552",
-      value: 1
-    },
-    {
-      id: "5d2846fdeff8722f4b96c4f3",
-      name: "PAC4200 - active power L1-N",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      archiveSampleTime: 1,
-      type: "sdVariable",
-      elementDeviceId: "5d283cb95d1680263b003587",
-      elementId: "5d283cb95d1680263b003558",
-      value: 1
-    }
-  ],
-  type: "msAgent",
-  dataAgent: {
-    dirPath:
-      "/home/wk/Documents/Projects/PowermonitorIOT/project/dataAgents/5d2846fdeff8722f4b96c4f0",
-    sampleTimeGroups: [
-      {
-        sampleTime: 1,
-        variableIds: [
-          "5d2846fdeff8722f4b96c4f1",
-          "5d2846fdeff8722f4b96c4f2",
-          "5d2846fdeff8722f4b96c4f3"
-        ]
+// let exec = async () => {
+//   try {
+//     let device = new S7Device();
+//     let initPayload = {
+//       ipAdress: "192.168.0.131",
+//       slot: 1,
+//       rack: 0,
+//       name: "test",
+//       type: "s7Device",
+//       timeout: 3000,
+//       isActive: true
+//     };
+//     await device.init(initPayload);
+//     device.Events.on("Refreshed", args => {
+//       if (Object.values(args[1]).length > 0) {
+//         // console.log(args[2]);
+//         // console.log(Object.values(args[1])[0].Value);
+//         // console.log(Object.values(args[1])[1].Value);
+//         // console.log(Object.values(args[1])[2].Value);
+//         // console.log(Object.values(args[1])[3].Value);
+//         // console.log(Object.values(args[1])[4].Value);
+//       }
+//     });
+
+//     let variable1Payload = {
+//       name: "testVariable1",
+//       sampleTime: 1,
+//       archived: false,
+//       unit: "",
+//       type: "s7ByteArray",
+//       areaType: "DB",
+//       write: false,
+//       length: 2,
+//       dbNumber: 6,
+//       offset: 4
+//     };
+
+//     await device.createVariable(variable1Payload);
+
+//     let variable2Payload = {
+//       name: "testVariable2",
+//       sampleTime: 1,
+//       archived: false,
+//       unit: "",
+//       type: "s7ByteArray",
+//       areaType: "DB",
+//       write: false,
+//       length: 2,
+//       dbNumber: 6,
+//       offset: 6
+//     };
+
+//     await device.createVariable(variable2Payload);
+
+//     let variable3Payload = {
+//       name: "testVariable3",
+//       sampleTime: 1,
+//       archived: false,
+//       unit: "",
+//       type: "s7Int16",
+//       areaType: "DB",
+//       write: false,
+//       dbNumber: 6,
+//       offset: 10
+//     };
+
+//     await device.createVariable(variable3Payload);
+
+//     let variable4Payload = {
+//       name: "testVariable3",
+//       sampleTime: 1,
+//       archived: false,
+//       unit: "",
+//       type: "s7Int16",
+//       areaType: "DB",
+//       write: true,
+//       dbNumber: 6,
+//       offset: 12
+//     };
+
+//     let var4 = await device.createVariable(variable4Payload);
+
+//     let variable5Payload = {
+//       name: "testVariable3",
+//       sampleTime: 1,
+//       archived: false,
+//       unit: "",
+//       type: "s7Int16",
+//       areaType: "DB",
+//       write: false,
+//       dbNumber: 6,
+//       offset: 14
+//     };
+
+//     await device.createVariable(variable5Payload);
+
+//     setInterval(() => {
+//       try {
+//         let tick = Math.round(Date.now() / 1000);
+//         var4.Value = 123;
+//         device.refresh(tick);
+//       } catch (err) {
+//         console.log(err);
+//       }
+//     }, 1000);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+// exec();
+
+let exec2 = async () => {
+  try {
+    let device = new MBDevice();
+    let initPayload = {
+      ipAdress: "192.168.1.131",
+      portNumber: 502,
+      name: "test",
+      type: "s7Device",
+      timeout: 3000,
+      isActive: true,
+      unitId: 1
+    };
+    await device.init(initPayload);
+    device.Events.on("Refreshed", args => {
+      if (Object.values(args[1]).length > 0) {
+        console.log(args[2]);
+        console.log(Object.values(args[1])[0].Value);
+        console.log(Object.values(args[1])[1].Value);
+        console.log(Object.values(args[1])[2].Value);
+        console.log(Object.values(args[1])[3].Value);
       }
-    ],
-    bufferSize: 100,
-    sendDataLimit: 20,
-    readyToSend: true,
-    boardingKey: {
-      content: {
-        baseUrl: "https://southgate.eu1.mindsphere.io",
-        iat:
-          "eyJraWQiOiJrZXktaWQtMSIsInR5cCI6IkpXVCIsImFsZyI6IlJTMjU2In0.eyJpc3MiOiJTQ0kiLCJzdWIiOiIzMGIzZGUzYzhmMTY0NzUzYjMwMTVjZjI1ZWQ4ZDJiZiIsImF1ZCI6IkFJQU0iLCJpYXQiOjE1NjI4MjE2MTcsIm5iZiI6MTU2MjgyMTYxNywiZXhwIjoxNTYzNDI2NDE3LCJqdGkiOiJmYWM5NDJjMi1iMWQ2LTQwMDctYmU0Ny1kZjU2MDBlNzY0ZTAiLCJzY29wZSI6IklBVCIsInRlbiI6ImludWNsZXVzIiwidGVuX2N0eCI6Im1haW4tdGVuYW50IiwiY2xpZW50X2NyZWRlbnRpYWxzX3Byb2ZpbGUiOlsiU0hBUkVEX1NFQ1JFVCJdLCJzY2hlbWFzIjpbInVybjpzaWVtZW5zOm1pbmRzcGhlcmU6djEiXX0.prDJMiZKt4CKUCKOaqo4rQ0TsQ7bLgKJcDPnVMsGmQKRuPv2kzmbdS25LkyY0M0giiqxa-WzzBpYt6DEZB_3vF9ui1rSKYxa6obsuvyNLyDyZBpdVAeJ_jkm2ppZi8Ajkf428U5d6wFNbWMcF-cS0YimqcTOmVQMTa3Iln4hsJbzdkhtn7AkSGaP4Zr3uMshjnWaddhixZM2cJe_lP-FvOzrLNUSNM9A9YRmR0kmBUO5DThVZ0elM43XokLPpfvVnki-ZRBneOtraAmvmNSStC3knGEIptDXrveB04l76dOPwPPCgqxQtx07ZqZGu0F9OfNo3gKLZnEZQwbuJubAOQ",
-        clientCredentialProfile: ["SHARED_SECRET"],
-        clientId: "30b3de3c8f164753b3015cf25ed8d2bf",
-        tenant: "inucleus"
-      },
-      expiration: "2019-07-18T05:06:57.000Z"
-    },
-    variableNames: {
-      "5d2846fdeff8722f4b96c4f1": "1562821701369",
-      "5d2846fdeff8722f4b96c4f2": "1562821687615",
-      "5d2846fdeff8722f4b96c4f3": "1562821666314"
-    }
+    });
+
+    let variable1Payload = {
+      name: "testVariable1",
+      sampleTime: 1,
+      archived: false,
+      unit: "",
+      type: "mbSwappedUInt32",
+      offset: 84 / 2,
+      fCode: 3
+    };
+
+    await device.createVariable(variable1Payload);
+
+    let variable2Payload = {
+      name: "testVariable2",
+      sampleTime: 1,
+      archived: false,
+      unit: "",
+      type: "mbSwappedUInt32",
+      offset: 88 / 2,
+      fCode: 3
+    };
+
+    await device.createVariable(variable2Payload);
+
+    let variable3Payload = {
+      name: "testVariable3",
+      sampleTime: 1,
+      archived: false,
+      unit: "",
+      type: "mbSwappedUInt32",
+      offset: 92 / 2,
+      fCode: 16
+    };
+
+    let var3 = await device.createVariable(variable3Payload);
+
+    let variable4Payload = {
+      name: "testVariable4",
+      sampleTime: 1,
+      archived: false,
+      unit: "",
+      type: "mbSwappedUInt32",
+      offset: 96 / 2,
+      fCode: 3
+    };
+
+    let var4 = await device.createVariable(variable4Payload);
+
+    setInterval(() => {
+      try {
+        let tick = Math.round(Date.now() / 1000);
+        device.editVariable(var3.Id, {
+          value: 123
+        });
+        device.refresh(tick);
+      } catch (err) {
+        console.log(err);
+      }
+    }, 1000);
+  } catch (err) {
+    console.log(err);
   }
 };
 
-let exec = async () => {
-  const server = await require("./server");
-
-  let result = await Project.CurrentProject.createDevice(payload);
-};
-
-exec();
+exec2();
 
 stdin.on("data", function(key) {
   // ctrl-c ( end of text )

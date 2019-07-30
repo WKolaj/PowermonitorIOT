@@ -1,11 +1,10 @@
 const Variable = require("../Variable");
-const MBRequest = require("../../driver/Modbus/MBRequest");
-const Sampler = require("../../sampler/Sampler");
+const S7Request = require("../../driver/S7/S7Request");
 const { exists } = require("../../../utilities/utilities");
 
-class MBVariable extends Variable {
+class S7Variable extends Variable {
   /**
-   * @description Base class representing Modbus variable
+   * @description Base class representing S7 variable
    * @param {object} device device associated with variable
    */
   constructor(device) {
@@ -19,47 +18,45 @@ class MBVariable extends Variable {
   async init(payload) {
     await super.init(payload);
 
-    if (!exists(payload.fCode)) throw new Error("FCode cannot be empty");
+    if (!exists(payload.areaType)) throw new Error("AreaType cannot be empty");
     if (!exists(payload.offset)) throw new Error("Offset cannot be empty");
     if (!exists(payload.length)) throw new Error("Length cannot be empty");
-    if (!exists(payload.setSingleFCode))
-      throw new Error("SetSingleFCode cannot be empty");
-    if (!exists(payload.getSingleFCode))
-      throw new Error("GetSingleFCode cannot be empty");
-
-    //Controlling if functions are possible
-    let allPossibleFCodes = this._getPossibleFCodes();
-
-    if (!allPossibleFCodes.includes(payload.fCode))
+    if (!exists(payload.write))
       throw new Error(
-        `Fcode ${payload.fCode} cannot be applied to given variable`
+        "Variable should be defined as to write or read! write missing"
       );
 
-    if (!allPossibleFCodes.includes(payload.setSingleFCode))
+    //Setting default value of dbNumber to 0
+    if (!exists(payload.dbNumber)) payload.dbNumber = 0;
+
+    //Controlling if areaTypes are possible
+    let allPossibleAreaTypes = this._getPossibleAreaTypes();
+
+    if (!allPossibleAreaTypes.includes(payload.areaType))
       throw new Error(
-        `Fcode ${payload.setSingleFCode} cannot be applied to given variable`
+        `AreaType ${payload.fCode} cannot be applied to given variable`
       );
 
-    if (!allPossibleFCodes.includes(payload.getSingleFCode))
-      throw new Error(
-        `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
-      );
     this._offset = payload.offset;
     this._length = payload.length;
-    this._fcode = payload.fCode;
-    this._setSingleFCode = payload.setSingleFCode;
-    this._getSingleFCode = payload.getSingleFCode;
+    this._areaType = payload.areaType;
+    this._dbNumber = payload.dbNumber;
+    this._write = payload.write;
 
-    this._getSingleRequest = new MBRequest(
-      this.Device.MBDriver,
-      payload.getSingleFCode,
-      this.Device.UnitId
+    this._getSingleRequest = new S7Request(
+      this.Device.S7Driver,
+      this.AreaType,
+      false,
+      100,
+      this.DBNumber
     );
     this._getSingleRequest.addVariable(this);
-    this._setSingleRequest = new MBRequest(
-      this.Device.MBDriver,
-      payload.setSingleFCode,
-      this.Device.UnitId
+    this._setSingleRequest = new S7Request(
+      this.Device.S7Driver,
+      this.AreaType,
+      true,
+      100,
+      this.DBNumber
     );
     this._setSingleRequest.addVariable(this);
 
@@ -82,7 +79,7 @@ class MBVariable extends Variable {
    * @description Method for generating type name that represents variable
    */
   _getTypeName() {
-    return "mbVariable";
+    return "s7Variable";
   }
 
   /**
@@ -90,26 +87,44 @@ class MBVariable extends Variable {
    */
   reassignDriver() {
     //After driver change - get and set single requests must also change
-    this._getSingleRequest = new MBRequest(
-      this.Device.MBDriver,
-      this.GetSingleFCode,
-      this.Device.UnitId
+    this._getSingleRequest = new S7Request(
+      this.Device.S7Driver,
+      this.AreaType,
+      false,
+      100,
+      this.DBNumber
     );
     this._getSingleRequest.addVariable(this);
 
-    this._setSingleRequest = new MBRequest(
-      this.Device.MBDriver,
-      this.SetSingleFCode,
-      this.Device.UnitId
+    this._setSingleRequest = new S7Request(
+      this.Device.S7Driver,
+      this.AreaType,
+      true,
+      100,
+      this.DBNumber
     );
     this._setSingleRequest.addVariable(this);
   }
 
   /**
-   * @description Modbus function code
+   * @description Area type of variable
    */
-  get FCode() {
-    return this._fcode;
+  get AreaType() {
+    return this._areaType;
+  }
+
+  /**
+   * @description DBNumber of variable
+   */
+  get DBNumber() {
+    return this._dbNumber;
+  }
+
+  /**
+   * @description Is variable assigned to write
+   */
+  get Write() {
+    return this._write;
   }
 
   /**
@@ -127,13 +142,6 @@ class MBVariable extends Variable {
   }
 
   /**
-   * @description Variable UnitId
-   */
-  get UnitId() {
-    return this.Device.UnitId;
-  }
-
-  /**
    * @description Request for getting single request
    */
   get GetSingleRequest() {
@@ -148,27 +156,13 @@ class MBVariable extends Variable {
   }
 
   /**
-   * @description FCode for setting single variable
-   */
-  get SetSingleFCode() {
-    return this._setSingleFCode;
-  }
-
-  /**
-   * @description FCode for getting single variable
-   */
-  get GetSingleFCode() {
-    return this._getSingleFCode;
-  }
-
-  /**
    * @description Setting value in variable and in Modbus device
    * @param {object} newValue value to set
    */
   setSingle(newValue) {
     this.Value = newValue;
     this._setSingleRequest.updateAction();
-    return this.Device.MBDriver.invokeRequests([this.SetSingleRequest]);
+    return this.Device.S7Driver.invokeRequests([this.SetSingleRequest]);
   }
 
   /**
@@ -177,7 +171,7 @@ class MBVariable extends Variable {
   getSingle() {
     return new Promise(async (resolve, reject) => {
       try {
-        let result = await this.Device.MBDriver.invokeRequests([
+        let result = await this.Device.S7Driver.invokeRequests([
           this.GetSingleRequest
         ]);
         return resolve(this.Value);
@@ -237,7 +231,6 @@ class MBVariable extends Variable {
           convertedData.length
         }`
       );
-
     this._value = value;
     this._data = convertedData;
   }
@@ -245,8 +238,8 @@ class MBVariable extends Variable {
   /**
    * @description Private method called for getting all possible FCodes - implemented in child
    */
-  _getPossibleFCodes() {
-    return [1, 2, 3, 4, 15, 16];
+  _getPossibleAreaTypes() {
+    return ["I", "Q", "M", "DB"];
   }
 
   /**
@@ -257,10 +250,9 @@ class MBVariable extends Variable {
 
     payload.offset = this.Offset;
     payload.length = this.Length;
-    payload.fCode = this.FCode;
-    payload.value = this.Value;
-    payload.getSingleFCode = this.GetSingleFCode;
-    payload.setSingleFCode = this.SetSingleFCode;
+    payload.areaType = this.AreaType;
+    payload.write = this.Write;
+    payload.dbNumber = this.DBNumber;
 
     return payload;
   }
@@ -270,60 +262,48 @@ class MBVariable extends Variable {
    */
   async editWithPayload(payload) {
     //Controlling if functions are possible
-    let allPossibleFCodes = this._getPossibleFCodes();
+    let allPossibleAreaTypes = this._getPossibleAreaTypes();
 
-    if (payload.fCode && !allPossibleFCodes.includes(payload.fCode))
+    if (payload.areaType && !allPossibleAreaTypes.includes(payload.areaType))
       throw new Error(
-        `Fcode ${payload.fCode} cannot be applied to given variable`
-      );
-
-    if (
-      payload.setSingleFCode &&
-      !allPossibleFCodes.includes(payload.setSingleFCode)
-    )
-      throw new Error(
-        `Fcode ${payload.setSingleFCode} cannot be applied to given variable`
-      );
-
-    if (
-      payload.getSingleFCode &&
-      !allPossibleFCodes.includes(payload.getSingleFCode)
-    )
-      throw new Error(
-        `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
+        `AreaType ${payload.areaType} cannot be applied to given variable`
       );
 
     await super.editWithPayload(payload);
 
+    let changesAssociatedWithRequest = false;
+
     if (payload.offset) {
       this._offset = payload.offset;
+      changesAssociatedWithRequest = true;
     }
     if (payload.length) {
       this._length = payload.length;
+      changesAssociatedWithRequest = true;
     }
-    if (payload.fCode) {
-      this._fcode = payload.fCode;
+    if (payload.areaType) {
+      this._fcode = payload.areaType;
+      changesAssociatedWithRequest = true;
     }
     if (payload.value !== undefined) {
       this.Value = payload.value;
-      //new valueTickId should be set
-      this.ValueTickId = Sampler.convertDateToTickNumber(Date.now());
     }
-    if (payload.getSingleFCode) {
-      this._getSingleFCode = payload.getSingleFCode;
-      this._getSingleRequest = new MBRequest(
-        this.Device.MBDriver,
-        payload.getSingleFCode,
-        this.Device.UnitId
+    if (changesAssociatedWithRequest) {
+      this._getSingleRequest = new S7Request(
+        this.Device.S7Driver,
+        this.AreaType,
+        false,
+        100,
+        this.DBNumber
       );
       this._getSingleRequest.addVariable(this);
-    }
-    if (payload.setSingleFCode) {
-      this._setSingleFCode = payload.setSingleFCode;
-      this._setSingleRequest = new MBRequest(
-        this.Device.MBDriver,
-        payload.setSingleFCode,
-        this.Device.UnitId
+
+      this._setSingleRequest = new S7Request(
+        this.Device.S7Driver,
+        this.AreaType,
+        true,
+        100,
+        this.DBNumber
       );
       this._setSingleRequest.addVariable(this);
     }
@@ -332,4 +312,4 @@ class MBVariable extends Variable {
   }
 }
 
-module.exports = MBVariable;
+module.exports = S7Variable;

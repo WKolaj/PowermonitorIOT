@@ -181,22 +181,23 @@ router.put(
 
     //Checking if element exists
     if (
-      !(await Project.CurrentProject.doesElementExist(
+      !(await Project.CurrentProject.doesVariableExist(
         req.params.deviceId,
         req.params.elementId
       ))
     )
-      return res.status(404).send("There is no element od given id");
+      return res.status(404).send("There is no variable od given id");
 
-    let element = await Project.CurrentProject.getElement(
+    let variable = await Project.CurrentProject.getVariable(
       req.params.deviceId,
       req.params.elementId
     );
 
-    element.ValueTickId = Sampler.convertDateToTickNumber(Date.now());
-    element.Value = req.body.value;
+    let device = await Project.CurrentProject.getDevice(req.params.deviceId);
 
-    let payloadToReturn = generateValuePayloadDetailedFromElement(element);
+    await device.editVariable(req.params.elementId, { value: req.body.value });
+
+    let payloadToReturn = generateValuePayloadDetailedFromElement(variable);
     res.status(200).send(payloadToReturn);
   }
 );
