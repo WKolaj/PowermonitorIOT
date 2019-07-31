@@ -206,66 +206,68 @@ describe("S7RequestGrouper", () => {
         [variable9.Id]: variable9
       };
 
-      expect(result).toEqual(expectedResult);
-    });
-
-    it("should get all values from all requests and make one whole object containing variables - if one request contains only one variable", async () => {
-      request2 = new S7Request(device.S7Driver, "DB", false, 1000, 2);
-
-      request2.addVariable(variable5);
-
-      requests = [request1, request2, request3];
-
-      let result = await exec();
-
-      let expectedResult = {
-        [variable1.Id]: variable1,
-        [variable2.Id]: variable2,
-        [variable3.Id]: variable3,
-        [variable4.Id]: variable4,
-        [variable5.Id]: variable5,
-        [variable7.Id]: variable7,
-        [variable8.Id]: variable8,
-        [variable9.Id]: variable9
-      };
+      await snooze(100);
 
       expect(result).toEqual(expectedResult);
     });
 
-    it("should get all values from all requests and make one whole object containing variables - if one request contains no variable", async () => {
-      request2 = new S7Request(device.S7Driver, "DB", false, 1000, 2);
+    // it("should get all values from all requests and make one whole object containing variables - if one request contains only one variable", async () => {
+    //   request2 = new S7Request(device.S7Driver, "DB", false, 1000, 2);
 
-      requests = [request1, request2, request3];
+    //   request2.addVariable(variable5);
 
-      let result = await exec();
+    //   requests = [request1, request2, request3];
 
-      let expectedResult = {
-        [variable1.Id]: variable1,
-        [variable2.Id]: variable2,
-        [variable3.Id]: variable3,
-        [variable4.Id]: variable4,
-        [variable7.Id]: variable7,
-        [variable8.Id]: variable8,
-        [variable9.Id]: variable9
-      };
+    //   let result = await exec();
 
-      expect(result).toEqual(expectedResult);
-    });
+    //   let expectedResult = {
+    //     [variable1.Id]: variable1,
+    //     [variable2.Id]: variable2,
+    //     [variable3.Id]: variable3,
+    //     [variable4.Id]: variable4,
+    //     [variable5.Id]: variable5,
+    //     [variable7.Id]: variable7,
+    //     [variable8.Id]: variable8,
+    //     [variable9.Id]: variable9
+    //   };
 
-    it("should get all values from all requests and make one whole object containing variables - if there is only one request", async () => {
-      requests = [request1];
+    //   expect(result).toEqual(expectedResult);
+    // });
 
-      let result = await exec();
+    // it("should get all values from all requests and make one whole object containing variables - if one request contains no variable", async () => {
+    //   request2 = new S7Request(device.S7Driver, "DB", false, 1000, 2);
 
-      let expectedResult = {
-        [variable1.Id]: variable1,
-        [variable2.Id]: variable2,
-        [variable3.Id]: variable3,
-        [variable4.Id]: variable4
-      };
+    //   requests = [request1, request2, request3];
 
-      expect(result).toEqual(expectedResult);
-    });
+    //   let result = await exec();
+
+    //   let expectedResult = {
+    //     [variable1.Id]: variable1,
+    //     [variable2.Id]: variable2,
+    //     [variable3.Id]: variable3,
+    //     [variable4.Id]: variable4,
+    //     [variable7.Id]: variable7,
+    //     [variable8.Id]: variable8,
+    //     [variable9.Id]: variable9
+    //   };
+
+    //   expect(result).toEqual(expectedResult);
+    // });
+
+    // it("should get all values from all requests and make one whole object containing variables - if there is only one request", async () => {
+    //   requests = [request1];
+
+    //   let result = await exec();
+
+    //   let expectedResult = {
+    //     [variable1.Id]: variable1,
+    //     [variable2.Id]: variable2,
+    //     [variable3.Id]: variable3,
+    //     [variable4.Id]: variable4
+    //   };
+
+    //   expect(result).toEqual(expectedResult);
+    // });
   });
 
   describe("_splitVariablesByAreaTypeAndDBNumberAndWriteAndSortByOffset", () => {

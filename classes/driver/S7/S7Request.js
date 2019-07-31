@@ -13,7 +13,7 @@ class S7Request {
     s7Driver,
     areaType,
     write = false,
-    maxRequestLength = 100,
+    maxRequestLength = 1000,
     dbNumber = 0
   ) {
     //Throwing if areaType is invalid
@@ -142,6 +142,9 @@ class S7Request {
     //Cannot add a variable that already exists in request
     if (s7Variable.Id in this.VariableConnections) return false;
 
+    //Writing should not be taken into account in this case!! - setSingleRequest or getSingleRequest for variables are all with different values of Write
+    //if (s7Variable.Write !== this.Write) return false;
+
     //Variable can be added despite its offset - undefined offset means that it is first variable of request - request's offset should be set according to there variable offset
     if (this.Offset === undefined) return true;
 
@@ -182,8 +185,8 @@ class S7Request {
     this.updateAction();
   }
 
-  /**variableObject
-   * @description Private method for formating values, which are to be written to Modbus Device
+  /**
+   * @description Private method for formating values, which are to be written to S7 Device
    */
   _formatDataToSend() {
     //Only valid for writing data
