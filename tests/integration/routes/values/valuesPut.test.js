@@ -606,54 +606,48 @@ describe("variables route", () => {
       expect(mbByteArrayVariable.Value).toEqual(valueToSet);
     });
 
-    it("should return code 200, payload containing new value and set value to given variable - averageElement", async () => {
+    it("should return code 404, - variable not found - for calcElement - calcElement value cannot be modified - averageElement", async () => {
+      let previousValue = averageElement.Value;
       variableId = averageElement.Id;
       valueToSet = 1234.3214;
       let result = await exec();
-      expect(result.status).toEqual(200);
+      expect(result.status).toEqual(404);
 
-      expect(Object.values(result.body)[0]).toEqual(valueToSet);
-
-      expect(averageElement.Value).toEqual(valueToSet);
+      expect(result.text).toMatch(/There is no variable od given id/);
+      expect(previousValue).toEqual(averageElement.Value);
     });
 
-    it("should return code 200, payload containing new value and set value to given variable - factorElement", async () => {
+    it("should return code 404, - variable not found - for calcElement - calcElement value cannot be modified - factorElement", async () => {
+      let previousValue = factorElement.Value;
       variableId = factorElement.Id;
       valueToSet = 1234.3214;
-
       let result = await exec();
+      expect(result.status).toEqual(404);
 
-      expect(result.status).toEqual(200);
-
-      expect(Object.values(result.body)[0]).toEqual(valueToSet);
-
-      expect(factorElement.Value).toEqual(valueToSet);
+      expect(result.text).toMatch(/There is no variable od given id/);
+      expect(previousValue).toEqual(factorElement.Value);
     });
 
-    it("should return code 200, payload containing new value and set value to given variable - sumElement", async () => {
+    it("should return code 404, - variable not found - for calcElement - calcElement value cannot be modified - sumElement", async () => {
+      let previousValue = sumElement.Value;
       variableId = sumElement.Id;
       valueToSet = 1234.3214;
-
       let result = await exec();
+      expect(result.status).toEqual(404);
 
-      expect(result.status).toEqual(200);
-
-      expect(Object.values(result.body)[0]).toEqual(valueToSet);
-
-      expect(sumElement.Value).toEqual(valueToSet);
+      expect(result.text).toMatch(/There is no variable od given id/);
+      expect(previousValue).toEqual(sumElement.Value);
     });
 
-    it("should return code 200, payload containing new value and set value to given variable - increaseElement", async () => {
+    it("should return code 404, - variable not found - for calcElement - calcElement value cannot be modified - increaseElement", async () => {
+      let previousValue = increaseElement.Value;
       variableId = increaseElement.Id;
       valueToSet = 1234.3214;
-
       let result = await exec();
+      expect(result.status).toEqual(404);
 
-      expect(result.status).toEqual(200);
-
-      expect(Object.values(result.body)[0]).toEqual(valueToSet);
-
-      expect(increaseElement.Value).toEqual(valueToSet);
+      expect(result.text).toMatch(/There is no variable od given id/);
+      expect(previousValue).toEqual(increaseElement.Value);
     });
 
     it("should return code 404 and do not set value if there is no device of given id", async () => {
@@ -672,7 +666,7 @@ describe("variables route", () => {
       let result = await exec();
 
       expect(result.status).toEqual(404);
-      expect(result.text).toMatch(`There is no element`);
+      expect(result.text).toMatch(`There is no variable od given id`);
       expect(variable.Value).toEqual(previousValue);
     });
 

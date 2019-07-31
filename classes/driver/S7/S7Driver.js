@@ -223,8 +223,6 @@ class S7Driver {
 
         let arrayData = exists(data) ? [...data] : data;
 
-        console.log(data);
-
         //Clear timeout and resolve promise
         clearTimeout(handle);
 
