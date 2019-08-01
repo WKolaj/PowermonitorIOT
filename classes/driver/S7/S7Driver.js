@@ -1,5 +1,5 @@
 const S7AsyncClient = require("./S7AsyncClient");
-const { exists } = require("../../../utilities/utilities");
+const { exists, snooze } = require("../../../utilities/utilities");
 const logger = require("../../../logger/logger");
 
 class S7Driver {
@@ -13,7 +13,7 @@ class S7Driver {
   constructor(
     s7Device,
     ipAdress = "192.168.0.100",
-    rack = 502,
+    rack = 0,
     timeout = 2000,
     slot = 1
   ) {

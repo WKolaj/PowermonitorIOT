@@ -3,7 +3,7 @@ const S7Int16Variable = require("../../../classes/variable/S7/S7Int16Variable");
 const S7Device = require("../../../classes/device/S7/S7Device");
 const { snooze } = require("../../../utilities/utilities");
 
-describe("S7RequestGrouper", () => {
+describe("S7Request", () => {
   describe("constructor", () => {
     let driver;
     let areaType;
