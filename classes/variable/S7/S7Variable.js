@@ -274,16 +274,24 @@ class S7Variable extends Variable {
 
     let changesAssociatedWithRequest = false;
 
-    if (payload.offset) {
+    if (exists(payload.offset)) {
       this._offset = payload.offset;
       changesAssociatedWithRequest = true;
     }
-    if (payload.length) {
+    if (exists(payload.length)) {
       this._length = payload.length;
       changesAssociatedWithRequest = true;
     }
-    if (payload.areaType) {
-      this._fcode = payload.areaType;
+    if (exists(payload.areaType)) {
+      this._areaType = payload.areaType;
+      changesAssociatedWithRequest = true;
+    }
+    if (exists(payload.dbNumber)) {
+      this._dbNumber = payload.dbNumber;
+      changesAssociatedWithRequest = true;
+    }
+    if (exists(payload.write)) {
+      this._write = payload.write;
       changesAssociatedWithRequest = true;
     }
     if (payload.value !== undefined) {
