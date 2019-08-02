@@ -35,7 +35,7 @@ class S7Variable extends Variable {
 
     if (!allPossibleAreaTypes.includes(payload.areaType))
       throw new Error(
-        `AreaType ${payload.fCode} cannot be applied to given variable`
+        `AreaType ${payload.areaType} cannot be applied to given variable`
       );
 
     this._offset = payload.offset;

@@ -19,7 +19,7 @@ const int32ToS7Data = function(intValue) {
   //Split int32 into bytes
   let int32Array = new Int32Array(1);
   int32Array[0] = intValue;
-  let bytes = new Int8Array(int32Array.buffer);
+  let bytes = new Uint8Array(int32Array.buffer);
 
   return [bytes[3], bytes[2], bytes[1], bytes[0]];
 };

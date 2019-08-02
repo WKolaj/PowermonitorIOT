@@ -16,7 +16,7 @@ const int8ToS7Data = function(intValue) {
   //Split int16 into bytes
   let int8Array = new Int8Array(1);
   int8Array[0] = intValue;
-  let bytes = new Int8Array(int8Array.buffer);
+  let bytes = new Uint8Array(int8Array.buffer);
 
   return [bytes[0]];
 };
