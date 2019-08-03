@@ -17,7 +17,7 @@ let exec = async () => {
   try {
     let device = new S7Device();
     let initPayload = {
-      ipAdress: "192.168.1.131",
+      ipAdress: "192.168.0.131",
       slot: 1,
       rack: 0,
       name: "test",
@@ -43,7 +43,7 @@ let exec = async () => {
       unit: "",
       type: "s7Int8",
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
       offset: 0
     };
@@ -57,7 +57,7 @@ let exec = async () => {
       unit: "",
       type: "s7Int16",
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
       offset: 2
     };
@@ -71,7 +71,7 @@ let exec = async () => {
       unit: "",
       type: "s7Int32",
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
       offset: 4
     };
@@ -85,7 +85,7 @@ let exec = async () => {
       unit: "",
       type: "s7UInt8",
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
       offset: 8
     };
@@ -99,7 +99,7 @@ let exec = async () => {
       unit: "",
       type: "s7UInt16",
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
       offset: 10
     };
@@ -113,7 +113,7 @@ let exec = async () => {
       unit: "",
       type: "s7UInt32",
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
       offset: 12
     };
@@ -125,9 +125,9 @@ let exec = async () => {
       sampleTime: 1,
       archived: false,
       unit: "",
-      type: "s7Int16",
+      type: "s7Float",
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
       offset: 16
     };
@@ -139,339 +139,15 @@ let exec = async () => {
       sampleTime: 1,
       archived: false,
       unit: "",
-      type: "s7Int16",
-      areaType: "DB",
-      write: false,
-      dbNumber: 7,
-      offset: 18
-    };
-
-    let var8 = await device.createVariable(variable8Payload);
-
-    let variable9Payload = {
-      name: "testVariable9",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
       type: "s7ByteArray",
+      length: 4,
       areaType: "DB",
-      write: false,
+      write: true,
       dbNumber: 7,
-      length: 8,
       offset: 20
     };
 
-    let var9 = await device.createVariable(variable9Payload);
-
-    let variable10Payload = {
-      name: "testVariable10",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int8",
-      areaType: "DB",
-      write: false,
-      dbNumber: 7,
-      length: 8,
-      offset: 28
-    };
-
-    let var10 = await device.createVariable(variable10Payload);
-
-    let variable11Payload = {
-      name: "testVariable11",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int8",
-      areaType: "DB",
-      write: false,
-      dbNumber: 7,
-      length: 8,
-      offset: 29
-    };
-
-    let var11 = await device.createVariable(variable11Payload);
-
-    let variable12Payload = {
-      name: "testVariable12",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Float",
-      areaType: "DB",
-      write: false,
-      dbNumber: 7,
-      offset: 30
-    };
-
-    let var12 = await device.createVariable(variable12Payload);
-
-    let variable13Payload = {
-      name: "testVariable13",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Float",
-      areaType: "DB",
-      write: false,
-      dbNumber: 7,
-      offset: 34
-    };
-
-    let var13 = await device.createVariable(variable13Payload);
-
-    let variable101Payload = {
-      name: "testVariable13",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt8",
-      areaType: "I",
-      write: false,
-      dbNumber: 0,
-      offset: 100
-    };
-
-    let var101 = await device.createVariable(variable101Payload);
-
-    let variable102Payload = {
-      name: "testVariable14",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt16",
-      areaType: "I",
-      write: false,
-      dbNumber: 0,
-      offset: 101
-    };
-
-    let var102 = await device.createVariable(variable102Payload);
-
-    let variable103Payload = {
-      name: "testVariable15",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt32",
-      areaType: "I",
-      write: false,
-      dbNumber: 0,
-      offset: 104
-    };
-
-    let var103 = await device.createVariable(variable103Payload);
-
-    let variable104Payload = {
-      name: "testVariable16",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int8",
-      areaType: "I",
-      write: false,
-      dbNumber: 0,
-      offset: 108
-    };
-
-    let var104 = await device.createVariable(variable104Payload);
-
-    let variable105Payload = {
-      name: "testVariable17",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int16",
-      areaType: "I",
-      write: false,
-      dbNumber: 0,
-      offset: 109
-    };
-
-    let var105 = await device.createVariable(variable105Payload);
-
-    let variable106Payload = {
-      name: "testVariable18",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int32",
-      areaType: "I",
-      write: false,
-      dbNumber: 0,
-      offset: 112
-    };
-
-    let var106 = await device.createVariable(variable106Payload);
-
-    let variable107Payload = {
-      name: "testVariable19",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt8",
-      areaType: "M",
-      write: false,
-      dbNumber: 0,
-      offset: 100
-    };
-
-    let var107 = await device.createVariable(variable107Payload);
-
-    let variable108Payload = {
-      name: "testVariable20",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt16",
-      areaType: "M",
-      write: false,
-      dbNumber: 0,
-      offset: 101
-    };
-
-    let var108 = await device.createVariable(variable108Payload);
-
-    let variable109Payload = {
-      name: "testVariable21",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt32",
-      areaType: "M",
-      write: false,
-      dbNumber: 0,
-      offset: 104
-    };
-
-    let var109 = await device.createVariable(variable109Payload);
-
-    let variable110Payload = {
-      name: "testVariable22",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int8",
-      areaType: "M",
-      write: false,
-      dbNumber: 0,
-      offset: 108
-    };
-
-    let var110 = await device.createVariable(variable110Payload);
-
-    let variable111Payload = {
-      name: "testVariable23",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int16",
-      areaType: "M",
-      write: false,
-      dbNumber: 0,
-      offset: 109
-    };
-
-    let var111 = await device.createVariable(variable111Payload);
-
-    let variable112Payload = {
-      name: "testVariable24",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int32",
-      areaType: "M",
-      write: false,
-      dbNumber: 0,
-      offset: 112
-    };
-
-    let var112 = await device.createVariable(variable112Payload);
-
-    let variable113Payload = {
-      name: "testVariable25",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt8",
-      areaType: "Q",
-      write: false,
-      dbNumber: 0,
-      offset: 100
-    };
-
-    let var113 = await device.createVariable(variable113Payload);
-
-    let variable114Payload = {
-      name: "testVariable26",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt16",
-      areaType: "Q",
-      write: false,
-      dbNumber: 0,
-      offset: 101
-    };
-
-    let var114 = await device.createVariable(variable114Payload);
-
-    let variable115Payload = {
-      name: "testVariable27",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7UInt32",
-      areaType: "Q",
-      write: false,
-      dbNumber: 0,
-      offset: 104
-    };
-
-    let var115 = await device.createVariable(variable115Payload);
-
-    let variable116Payload = {
-      name: "testVariable28",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int8",
-      areaType: "Q",
-      write: false,
-      dbNumber: 0,
-      offset: 108
-    };
-
-    let var116 = await device.createVariable(variable116Payload);
-
-    let variable117Payload = {
-      name: "testVariable29",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int16",
-      areaType: "Q",
-      write: false,
-      dbNumber: 0,
-      offset: 109
-    };
-
-    let var117 = await device.createVariable(variable117Payload);
-
-    let variable118Payload = {
-      name: "testVariable30",
-      sampleTime: 1,
-      archived: false,
-      unit: "",
-      type: "s7Int32",
-      areaType: "Q",
-      write: false,
-      dbNumber: 0,
-      offset: 112
-    };
-
-    let var118 = await device.createVariable(variable118Payload);
+    let var8 = await device.createVariable(variable8Payload);
 
     // for (let i = 0; i < 1000; i++) {
     //   let variablePayload = {
@@ -481,7 +157,7 @@ let exec = async () => {
     //     unit: "",
     //     type: "s7UInt16",
     //     areaType: "DB",
-    //     write: false,
+    //     write: true,
     //     dbNumber: 7,
     //     offset: 38 + i * 2
     //   };
@@ -489,14 +165,20 @@ let exec = async () => {
     //   await device.createVariable(variablePayload);
     // }
 
+    await device.editVariable(var1.Id, { value: -1 });
+    await device.editVariable(var2.Id, { value: -2 });
+    await device.editVariable(var3.Id, { value: -3 });
+    await device.editVariable(var4.Id, { value: 255 });
+    await device.editVariable(var5.Id, { value: 65535 });
+    await device.editVariable(var6.Id, { value: 4294967295 });
+    await device.editVariable(var7.Id, { value: -123.321 });
+    await device.editVariable(var8.Id, { value: [255, 255, 255, 255] });
+
     setInterval(async () => {
       try {
         let tick = Math.round(Date.now() / 1000);
 
         await device.refresh(tick);
-
-        await var12.setSingle(1234.4321);
-        await var13.setSingle(123456.321);
       } catch (err) {
         console.log(err);
       }

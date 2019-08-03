@@ -1,9 +1,9 @@
 const Joi = require("joi");
 const Project = require("../../../classes/project/Project");
 
-let MBInt32VariableCreateSchema = Joi.object().keys({
+let S7UInt16VariableCreateSchema = Joi.object().keys({
   type: Joi.string()
-    .valid("mbInt32")
+    .valid("s7UInt16")
     .required(),
   name: Joi.string()
     .min(3)
@@ -16,8 +16,8 @@ let MBInt32VariableCreateSchema = Joi.object().keys({
     .required(),
   value: Joi.number()
     .integer()
-    .max(2147483647)
-    .min(-2147483648)
+    .min(0)
+    .max(65535)
     .required(),
   unit: Joi.string()
     .min(0)
@@ -30,9 +30,12 @@ let MBInt32VariableCreateSchema = Joi.object().keys({
     .min(0)
     .max(10000)
     .required(),
-  fCode: Joi.valid(3, 4, 16).required(),
-  getSingleFCode: Joi.valid(3, 4).required(),
-  setSingleFCode: Joi.valid(16).required(),
+  areaType: Joi.valid("I", "Q", "M", "DB").required(),
+  dbNumber: Joi.number()
+    .min(1)
+    .max(65535)
+    .required(),
+  write: Joi.boolean().required(),
   archiveSampleTime: Joi.number()
     .integer()
     .min(1)
@@ -40,7 +43,7 @@ let MBInt32VariableCreateSchema = Joi.object().keys({
     .required()
 });
 
-let MBInt32VariableEditSchema = Joi.object().keys({
+let S7UInt16VariableEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
     .max(100),
@@ -50,9 +53,8 @@ let MBInt32VariableEditSchema = Joi.object().keys({
     .max(10000),
   value: Joi.number()
     .integer()
-    .integer()
-    .max(2147483647)
-    .min(-2147483648),
+    .min(0)
+    .max(65535),
   unit: Joi.string()
     .min(0)
     .max(10)
@@ -62,9 +64,11 @@ let MBInt32VariableEditSchema = Joi.object().keys({
     .integer()
     .min(0)
     .max(10000),
-  fCode: Joi.valid(3, 4, 16),
-  getSingleFCode: Joi.valid(3, 4),
-  setSingleFCode: Joi.valid(16),
+  areaType: Joi.valid("I", "Q", "M", "DB"),
+  dbNumber: Joi.number()
+    .min(1)
+    .max(65535),
+  write: Joi.boolean(),
   archiveSampleTime: Joi.number()
     .integer()
     .min(1)
@@ -77,8 +81,14 @@ let setDefaultValues = function(req) {
   if (req.body.value === undefined) req.body.value = 0;
   if (req.body.unit === undefined) req.body.unit = "";
   if (req.body.archived === undefined) req.body.archived = false;
-  if (req.body.getSingleFCode === undefined) req.body.getSingleFCode = 3;
-  if (req.body.setSingleFCode === undefined) req.body.setSingleFCode = 16;
+
+  //Setting default DBNumber to 1 if areaType is I M ir Q
+  if (
+    req.body.areaType === "I" ||
+    req.body.areaType === "M" ||
+    req.body.areaType === "Q"
+  )
+    req.body.dbNumber = 1;
 };
 
 /**
@@ -89,7 +99,7 @@ let validateCreate = function(req) {
   setDefaultValues(req);
 
   return new Promise(async (resolve, reject) => {
-    Joi.validate(req.body, MBInt32VariableCreateSchema, (err, value) => {
+    Joi.validate(req.body, S7UInt16VariableCreateSchema, (err, value) => {
       if (err) {
         return resolve(err.details[0].message);
       } else {
@@ -104,7 +114,7 @@ let validateCreate = function(req) {
  */
 let validateEdit = function(req) {
   return new Promise(async (resolve, reject) => {
-    Joi.validate(req.body, MBInt32VariableEditSchema, (err, value) => {
+    Joi.validate(req.body, S7UInt16VariableEditSchema, (err, value) => {
       if (err) {
         return resolve(err.details[0].message);
       } else {

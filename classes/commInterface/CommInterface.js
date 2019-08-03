@@ -2,6 +2,7 @@ const Sampler = require("../sampler/Sampler");
 
 const logger = require("../../logger/logger");
 const MBDevice = require("../device/Modbus/MBDevice");
+const S7Device = require("../device/S7/S7Device");
 const SpecialDevice = require("../device/SpecialDevices/SpecialDevice");
 const MindConnectDevice = require("../device/SpecialDevices/MindConnectDevice/MindConnectDevice");
 
@@ -315,6 +316,9 @@ class CommInterface {
       case "PAC4200TCP": {
         return this._createPAC4200TCPDevice(payload);
       }
+      case "s7Device": {
+        return this._createS7Device(payload);
+      }
       case "specialDevice": {
         return this._createSpecialDevice(payload);
       }
@@ -337,6 +341,25 @@ class CommInterface {
     return new Promise(async (resolve, reject) => {
       try {
         let newDevice = new MBDevice();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
+
+  /**
+   * @description Method for creating S7Device based on payload
+   * @param {object} payload
+   */
+  async _createS7Device(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new S7Device();
         await newDevice.init(payload);
         this.Devices[newDevice.Id] = newDevice;
         this.Sampler.addDevice(newDevice);

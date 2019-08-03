@@ -17,6 +17,7 @@ let generateSchema = variableType => {
       return {
         value: Joi.number()
           .integer()
+          .min(-32768)
           .max(32767)
           .required()
       };
@@ -27,6 +28,7 @@ let generateSchema = variableType => {
         value: Joi.number()
           .integer()
           .max(2147483647)
+          .min(-2147483648)
           .required()
       };
     }
@@ -35,8 +37,8 @@ let generateSchema = variableType => {
       return {
         value: Joi.number()
           .integer()
-          .max(65535)
           .min(0)
+          .max(65535)
           .required()
       };
     }
@@ -45,8 +47,8 @@ let generateSchema = variableType => {
       return {
         value: Joi.number()
           .integer()
-          .max(4294967295)
           .min(0)
+          .max(4294967295)
           .required()
       };
     }
@@ -68,6 +70,7 @@ let generateSchema = variableType => {
         value: Joi.number()
           .integer()
           .max(2147483647)
+          .min(-2147483648)
           .required()
       };
     }
@@ -76,8 +79,8 @@ let generateSchema = variableType => {
       return {
         value: Joi.number()
           .integer()
-          .max(4294967295)
           .min(0)
+          .max(4294967295)
           .required()
       };
     }
@@ -106,6 +109,73 @@ let generateSchema = variableType => {
       };
     }
 
+    case "s7UInt8": {
+      return {
+        value: Joi.number()
+          .integer()
+          .max(255)
+          .min(0)
+          .required()
+      };
+    }
+
+    case "s7Int8": {
+      return {
+        value: Joi.number()
+          .integer()
+          .min(-128)
+          .max(127)
+          .required()
+      };
+    }
+
+    case "s7Int16": {
+      return {
+        value: Joi.number()
+          .integer()
+          .min(-32768)
+          .max(32767)
+          .required()
+      };
+    }
+
+    case "s7UInt16": {
+      return {
+        value: Joi.number()
+          .integer()
+          .min(0)
+          .max(65535)
+          .required()
+      };
+    }
+
+    case "s7Float": {
+      return {
+        value: Joi.number().required()
+      };
+    }
+
+    case "s7Int32": {
+      return {
+        value: Joi.number()
+          .integer()
+          .max(2147483647)
+          .min(-2147483648)
+          .required()
+      };
+    }
+
+    case "s7UInt32": {
+      return {
+        value: Joi.number()
+          .integer()
+          .min(0)
+          .max(4294967295)
+          .min(0)
+          .required()
+      };
+    }
+
     //if type is not recognized - leave it without Joi validation eg. ByteArray
     default: {
       return;
@@ -113,11 +183,21 @@ let generateSchema = variableType => {
   }
 };
 
-let validateValue = function(value, length) {
+let validateMBByteValue = function(value, length) {
   if (!value || !length) return "value cannot be empty";
   if (!Array.isArray(value)) return "value has to be an array";
   if (value.length !== length * 2)
     return "value (array) length has to be two times longer than length of variable";
+
+  //Returning undefined if value is ok
+  return;
+};
+
+let validateS7ByteValue = function(value, length) {
+  if (!value || !length) return "value cannot be empty";
+  if (!Array.isArray(value)) return "value has to be an array";
+  if (value.length !== length)
+    return "value (array) length has to be the same as length of variable";
 
   //Returning undefined if value is ok
   return;
@@ -152,6 +232,13 @@ let validateEdit = function(req) {
       req.params.elementId
     );
 
+    if (
+      blockedElementTypes.some(
+        blockedElement => blockedElement === element.Type
+      )
+    )
+      return resolve(`Element of type ${element.Type} does not have values!`);
+
     //Generating schema based on type - variable has type defined on variable Type and calcElement on ValueType
     let schema = generateSchema(element.Type);
 
@@ -171,7 +258,12 @@ let validateEdit = function(req) {
         case "mbByteArray": {
           if (!req.body.value) return resolve("value has to be defined");
 
-          return resolve(validateValue(req.body.value, element.Length));
+          return resolve(validateMBByteValue(req.body.value, element.Length));
+        }
+        case "s7ByteArray": {
+          if (!req.body.value) return resolve("value has to be defined");
+
+          return resolve(validateS7ByteValue(req.body.value, element.Length));
         }
         default: {
           return resolve("element type not recognized");

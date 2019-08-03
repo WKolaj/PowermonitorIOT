@@ -10,6 +10,14 @@ const MBSwappedInt32VariableValidator = require("./variables/MBSwappedInt32Varia
 const MBSwappedUInt32VariableValidator = require("./variables/MBSwappedUInt32Variable");
 const MBUInt16VariableValidator = require("./variables/MBUInt16Variable");
 const MBUInt32VariableValidator = require("./variables/MBUInt32Variable");
+const S7ByteArrayVariableValidator = require("./variables/S7ByteArrayVariable");
+const S7FloatVariableValidator = require("./variables/S7FloatVariable");
+const S7Int16VariableValidator = require("./variables/S7Int16Variable");
+const S7Int32VariableValidator = require("./variables/S7Int32Variable");
+const S7UInt16VariableValidator = require("./variables/S7UInt16Variable");
+const S7UInt32VariableValidator = require("./variables/S7UInt32Variable");
+const S7Int8VariableValidator = require("./variables/S7Int8Variable");
+const S7UInt8VariableValidator = require("./variables/S7UInt8Variable");
 const SDVariableValidator = require("./variables/SDVariable");
 
 /**
@@ -72,6 +80,36 @@ let validateCreate = function(req) {
       switch (req.body.type) {
         case "sdVariable": {
           return resolve(await SDVariableValidator.create(req));
+        }
+        default: {
+          return resolve("Given variable type is not recognized");
+        }
+      }
+    } else if (deviceType === "s7Device") {
+      switch (req.body.type) {
+        case "s7Int8": {
+          return resolve(await S7Int8VariableValidator.create(req));
+        }
+        case "s7UInt8": {
+          return resolve(await S7UInt8VariableValidator.create(req));
+        }
+        case "s7Int16": {
+          return resolve(await S7Int16VariableValidator.create(req));
+        }
+        case "s7UInt16": {
+          return resolve(await S7UInt16VariableValidator.create(req));
+        }
+        case "s7Int32": {
+          return resolve(await S7Int32VariableValidator.create(req));
+        }
+        case "s7UInt32": {
+          return resolve(await S7UInt32VariableValidator.create(req));
+        }
+        case "s7Float": {
+          return resolve(await S7FloatVariableValidator.create(req));
+        }
+        case "s7ByteArray": {
+          return resolve(await S7ByteArrayVariableValidator.create(req));
         }
         default: {
           return resolve("Given variable type is not recognized");
@@ -167,6 +205,36 @@ let validateEdit = function(req) {
       switch (variableType) {
         case "sdVariable": {
           return resolve(await SDVariableValidator.edit(req));
+        }
+        default: {
+          return resolve("Given variable type is not recognized");
+        }
+      }
+    } else if (deviceType === "s7Device") {
+      switch (variableType) {
+        case "s7Int8": {
+          return resolve(await S7Int8VariableValidator.edit(req));
+        }
+        case "s7UInt8": {
+          return resolve(await S7UInt8VariableValidator.edit(req));
+        }
+        case "s7Int16": {
+          return resolve(await S7Int16VariableValidator.edit(req));
+        }
+        case "s7UInt16": {
+          return resolve(await S7UInt16VariableValidator.edit(req));
+        }
+        case "s7Int32": {
+          return resolve(await S7Int32VariableValidator.edit(req));
+        }
+        case "s7UInt32": {
+          return resolve(await S7UInt32VariableValidator.edit(req));
+        }
+        case "s7Float": {
+          return resolve(await S7FloatVariableValidator.edit(req));
+        }
+        case "s7ByteArray": {
+          return resolve(await S7ByteArrayVariableValidator.edit(req));
         }
         default: {
           return resolve("Given variable type is not recognized");

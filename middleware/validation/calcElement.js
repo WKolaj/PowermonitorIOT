@@ -27,6 +27,7 @@ let validateCreate = function(req) {
       deviceType === "PAC3200TCP" ||
       deviceType === "PAC4200TCP" ||
       deviceType === "PAC2200TCP" ||
+      deviceType === "s7Device" ||
       deviceType === "specialDevice"
     ) {
       switch (req.body.type) {
@@ -99,6 +100,7 @@ let validateEdit = function(req) {
       deviceType === "PAC3200TCP" ||
       deviceType === "PAC4200TCP" ||
       deviceType === "PAC2200TCP" ||
+      deviceType === "s7Device" ||
       deviceType === "specialDevice"
     ) {
       switch (calcElementType) {
