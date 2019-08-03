@@ -29,9 +29,11 @@ describe("auth route", () => {
 
   let PAC3200TCPBody;
   let mbDeviceBody;
+  let s7DeviceBody;
 
   let pac3200TCP;
   let mbDevice;
+  let s7Device;
 
   let mbBooleanVariableBody;
   let mbFloatVariableBody;
@@ -52,6 +54,24 @@ describe("auth route", () => {
   let mbSwappedFloatVariable;
   let mbSwappedInt32Variable;
   let mbSwappedUInt32Variable;
+
+  let s7Int8VariableBody;
+  let s7Int16VariableBody;
+  let s7Int32VariableBody;
+  let s7UInt8VariableBody;
+  let s7UInt16VariableBody;
+  let s7UInt32VariableBody;
+  let s7FloatVariableBody;
+  let s7ByteArrayVariableBody;
+
+  let s7Int8Variable;
+  let s7Int16Variable;
+  let s7Int32Variable;
+  let s7UInt8Variable;
+  let s7UInt16Variable;
+  let s7UInt32Variable;
+  let s7FloatVariable;
+  let s7ByteArrayVariable;
 
   let init = async () => {
     //Creating additional users
@@ -119,6 +139,15 @@ describe("auth route", () => {
       ipAdress: "192.168.100.34"
     };
 
+    s7DeviceBody = {
+      type: "s7Device",
+      name: "s7DeviceTest",
+      ipAdress: "192.168.100.35",
+      slot: 1,
+      rack: 2,
+      timeout: 5000
+    };
+
     let mbDeviceResult = await request(server)
       .post("/api/devices")
       .set(tokenHeader, adminToken)
@@ -127,11 +156,16 @@ describe("auth route", () => {
       .post("/api/devices")
       .set(tokenHeader, adminToken)
       .send(PAC3200TCPBody);
+    let s7DeviceResult = await request(server)
+      .post("/api/devices")
+      .set(tokenHeader, adminToken)
+      .send(s7DeviceBody);
 
     mbDevice = await Project.CurrentProject.getDevice(mbDeviceResult.body.id);
     pac3200TCP = await Project.CurrentProject.getDevice(
       pac3200TCPResult.body.id
     );
+    s7Device = await Project.CurrentProject.getDevice(s7DeviceResult.body.id);
 
     mbBooleanVariableBody = {
       type: "mbBoolean",
@@ -305,6 +339,153 @@ describe("auth route", () => {
       mbDevice.Id,
       swappedUInt32Result.body.id
     );
+
+    s7Int8VariableBody = {
+      type: "s7Int8",
+      name: "s7Int8Variable",
+      areaType: "I",
+      offset: 0,
+      write: false
+    };
+
+    s7Int16VariableBody = {
+      type: "s7Int16",
+      name: "s7Int16Variable",
+      areaType: "DB",
+      offset: 1,
+      dbNumber: 1,
+      write: false
+    };
+
+    s7Int32VariableBody = {
+      type: "s7Int32",
+      name: "s7Int32Variable",
+      areaType: "Q",
+      offset: 0,
+      write: false
+    };
+
+    s7UInt8VariableBody = {
+      type: "s7UInt8",
+      name: "s7UInt8Variable",
+      areaType: "I",
+      offset: 1,
+      write: false
+    };
+
+    s7UInt16VariableBody = {
+      type: "s7UInt16",
+      name: "s7UInt16Variable",
+      areaType: "M",
+      offset: 1,
+      write: false
+    };
+
+    s7UInt32VariableBody = {
+      type: "s7UInt32",
+      name: "s7UInt32Variable",
+      areaType: "M",
+      offset: 3,
+      write: false
+    };
+
+    s7FloatVariableBody = {
+      type: "s7Float",
+      name: "s7FloatVariable",
+      areaType: "I",
+      offset: 3,
+      write: false
+    };
+
+    s7ByteArrayVariableBody = {
+      type: "s7ByteArray",
+      name: "s7ByteArrayVariable",
+      areaType: "DB",
+      offset: 2,
+      length: 4,
+      dbNumber: 2,
+      write: false
+    };
+
+    let s7Int8Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7Int8VariableBody);
+
+    let s7Int16Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7Int16VariableBody);
+
+    let s7Int32Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7Int32VariableBody);
+
+    let s7UInt8Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7UInt8VariableBody);
+
+    let s7UInt16Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7UInt16VariableBody);
+
+    let s7UInt32Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7UInt32VariableBody);
+
+    let s7FloatResult = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7FloatVariableBody);
+
+    let s7ByteArrayResult = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7ByteArrayVariableBody);
+
+    s7Int8Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7Int8Result.body.id
+    );
+
+    s7Int16Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7Int16Result.body.id
+    );
+
+    s7Int32Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7Int32Result.body.id
+    );
+
+    s7UInt8Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7UInt8Result.body.id
+    );
+
+    s7UInt16Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7UInt16Result.body.id
+    );
+
+    s7UInt32Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7UInt32Result.body.id
+    );
+
+    s7FloatVariable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7FloatResult.body.id
+    );
+
+    s7ByteArrayVariable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7ByteArrayResult.body.id
+    );
   };
 
   beforeEach(async () => {
@@ -427,6 +608,38 @@ describe("auth route", () => {
     };
 
     it("should return code 200 and device payload based on given id", async () => {
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let device = await Project.CurrentProject.getDevice(deviceId);
+
+      let expectedPayload = device.Payload;
+      expectedPayload.calculationElements = (await Project.CurrentProject.getAllCalcElements(
+        deviceId
+      )).map(calcElement => {
+        return {
+          id: calcElement.Id,
+          name: calcElement.Name
+        };
+      });
+
+      expectedPayload.variables = (await Project.CurrentProject.getAllVariables(
+        deviceId
+      )).map(variable => {
+        return {
+          id: variable.Id,
+          name: variable.Name
+        };
+      });
+      expectedPayload.connected = device.Connected;
+
+      expect(result.body).toEqual(expectedPayload);
+    });
+
+    it("should return code 200 and device payload based on given id - if device is s7Device", async () => {
+      deviceId = s7Device.Id;
+
       let result = await exec();
 
       expect(result.status).toEqual(200);

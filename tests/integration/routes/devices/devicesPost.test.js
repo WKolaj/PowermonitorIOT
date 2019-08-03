@@ -356,7 +356,7 @@ describe("auth route", () => {
       }
     };
 
-    getMBDeviceBody = function() {
+    let getMBDeviceBody = function() {
       return {
         name: "testDevice2",
         timeout: 700,
@@ -367,7 +367,7 @@ describe("auth route", () => {
       };
     };
 
-    getPAC3200TCPBody = function() {
+    let getPAC3200TCPBody = function() {
       return {
         name: "testDevice1",
         timeout: 600,
@@ -378,10 +378,21 @@ describe("auth route", () => {
       };
     };
 
-    getSpecialDeviceBody = function() {
+    let getSpecialDeviceBody = function() {
       return {
         name: "testDevice1",
         type: "specialDevice"
+      };
+    };
+
+    let getS7DeviceDeviceBody = function() {
+      return {
+        name: "testDevice4",
+        type: "s7Device",
+        ipAdress: "192.168.0.12",
+        timeout: 3000,
+        rack: 1,
+        slot: 2
       };
     };
 
@@ -940,6 +951,412 @@ describe("auth route", () => {
     it("should not create device and return 400 if type is specialDevice and name is longer than 20 signs", async () => {
       body = getSpecialDeviceBody();
       body.name = new Array(101 + 1).join("a");
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should create s7Device according to given payload", async () => {
+      body = getS7DeviceDeviceBody();
+
+      await exec();
+
+      let createdDevice = (await Project.CurrentProject.getAllDevices()).find(
+        device => device.Name === body.name
+      );
+
+      let createdDevicePayload = {
+        name: createdDevice.Name,
+        timeout: createdDevice.Timeout,
+        ipAdress: createdDevice.IPAdress,
+        slot: createdDevice.Slot,
+        rack: createdDevice.Rack,
+        type: createdDevice.Type
+      };
+
+      expect(createdDevicePayload).toEqual(body);
+    });
+
+    it("should return with code 200 and new created device", async () => {
+      body = getS7DeviceDeviceBody();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let createdDevice = (await Project.CurrentProject.getAllDevices()).find(
+        device => device.Name === body.name
+      );
+
+      let expectedPayload = {
+        ...createdDevice.Payload,
+        connected: createdDevice.Connected,
+        variables: [],
+        calculationElements: []
+      };
+
+      expect(result.body).toEqual(expectedPayload);
+    });
+
+    it("should not create device and return 401 if there is no user logged in", async () => {
+      body = getS7DeviceDeviceBody();
+
+      token = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(401);
+      expect(result.text).toMatch(/No token provided/);
+
+      let createdDevice = (await Project.CurrentProject.getAllDevices()).find(
+        device => device.Name === body.name
+      );
+
+      expect(createdDevice).not.toBeDefined();
+    });
+
+    it("should not create device and return 403 if user does not have dataAdmin rights", async () => {
+      body = getS7DeviceDeviceBody();
+
+      token = await visuUser.generateToken();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(403);
+      expect(result.text).toMatch(/Access forbidden/);
+
+      let createdDevice = (await Project.CurrentProject.getAllDevices()).find(
+        device => device.Name === body.name
+      );
+
+      expect(createdDevice).not.toBeDefined();
+    });
+
+    it("should not create device and return 400 if type is not defined in body", async () => {
+      body = getS7DeviceDeviceBody();
+
+      body.type = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/type has to be defined/);
+
+      let createdDevice = (await Project.CurrentProject.getAllDevices()).find(
+        device => device.Name === body.name
+      );
+
+      expect(createdDevice).not.toBeDefined();
+    });
+
+    it("should not create device and return 400 if type is s7Device and there is no name defined", async () => {
+      body = getS7DeviceDeviceBody();
+
+      body.name = undefined;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/\"name\" is required/);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and there is no ipAdress defined", async () => {
+      body = getS7DeviceDeviceBody();
+
+      body.ipAdress = undefined;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/\"ipAdress\" is required/);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if isActive is defined in payload of s7Device", async () => {
+      body = getS7DeviceDeviceBody();
+
+      body.isActive = true;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/\"isActive\"/);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should create device with default value of timeout (3000) and return 200 if type is s7Device and there is no timeout defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body.timeout = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let createdDevice = await Project.CurrentProject.getDevice(
+        result.body.id
+      );
+
+      expect(createdDevice).toBeDefined();
+      expect(createdDevice.Timeout).toEqual(3000);
+    });
+
+    it("should create device with default value of rack (0) and return 200 if type is s7Device and there is no rack defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body.rack = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let createdDevice = await Project.CurrentProject.getDevice(
+        result.body.id
+      );
+
+      expect(createdDevice).toBeDefined();
+      expect(createdDevice.Rack).toEqual(0);
+    });
+
+    it("should create device with default value of slot (0) and return 200 if type is s7Device and there is no slot defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body.slot = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      let createdDevice = await Project.CurrentProject.getDevice(
+        result.body.id
+      );
+
+      expect(createdDevice).toBeDefined();
+      expect(createdDevice.Slot).toEqual(1);
+    });
+
+    it("should not create device and return 400 if type is s7Device and name is shorter than 3 signs", async () => {
+      body = getS7DeviceDeviceBody();
+      body.name = "ab";
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and name is longer than 100 signs", async () => {
+      body = getS7DeviceDeviceBody();
+      body.name = new Array(101 + 1).join("a");
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and timeout is smaller than 3000", async () => {
+      body = getS7DeviceDeviceBody();
+      body.timeout = 2500;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and timeout is larger than 10000", async () => {
+      body = getS7DeviceDeviceBody();
+      body.timeout = 10001;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and ipAdress is not valid ip", async () => {
+      body = getS7DeviceDeviceBody();
+      body.ipAdress = "someText";
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and calculationElements are defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body.calculationElements = [];
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and variables are defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body.variables = [];
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and isActive are defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body.isActive = false;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and there is no name defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body = getPAC3200TCPBody();
+      body.name = undefined;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/\"name\" is required/);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if type is s7Device and there is no ipAdress defined", async () => {
+      body = getS7DeviceDeviceBody();
+      body = getPAC3200TCPBody();
+      body.ipAdress = undefined;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+      expect(result.text).toMatch(/\"ipAdress\" is required/);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if rack is greater than 255", async () => {
+      body = getS7DeviceDeviceBody();
+      body.rack = 257;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if rack is smaller than 0", async () => {
+      body = getS7DeviceDeviceBody();
+      body.rack = -1;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if slot is greater than 255", async () => {
+      body = getS7DeviceDeviceBody();
+      body.slot = 257;
+
+      let devicesBefore = await Project.CurrentProject.getAllDevices();
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      let devicesAfter = await Project.CurrentProject.getAllDevices();
+
+      expect(devicesAfter).toEqual(devicesBefore);
+    });
+
+    it("should not create device and return 400 if slot is smaller than 0", async () => {
+      body = getS7DeviceDeviceBody();
+      body.slot = -1;
 
       let devicesBefore = await Project.CurrentProject.getAllDevices();
 
