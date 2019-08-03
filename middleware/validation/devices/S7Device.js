@@ -9,9 +9,10 @@ let S7DeviceCreateSchema = Joi.object().keys({
     .min(3)
     .max(100)
     .required(),
+  //S7 Device timeout cannot be shorter than default timeout of Snap7 library
   timeout: Joi.number()
     .integer()
-    .min(1)
+    .min(3000)
     .max(10000)
     .required(),
   ipAdress: Joi.string()
@@ -35,9 +36,10 @@ let S7DeviceEditSchema = Joi.object().keys({
   name: Joi.string()
     .min(3)
     .max(100),
+  //S7 Device timeout cannot be shorter than default timeout of Snap7 library
   timeout: Joi.number()
     .integer()
-    .min(1)
+    .min(3000)
     .max(10000),
   ipAdress: Joi.string().ip({
     version: ["ipv4"]
@@ -54,7 +56,7 @@ let S7DeviceEditSchema = Joi.object().keys({
 });
 
 let setDefaultValues = function(req) {
-  if (req.body.timeout === undefined) req.body.timeout = 500;
+  if (req.body.timeout === undefined) req.body.timeout = 3000;
   if (req.body.rack === undefined) req.body.rack = 0;
   if (req.body.slot === undefined) req.body.slot = 1;
 };
