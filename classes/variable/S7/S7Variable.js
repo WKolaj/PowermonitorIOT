@@ -253,6 +253,7 @@ class S7Variable extends Variable {
     payload.length = this.Length;
     payload.areaType = this.AreaType;
     payload.write = this.Write;
+    payload.value = this.Value;
     payload.dbNumber = this.DBNumber;
 
     return payload;

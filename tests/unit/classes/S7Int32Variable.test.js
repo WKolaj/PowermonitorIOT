@@ -58,7 +58,8 @@ describe("S7Int32Variable", () => {
         write: false,
         dbNumber: 1,
         offset: 1,
-        unit: "A"
+        unit: "A",
+        value: 0
       };
     });
 
@@ -336,7 +337,8 @@ describe("S7Int32Variable", () => {
         write: false,
         dbNumber: 1,
         offset: 1,
-        unit: "A"
+        unit: "A",
+        value: 0
       };
 
       editPayload = {
@@ -370,8 +372,7 @@ describe("S7Int32Variable", () => {
 
       expect(variable.Payload).toEqual({
         ...variablePayload,
-        ...editPayload,
-        value: undefined
+        ...editPayload
       });
     });
 

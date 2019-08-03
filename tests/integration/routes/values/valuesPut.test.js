@@ -63,6 +63,27 @@ describe("variables route", () => {
   let increaseElement;
   let sumElement;
 
+  let s7DeviceBody;
+  let s7Device;
+
+  let s7Int8VariableBody;
+  let s7Int16VariableBody;
+  let s7Int32VariableBody;
+  let s7UInt8VariableBody;
+  let s7UInt16VariableBody;
+  let s7UInt32VariableBody;
+  let s7FloatVariableBody;
+  let s7ByteArrayVariableBody;
+
+  let s7Int8Variable;
+  let s7Int16Variable;
+  let s7Int32Variable;
+  let s7UInt8Variable;
+  let s7UInt16Variable;
+  let s7UInt32Variable;
+  let s7FloatVariable;
+  let s7ByteArrayVariable;
+
   let init = async () => {
     //Creating additional users
     visuUserBody = {
@@ -129,6 +150,15 @@ describe("variables route", () => {
       ipAdress: "192.168.100.34"
     };
 
+    s7DeviceBody = {
+      type: "s7Device",
+      name: "s7DeviceTest",
+      ipAdress: "192.168.100.35",
+      slot: 1,
+      rack: 2,
+      timeout: 5000
+    };
+
     let mbDeviceResult = await request(server)
       .post("/api/devices")
       .set(tokenHeader, adminToken)
@@ -137,11 +167,16 @@ describe("variables route", () => {
       .post("/api/devices")
       .set(tokenHeader, adminToken)
       .send(PAC3200TCPBody);
+    let s7DeviceResult = await request(server)
+      .post("/api/devices")
+      .set(tokenHeader, adminToken)
+      .send(s7DeviceBody);
 
     mbDevice = await Project.CurrentProject.getDevice(mbDeviceResult.body.id);
     pac3200TCP = await Project.CurrentProject.getDevice(
       pac3200TCPResult.body.id
     );
+    s7Device = await Project.CurrentProject.getDevice(s7DeviceResult.body.id);
 
     mbBooleanVariableBody = {
       type: "mbBoolean",
@@ -410,6 +445,153 @@ describe("variables route", () => {
       mbDevice.Id,
       sumElementResult.body.id
     );
+
+    s7Int8VariableBody = {
+      type: "s7Int8",
+      name: "s7Int8Variable",
+      areaType: "I",
+      offset: 0,
+      write: false
+    };
+
+    s7Int16VariableBody = {
+      type: "s7Int16",
+      name: "s7Int16Variable",
+      areaType: "DB",
+      offset: 1,
+      dbNumber: 1,
+      write: false
+    };
+
+    s7Int32VariableBody = {
+      type: "s7Int32",
+      name: "s7Int32Variable",
+      areaType: "Q",
+      offset: 0,
+      write: false
+    };
+
+    s7UInt8VariableBody = {
+      type: "s7UInt8",
+      name: "s7UInt8Variable",
+      areaType: "I",
+      offset: 1,
+      write: false
+    };
+
+    s7UInt16VariableBody = {
+      type: "s7UInt16",
+      name: "s7UInt16Variable",
+      areaType: "M",
+      offset: 1,
+      write: false
+    };
+
+    s7UInt32VariableBody = {
+      type: "s7UInt32",
+      name: "s7UInt32Variable",
+      areaType: "M",
+      offset: 3,
+      write: false
+    };
+
+    s7FloatVariableBody = {
+      type: "s7Float",
+      name: "s7FloatVariable",
+      areaType: "I",
+      offset: 3,
+      write: false
+    };
+
+    s7ByteArrayVariableBody = {
+      type: "s7ByteArray",
+      name: "s7ByteArrayVariable",
+      areaType: "DB",
+      offset: 2,
+      length: 4,
+      dbNumber: 2,
+      write: false
+    };
+
+    let s7Int8Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7Int8VariableBody);
+
+    let s7Int16Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7Int16VariableBody);
+
+    let s7Int32Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7Int32VariableBody);
+
+    let s7UInt8Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7UInt8VariableBody);
+
+    let s7UInt16Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7UInt16VariableBody);
+
+    let s7UInt32Result = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7UInt32VariableBody);
+
+    let s7FloatResult = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7FloatVariableBody);
+
+    let s7ByteArrayResult = await request(server)
+      .post(`/api/variables/${s7Device.Id}`)
+      .set(tokenHeader, adminToken)
+      .send(s7ByteArrayVariableBody);
+
+    s7Int8Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7Int8Result.body.id
+    );
+
+    s7Int16Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7Int16Result.body.id
+    );
+
+    s7Int32Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7Int32Result.body.id
+    );
+
+    s7UInt8Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7UInt8Result.body.id
+    );
+
+    s7UInt16Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7UInt16Result.body.id
+    );
+
+    s7UInt32Variable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7UInt32Result.body.id
+    );
+
+    s7FloatVariable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7FloatResult.body.id
+    );
+
+    s7ByteArrayVariable = await Project.CurrentProject.getVariable(
+      s7Device.Id,
+      s7ByteArrayResult.body.id
+    );
   };
 
   beforeEach(async () => {
@@ -606,6 +788,118 @@ describe("variables route", () => {
       expect(mbByteArrayVariable.Value).toEqual(valueToSet);
     });
 
+    it("should return code 200, payload containing new value and set value to given variable - s7Int8", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int8Variable.Id;
+      valueToSet = 123;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7Int8Variable.Value).toEqual(valueToSet);
+    });
+
+    it("should return code 200, payload containing new value and set value to given variable - s7Int16", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int16Variable.Id;
+      valueToSet = 123;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7Int16Variable.Value).toEqual(valueToSet);
+    });
+
+    it("should return code 200, payload containing new value and set value to given variable - s7Int32", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int32Variable.Id;
+      valueToSet = 123;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7Int32Variable.Value).toEqual(valueToSet);
+    });
+
+    it("should return code 200, payload containing new value and set value to given variable - s7UInt8", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt8Variable.Id;
+      valueToSet = 123;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7UInt8Variable.Value).toEqual(valueToSet);
+    });
+
+    it("should return code 200, payload containing new value and set value to given variable - s7UInt16", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt16Variable.Id;
+      valueToSet = 123;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7UInt16Variable.Value).toEqual(valueToSet);
+    });
+
+    it("should return code 200, payload containing new value and set value to given variable - s7UInt32", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt32Variable.Id;
+      valueToSet = 123;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7UInt32Variable.Value).toEqual(valueToSet);
+    });
+
+    it("should return code 200, payload containing new value and set value to given variable - s7Float", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7FloatVariable.Id;
+      valueToSet = 123.321;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7FloatVariable.Value).toEqual(valueToSet);
+    });
+
+    it("should return code 200, payload containing new value and set value to given variable - s7ByteArray", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7ByteArrayVariable.Id;
+      valueToSet = [9, 8, 7, 6];
+
+      let result = await exec();
+
+      expect(result.status).toEqual(200);
+
+      expect(Object.values(result.body)[0]).toEqual(valueToSet);
+
+      expect(s7ByteArrayVariable.Value).toEqual(valueToSet);
+    });
+
     it("should return code 404, - variable not found - for calcElement - calcElement value cannot be modified - averageElement", async () => {
       let previousValue = averageElement.Value;
       variableId = averageElement.Id;
@@ -661,6 +955,17 @@ describe("variables route", () => {
     });
 
     it("should return code 404 and do not set value if there is no variable or calcElement of given id", async () => {
+      variableId = "4321";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(404);
+      expect(result.text).toMatch(`There is no variable od given id`);
+      expect(variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 404 and do not set value if there is no variable or calcElement of given id - s7Device", async () => {
+      deviceId = s7Device.Id;
       variableId = "4321";
 
       let result = await exec();
@@ -916,6 +1221,253 @@ describe("variables route", () => {
       expect(result.status).toEqual(400);
 
       expect(mbByteArrayVariable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7Int8 - float", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int8Variable.Id;
+      previousValue = s7Int8Variable.Value;
+      valueToSet = 123.321;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7Int8Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7Int8 - string", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int8Variable.Id;
+      previousValue = s7Int8Variable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7Int8Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7Int16 - float", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int16Variable.Id;
+      previousValue = s7Int16Variable.Value;
+      valueToSet = 123.321;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7Int16Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7Int16 - string", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int16Variable.Id;
+      previousValue = s7Int16Variable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7Int16Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7Int32 - float", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int32Variable.Id;
+      previousValue = s7Int32Variable.Value;
+      valueToSet = 123.321;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7Int32Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7Int32 - string", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7Int32Variable.Id;
+      previousValue = s7Int32Variable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7Int32Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt8 - float", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt8Variable.Id;
+      previousValue = s7UInt8Variable.Value;
+      valueToSet = 123.321;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt8Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt8 - string", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt8Variable.Id;
+      previousValue = s7UInt8Variable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt8Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt8 - minus", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt8Variable.Id;
+      previousValue = s7UInt8Variable.Value;
+      valueToSet = -1;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt8Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt16 - float", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt16Variable.Id;
+      previousValue = s7UInt16Variable.Value;
+      valueToSet = 123.321;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt16Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt16 - string", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt16Variable.Id;
+      previousValue = s7UInt16Variable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt16Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt16 - minus", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt16Variable.Id;
+      previousValue = s7UInt16Variable.Value;
+      valueToSet = -1;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt16Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt32 - float", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt32Variable.Id;
+      previousValue = s7UInt32Variable.Value;
+      valueToSet = 123.321;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt32Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt32 - string", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt32Variable.Id;
+      previousValue = s7UInt32Variable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt32Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7UInt32 - minus", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7UInt32Variable.Id;
+      previousValue = s7UInt32Variable.Value;
+      valueToSet = -1;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7UInt32Variable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7ByteArray - length to short", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7ByteArrayVariable.Id;
+      previousValue = s7ByteArrayVariable.Value;
+      valueToSet = [1, 2, 3];
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7ByteArrayVariable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7ByteArray - length to long", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7ByteArrayVariable.Id;
+      previousValue = s7ByteArrayVariable.Value;
+      valueToSet = [1, 2, 3, 4, 5];
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7ByteArrayVariable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7ByteArray - string", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7ByteArrayVariable.Id;
+      previousValue = s7ByteArrayVariable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7ByteArrayVariable.Value).toEqual(previousValue);
+    });
+
+    it("should return code 400, and do not edit value if value is invalid - s7ByteArray - number", async () => {
+      deviceId = s7Device.Id;
+      variableId = s7ByteArrayVariable.Id;
+      previousValue = s7ByteArrayVariable.Value;
+      valueToSet = "fakeValue";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(s7ByteArrayVariable.Value).toEqual(previousValue);
     });
   });
 });

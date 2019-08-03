@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const Project = require("../../../classes/project/Project");
+const { getCurrentProject, exists } = require("../../../utilities/utilities");
 
 let S7FloatVariableCreateSchema = Joi.object().keys({
   type: Joi.string()
@@ -84,6 +85,26 @@ let setDefaultValues = function(req) {
     req.body.dbNumber = 1;
 };
 
+let setDefaultDBNumberToEdit = function(req, variable) {
+  if (exists(req.body.areaType)) {
+    //Getting area from req
+    if (
+      req.body.areaType === "I" ||
+      req.body.areaType === "M" ||
+      req.body.areaType === "Q"
+    )
+      req.body.dbNumber = 1;
+  } else {
+    //Getting area from variable
+    if (
+      variable.AreaType === "I" ||
+      variable.AreaType === "M" ||
+      variable.AreaType === "Q"
+    )
+      req.body.dbNumber = 1;
+  }
+};
+
 /**
  * @description Method for validate if element is valid while creating - return error message if object is not valid or undefined instead
  */
@@ -107,6 +128,24 @@ let validateCreate = function(req) {
  */
 let validateEdit = function(req) {
   return new Promise(async (resolve, reject) => {
+    //Getting current variable
+    let currentProject = getCurrentProject();
+
+    //Checking parameters
+    if (!req.params.deviceId) return resolve("deviceId has to be defined!");
+    if (!req.params.variableId) return resolve("variableId has to be defined!");
+
+    //If there is no device set - resolving undefined in order to return 404 later
+    if (!(await currentProject.doesDeviceExist(req.params.deviceId)))
+      return resolve();
+
+    let variableToEdit = await currentProject.getVariable(
+      req.params.deviceId,
+      req.params.variableId
+    );
+
+    setDefaultDBNumberToEdit(req, variableToEdit);
+
     Joi.validate(req.body, S7FloatVariableEditSchema, (err, value) => {
       if (err) {
         return resolve(err.details[0].message);

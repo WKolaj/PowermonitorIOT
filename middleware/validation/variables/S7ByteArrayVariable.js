@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const Project = require("../../../classes/project/Project");
+const { getCurrentProject, exists } = require("../../../utilities/utilities");
 
 let S7ByteArrayVariableCreateSchema = Joi.object().keys({
   type: Joi.string()
@@ -106,6 +107,26 @@ let setDefaultValues = function(req) {
     req.body.dbNumber = 1;
 };
 
+let setDefaultDBNumberToEdit = function(req, variable) {
+  if (exists(req.body.areaType)) {
+    //Getting area from req
+    if (
+      req.body.areaType === "I" ||
+      req.body.areaType === "M" ||
+      req.body.areaType === "Q"
+    )
+      req.body.dbNumber = 1;
+  } else {
+    //Getting area from variable
+    if (
+      variable.AreaType === "I" ||
+      variable.AreaType === "M" ||
+      variable.AreaType === "Q"
+    )
+      req.body.dbNumber = 1;
+  }
+};
+
 let validateValue = function(value, length) {
   if (!value || !length) return "value cannot be empty";
   if (!Array.isArray(value)) return "value has to be an array";
@@ -143,6 +164,24 @@ let validateCreate = function(req) {
  */
 let validateEdit = function(req) {
   return new Promise(async (resolve, reject) => {
+    //Getting current variable
+    let currentProject = getCurrentProject();
+
+    //Checking parameters
+    if (!req.params.deviceId) return resolve("deviceId has to be defined!");
+    if (!req.params.variableId) return resolve("variableId has to be defined!");
+
+    //If there is no device set - resolving undefined in order to return 404 later
+    if (!(await currentProject.doesDeviceExist(req.params.deviceId)))
+      return resolve();
+
+    let variableToEdit = await currentProject.getVariable(
+      req.params.deviceId,
+      req.params.variableId
+    );
+
+    setDefaultDBNumberToEdit(req, variableToEdit);
+
     Joi.validate(
       req.body,
       S7ByteArrayVariableEditSchema,
@@ -156,28 +195,10 @@ let validateEdit = function(req) {
 
             //Getting variable Length from body and if it does not exist in body - from variable
             let variableLength = req.body.length;
-            if (!variableLength) {
-              //Getting variable first
 
-              //Checking parameters
-              if (!req.params.deviceId)
-                return resolve("deviceId has to be defined!");
-              if (!req.params.variableId)
-                return resolve("variableId has to be defined!");
-
-              //If there is no device set - resolving undefined in order to return 404 later
-              if (
-                !(await Project.CurrentProject.doesDeviceExist(
-                  req.params.deviceId
-                ))
-              )
-                return resolve();
-
+            if (!exists(variableLength)) {
               //Getting length from variable
-              variableLength = (await Project.CurrentProject.getVariable(
-                req.params.deviceId,
-                req.params.variableId
-              )).Length;
+              variableLength = variableToEdit.Length;
             }
 
             //Validating value vs length

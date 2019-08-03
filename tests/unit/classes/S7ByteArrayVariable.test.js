@@ -58,7 +58,8 @@ describe("S7ByteArrayVariable", () => {
         write: false,
         dbNumber: 1,
         offset: 1,
-        unit: "A"
+        unit: "A",
+        value: [0, 0]
       };
     });
 
@@ -335,7 +336,8 @@ describe("S7ByteArrayVariable", () => {
         write: false,
         dbNumber: 1,
         offset: 1,
-        unit: "A"
+        unit: "A",
+        value: [0, 0]
       };
 
       editPayload = {
@@ -370,8 +372,7 @@ describe("S7ByteArrayVariable", () => {
 
       expect(variable.Payload).toEqual({
         ...variablePayload,
-        ...editPayload,
-        value: undefined
+        ...editPayload
       });
     });
 

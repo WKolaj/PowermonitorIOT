@@ -171,7 +171,6 @@ let generateSchema = variableType => {
           .integer()
           .min(0)
           .max(4294967295)
-          .min(0)
           .required()
       };
     }

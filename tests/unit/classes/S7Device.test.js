@@ -53,7 +53,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 1,
             offset: 1,
-            unit: "A"
+            unit: "A",
+            value: 0
           },
           {
             id: "varId2",
@@ -67,7 +68,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 1,
             offset: 2,
-            unit: "B"
+            unit: "B",
+            value: 0
           },
           {
             id: "varId3",
@@ -81,7 +83,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 3,
             offset: 3,
-            unit: "C"
+            unit: "C",
+            value: 0
           },
           {
             id: "varId4",
@@ -95,7 +98,8 @@ describe("S7Device", () => {
             write: true,
             dbNumber: 1,
             offset: 1,
-            unit: "D"
+            unit: "D",
+            value: 0
           },
           {
             id: "varId5",
@@ -109,7 +113,8 @@ describe("S7Device", () => {
             write: true,
             dbNumber: 1,
             offset: 2,
-            unit: "E"
+            unit: "E",
+            value: 0
           },
           {
             id: "varId6",
@@ -123,7 +128,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 3,
             offset: 3,
-            unit: "F"
+            unit: "F",
+            value: 0
           },
           {
             id: "varId7",
@@ -138,7 +144,8 @@ describe("S7Device", () => {
             write: true,
             dbNumber: 3,
             offset: 3,
-            unit: "F"
+            unit: "F",
+            value: [0, 0, 0, 0, 0, 0]
           },
           {
             id: "varId8",
@@ -152,7 +159,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 3,
             offset: 13,
-            unit: "F"
+            unit: "F",
+            value: 0
           }
         ],
         calculationElements: [
@@ -509,7 +517,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 1,
             offset: 1,
-            unit: "A"
+            unit: "A",
+            value: 0
           },
           {
             id: "varId2",
@@ -523,7 +532,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 1,
             offset: 2,
-            unit: "B"
+            unit: "B",
+            value: 0
           },
           {
             id: "varId3",
@@ -537,7 +547,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 3,
             offset: 3,
-            unit: "C"
+            unit: "C",
+            value: 0
           },
           {
             id: "varId4",
@@ -551,7 +562,8 @@ describe("S7Device", () => {
             write: true,
             dbNumber: 1,
             offset: 1,
-            unit: "D"
+            unit: "D",
+            value: 0
           },
           {
             id: "varId5",
@@ -565,7 +577,8 @@ describe("S7Device", () => {
             write: true,
             dbNumber: 1,
             offset: 2,
-            unit: "E"
+            unit: "E",
+            value: 0
           },
           {
             id: "varId6",
@@ -579,7 +592,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 3,
             offset: 3,
-            unit: "F"
+            unit: "F",
+            value: 0
           },
           {
             id: "varId7",
@@ -594,7 +608,8 @@ describe("S7Device", () => {
             write: true,
             dbNumber: 3,
             offset: 3,
-            unit: "F"
+            unit: "F",
+            value: [0, 0, 0, 0, 0, 0]
           },
           {
             id: "varId8",
@@ -608,7 +623,8 @@ describe("S7Device", () => {
             write: false,
             dbNumber: 3,
             offset: 13,
-            unit: "F"
+            unit: "F",
+            value: 0
           }
         ],
         calculationElements: [
@@ -1004,7 +1020,8 @@ describe("S7Device", () => {
         areaType: "I",
         write: false,
         dbNumber: 3,
-        offset: 20
+        offset: 20,
+        value: 0
       };
 
       devicePayload = {
@@ -1342,6 +1359,7 @@ describe("S7Device", () => {
     it("should create new variable based on given payload - s7ByteArray", async () => {
       newVariablePayload.type = "s7ByteArray";
       newVariablePayload.length = 4;
+      newVariablePayload.value = [1, 2, 3, 4];
       await exec();
 
       expect(Object.values(device.Variables).length).toEqual(9);
@@ -1989,7 +2007,8 @@ describe("S7Device", () => {
         areaType: "I",
         write: false,
         dbNumber: 3,
-        offset: 20
+        offset: 20,
+        value: 0
       };
 
       editVariablePayload = {

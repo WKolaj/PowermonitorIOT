@@ -29,11 +29,9 @@ describe("auth route", () => {
 
   let PAC3200TCPBody;
   let mbDeviceBody;
-  let s7DeviceBody;
 
   let pac3200TCP;
   let mbDevice;
-  let s7Device;
 
   let mbBooleanVariableBody;
   let mbFloatVariableBody;
@@ -54,6 +52,9 @@ describe("auth route", () => {
   let mbSwappedFloatVariable;
   let mbSwappedInt32Variable;
   let mbSwappedUInt32Variable;
+
+  let s7DeviceBody;
+  let s7Device;
 
   let s7Int8VariableBody;
   let s7Int16VariableBody;
