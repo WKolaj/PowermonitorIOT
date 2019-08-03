@@ -1,6 +1,7 @@
 const express = require("express");
 //Initializing proccess of automatically calling next when error occurs while request handling - in order to go to last middlware of logging error
 require("express-async-errors");
+const jsonValidation = require("../middleware/jsonError");
 const config = require("config");
 const log = require("../logger/logger");
 const app = express();
@@ -26,6 +27,9 @@ module.exports = async function(workingDirName) {
   //Static front-end files are stored under client/build dir
   app.use(express.static(path.join(workingDirName, "client/build")));
   app.use(express.json());
+
+  //Using method to check if there is an error of parsing json - returning if there is one
+  app.use(jsonValidation);
 
   //Enabling use of cors - and also sending x-auth-token via auth response
   app.use(
