@@ -38,6 +38,7 @@ module.exports.statAsync = promisify(fs.stat);
 module.exports.readFileAsync = promisify(fs.readFile);
 module.exports.writeFileAsync = promisify(fs.writeFile);
 module.exports.readDirAsync = promisify(fs.readdir);
+module.exports.appendFileAsync = promisify(fs.appendFile);
 module.exports.createDirAsync = promisify(fs.mkdir);
 module.exports.unlinkAnsync = promisify(fs.unlink);
 

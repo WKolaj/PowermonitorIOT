@@ -59,6 +59,18 @@ let generateSchema = variableType => {
       };
     }
 
+    case "mbDouble": {
+      return {
+        value: Joi.number().required()
+      };
+    }
+
+    case "mbSwappedDouble": {
+      return {
+        value: Joi.number().required()
+      };
+    }
+
     case "mbSwappedFloat": {
       return {
         value: Joi.number().required()

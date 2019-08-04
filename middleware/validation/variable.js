@@ -3,6 +3,8 @@ const validationMiddleware = require("../validation");
 const MBBooleanVariableValidator = require("./variables/MBBooleanVariable");
 const MBByteArrayVariableValidator = require("./variables/MBByteArrayVariable");
 const MBFloatVariableValidator = require("./variables/MBFloatVariable");
+const MBDoubleVariableValidator = require("./variables/MBDoubleVariable");
+const MBSwappedDoubleVariableValidator = require("./variables/MBSwappedDoubleVariable");
 const MBInt16VariableValidator = require("./variables/MBInt16Variable");
 const MBInt32VariableValidator = require("./variables/MBInt32Variable");
 const MBSwappedFloatVariableValidator = require("./variables/MBSwappedFloatVariable");
@@ -71,6 +73,12 @@ let validateCreate = function(req) {
         }
         case "mbSwappedUInt32": {
           return resolve(await MBSwappedUInt32VariableValidator.create(req));
+        }
+        case "mbDouble": {
+          return resolve(await MBDoubleVariableValidator.create(req));
+        }
+        case "mbSwappedDouble": {
+          return resolve(await MBSwappedDoubleVariableValidator.create(req));
         }
         default: {
           return resolve("Given variable type is not recognized");
@@ -196,6 +204,12 @@ let validateEdit = function(req) {
         }
         case "mbSwappedUInt32": {
           return resolve(await MBSwappedUInt32VariableValidator.edit(req));
+        }
+        case "mbDouble": {
+          return resolve(await MBDoubleVariableValidator.edit(req));
+        }
+        case "mbSwappedDouble": {
+          return resolve(await MBSwappedDoubleVariableValidator.edit(req));
         }
         default: {
           return resolve("Given variable type is not recognized");

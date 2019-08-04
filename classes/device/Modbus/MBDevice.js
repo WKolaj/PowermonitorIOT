@@ -12,6 +12,8 @@ const MBSwappedInt32Variable = require("../../variable/Modbus/MBSwappedInt32Vari
 const MBSwappedUInt32Variable = require("../../variable/Modbus/MBSwappedUInt32Variable");
 const MBUInt16Variable = require("../../variable/Modbus/MBUInt16Variable");
 const MBUInt32Variable = require("../../variable/Modbus/MBUInt32Variable");
+const MBDoubleVariable = require("../../variable/Modbus/MBDoubleVariable");
+const MBSwappedDoubleVariable = require("../../variable/Modbus/MBSwappedDoubleVariable");
 const logger = require("../../../logger/logger");
 const { exists } = require("../../../utilities/utilities");
 
@@ -210,6 +212,12 @@ class MBDevice extends Device {
       }
       case "mbSwappedUInt32": {
         return this._createSwappedUInt32Variable(payload);
+      }
+      case "mbDouble": {
+        return this._createDoubleVariable(payload);
+      }
+      case "mbSwappedDouble": {
+        return this._createSwappedDoubleVariable(payload);
       }
       default: {
         throw new Error(
@@ -447,6 +455,46 @@ class MBDevice extends Device {
       throw new Error("variable fCode in payload is not defined");
 
     let variableToAdd = new MBSwappedUInt32Variable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating float variable
+   * @param {*} payload Payload of edition
+   */
+  async _createDoubleVariable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.fCode))
+      throw new Error("variable fCode in payload is not defined");
+
+    let variableToAdd = new MBDoubleVariable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating float variable
+   * @param {*} payload Payload of edition
+   */
+  async _createSwappedDoubleVariable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.fCode))
+      throw new Error("variable fCode in payload is not defined");
+
+    let variableToAdd = new MBSwappedDoubleVariable(this);
     await variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;
