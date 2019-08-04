@@ -77,7 +77,7 @@ const doubleToMBData = function(floatValue) {
   let int2 = view2.getUint16(0);
 
   //swap bytes
-  let int3Buf = [bytes[5], bytes[4]];
+  let int3Buf = [bytes[7], bytes[6]];
 
   // Create a buffer
   var buf3 = new ArrayBuffer(4);
@@ -92,7 +92,7 @@ const doubleToMBData = function(floatValue) {
   let int3 = view3.getUint16(0);
 
   //swap bytes
-  let int4Buf = [bytes[7], bytes[6]];
+  let int4Buf = [bytes[5], bytes[4]];
 
   // Create a buffer
   var buf4 = new ArrayBuffer(4);
