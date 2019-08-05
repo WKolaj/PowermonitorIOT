@@ -44,6 +44,9 @@ class MBVariable extends Variable {
       throw new Error(
         `Fcode ${payload.getSingleFCode} cannot be applied to given variable`
       );
+
+    if (exists(payload.unitId)) this._ownUnitId = payload.unitId;
+
     this._offset = payload.offset;
     this._length = payload.length;
     this._fcode = payload.fCode;
@@ -53,13 +56,13 @@ class MBVariable extends Variable {
     this._getSingleRequest = new MBRequest(
       this.Device.MBDriver,
       payload.getSingleFCode,
-      this.Device.UnitId
+      this.UnitId
     );
     this._getSingleRequest.addVariable(this);
     this._setSingleRequest = new MBRequest(
       this.Device.MBDriver,
       payload.setSingleFCode,
-      this.Device.UnitId
+      this.UnitId
     );
     this._setSingleRequest.addVariable(this);
 
@@ -93,16 +96,20 @@ class MBVariable extends Variable {
     this._getSingleRequest = new MBRequest(
       this.Device.MBDriver,
       this.GetSingleFCode,
-      this.Device.UnitId
+      this.UnitId
     );
     this._getSingleRequest.addVariable(this);
 
     this._setSingleRequest = new MBRequest(
       this.Device.MBDriver,
       this.SetSingleFCode,
-      this.Device.UnitId
+      this.UnitId
     );
     this._setSingleRequest.addVariable(this);
+  }
+
+  get OwnUnitId() {
+    return this._ownUnitId;
   }
 
   /**
@@ -130,7 +137,7 @@ class MBVariable extends Variable {
    * @description Variable UnitId
    */
   get UnitId() {
-    return this.Device.UnitId;
+    return exists(this.OwnUnitId) ? this.OwnUnitId : this.Device.UnitId;
   }
 
   /**
@@ -261,6 +268,7 @@ class MBVariable extends Variable {
     payload.value = this.Value;
     payload.getSingleFCode = this.GetSingleFCode;
     payload.setSingleFCode = this.SetSingleFCode;
+    if (exists(this.OwnUnitId)) payload.unitId = this.OwnUnitId;
 
     return payload;
   }
@@ -295,6 +303,9 @@ class MBVariable extends Variable {
 
     await super.editWithPayload(payload);
 
+    if (payload.unitId) {
+      this._ownUnitId = payload.unitId;
+    }
     if (payload.offset) {
       this._offset = payload.offset;
     }
@@ -314,7 +325,7 @@ class MBVariable extends Variable {
       this._getSingleRequest = new MBRequest(
         this.Device.MBDriver,
         payload.getSingleFCode,
-        this.Device.UnitId
+        this.UnitId
       );
       this._getSingleRequest.addVariable(this);
     }
@@ -323,7 +334,7 @@ class MBVariable extends Variable {
       this._setSingleRequest = new MBRequest(
         this.Device.MBDriver,
         payload.setSingleFCode,
-        this.Device.UnitId
+        this.UnitId
       );
       this._setSingleRequest.addVariable(this);
     }

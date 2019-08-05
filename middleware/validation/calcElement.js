@@ -28,7 +28,8 @@ let validateCreate = function(req) {
       deviceType === "PAC4200TCP" ||
       deviceType === "PAC2200TCP" ||
       deviceType === "s7Device" ||
-      deviceType === "specialDevice"
+      deviceType === "specialDevice" ||
+      deviceType === "mbGateway"
     ) {
       switch (req.body.type) {
         case "factorElement": {

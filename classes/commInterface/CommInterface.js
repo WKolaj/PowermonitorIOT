@@ -10,6 +10,8 @@ const PAC3200TCP = require("../device/Modbus/Meters/PAC3200TCP");
 const PAC2200TCP = require("../device/Modbus/Meters/PAC2200TCP");
 const PAC4200TCP = require("../device/Modbus/Meters/PAC4200TCP");
 
+const MBGateway = require("../device/Modbus/MBGateway");
+
 class CommInterface {
   /**
    * @description class representing communication interface of App
@@ -325,6 +327,9 @@ class CommInterface {
       case "msAgent": {
         return this._createMSAgent(payload);
       }
+      case "mbGateway": {
+        return this._createMBGateway(payload);
+      }
       default: {
         return Promise.reject(
           new Error(`Given device type is not recognized: ${payload.type}`)
@@ -466,6 +471,24 @@ class CommInterface {
     });
   }
 
+  /**
+   * @description Method for creating MBGateway based on payload
+   * @param {object} payload
+   */
+  async _createMBGateway(payload) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        let newDevice = new MBGateway();
+        await newDevice.init(payload);
+        this.Devices[newDevice.Id] = newDevice;
+        this.Sampler.addDevice(newDevice);
+        //Initializing new devices archive manager
+        return resolve(newDevice);
+      } catch (err) {
+        return reject(err);
+      }
+    });
+  }
   /**
    * @description Method for checking if device of given id exists
    * @param {string} deviceId Id of device

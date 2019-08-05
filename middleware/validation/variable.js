@@ -1,4 +1,5 @@
 const Project = require("../../classes/project/Project");
+const { exists } = require("../../utilities/utilities");
 const validationMiddleware = require("../validation");
 const MBBooleanVariableValidator = require("./variables/MBBooleanVariable");
 const MBByteArrayVariableValidator = require("./variables/MBByteArrayVariable");
@@ -21,6 +22,19 @@ const S7UInt32VariableValidator = require("./variables/S7UInt32Variable");
 const S7Int8VariableValidator = require("./variables/S7Int8Variable");
 const S7UInt8VariableValidator = require("./variables/S7UInt8Variable");
 const SDVariableValidator = require("./variables/SDVariable");
+
+const MBGatewayBooleanVariableValidator = require("./variables/MBGateway/MBBooleanVariable");
+const MBGatewayByteArrayVariableValidator = require("./variables/MBGateway/MBByteArrayVariable");
+const MBGatewayFloatVariableValidator = require("./variables/MBGateway/MBFloatVariable");
+const MBGatewayDoubleVariableValidator = require("./variables/MBGateway/MBDoubleVariable");
+const MBGatewaySwappedDoubleVariableValidator = require("./variables/MBGateway/MBSwappedDoubleVariable");
+const MBGatewayInt16VariableValidator = require("./variables/MBGateway/MBInt16Variable");
+const MBGatewayInt32VariableValidator = require("./variables/MBGateway/MBInt32Variable");
+const MBGatewaySwappedFloatVariableValidator = require("./variables/MBGateway/MBSwappedFloatVariable");
+const MBGatewaySwappedInt32VariableValidator = require("./variables/MBGateway/MBSwappedInt32Variable");
+const MBGatewaySwappedUInt32VariableValidator = require("./variables/MBGateway/MBSwappedUInt32Variable");
+const MBGatewayUInt16VariableValidator = require("./variables/MBGateway/MBUInt16Variable");
+const MBGatewayUInt32VariableValidator = require("./variables/MBGateway/MBUInt32Variable");
 
 /**
  * @description Method for validate if element is valid while creating - return error message if object is not valid or undefined instead
@@ -79,6 +93,56 @@ let validateCreate = function(req) {
         }
         case "mbSwappedDouble": {
           return resolve(await MBSwappedDoubleVariableValidator.create(req));
+        }
+        default: {
+          return resolve("Given variable type is not recognized");
+        }
+      }
+    } else if (deviceType === "mbGateway") {
+      switch (req.body.type) {
+        case "mbBoolean": {
+          return resolve(await MBGatewayBooleanVariableValidator.create(req));
+        }
+        case "mbByteArray": {
+          return resolve(await MBGatewayByteArrayVariableValidator.create(req));
+        }
+        case "mbFloat": {
+          return resolve(await MBGatewayFloatVariableValidator.create(req));
+        }
+        case "mbSwappedFloat": {
+          return resolve(
+            await MBGatewaySwappedFloatVariableValidator.create(req)
+          );
+        }
+        case "mbInt16": {
+          return resolve(await MBGatewayInt16VariableValidator.create(req));
+        }
+        case "mbUInt16": {
+          return resolve(await MBGatewayUInt16VariableValidator.create(req));
+        }
+        case "mbInt32": {
+          return resolve(await MBGatewayInt32VariableValidator.create(req));
+        }
+        case "mbUInt32": {
+          return resolve(await MBGatewayUInt32VariableValidator.create(req));
+        }
+        case "mbSwappedInt32": {
+          return resolve(
+            await MBGatewaySwappedInt32VariableValidator.create(req)
+          );
+        }
+        case "mbSwappedUInt32": {
+          return resolve(
+            await MBGatewaySwappedUInt32VariableValidator.create(req)
+          );
+        }
+        case "mbDouble": {
+          return resolve(await MBGatewayDoubleVariableValidator.create(req));
+        }
+        case "mbSwappedDouble": {
+          return resolve(
+            await MBGatewaySwappedDoubleVariableValidator.create(req)
+          );
         }
         default: {
           return resolve("Given variable type is not recognized");
@@ -210,6 +274,56 @@ let validateEdit = function(req) {
         }
         case "mbSwappedDouble": {
           return resolve(await MBSwappedDoubleVariableValidator.edit(req));
+        }
+        default: {
+          return resolve("Given variable type is not recognized");
+        }
+      }
+    } else if (deviceType === "mbGateway") {
+      switch (variableType) {
+        case "mbBoolean": {
+          return resolve(await MBGatewayBooleanVariableValidator.edit(req));
+        }
+        case "mbByteArray": {
+          return resolve(await MBGatewayByteArrayVariableValidator.edit(req));
+        }
+        case "mbFloat": {
+          return resolve(await MBGatewayFloatVariableValidator.edit(req));
+        }
+        case "mbSwappedFloat": {
+          return resolve(
+            await MBGatewaySwappedFloatVariableValidator.edit(req)
+          );
+        }
+        case "mbInt16": {
+          return resolve(await MBGatewayInt16VariableValidator.edit(req));
+        }
+        case "mbUInt16": {
+          return resolve(await MBGatewayUInt16VariableValidator.edit(req));
+        }
+        case "mbInt32": {
+          return resolve(await MBGatewayInt32VariableValidator.edit(req));
+        }
+        case "mbUInt32": {
+          return resolve(await MBGatewayUInt32VariableValidator.edit(req));
+        }
+        case "mbSwappedInt32": {
+          return resolve(
+            await MBGatewaySwappedInt32VariableValidator.edit(req)
+          );
+        }
+        case "mbSwappedUInt32": {
+          return resolve(
+            await MBGatewaySwappedUInt32VariableValidator.edit(req)
+          );
+        }
+        case "mbDouble": {
+          return resolve(await MBGatewayDoubleVariableValidator.edit(req));
+        }
+        case "mbSwappedDouble": {
+          return resolve(
+            await MBGatewaySwappedDoubleVariableValidator.edit(req)
+          );
         }
         default: {
           return resolve("Given variable type is not recognized");

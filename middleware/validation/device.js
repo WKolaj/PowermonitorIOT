@@ -5,6 +5,7 @@ const S7DeviceValidator = require("./devices/S7Device");
 const PAC3200TCPValidator = require("./devices/PAC3200TCP");
 const PAC2200TCPValidator = require("./devices/PAC2200TCP");
 const PAC4200TCPValidator = require("./devices/PAC4200TCP");
+const mbGatewayValidator = require("./devices/mbGateway");
 const SpecialDeviceValidator = require("./devices/specialDevice");
 const MindConnectDeviceValidator = require("./devices/MindConnectDevice");
 
@@ -19,6 +20,9 @@ let validateCreate = function(req) {
     switch (req.body.type) {
       case "mbDevice": {
         return resolve(await mbDeviceValidator.create(req));
+      }
+      case "mbGateway": {
+        return resolve(await mbGatewayValidator.create(req));
       }
       case "PAC2200TCP": {
         return resolve(await PAC2200TCPValidator.create(req));
@@ -62,6 +66,9 @@ let validateEdit = function(req) {
     switch (device.Type) {
       case "mbDevice": {
         return resolve(await mbDeviceValidator.edit(req));
+      }
+      case "mbGateway": {
+        return resolve(await mbGatewayValidator.edit(req));
       }
       case "s7Device": {
         return resolve(await S7DeviceValidator.edit(req));

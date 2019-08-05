@@ -421,6 +421,7 @@ describe("MBVariable", () => {
     let unitId;
     let mbVariable;
     let payload;
+    let ownUnitId;
 
     beforeEach(() => {
       name = "Test variable name";
@@ -435,6 +436,7 @@ describe("MBVariable", () => {
       offset = 2;
       length = 4;
       fcode = 4;
+      ownUnitId = undefined;
     });
 
     let exec = async () => {
@@ -444,7 +446,8 @@ describe("MBVariable", () => {
         offset: offset,
         length: length,
         getSingleFCode: 3,
-        setSingleFCode: 16
+        setSingleFCode: 16,
+        unitId: ownUnitId
       };
       mbVariable = new MBVariable(device);
       await mbVariable.init(payload);
@@ -455,6 +458,13 @@ describe("MBVariable", () => {
       let result = await exec();
 
       expect(result).toEqual(unitId);
+    });
+
+    it("should return own unitId if it is defined", async () => {
+      ownUnitId = 15;
+      let result = await exec();
+
+      expect(result).toEqual(ownUnitId);
     });
   });
 
@@ -1174,6 +1184,8 @@ describe("MBVariable", () => {
     let realGetValueMockFunction;
     let variable;
 
+    let ownUnitId;
+
     beforeEach(() => {
       name = "Test variable name";
       unitId = 1;
@@ -1193,6 +1205,7 @@ describe("MBVariable", () => {
       realSetValueMockFunction = MBVariable.prototype._setValue;
       realGetValueMockFunction = MBVariable.prototype._getValue;
       archived = true;
+      ownUnitId = undefined;
     });
 
     //Should set again real _setValue function
@@ -1210,7 +1223,8 @@ describe("MBVariable", () => {
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
         value: value,
-        archived: archived
+        archived: archived,
+        unitId: ownUnitId
       };
 
       setValueMockFunction = jest.fn();
@@ -1239,6 +1253,22 @@ describe("MBVariable", () => {
 
       expect(result).toBeDefined();
       expect(result).toMatchObject(validPayload);
+    });
+
+    it("should generate payload without unitId if unitId is not defined", async () => {
+      ownUnitId = undefined;
+
+      let result = await exec();
+
+      expect(result.unitId).not.toBeDefined();
+    });
+
+    it("should generate payload with unitId if unitId is not defined", async () => {
+      ownUnitId = 15;
+
+      let result = await exec();
+
+      expect(result.unitId).toEqual(ownUnitId);
     });
 
     it("should generate payload with appropriate parameters if value is undefined", async () => {
@@ -1376,6 +1406,7 @@ describe("MBVariable", () => {
     let offset;
     let length;
     let unitId;
+    let ownUnitId;
     let sampleTime;
     let getSingleFCode;
     let setSingleFCode;
@@ -1396,6 +1427,7 @@ describe("MBVariable", () => {
     let editValue;
     let editGetSingleFCode;
     let editSetSingleFCode;
+    let editOwnUnitId;
 
     beforeEach(() => {
       id = "1234";
@@ -1417,6 +1449,7 @@ describe("MBVariable", () => {
       sampleTime = 3;
       realSetValueMockFunction = MBVariable.prototype._setValue;
       realGetValueMockFunction = MBVariable.prototype._getValue;
+      ownUnitId = 13;
 
       editId = undefined;
       editSampleTime = 5;
@@ -1427,6 +1460,7 @@ describe("MBVariable", () => {
       editValue = 4321;
       editGetSingleFCode = 4;
       editSetSingleFCode = 16;
+      editOwnUnitId = 15;
     });
 
     //Should set again real _setValue function
@@ -1445,7 +1479,8 @@ describe("MBVariable", () => {
         length: length,
         getSingleFCode: getSingleFCode,
         setSingleFCode: setSingleFCode,
-        value: value
+        value: value,
+        unitId: ownUnitId
       };
 
       setValueMockFunction = jest.fn();
@@ -1465,13 +1500,14 @@ describe("MBVariable", () => {
         length: editLength,
         getSingleFCode: editGetSingleFCode,
         setSingleFCode: editSetSingleFCode,
-        value: editValue
+        value: editValue,
+        unitId: editOwnUnitId
       };
 
       return variable.editWithPayload(editPayload);
     };
 
-    it("should edit variable with payload with appropriate parameters if all parameters are passed", async () => {
+    it("should edit variable with payload with appropriate parameters if all parameters are passed - if unitId is defined", async () => {
       let result = await exec();
 
       expect(result).toBeDefined();
@@ -1485,6 +1521,71 @@ describe("MBVariable", () => {
       expect(result.Length).toEqual(editLength);
       expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
       expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
+      expect(result.UnitId).toEqual(editOwnUnitId);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
+    });
+
+    it("should edit variable with payload with appropriate parameters if all parameters are passed - if unitId is not  defined", async () => {
+      ownUnitId = undefined;
+      editOwnUnitId = undefined;
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.SampleTime).toEqual(editSampleTime);
+      expect(result.Name).toEqual(editName);
+      expect(result.FCode).toEqual(editFCode);
+      expect(result.Offset).toEqual(editOffset);
+      expect(result.Length).toEqual(editLength);
+      expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
+      expect(result.UnitId).toEqual(unitId);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
+    });
+
+    it("should edit variable with payload with appropriate parameters if all parameters are passed - if unitId was not defined and now it is", async () => {
+      ownUnitId = undefined;
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.SampleTime).toEqual(editSampleTime);
+      expect(result.Name).toEqual(editName);
+      expect(result.FCode).toEqual(editFCode);
+      expect(result.Offset).toEqual(editOffset);
+      expect(result.Length).toEqual(editLength);
+      expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
+      expect(result.UnitId).toEqual(editOwnUnitId);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
+    });
+
+    it("should edit variable with payload with appropriate parameters if all parameters are passed - if unitId was defined and now it is not", async () => {
+      editOwnUnitId = undefined;
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.SampleTime).toEqual(editSampleTime);
+      expect(result.Name).toEqual(editName);
+      expect(result.FCode).toEqual(editFCode);
+      expect(result.Offset).toEqual(editOffset);
+      expect(result.Length).toEqual(editLength);
+      expect(result.GetSingleFCode).toEqual(editGetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(editSetSingleFCode);
+      expect(result.UnitId).toEqual(ownUnitId);
       //First time - creating variable - second time editing
       expect(setValueMockFunction).toHaveBeenCalledTimes(2);
       expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
@@ -1812,6 +1913,34 @@ describe("MBVariable", () => {
 
       //First time - creating variable
       expect(setValueMockFunction).toHaveBeenCalledTimes(1);
+    });
+
+    it("should edit variable with unitId equal to unitId given in payload", async () => {
+      editSampleTime = undefined;
+      editName = undefined;
+      editFCode = undefined;
+      editOffset = undefined;
+      editLength = undefined;
+      editGetSingleFCode = undefined;
+      editSetSingleFCode = undefined;
+
+      let result = await exec();
+
+      expect(result).toBeDefined();
+      expect(result.Id).toEqual(variable.Id);
+      expect(result.Events).toEqual(variable.Events);
+
+      expect(result.SampleTime).toEqual(variable.SampleTime);
+      expect(result.Name).toEqual(variable.Name);
+      expect(result.FCode).toEqual(variable.FCode);
+      expect(result.Offset).toEqual(variable.Offset);
+      expect(result.Length).toEqual(variable.Length);
+      expect(result.GetSingleFCode).toEqual(variable.GetSingleFCode);
+      expect(result.SetSingleFCode).toEqual(variable.SetSingleFCode);
+      expect(result.UnitId).toEqual(editOwnUnitId);
+      //First time - creating variable - second time editing
+      expect(setValueMockFunction).toHaveBeenCalledTimes(2);
+      expect(setValueMockFunction.mock.calls[1][0]).toEqual(editValue);
     });
   });
 });
