@@ -17,6 +17,9 @@ class SpecialDevice extends Device {
    * @param {object} payload Device payload
    */
   async init(payload) {
+    //Ensuring that special device is always initialized after normal devices - adding za_ before id
+    if (!payload.id) payload.id = `za_${Device.generateRandId()}`;
+
     await super.init(payload);
 
     //Initializing variables if they are given in payload

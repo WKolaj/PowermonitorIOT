@@ -54,7 +54,8 @@ let dataAgentEditSchema = Joi.object().keys({
     .min(1)
     .max(10),
   variableNames: Joi.object(),
-  eventDescriptions: Joi.object()
+  eventDescriptions: Joi.object(),
+  valueConverter: Joi.object()
 });
 
 let specialDeviceCreateSchema = Joi.object().keys({
@@ -93,6 +94,47 @@ let eventVariablePairSchema = Joi.object().keys({
   valueDevId: Joi.string().required()
 });
 
+let validateConverterElement = elementConfig => {
+  if (!exists(elementConfig)) return "Element config cannot be empty";
+  if (!exists(elementConfig.format))
+    return "Element config format cannot be empty";
+  if (!exists(elementConfig.length))
+    return "Element config length cannot be empty";
+  if (elementConfig.format !== "fixed" && elementConfig.format !== "precision")
+    return `Element config format cannot have value ${elementConfig.format}`;
+
+  if (isNaN(elementConfig.length))
+    return "Element config length has to be a valid number";
+
+  if (elementConfig.format === "fixed") {
+    if (elementConfig.length < 0) {
+      return "Element config length has to be greater or equal to 0";
+    }
+  }
+
+  if (elementConfig.format === "precision") {
+    if (elementConfig.length <= 0) {
+      return "Element config length has to be greater than 0";
+    }
+  }
+
+  return;
+};
+
+let validateConverter = converter => {
+  if (!exists(converter)) return "converter element has to exist";
+
+  let elements = Object.values(converter);
+
+  for (let element of elements) {
+    let elementValidation = validateConverterElement(element);
+
+    if (exists(elementValidation)) return elementValidation;
+  }
+
+  return;
+};
+
 let validateEventVariablePair = variablePair => {
   return new Promise(async (resolve, reject) => {
     Joi.validate(variablePair, eventVariablePairSchema, async (err, value) => {
@@ -116,9 +158,7 @@ let validateEventVariablePair = variablePair => {
       );
       if (!tickVarExists)
         return resolve(
-          `There is no element of id ${variablePair.tickVarId} in device ${
-            variablePair.tickDevId
-          }`
+          `There is no element of id ${variablePair.tickVarId} in device ${variablePair.tickDevId}`
         );
 
       let valueVarExists = await project.doesElementExist(
@@ -127,9 +167,7 @@ let validateEventVariablePair = variablePair => {
       );
       if (!valueVarExists)
         return resolve(
-          `There is no element of id ${variablePair.valueVarId} in device ${
-            variablePair.valueDevId
-          }`
+          `There is no element of id ${variablePair.valueVarId} in device ${variablePair.valueDevId}`
         );
 
       return resolve();
@@ -250,6 +288,14 @@ let validateEdit = function(req) {
               req.body.dataAgent.eventDescriptions
             );
             if (eventDescriptionsCheck) return resolve(eventDescriptionsCheck);
+          }
+
+          //Checking valueConverter
+          if (exists(req.body.dataAgent.valueConverter)) {
+            let validateConverterCheck = await validateConverter(
+              req.body.dataAgent.valueConverter
+            );
+            if (validateConverterCheck) return resolve(validateConverterCheck);
           }
         }
 

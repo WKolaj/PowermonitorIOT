@@ -12,6 +12,7 @@ const Sampler = require("../../../sampler/Sampler");
 const { MindConnectAgent, retry } = require("@mindconnect/mindconnect-nodejs");
 const path = require("path");
 const logger = require("../../../../logger/logger");
+const NumberToStringConverter = require("../../../numberToStringConverter/NumberToStringConverter");
 
 class MindConnectSenderAgent extends SenderAgent {
   constructor() {
@@ -20,6 +21,11 @@ class MindConnectSenderAgent extends SenderAgent {
     this._variableNames = {};
     this._agent = null;
     this._numberOfSendingRetries = 5;
+    this._valueConverter = new NumberToStringConverter();
+  }
+
+  get ValueConverter() {
+    return this._valueConverter;
   }
 
   get VariableNames() {
@@ -93,11 +99,15 @@ class MindConnectSenderAgent extends SenderAgent {
 
         for (let valueObject of tickContent.values) {
           let variableName = this.VariableNames[valueObject.id];
+          let variableValueString = this.ValueConverter.convertNumber(
+            valueObject.id,
+            valueObject.value
+          );
           if (exists(variableName))
             valuesPayload.push({
               dataPointId: variableName,
               qualityCode: "0",
-              value: valueObject.value.toString()
+              value: variableValueString
             });
         }
 
@@ -130,6 +140,8 @@ class MindConnectSenderAgent extends SenderAgent {
       this._numberOfSendingRetries = payload.numberOfSendingRetries;
     if (exists(payload.variableNames))
       this._variableNames = payload.variableNames;
+    if (exists(payload.valueConverter))
+      this.ValueConverter.setElements(payload.valueConverter);
     await super._initProperties(payload);
   }
 
@@ -177,6 +189,8 @@ class MindConnectSenderAgent extends SenderAgent {
 
     payload.variableNames = this.VariableNames;
 
+    payload.valueConverter = this.ValueConverter.Elements;
+
     return payload;
   }
 
@@ -192,6 +206,9 @@ class MindConnectSenderAgent extends SenderAgent {
 
     if (exists(payload.variableNames))
       this._variableNames = payload.variableNames;
+
+    if (exists(payload.valueConverter))
+      this.ValueConverter.setElements(payload.valueConverter);
 
     return super.editWithPayload(payload);
   }
