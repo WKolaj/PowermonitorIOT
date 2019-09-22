@@ -46,6 +46,11 @@ describe("MindConnectSenderAgent", () => {
       expect(result).toBeDefined();
     });
 
+    it("should create new ValueConverter", () => {
+      let result = exec();
+      expect(result.ValueConverter).toBeDefined();
+    });
+
     it("should set isWriting enabled to false", () => {
       let result = exec();
       expect(result.IsWritingFile).toBeFalsy();
@@ -143,6 +148,11 @@ describe("MindConnectSenderAgent", () => {
           varId2: "msName2",
           varId3: "msName3",
           varId4: "msName4"
+        },
+        valueConverter: {
+          varId5: { format: "fixed", length: 2 },
+          varId6: { format: "precision", length: 3 },
+          varId7: { format: "fixed", length: 4 }
         },
         sendFileLimit: 10,
         sendEventLimit: 10,
@@ -584,6 +594,53 @@ describe("MindConnectSenderAgent", () => {
 
       expect(senderDevice.EventContentManager.LastEventId).toEqual(2);
     });
+
+    it("should throw if format is not valid", async () => {
+      initialPayload.valueConverter.varId5.format = "invalidFormat";
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should throw if length is not valid", async () => {
+      initialPayload.valueConverter.varId5.length = -1;
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+    });
+
+    it("should not throw if valueConverter is empty", async () => {
+      initialPayload.valueConverter = {};
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).resolves.toBeDefined();
+
+      expect(senderDevice.Payload).toEqual(initialPayload);
+    });
   });
 
   describe("addToBuffer", () => {
@@ -808,6 +865,10 @@ describe("MindConnectSenderAgent", () => {
           varId2: "msName2",
           varId3: "msName3",
           varId4: "msName4"
+        },
+        valueConverter: {
+          varId2: { format: "fixed", length: 2 },
+          varId3: { format: "precision", length: 3 }
         }
       };
 
@@ -815,28 +876,28 @@ describe("MindConnectSenderAgent", () => {
         {
           tickId: 1563524843,
           values: [
-            { id: "varId1", value: 1 },
-            { id: "varId2", value: 2 },
-            { id: "varId3", value: 3 },
-            { id: "varId4", value: 4 }
+            { id: "varId1", value: 1.123 },
+            { id: "varId2", value: 2.124 },
+            { id: "varId3", value: 3.125 },
+            { id: "varId4", value: 4.126 }
           ]
         },
         {
           tickId: 1563524844,
           values: [
-            { id: "varId1", value: 11 },
-            { id: "varId2", value: 12 },
-            { id: "varId3", value: 13 },
-            { id: "varId4", value: 14 }
+            { id: "varId1", value: 11.123 },
+            { id: "varId2", value: 12.124 },
+            { id: "varId3", value: 13.125 },
+            { id: "varId4", value: 14.126 }
           ]
         },
         {
           tickId: 1563524845,
           values: [
-            { id: "varId1", value: 21 },
-            { id: "varId2", value: 22 },
-            { id: "varId3", value: 23 },
-            { id: "varId4", value: 24 }
+            { id: "varId1", value: 21.123 },
+            { id: "varId2", value: 22.124 },
+            { id: "varId3", value: 23.125 },
+            { id: "varId4", value: 24.126 }
           ]
         }
       ];
@@ -858,22 +919,22 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName1",
               qualityCode: "0",
-              value: "1"
+              value: "1.123"
             },
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "2"
+              value: "2.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "3"
+              value: "3.13"
             },
             {
               dataPointId: "msName4",
               qualityCode: "0",
-              value: "4"
+              value: "4.126"
             }
           ]
         },
@@ -883,22 +944,22 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName1",
               qualityCode: "0",
-              value: "11"
+              value: "11.123"
             },
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "12"
+              value: "12.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "13"
+              value: "13.1"
             },
             {
               dataPointId: "msName4",
               qualityCode: "0",
-              value: "14"
+              value: "14.126"
             }
           ]
         },
@@ -908,22 +969,22 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName1",
               qualityCode: "0",
-              value: "21"
+              value: "21.123"
             },
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "22"
+              value: "22.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "23"
+              value: "23.1"
             },
             {
               dataPointId: "msName4",
               qualityCode: "0",
-              value: "24"
+              value: "24.126"
             }
           ]
         }
@@ -947,12 +1008,12 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "2"
+              value: "2.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "3"
+              value: "3.13"
             }
           ]
         },
@@ -962,12 +1023,12 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "12"
+              value: "12.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "13"
+              value: "13.1"
             }
           ]
         },
@@ -977,12 +1038,12 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "22"
+              value: "22.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "23"
+              value: "23.1"
             }
           ]
         }
@@ -1000,10 +1061,10 @@ describe("MindConnectSenderAgent", () => {
         {
           tickId: 1563524844,
           values: [
-            { id: "varId1", value: 11 },
-            { id: "varId2", value: 12 },
-            { id: "varId3", value: 13 },
-            { id: "varId4", value: 14 }
+            { id: "varId1", value: 11.123 },
+            { id: "varId2", value: 12.124 },
+            { id: "varId3", value: 13.125 },
+            { id: "varId4", value: 14.126 }
           ]
         },
         {
@@ -1021,22 +1082,22 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName1",
               qualityCode: "0",
-              value: "11"
+              value: "11.123"
             },
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "12"
+              value: "12.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "13"
+              value: "13.1"
             },
             {
               dataPointId: "msName4",
               qualityCode: "0",
-              value: "14"
+              value: "14.126"
             }
           ]
         }
@@ -1054,20 +1115,26 @@ describe("MindConnectSenderAgent", () => {
       data = [
         {
           tickId: 1563524843,
-          values: [{ id: "varId1", value: 1 }, { id: "varId4", value: 4 }]
+          values: [
+            { id: "varId1", value: 1.123 },
+            { id: "varId4", value: 4.126 }
+          ]
         },
         {
           tickId: 1563524844,
           values: [
-            { id: "varId1", value: 11 },
-            { id: "varId2", value: 12 },
-            { id: "varId3", value: 13 },
-            { id: "varId4", value: 14 }
+            { id: "varId1", value: 11.123 },
+            { id: "varId2", value: 12.124 },
+            { id: "varId3", value: 13.125 },
+            { id: "varId4", value: 14.126 }
           ]
         },
         {
           tickId: 1563524845,
-          values: [{ id: "varId1", value: 21 }, { id: "varId4", value: 24 }]
+          values: [
+            { id: "varId1", value: 21.123 },
+            { id: "varId4", value: 24.126 }
+          ]
         }
       ];
 
@@ -1080,12 +1147,12 @@ describe("MindConnectSenderAgent", () => {
             {
               dataPointId: "msName2",
               qualityCode: "0",
-              value: "12"
+              value: "12.12"
             },
             {
               dataPointId: "msName3",
               qualityCode: "0",
-              value: "13"
+              value: "13.1"
             }
           ]
         }
@@ -1126,15 +1193,24 @@ describe("MindConnectSenderAgent", () => {
       data = [
         {
           tickId: 1563524843,
-          values: [{ id: "varId1", value: 1 }, { id: "varId4", value: 4 }]
+          values: [
+            { id: "varId1", value: 1.123 },
+            { id: "varId4", value: 4.126 }
+          ]
         },
         {
           tickId: 1563524844,
-          values: [{ id: "varId1", value: 1 }, { id: "varId4", value: 4 }]
+          values: [
+            { id: "varId1", value: 1.123 },
+            { id: "varId4", value: 4.126 }
+          ]
         },
         {
           tickId: 1563524845,
-          values: [{ id: "varId1", value: 1 }, { id: "varId4", value: 4 }]
+          values: [
+            { id: "varId1", value: 1.123 },
+            { id: "varId4", value: 4.126 }
+          ]
         }
       ];
 
@@ -1195,36 +1271,46 @@ describe("MindConnectSenderAgent", () => {
           varId2: "msName2",
           varId3: "msName3",
           varId4: "msName4"
+        },
+        valueConverter: {
+          varId2: {
+            format: "fixed",
+            length: 1
+          },
+          varId3: {
+            format: "precision",
+            length: 2
+          }
         }
       };
 
       bufferContent1 = {
         tickId: 1563524700,
         values: [
-          { id: "varId1", value: 0 },
-          { id: "varId2", value: 1 },
-          { id: "varId3", value: 2 },
-          { id: "varId4", value: 3 }
+          { id: "varId1", value: 0.123 },
+          { id: "varId2", value: 1.124 },
+          { id: "varId3", value: 2.125 },
+          { id: "varId4", value: 3.126 }
         ]
       };
 
       bufferContent2 = {
         tickId: 1563524701,
         values: [
-          { id: "varId1", value: 10 },
-          { id: "varId2", value: 11 },
-          { id: "varId3", value: 12 },
-          { id: "varId4", value: 13 }
+          { id: "varId1", value: 10.123 },
+          { id: "varId2", value: 11.124 },
+          { id: "varId3", value: 12.125 },
+          { id: "varId4", value: 13.126 }
         ]
       };
 
       bufferContent3 = {
         tickId: 15635248702,
         values: [
-          { id: "varId1", value: 20 },
-          { id: "varId2", value: 21 },
-          { id: "varId3", value: 22 },
-          { id: "varId4", value: 23 }
+          { id: "varId1", value: 20.123 },
+          { id: "varId2", value: 21.124 },
+          { id: "varId3", value: 22.125 },
+          { id: "varId4", value: 23.126 }
         ]
       };
     });
@@ -2433,6 +2519,11 @@ describe("MindConnectSenderAgent", () => {
           },
           expiration: "2019-07-18T05:06:57.000Z"
         },
+        valueConverter: {
+          varId4: { format: "fixed", length: 1 },
+          varId5: { format: "precision", length: 2 },
+          varId6: { format: "fixed", length: 3 }
+        },
         numberOfSendingRetries: 15,
         variableNames: {
           varId1: "msName1",
@@ -2499,6 +2590,11 @@ describe("MindConnectSenderAgent", () => {
           varId3: "msName4",
           varId3: "msName5",
           varId4: "msName6"
+        },
+        valueConverter: {
+          varId4: { format: "precision", length: 2 },
+          varId5: { format: "fixed", length: 3 },
+          varId7: { format: "fixed", length: 4 }
         },
         sendEventLimit: 12,
         eventBufferSize: 5,
@@ -2798,6 +2894,48 @@ describe("MindConnectSenderAgent", () => {
       await exec();
 
       expect(senderDevice.EventContentManager.Busy).toEqual(false);
+    });
+
+    it("should throw if format in value converter is invalid", async () => {
+      editPayload = {
+        valueConverter: {
+          test: { format: "invalidFormat", length: 2 }
+        }
+      };
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(senderDevice.Payload).toEqual(initialPayload);
+    });
+
+    it("should throw if length in value converter is invalid", async () => {
+      editPayload = {
+        valueConverter: {
+          test: { format: "fixed", length: -1 }
+        }
+      };
+
+      await expect(
+        new Promise(async (resolve, reject) => {
+          try {
+            await exec();
+            return resolve(true);
+          } catch (err) {
+            return reject(err);
+          }
+        })
+      ).rejects.toBeDefined();
+
+      expect(senderDevice.Payload).toEqual(initialPayload);
     });
   });
 

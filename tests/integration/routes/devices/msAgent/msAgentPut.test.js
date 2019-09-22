@@ -483,6 +483,10 @@ describe("auth route", () => {
             severity: 20,
             description: "test event 9"
           }
+        },
+        valueConverter: {
+          variableId1: { format: "fixed", length: 1 },
+          variableId2: { format: "precision", length: 2 }
         }
       };
 
@@ -593,6 +597,11 @@ describe("auth route", () => {
               severity: 20,
               description: "test event 10"
             }
+          },
+          valueConverter: {
+            variable2Id: { format: "fixed", length: 0 },
+            variable3Id: { format: "precision", length: 3 },
+            variable4Id: { format: "fixed", length: 4 }
           }
         },
         eventVariables: [
@@ -1559,6 +1568,134 @@ describe("auth route", () => {
       )).map(variable => variable.Payload);
 
       expect(msAgent.Payload).toEqual(expectedPayload);
+    });
+
+    it("should return 400 and not edit anything if valueConverter is invalid object", async () => {
+      editPayload.dataAgent.valueConverter = "fakeConverter";
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid format", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "fakeFormat";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid length - format fixed, length = -1", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "fixed";
+      editPayload.dataAgent.valueConverter.variable2Id.length = -1;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid length - format precision, length = -1", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "precision";
+      editPayload.dataAgent.valueConverter.variable2Id.length = -1;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid length - format precision, length = 0", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "precision";
+      editPayload.dataAgent.valueConverter.variable2Id.length = 0;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid length - format precision, length = 1.2", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "precision";
+      editPayload.dataAgent.valueConverter.variable2Id.length = 1.2;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid length - format fixed, length = 1.2", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "fixed";
+      editPayload.dataAgent.valueConverter.variable2Id.length = 1.2;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid length - format fixed, length = abcd", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "fixed";
+      editPayload.dataAgent.valueConverter.variable2Id.length = "abcd";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have valid length - format precision, length = abcd", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "precision";
+      editPayload.dataAgent.valueConverter.variable2Id.length = "abcd";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have format given", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = undefined;
+      editPayload.dataAgent.valueConverter.variable2Id.length = 1;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter does not have length given", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id.format = "fixed";
+      editPayload.dataAgent.valueConverter.variable2Id.length = undefined;
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
+    });
+
+    it("should return 400 and not edit anything if one of element in valueConverter is invalid", async () => {
+      editPayload.dataAgent.valueConverter.variable2Id = "fakeElement";
+
+      let result = await exec();
+
+      expect(result.status).toEqual(400);
+
+      expect(msAgent.Payload).toEqual(initialDevicePayload);
     });
   });
 });

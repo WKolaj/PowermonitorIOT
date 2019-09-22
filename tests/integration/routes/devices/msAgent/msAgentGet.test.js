@@ -77,6 +77,7 @@ describe("auth route", () => {
   let sendEventLimit;
   let eventDescriptions;
   let eventVariables;
+  let valueConverter;
 
   let init = async () => {
     //Creating additional users
@@ -489,6 +490,21 @@ describe("auth route", () => {
       }
     ];
 
+    valueConverter = {
+      [msAgentVariable1.Id]: {
+        format: "fixed",
+        length: 2
+      },
+      [msAgentVariable2.Id]: {
+        format: "precision",
+        length: 3
+      },
+      [msAgentVariable3.Id]: {
+        format: "fixed",
+        length: 5
+      }
+    };
+
     let editPayload = {
       dataAgent: {
         variableNames,
@@ -498,7 +514,8 @@ describe("auth route", () => {
         sendingInterval,
         numberOfSendingRetries,
         sendEventLimit,
-        eventDescriptions
+        eventDescriptions,
+        valueConverter
       },
       eventVariables
     };
@@ -574,7 +591,8 @@ describe("auth route", () => {
           boardingKey,
           variableNames,
           sendEventLimit,
-          eventDescriptions
+          eventDescriptions,
+          valueConverter
         },
         eventVariables
       };
@@ -622,7 +640,8 @@ describe("auth route", () => {
           boardingKey,
           variableNames,
           sendEventLimit,
-          eventDescriptions
+          eventDescriptions,
+          valueConverter
         },
         eventVariables
       };

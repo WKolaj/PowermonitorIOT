@@ -399,7 +399,8 @@ describe("auth route", () => {
           sendFileLimit: 5,
           sendingInterval: 60,
           numberOfSendingRetries: 5,
-          eventDescriptions: {}
+          eventDescriptions: {},
+          valueConverter: {}
         },
         eventVariables: []
       };

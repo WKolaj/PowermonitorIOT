@@ -706,6 +706,16 @@ describe("MindConnectDevice", () => {
               severity: 20,
               description: "test event 9"
             }
+          },
+          valueConverter: {
+            "9008": {
+              format: "fixed",
+              length: 1
+            },
+            "9009": {
+              format: "fixed",
+              length: 2
+            }
           }
         },
         eventVariables: [
@@ -1319,6 +1329,16 @@ describe("MindConnectDevice", () => {
             9003: "msName3",
             9101: "msName4"
           },
+          valueConverter: {
+            "9008": {
+              format: "fixed",
+              length: 1
+            },
+            "9009": {
+              format: "fixed",
+              length: 2
+            }
+          },
           sendEventLimit: 10,
           eventDescriptions: {
             "1001": {
@@ -1406,6 +1426,16 @@ describe("MindConnectDevice", () => {
             9002: "msName4",
             9003: "msName5",
             9101: "msName6"
+          },
+          valueConverter: {
+            "9008": {
+              format: "precision",
+              length: 2
+            },
+            "9010": {
+              format: "fixed",
+              length: 3
+            }
           },
           sendEventLimit: 11,
           eventDescriptions: {
@@ -1583,6 +1613,46 @@ describe("MindConnectDevice", () => {
       expect(mindConnectDevice.DataAgent.DirectoryPath).toEqual(
         expectedDirPath
       );
+    });
+
+    it("Should edit only valueConverter if only valueConverter is given in payload", async () => {
+      editPayload = {
+        dataAgent: {
+          valueConverter: editPayload.dataAgent.valueConverter
+        }
+      };
+
+      await exec();
+
+      //Building expected variables payload - values of varaibles have to be added
+      let varaiblesExepcetedPayload = [];
+
+      for (let variable of initialPayload.variables) {
+        let realVariable = commInterface.getVariable(
+          variable.elementDeviceId,
+          variable.elementId
+        );
+
+        let variablePayload = {
+          ...variable,
+          value: realVariable.Value
+        };
+
+        varaiblesExepcetedPayload.push(variablePayload);
+      }
+
+      let expectedPayload = {
+        ...initialPayload,
+        ...editPayload,
+        variables: varaiblesExepcetedPayload,
+        dataAgent: {
+          ...initialPayload.dataAgent,
+          ...editPayload.dataAgent,
+          eventBufferSize: initialPayload.eventVariables.length,
+          dirPath: path.join(projPath, "dataAgents", initialPayload.id)
+        }
+      };
+      expect(mindConnectDevice.Payload).toEqual(expectedPayload);
     });
 
     it("should invoke boarding and getting configuation if boardingKey is given and sendingEnabled is set to true - and set readyToSend to true", async () => {
@@ -1958,6 +2028,16 @@ describe("MindConnectDevice", () => {
               severity: 20,
               description: "test event 9"
             }
+          },
+          valueConverter: {
+            "9008": {
+              format: "fixed",
+              length: 1
+            },
+            "9009": {
+              format: "fixed",
+              length: 2
+            }
           }
         },
         eventVariables: [
@@ -2033,7 +2113,8 @@ describe("MindConnectDevice", () => {
           sendingInterval: initialPayload.dataAgent.sendingInterval,
           variableNames: initialPayload.dataAgent.variableNames,
           sendEventLimit: initialPayload.dataAgent.sendEventLimit,
-          eventDescriptions: initialPayload.dataAgent.eventDescriptions
+          eventDescriptions: initialPayload.dataAgent.eventDescriptions,
+          valueConverter: initialPayload.dataAgent.valueConverter
         },
         eventVariables: initialPayload.eventVariables
       };
@@ -2077,7 +2158,8 @@ describe("MindConnectDevice", () => {
           sendingInterval: initialPayload.dataAgent.sendingInterval,
           variableNames: initialPayload.dataAgent.variableNames,
           sendEventLimit: initialPayload.dataAgent.sendEventLimit,
-          eventDescriptions: initialPayload.dataAgent.eventDescriptions
+          eventDescriptions: initialPayload.dataAgent.eventDescriptions,
+          valueConverter: initialPayload.dataAgent.valueConverter
         },
         eventVariables: initialPayload.eventVariables
       };
@@ -2126,7 +2208,8 @@ describe("MindConnectDevice", () => {
           sendingInterval: initialPayload.dataAgent.sendingInterval,
           variableNames: initialPayload.dataAgent.variableNames,
           sendEventLimit: initialPayload.dataAgent.sendEventLimit,
-          eventDescriptions: {}
+          eventDescriptions: {},
+          valueConverter: initialPayload.dataAgent.valueConverter
         },
         eventVariables: initialPayload.eventVariables
       };
@@ -2175,7 +2258,8 @@ describe("MindConnectDevice", () => {
           sendingInterval: initialPayload.dataAgent.sendingInterval,
           variableNames: initialPayload.dataAgent.variableNames,
           sendEventLimit: initialPayload.dataAgent.sendEventLimit,
-          eventDescriptions: initialPayload.dataAgent.eventDescriptions
+          eventDescriptions: initialPayload.dataAgent.eventDescriptions,
+          valueConverter: initialPayload.dataAgent.valueConverter
         },
         eventVariables: []
       };
@@ -2414,6 +2498,16 @@ describe("MindConnectDevice", () => {
               source: "testSource10",
               severity: 20,
               description: "test event 10"
+            }
+          },
+          valueConverter: {
+            "9001": {
+              format: "fixed",
+              length: 1
+            },
+            "9002": {
+              format: "precision",
+              length: 2
             }
           }
         },
@@ -2654,7 +2748,7 @@ describe("MindConnectDevice", () => {
       expect(mindConnectDevice.DataAgent.Buffer).toEqual(expectedBufferContent);
     });
 
-    it("Should send buffer content and clear it when tickId correpsonds to sendingInterval", async () => {
+    it("Should send buffer content and clear it when tickId correpsonds to sendingInterval - and take conversion details into account", async () => {
       initialPayload.dataAgent.sendingInterval = 2;
 
       await exec();
@@ -2690,7 +2784,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value1.toString()
+            value: Number(var1Value1.toFixed(1)).toString()
           }
         ]
       };
@@ -2704,7 +2798,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value2.toString()
+            value: Number(var1Value2.toFixed(1)).toString()
           },
           {
             dataPointId:
@@ -2712,7 +2806,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[1].id
               ],
             qualityCode: "0",
-            value: var2Value2.toString()
+            value: Number(var2Value2.toPrecision(2)).toString()
           },
           {
             dataPointId:
@@ -2773,7 +2867,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value1.toString()
+            value: Number(var1Value1.toFixed(1)).toString()
           }
         ]
       };
@@ -2787,7 +2881,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value2.toString()
+            value: Number(var1Value2.toFixed(1)).toString()
           },
           {
             dataPointId:
@@ -2795,7 +2889,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[1].id
               ],
             qualityCode: "0",
-            value: var2Value2.toString()
+            value: Number(var2Value2.toPrecision(2)).toString()
           },
           {
             dataPointId:
@@ -2878,7 +2972,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value1.toString()
+            value: Number(var1Value1.toFixed(1)).toString()
           }
         ]
       };
@@ -2892,7 +2986,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value2.toString()
+            value: Number(var1Value2.toFixed(1)).toString()
           },
           {
             dataPointId:
@@ -2900,7 +2994,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[1].id
               ],
             qualityCode: "0",
-            value: var2Value2.toString()
+            value: Number(var2Value2.toPrecision(2)).toString()
           },
           {
             dataPointId:
@@ -2922,7 +3016,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value3.toString()
+            value: Number(var1Value3.toFixed(1)).toString()
           },
           {
             dataPointId:
@@ -2944,7 +3038,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[0].id
               ],
             qualityCode: "0",
-            value: var1Value4.toString()
+            value: Number(var1Value4.toFixed(1)).toString()
           },
           {
             dataPointId:
@@ -2952,7 +3046,7 @@ describe("MindConnectDevice", () => {
                 initialPayload.variables[1].id
               ],
             qualityCode: "0",
-            value: var2Value4.toString()
+            value: Number(var2Value4.toPrecision(2)).toString()
           },
           {
             dataPointId:
@@ -3740,7 +3834,7 @@ describe("MindConnectDevice", () => {
 
     it("Should not call send event files or create fiiles if new variable values does not change", async () => {
       //Creating initial event files
-      
+
       eventVar1Tick1 = 1564251578;
       eventVar2Tick1 = 1564251577;
       eventVar3Tick1 = 1564251576;
@@ -3769,7 +3863,6 @@ describe("MindConnectDevice", () => {
       eventVar2Value3 = 1009;
       eventVar3Value3 = 1008;
       eventVar4Value3 = 1007;
-
 
       await exec();
 
@@ -3801,7 +3894,7 @@ describe("MindConnectDevice", () => {
         sourceId: "application",
         timestamp: new Date(1564251578000).toISOString()
       };
-      
+
       let expectedPayload5 = {
         ...initialPayload.dataAgent.eventDescriptions[1007],
         entityId: initialPayload.dataAgent.boardingKey.content.clientId, // use assetid if you dont want to store event in the agent :)

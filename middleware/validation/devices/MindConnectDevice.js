@@ -106,6 +106,9 @@ let validateConverterElement = elementConfig => {
   if (isNaN(elementConfig.length))
     return "Element config length has to be a valid number";
 
+  if (!Number.isInteger(elementConfig.length))
+    return "Element config length has to be valid integer";
+
   if (elementConfig.format === "fixed") {
     if (elementConfig.length < 0) {
       return "Element config length has to be greater or equal to 0";
