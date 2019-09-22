@@ -269,7 +269,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
       "THD Voltage L1": {
         id: Variable.generateRandId(),
         sampleTime: 1,
-        offset: 43,
+        offset: 261,
         length: 2,
         fCode: 3,
         value: 1,
@@ -281,7 +281,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
       "THD Voltage L2": {
         id: Variable.generateRandId(),
         sampleTime: 1,
-        offset: 45,
+        offset: 263,
         length: 2,
         fCode: 3,
         value: 2,
@@ -293,7 +293,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
       "THD Voltage L3": {
         id: Variable.generateRandId(),
         sampleTime: 1,
-        offset: 47,
+        offset: 265,
         length: 2,
         fCode: 3,
         value: 3,
@@ -305,7 +305,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
       "THD Current L1": {
         id: Variable.generateRandId(),
         sampleTime: 1,
-        offset: 49,
+        offset: 267,
         length: 2,
         fCode: 3,
         value: 1,
@@ -317,7 +317,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
       "THD Current L2": {
         id: Variable.generateRandId(),
         sampleTime: 1,
-        offset: 51,
+        offset: 269,
         length: 2,
         fCode: 3,
         value: 2,
@@ -329,7 +329,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
       "THD Current L3": {
         id: Variable.generateRandId(),
         sampleTime: 1,
-        offset: 53,
+        offset: 271,
         length: 2,
         fCode: 3,
         value: 3,
@@ -602,6 +602,12 @@ class PAC4200TCP extends MBDeviceWithTemplate {
     let reactiveEnergyExportT1Id =
       variablesSchema["Reactive energy export - tarif 1"].id;
     let apparentEnergyId = variablesSchema["Apparent energy - tarif 1"].id;
+    let currentL1THDId = variablesSchema["THD Current L1"].id;
+    let currentL2THDId = variablesSchema["THD Current L2"].id;
+    let currentL3THDId = variablesSchema["THD Current L3"].id;
+    let voltageL1THDId = variablesSchema["THD Voltage L1"].id;
+    let voltageL2THDId = variablesSchema["THD Voltage L2"].id;
+    let voltageL3THDId = variablesSchema["THD Voltage L3"].id;
 
     return {
       "Active power import 15-min - tarif 1": {
@@ -738,6 +744,72 @@ class PAC4200TCP extends MBDeviceWithTemplate {
         unit: "A",
         archived: true,
         variableId: currentL3Id,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "THD Current L1 average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: currentL1THDId,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "THD Current L2 average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: currentL2THDId,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "THD Current L3 average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: currentL3THDId,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "THD Voltage L1 average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: voltageL1THDId,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "THD Voltage L2 average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: voltageL2THDId,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "THD Voltage L3 average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: voltageL3THDId,
         type: "averageElement",
         archiveSampleTime: 1
       }
