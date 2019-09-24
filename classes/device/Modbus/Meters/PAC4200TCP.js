@@ -609,6 +609,9 @@ class PAC4200TCP extends MBDeviceWithTemplate {
     let voltageL2THDId = variablesSchema["THD Voltage L2"].id;
     let voltageL3THDId = variablesSchema["THD Voltage L3"].id;
 
+    let currentUnbalanceId = variablesSchema["Current unbalance"].id;
+    let voltageUnbalanceId = variablesSchema["Voltage unbalance"].id;
+
     return {
       "Active power import 15-min - tarif 1": {
         id: Variable.generateRandId(),
@@ -753,7 +756,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
         calculationInterval: 60,
         factor: 1,
         unit: "%",
-        archived: false,
+        archived: true,
         variableId: currentL1THDId,
         type: "averageElement",
         archiveSampleTime: 1
@@ -764,7 +767,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
         calculationInterval: 60,
         factor: 1,
         unit: "%",
-        archived: false,
+        archived: true,
         variableId: currentL2THDId,
         type: "averageElement",
         archiveSampleTime: 1
@@ -775,7 +778,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
         calculationInterval: 60,
         factor: 1,
         unit: "%",
-        archived: false,
+        archived: true,
         variableId: currentL3THDId,
         type: "averageElement",
         archiveSampleTime: 1
@@ -786,7 +789,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
         calculationInterval: 60,
         factor: 1,
         unit: "%",
-        archived: false,
+        archived: true,
         variableId: voltageL1THDId,
         type: "averageElement",
         archiveSampleTime: 1
@@ -797,7 +800,7 @@ class PAC4200TCP extends MBDeviceWithTemplate {
         calculationInterval: 60,
         factor: 1,
         unit: "%",
-        archived: false,
+        archived: true,
         variableId: voltageL2THDId,
         type: "averageElement",
         archiveSampleTime: 1
@@ -808,8 +811,30 @@ class PAC4200TCP extends MBDeviceWithTemplate {
         calculationInterval: 60,
         factor: 1,
         unit: "%",
-        archived: false,
+        archived: true,
         variableId: voltageL3THDId,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "Voltage unbalance average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: voltageUnbalanceId,
+        type: "averageElement",
+        archiveSampleTime: 1
+      },
+      "Current unbalance average": {
+        id: Variable.generateRandId(),
+        sampleTime: 1,
+        calculationInterval: 60,
+        factor: 1,
+        unit: "%",
+        archived: false,
+        variableId: currentUnbalanceId,
         type: "averageElement",
         archiveSampleTime: 1
       }
