@@ -187,6 +187,14 @@ let generateSchema = variableType => {
       };
     }
 
+    case "s7DTL": {
+      return {
+        value: Joi.number()
+          .integer()
+          .required()
+      };
+    }
+
     //if type is not recognized - leave it without Joi validation eg. ByteArray
     default: {
       return;

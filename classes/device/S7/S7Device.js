@@ -9,6 +9,7 @@ const S7Int8Variable = require("../../variable/S7/S7Int8Variable");
 const S7UInt32Variable = require("../../variable/S7/S7UInt32Variable");
 const S7Int32Variable = require("../../variable/S7/S7Int32Variable");
 const S7FloatVariable = require("../../variable/S7/S7FloatVariable");
+const S7DTLVariable = require("../../variable/S7/S7DTLVariable");
 const S7ByteArrayVariable = require("../../variable/S7/S7ByteArrayVariable");
 const logger = require("../../../logger/logger");
 const { exists } = require("../../../utilities/utilities");
@@ -202,6 +203,9 @@ class S7Device extends Device {
       }
       case "s7Float": {
         return this._createFloatVariable(payload);
+      }
+      case "s7DTL": {
+        return this._createDTLVariable(payload);
       }
       default: {
         throw new Error(
@@ -399,6 +403,26 @@ class S7Device extends Device {
       throw new Error("variable areaType in payload is not defined");
 
     let variableToAdd = new S7FloatVariable(this);
+    await variableToAdd.init(payload);
+    await this.addVariable(variableToAdd);
+    return variableToAdd;
+  }
+
+  /**
+   * @description Method for creating DTL variable
+   * @param {*} payload Payload of edition
+   */
+  async _createDTLVariable(payload) {
+    if (!exists(payload.sampleTime))
+      throw new Error("time sample in payload is not defined");
+    if (!exists(payload.name))
+      throw new Error("variable name in payload is not defined");
+    if (!exists(payload.offset))
+      throw new Error("variable offset in payload is not defined");
+    if (!exists(payload.areaType))
+      throw new Error("variable areaType in payload is not defined");
+
+    let variableToAdd = new S7DTLVariable(this);
     await variableToAdd.init(payload);
     await this.addVariable(variableToAdd);
     return variableToAdd;

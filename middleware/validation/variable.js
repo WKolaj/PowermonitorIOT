@@ -21,6 +21,7 @@ const S7UInt16VariableValidator = require("./variables/S7UInt16Variable");
 const S7UInt32VariableValidator = require("./variables/S7UInt32Variable");
 const S7Int8VariableValidator = require("./variables/S7Int8Variable");
 const S7UInt8VariableValidator = require("./variables/S7UInt8Variable");
+const S7DTLVariable = require("./variables/S7DTLVariable");
 const SDVariableValidator = require("./variables/SDVariable");
 
 const MBGatewayBooleanVariableValidator = require("./variables/MBGateway/MBBooleanVariable");
@@ -47,9 +48,9 @@ let validateCreate = function(req) {
     if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
       return resolve();
 
-    let deviceType = (await Project.CurrentProject.getDevice(
-      req.params.deviceId
-    )).Type;
+    let deviceType = (
+      await Project.CurrentProject.getDevice(req.params.deviceId)
+    ).Type;
 
     if (
       deviceType === "mbDevice" ||
@@ -183,15 +184,16 @@ let validateCreate = function(req) {
         case "s7ByteArray": {
           return resolve(await S7ByteArrayVariableValidator.create(req));
         }
+        case "s7DTL": {
+          return resolve(await S7DTLVariable.create(req));
+        }
         default: {
           return resolve("Given variable type is not recognized");
         }
       }
     } else {
       return resolve(
-        `Type of given device has not been recongized ( id ${
-          req.params.deviceId
-        } )`
+        `Type of given device has not been recongized ( id ${req.params.deviceId} )`
       );
     }
   });
@@ -210,9 +212,9 @@ let validateEdit = function(req) {
     if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
       return resolve();
 
-    let deviceType = (await Project.CurrentProject.getDevice(
-      req.params.deviceId
-    )).Type;
+    let deviceType = (
+      await Project.CurrentProject.getDevice(req.params.deviceId)
+    ).Type;
 
     //If there is no device set - resolving undefined in order to return 404 later
     if (!(await Project.CurrentProject.doesDeviceExist(req.params.deviceId)))
@@ -227,10 +229,12 @@ let validateEdit = function(req) {
     )
       return resolve();
 
-    let variableType = (await Project.CurrentProject.getVariable(
-      req.params.deviceId,
-      req.params.variableId
-    )).Type;
+    let variableType = (
+      await Project.CurrentProject.getVariable(
+        req.params.deviceId,
+        req.params.variableId
+      )
+    ).Type;
 
     if (
       deviceType === "mbDevice" ||
@@ -364,15 +368,16 @@ let validateEdit = function(req) {
         case "s7ByteArray": {
           return resolve(await S7ByteArrayVariableValidator.edit(req));
         }
+        case "s7DTL": {
+          return resolve(await S7DTLVariable.edit(req));
+        }
         default: {
           return resolve("Given variable type is not recognized");
         }
       }
     } else {
       return resolve(
-        `Type of given device has not been recongized ( id ${
-          req.params.deviceId
-        } )`
+        `Type of given device has not been recongized ( id ${req.params.deviceId} )`
       );
     }
   });
