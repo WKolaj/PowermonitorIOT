@@ -26,7 +26,7 @@
   "homepage": "https://github.com/WKolaj/PowermonitorIOT#readme",
   "dependencies": {
     "@mindconnect/mindconnect-nodejs": "^3.6.0",
-    "bcrypt": "^3.0.6",
+    "bcrypt": "^5.0.0",
     "check-disk-space": "^2.1.0",
     "config": "^3.2.0",
     "cors": "^2.8.5",
