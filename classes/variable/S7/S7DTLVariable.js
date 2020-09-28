@@ -16,7 +16,8 @@ const s7DataToDTL = function(data) {
   let month = view.getUint8(0);
 
   //Converting month to JS format (0-January, 11-December)
-  month--;
+  //Month 0 is should not be set to -1
+  month > 0 ? month-- : month;
 
   //Reading day
   buf = new ArrayBuffer(1);
