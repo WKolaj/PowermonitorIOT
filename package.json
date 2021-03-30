@@ -38,7 +38,7 @@
     "lodash": "^4.17.14",
     "modbus-serial": "^7.6.0",
     "mongoose": "^5.6.5",
-    "netmask": "^1.0.6",
+    "netmask": "^2.0.1",
     "network": "^0.4.1",
     "node-snap7": "^1.0.3",
     "sqlite3": "^4.0.9",
